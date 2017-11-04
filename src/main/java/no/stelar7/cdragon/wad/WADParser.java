@@ -24,8 +24,14 @@ public class WADParser
      */
     public WADFile parseLatest(Path path) throws Exception
     {
+        if (Files.exists(getUncompressedPath(path)))
+        {
+            System.out.println("Found already decompressed file");
+            return parse(getUncompressedPath(path));
+        }
         if (Files.exists(path))
         {
+            System.out.println("Found already existing file");
             return parse(path);
         }
         
@@ -34,6 +40,13 @@ public class WADParser
         UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, 60, 100);
         
         return parse(path);
+    }
+    
+    private Path getUncompressedPath(Path compressedPath)
+    {
+        String filename = compressedPath.getFileName().toString();
+        filename = filename.substring(0, filename.lastIndexOf(".compressed"));
+        return compressedPath.getParent().resolve(filename);
     }
     
     
@@ -67,15 +80,12 @@ public class WADParser
     
     private Path uncompressWAD(Path compressedPath) throws IOException
     {
-        String filename = compressedPath.getFileName().toString();
-        filename = filename.substring(0, filename.lastIndexOf(".compressed"));
-        Path uncompressPath = compressedPath.getParent().resolve(filename);
-        
         System.out.println("Uncompressing WAD");
         
-        CompressionHandler.uncompressDEFLATE(Files.readAllBytes(compressedPath), uncompressPath);
+        Path uncompressed = getUncompressedPath(compressedPath);
+        CompressionHandler.uncompressDEFLATE(Files.readAllBytes(compressedPath), uncompressed);
         
-        return uncompressPath;
+        return uncompressed;
     }
     
     /**

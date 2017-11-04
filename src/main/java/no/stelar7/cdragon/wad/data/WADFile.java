@@ -29,9 +29,10 @@ public class WADFile
     
     public void extractFiles(Path outputPath)
     {
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        System.out.println("Extracting files");
         
-        final int interval = (int) Math.ceil(getContentHeaders().size() / 20f);
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
         
         for (int index = 0; index < getContentHeaders().size(); index++)
         {
