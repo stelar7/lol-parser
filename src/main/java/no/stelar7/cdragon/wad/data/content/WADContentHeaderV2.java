@@ -5,10 +5,10 @@ import lombok.Data;
 @Data
 public class WADContentHeaderV2 extends WADContentHeaderV1
 {
-    private long duplicate;
-    private int  unknown;
-    private int  unknown2;
-    private long sha256;
+    private boolean duplicate;
+    private int     unknown;
+    private int     unknown2;
+    private long    sha256;
     
     public WADContentHeaderV2(WADContentHeaderV1 header)
     {

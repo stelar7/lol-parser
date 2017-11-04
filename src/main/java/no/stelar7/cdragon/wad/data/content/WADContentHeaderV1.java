@@ -5,9 +5,9 @@ import lombok.*;
 @Data
 public class WADContentHeaderV1
 {
-    protected long pathHash;
-    protected long offset;
-    protected long compressedFileSize;
-    protected long fileSize;
-    protected long compressed;
+    protected long    pathHash;
+    protected long    offset;
+    protected int     compressedFileSize;
+    protected int     fileSize;
+    protected boolean compressed;
 }
