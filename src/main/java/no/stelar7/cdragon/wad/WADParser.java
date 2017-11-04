@@ -30,12 +30,10 @@ public class WADParser
         }
         
         String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/0.0.1.%s/files/Plugins/rcp-be-lol-game-data/default-assets.wad.compressed";
-        if (UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, 60, 100))
-        {
-            return parse(path);
-        }
         
-        return null;
+        UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, 60, 100);
+        
+        return parse(path);
     }
     
     

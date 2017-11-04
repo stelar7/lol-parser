@@ -58,7 +58,8 @@ public class WADFile
         {
             executor.shutdown();
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-        } catch (InterruptedException e)
+            fileReader.close();
+        } catch (InterruptedException | IOException e)
         {
             e.printStackTrace();
         }

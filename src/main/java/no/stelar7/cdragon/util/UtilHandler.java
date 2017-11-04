@@ -9,6 +9,7 @@ import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 public final class UtilHandler
@@ -68,25 +69,47 @@ public final class UtilHandler
         return magicNumbers;
     }
     
-    public static boolean tryDownloadVersion(Path output, String url, int min, int max) throws IOException
+    public static void tryDownloadVersion(Path output, String url, int min, int max) throws Exception
     {
+        ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        
+        System.out.println("Looking for highest version");
+        int[] foundMax = {0};
         for (int i = max; i >= min; i--)
         {
-            String finalUrl = String.format(url, i);
-            
-            HttpURLConnection con = (HttpURLConnection) new URL(finalUrl).openConnection();
-            if (con.getResponseCode() == 200)
-            {
-                con.disconnect();
-                
-                System.out.println("Downloading file: " + finalUrl);
-                ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
-                FileOutputStream    fos = new FileOutputStream(output.toFile());
-                
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-                return true;
-            }
+            final int tryme = i;
+            service.submit(() -> {
+                try
+                {
+                    
+                    String            finalUrl = String.format(url, tryme);
+                    HttpURLConnection con      = (HttpURLConnection) new URL(finalUrl).openConnection();
+                    if (con.getResponseCode() == 200)
+                    {
+                        con.disconnect();
+                        
+                        if (tryme > foundMax[0])
+                        {
+                            foundMax[0] = tryme;
+                        }
+                    }
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            });
         }
-        return false;
+        
+        
+        service.shutdown();
+        service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        
+        String finalUrl = String.format(url, foundMax[0]);
+        System.out.println("Downloading file: " + finalUrl);
+        
+        ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
+        FileOutputStream    fos = new FileOutputStream(output.toFile());
+        
+        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
     }
 }

@@ -10,8 +10,8 @@ public class WADTest
     public void testWAD() throws Exception
     {
         WADParser parser = new WADParser();
-        //WADFile file = parser.parse(Paths.get("C:\\Users\\Steffen\\Downloads\\default-assets.wad"));
-        WADFile file = parser.parseLatest(Paths.get("C:\\Users\\Steffen\\Downloads\\default-assets.wad.compressed"));
+        //WADFile file = parser.parse(Paths.get("C:\\Users\\Steffen\\Downloads\\default-assets.wad.compressed"));
+        WADFile file  = parser.parseLatest(Paths.get("C:\\Users\\Steffen\\Downloads\\default-assets.wad.compressed"));
         
         file.extractFiles(Paths.get("C:\\Users\\Steffen\\Downloads\\"));
     }
