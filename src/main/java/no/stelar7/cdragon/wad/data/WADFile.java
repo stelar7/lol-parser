@@ -38,11 +38,6 @@ public class WADFile
             final int selfIndex = index;
             executor.submit(() ->
                             {
-                                if (selfIndex % interval == 0)
-                                {
-                                    System.out.println(selfIndex + "/" + getContentHeaders().size());
-                                }
-                
                                 WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
                 
                                 if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
@@ -51,6 +46,12 @@ public class WADFile
                                 }
                 
                                 saveFile(fileHeader, outputPath);
+                
+                                if (selfIndex % interval == 0)
+                                {
+                                    System.out.println(selfIndex + "/" + getContentHeaders().size());
+                                }
+                
                             });
         }
         
