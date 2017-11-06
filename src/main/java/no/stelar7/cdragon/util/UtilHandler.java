@@ -49,21 +49,40 @@ public final class UtilHandler
         return hashNames;
     }
     
+    private static boolean isSame(byte a, byte b)
+    {
+        return a == b;
+    }
+    
+    public static boolean isProbableJSON(byte[] data)
+    {
+        boolean isJSON      = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
+        boolean isArrayJSON = (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x22));
+        
+        return isJSON || isArrayJSON;
+    }
+    
     public static synchronized Map<ByteArrayWrapper, String> getMagicNumbers()
     {
         if (magicNumbers == null)
         {
-            System.out.println("Loading JMimeMagic unknown types");
+            System.out.println("Loading magic numbers");
             
-            ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{79, 103, 103, 83});
-            ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{26, 69, -33, -93});
-            ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{68, 68, 83, 32});
+            ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{0x4f, 0x67, 0x67, 0x53});
+            ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{0x1A, 0x45, (byte) 0xDF, (byte) 0xA3});
+            ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{0x44, 0x44, 0x53, 0x20});
+            ByteArrayWrapper pngMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47});
+            ByteArrayWrapper jpgMagic  = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
+            ByteArrayWrapper jpegMagic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
+            
             
             magicNumbers = new HashMap<>();
             magicNumbers.put(oggMagic, "ogg");
             magicNumbers.put(webmMagic, "webm");
             magicNumbers.put(ddsMagic, "dds");
-            
+            magicNumbers.put(pngMagic, "png");
+            magicNumbers.put(jpgMagic, "jpg");
+            magicNumbers.put(jpegMagic, "jpg");
         }
         
         return magicNumbers;

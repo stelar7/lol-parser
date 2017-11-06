@@ -1,85 +1,84 @@
 package no.stelar7.cdragon.util;
 
+import sun.nio.ch.DirectBuffer;
+
 import java.io.*;
-import java.nio.ByteOrder;
+import java.nio.*;
+import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Arrays;
 
 public class RAFReader implements AutoCloseable
 {
-    private final RandomAccessFile raf;
-    private final ByteOrder        order;
+    private MappedByteBuffer buffer;
     
-    private long pointer;
-    
-    public RAFReader(RandomAccessFile raf, ByteOrder order)
+    public RAFReader(Path path, ByteOrder order)
     {
-        this.raf = raf;
-        this.order = order;
-    }
-    
-    public void mark() throws IOException
-    {
-        this.pointer = raf.getFilePointer();
-    }
-    
-    public void reset() throws IOException
-    {
-        raf.seek(pointer);
-    }
-    
-    public void seek(long pos) throws IOException
-    {
-        raf.seek(pos);
+        try
+        {
+            RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r");
+            
+            this.buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
+            this.buffer.order(order);
+            raf.close();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException("Invalid file?");
+        }
     }
     
     @Override
-    public void close() throws IOException
+    public void close()
     {
-        raf.close();
+        /*
+         This is really hacky, but its a workaround to http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4715154
+          */
+        ((DirectBuffer) buffer).cleaner().clean();
     }
     
-    public String readString(int length) throws IOException
+    
+    public void seek(int pos)
+    {
+        buffer.position(pos);
+    }
+    
+    public String readString(int length)
+    {
+        return new String(readBytes(length), StandardCharsets.UTF_8).trim();
+    }
+    
+    public long readLong()
+    {
+        return buffer.getLong();
+    }
+    
+    public int readInt()
+    {
+        return buffer.getInt();
+    }
+    
+    public short readShort()
+    {
+        return buffer.getShort();
+    }
+    
+    public byte readByte()
+    {
+        return buffer.get();
+    }
+    
+    public byte[] readBytes(int length)
+    {
+        return readBytes(length, 0);
+    }
+    
+    public byte[] readBytes(int length, int offset)
     {
         byte[] tempData = new byte[length];
-        raf.read(tempData, 0, length);
-        return new String(tempData, StandardCharsets.UTF_8).trim();
-    }
-    
-    public long readULong() throws IOException
-    {
-        long data = raf.readLong();
-        return order == ByteOrder.BIG_ENDIAN ? data : Long.reverseBytes(data);
-    }
-    
-    public long readUInt() throws IOException
-    {
-        int data = raf.readInt();
-        return order == ByteOrder.BIG_ENDIAN ? data : Integer.reverseBytes(data);
-    }
-    
-    public int readUShort() throws IOException
-    {
-        short data = raf.readShort();
-        return order == ByteOrder.BIG_ENDIAN ? data : Short.reverseBytes(data);
-    }
-    
-    public int readUByte() throws IOException
-    {
-        return raf.readUnsignedByte();
-    }
-    
-    public byte[] readBytes(int length) throws IOException
-    {
-        byte[] tempData = new byte[length];
-        raf.readFully(tempData, 0, length);
+        buffer.get(tempData, offset, length);
         return Arrays.copyOf(tempData, length);
     }
     
-    public byte[] readBytes(int length, int offset) throws IOException
-    {
-        byte[] tempData = new byte[length];
-        raf.readFully(tempData, offset, length);
-        return Arrays.copyOf(tempData, length);
-    }
 }

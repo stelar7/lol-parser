@@ -12,19 +12,22 @@ public final class CompressionHandler
         // Hide public constructor
     }
     
+    
+    public static void uncompressDEFLATE(Path inputPath, Path uncompressPath) throws IOException
+    {
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(Files.readAllBytes(inputPath));
+             InflaterInputStream in = new InflaterInputStream(bis)
+        )
+        {
+            Files.copy(in, uncompressPath, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+    
     public static byte[] uncompressGZIP(byte[] data) throws IOException
     {
-        return transferBuffer(new GZIPInputStream(new ByteArrayInputStream(data)));
-    }
-    
-    public static void uncompressDEFLATE(byte[] data, Path uncompressPath) throws IOException
-    {
-        Files.copy(new InflaterInputStream(new ByteArrayInputStream(data)), uncompressPath, StandardCopyOption.REPLACE_EXISTING);
-    }
-    
-    private static byte[] transferBuffer(FilterInputStream input) throws IOException
-    {
-        try (ByteArrayOutputStream output = new ByteArrayOutputStream())
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(data);
+             GZIPInputStream input = new GZIPInputStream(bis);
+             ByteArrayOutputStream output = new ByteArrayOutputStream())
         {
             byte[] buffer = new byte[1024];
             

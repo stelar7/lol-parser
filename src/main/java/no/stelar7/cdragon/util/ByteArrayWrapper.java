@@ -21,9 +21,21 @@ public final class ByteArrayWrapper
         return Arrays.equals(data, ((ByteArrayWrapper) other).data);
     }
     
+    public byte[] getData()
+    {
+        return Arrays.copyOf(data, data.length);
+    }
+    
     @Override
     public int hashCode()
     {
         return Arrays.hashCode(data);
+    }
+    
+    
+    @Override
+    public String toString()
+    {
+        return Arrays.toString(data);
     }
 }

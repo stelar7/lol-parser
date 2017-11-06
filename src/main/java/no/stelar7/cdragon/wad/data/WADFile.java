@@ -1,13 +1,11 @@
 package no.stelar7.cdragon.wad.data;
 
 import lombok.*;
-import net.sf.jmimemagic.*;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
 
-import java.io.*;
-import java.nio.ByteOrder;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -31,6 +29,7 @@ public class WADFile
     {
         System.out.println("Extracting files");
         
+        // set this to 1 to reduce memory usage
         ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
         
@@ -61,7 +60,7 @@ public class WADFile
             executor.shutdown();
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             fileReader.close();
-        } catch (InterruptedException | IOException e)
+        } catch (InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -71,19 +70,20 @@ public class WADFile
     {
         try
         {
-            String hash             = Long.toUnsignedString(header.getPathHash(), 16);
-            String filename         = UtilHandler.getKnownFileHashes().getOrDefault(hash, "unknown/" + hash);
-            String adjustedFileName = filename.startsWith("/") ? ("." + filename) : filename;
-            Path   self             = savePath.resolve(adjustedFileName).normalize();
+            String hash     = Long.toUnsignedString(header.getPathHash(), 16);
+            String filename = UtilHandler.getKnownFileHashes().getOrDefault(hash, "\\unknown\\" + hash);
+            Path   self     = Paths.get(savePath.toString(), filename);
             
             self.getParent().toFile().mkdirs();
+            String parentName = self.getParent().getFileName().toString();
             
-            byte[] data = findHeaderData(header);
+            
+            byte[] data = readContentFromHeaderData(header);
             Files.write(self, data);
             
-            if ("unknown".equals(self.getParent().getFileName().toString()))
+            if ("unknown".equals(parentName))
             {
-                findFileTypeAndRename(self, data, adjustedFileName, savePath);
+                findFileTypeAndRename(self, data, filename, savePath);
             }
             
         } catch (IOException e)
@@ -92,7 +92,7 @@ public class WADFile
         }
     }
     
-    private synchronized byte[] findHeaderData(WADContentHeaderV1 header) throws IOException
+    private synchronized byte[] readContentFromHeaderData(WADContentHeaderV1 header) throws IOException
     {
         fileReader.seek(header.getOffset());
         if (header.isCompressed())
@@ -104,39 +104,40 @@ public class WADFile
         }
     }
     
+    private String findFileType(Path self, byte[] data)
+    {
+        ByteArrayWrapper magic  = new ByteArrayWrapper(Arrays.copyOf(data, 4));
+        String           result = UtilHandler.getMagicNumbers().get(magic);
+        
+        if (result != null)
+        {
+            return result;
+        }
+        
+        if (UtilHandler.isProbableJSON(magic.getData()))
+        {
+            return "json";
+        }
+        
+        System.out.print("Unknown filetype: ");
+        System.out.print(self.toString());
+        System.out.println(magic.toString());
+        return "txt";
+    }
+    
     private void findFileTypeAndRename(Path self, byte[] data, String filename, Path parent)
     {
         try
         {
-            StringBuilder sb = new StringBuilder(filename);
+            String        fileType = findFileType(self, data);
+            StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
+            Path          other    = Paths.get(parent.toString(), sb.toString());
             
-            MagicMatch match = Magic.getMagicMatch(data);
-            if (match != null)
-            {
-                sb.append(".");
-                
-                if (!match.getExtension().isEmpty())
-                {
-                    sb.append(match.getExtension());
-                } else
-                {
-                    // JMimeMagic can find _most_ types, but not newer ones, so we check the magic number for those
-                    try (RAFReader raf2 = new RAFReader(new RandomAccessFile(self.toFile(), "r"), ByteOrder.LITTLE_ENDIAN))
-                    {
-                        ByteArrayWrapper magic     = new ByteArrayWrapper(raf2.readBytes(4));
-                        String           extention = UtilHandler.getMagicNumbers().getOrDefault(magic, "txt");
-                        sb.append(extention);
-                    }
-                }
-                
-                Path other = parent.resolve(sb.toString()).normalize();
-                Files.move(self, other, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (MagicParseException | MagicMatchNotFoundException | MagicException | IOException e)
+            Files.move(self, other, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            
+        } catch (IOException e)
         {
-            System.err.println("Magic didnt find extension for hash: " + filename + ", you should try with FILE");
             e.printStackTrace();
         }
     }
-    
 }

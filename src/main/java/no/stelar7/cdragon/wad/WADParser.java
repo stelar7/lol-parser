@@ -67,9 +67,8 @@ public class WADParser
             parsePath = uncompressWAD(path);
         }
         
-        RandomAccessFile accessFile = new RandomAccessFile(parsePath.toFile(), "r");
-        RAFReader        raf        = new RAFReader(accessFile, ByteOrder.LITTLE_ENDIAN);
-        WADFile          wadFile    = new WADFile(raf);
+        RAFReader raf     = new RAFReader(parsePath, ByteOrder.LITTLE_ENDIAN);
+        WADFile   wadFile = new WADFile(raf);
         
         wadFile.setHeader(parseHeader(raf));
         wadFile.setContentHeaders(parseContent(raf, wadFile.getHeader()));
@@ -83,7 +82,7 @@ public class WADParser
         System.out.println("Uncompressing WAD");
         
         Path uncompressed = getUncompressedPath(compressedPath);
-        CompressionHandler.uncompressDEFLATE(Files.readAllBytes(compressedPath), uncompressed);
+        CompressionHandler.uncompressDEFLATE(compressedPath, uncompressed);
         
         return uncompressed;
     }
@@ -109,19 +108,19 @@ public class WADParser
         for (int i = 0; i < fileCount; i++)
         {
             WADContentHeaderV1 header = new WADContentHeaderV1();
-            header.setPathHash(raf.readULong());
-            header.setOffset(raf.readUInt());
-            header.setCompressedFileSize((int) raf.readUInt());
-            header.setFileSize((int) raf.readUInt());
-            header.setCompressed(raf.readUByte() > 0);
+            header.setPathHash(raf.readLong());
+            header.setOffset(raf.readInt());
+            header.setCompressedFileSize(raf.readInt());
+            header.setFileSize(raf.readInt());
+            header.setCompressed(raf.readByte() > 0);
             
             if (base.getMajor() == 2 || base.getMajor() == 3)
             {
                 WADContentHeaderV2 headerv2 = new WADContentHeaderV2(header);
-                headerv2.setDuplicate(raf.readUByte() > 0);
-                headerv2.setUnknown(raf.readUByte());
-                headerv2.setUnknown2(raf.readUByte());
-                headerv2.setSha256(raf.readULong());
+                headerv2.setDuplicate(raf.readByte() > 0);
+                headerv2.setUnknown(raf.readByte());
+                headerv2.setUnknown2(raf.readByte());
+                headerv2.setSha256(raf.readLong());
                 
                 content.add(headerv2);
                 continue;
@@ -140,44 +139,44 @@ public class WADParser
      * @return WADHeaderBase
      */
     
-    private WADHeaderBase parseHeader(RAFReader raf) throws IOException
+    private WADHeaderBase parseHeader(RAFReader raf)
     {
         System.out.println("Parsing WAD header");
         
         
         WADHeaderBase base = new WADHeaderBase();
         base.setMagic(raf.readString(2));
-        base.setMajor(raf.readUByte());
-        base.setMinor(raf.readUByte());
+        base.setMajor(raf.readByte());
+        base.setMinor(raf.readByte());
         
         switch (base.getMajor())
         {
             case 1:
             {
                 WADHeaderV1 head = new WADHeaderV1(base);
-                head.setEntryHeaderOffset(raf.readUShort());
-                head.setEntryHeaderCellSize(raf.readUShort());
-                head.setFileCount(raf.readUInt());
+                head.setEntryHeaderOffset(raf.readShort());
+                head.setEntryHeaderCellSize(raf.readShort());
+                head.setFileCount(raf.readInt());
                 return head;
             }
             case 2:
             {
                 WADHeaderV2 head = new WADHeaderV2(base);
-                head.setECDSALength(raf.readUByte());
+                head.setECDSALength(raf.readByte());
                 head.setECDSA(raf.readBytes(head.getECDSALength()));
                 head.setECDSAPadding(raf.readBytes(83 - head.getECDSALength()));
-                head.setFileChecksum(raf.readULong());
-                head.setEntryHeaderOffset(raf.readUShort());
-                head.setEntryHeaderCellSize(raf.readUShort());
-                head.setFileCount(raf.readUInt());
+                head.setFileChecksum(raf.readLong());
+                head.setEntryHeaderOffset(raf.readShort());
+                head.setEntryHeaderCellSize(raf.readShort());
+                head.setFileCount(raf.readInt());
                 return head;
             }
             case 3:
             {
                 WADHeaderV3 head = new WADHeaderV3(base);
                 head.setECDSA(raf.readBytes(256));
-                head.setChecksum(raf.readULong());
-                head.setFileCount(raf.readUInt());
+                head.setChecksum(raf.readLong());
+                head.setFileCount(raf.readInt());
                 return head;
             }
             default:
