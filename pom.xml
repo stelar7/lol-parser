@@ -25,6 +25,11 @@
             <version>1.16.18</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.lz4</groupId>
+            <artifactId>lz4-java</artifactId>
+            <version>1.4</version>
+        </dependency>
     </dependencies>
 
     <build>

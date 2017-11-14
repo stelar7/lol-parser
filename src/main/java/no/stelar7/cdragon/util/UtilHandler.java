@@ -56,10 +56,11 @@ public final class UtilHandler
     
     public static boolean isProbableJSON(byte[] data)
     {
-        boolean isJSON      = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
-        boolean isArrayJSON = (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x22));
+        boolean isJSON       = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
+        boolean isArrayJSON  = (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x22));
+        boolean isArrayJSON2 = (isSame(data[0], (byte) 0x5b) && isSame(data[1], (byte) 0xa) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
         
-        return isJSON || isArrayJSON;
+        return isJSON || isArrayJSON || isArrayJSON2;
     }
     
     public static synchronized Map<ByteArrayWrapper, String> getMagicNumbers()

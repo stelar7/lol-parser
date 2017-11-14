@@ -1,11 +1,13 @@
 package no.stelar7.cdragon.wad.data;
 
 import lombok.*;
+import net.jpountz.xxhash.*;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
 
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -70,7 +72,7 @@ public class WADFile
     {
         try
         {
-            String hash     = Long.toUnsignedString(header.getPathHash(), 16);
+            String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
             String filename = UtilHandler.getKnownFileHashes().getOrDefault(hash, "\\unknown\\" + hash);
             Path   self     = Paths.get(savePath.toString(), filename);
             
@@ -129,6 +131,13 @@ public class WADFile
     {
         try
         {
+            
+            // TODO:
+            // somehow find the real filename
+            //  String hashName     = filename.substring(filename.lastIndexOf('\\') + 1);
+            //  String realFileName = getHash("plugins/rcp-fe-l10n/rcp-fe-l10n/global/licenses.json");
+            // TODOEND
+            
             String        fileType = findFileType(self, data);
             StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
             Path          other    = Paths.get(parent.toString(), sb.toString());
@@ -140,4 +149,27 @@ public class WADFile
             e.printStackTrace();
         }
     }
+    
+    
+    /*
+    private String getHash(String text) throws IOException
+    {
+        XXHashFactory        factory = XXHashFactory.fastestInstance();
+        byte[]               data    = text.getBytes(StandardCharsets.UTF_8);
+        ByteArrayInputStream in      = new ByteArrayInputStream(data);
+        
+        StreamingXXHash64 hash64 = factory.newStreamingHash64(0);
+        byte[]            buf    = new byte[8];
+        for (; ; )
+        {
+            int read = in.read(buf);
+            if (read == -1)
+            {
+                break;
+            }
+            hash64.update(buf, 0, read);
+        }
+        return String.format("%016X", hash64.getValue()).toLowerCase(Locale.ENGLISH);
+    }
+    */
 }
