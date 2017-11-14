@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.util;
 
+
 import sun.nio.ch.DirectBuffer;
 
 import java.io.*;
@@ -47,6 +48,23 @@ public class RAFReader implements AutoCloseable
     public String readString(int length)
     {
         return new String(readBytes(length), StandardCharsets.UTF_8).trim();
+    }
+    
+    
+    /**
+     * Reads untill 0x00 is read.
+     */
+    public String readString()
+    {
+        byte[] temp  = new byte[65536];
+        byte   b;
+        int    index = 0;
+        while ((b = readByte()) != 0)
+        {
+            temp[index++] = b;
+        }
+        
+        return new String(temp, StandardCharsets.UTF_8).trim();
     }
     
     public long readLong()
