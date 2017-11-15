@@ -10,8 +10,8 @@ public class WADTest
     public void testWAD() throws Exception
     {
         WADParser parser = new WADParser();
-        WADFile file  = parser.parse(Paths.get("C:\\Riot Games\\League of Legends\\RADS\\projects\\league_client\\managedfiles\\0.0.0.104\\Plugins\\rcp-fe-l10n\\assets.wad"));
+        WADFile file  = parser.parseLatest(Paths.get("C:\\Users\\Steffen\\Downloads"));
         
-        file.extractFiles(Paths.get("C:\\Riot Games\\League of Legends\\RADS\\projects\\league_client\\managedfiles\\0.0.0.104\\Plugins\\rcp-fe-l10n"));
+        file.extractFiles(Paths.get("C:\\Users\\Steffen\\Downloads"));
     }
 }

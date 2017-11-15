@@ -1,5 +1,7 @@
 package no.stelar7.cdragon.util;
 
+import com.github.luben.zstd.Zstd;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.zip.*;
@@ -39,5 +41,10 @@ public final class CompressionHandler
             output.flush();
             return output.toByteArray();
         }
+    }
+    
+    public static byte[] uncompressZSTD(byte[] fileBytes, int originalSize)
+    {
+        return Zstd.decompress(fileBytes, originalSize);
     }
 }

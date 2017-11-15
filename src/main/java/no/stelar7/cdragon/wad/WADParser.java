@@ -5,7 +5,6 @@ import no.stelar7.cdragon.wad.data.WADFile;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.*;
 
-import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.nio.file.*;
@@ -13,6 +12,11 @@ import java.util.*;
 
 public class WADParser
 {
+    public WADParser()
+    {
+        UtilHandler.getKnownFileHashes();
+        UtilHandler.getMagicNumbers();
+    }
     
     /**
      * Downloads and parses the latest WAD file;
@@ -24,29 +28,30 @@ public class WADParser
      */
     public WADFile parseLatest(Path path) throws Exception
     {
-        if (Files.exists(getUncompressedPath(path)))
+        String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/rcp-be-lol-game-data/default-assets.wad.compressed";
+        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 60, 100);
+        
+        Path fileLocation      = path.resolve(version);
+        Path noCompressionPath = path.resolve(version + ".nocompress");
+        
+        if (Files.exists(noCompressionPath))
         {
-            System.out.println("Found already decompressed file");
-            return parse(getUncompressedPath(path));
+            System.out.println("Found uncompressed WAD");
+            return parse(noCompressionPath);
         }
-        if (Files.exists(path))
+        
+        if (Files.exists(fileLocation))
         {
-            System.out.println("Found already existing file");
-            return parse(path);
+            System.out.println("Found compressed WAD");
+            CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
+            return parse(noCompressionPath);
         }
         
-        String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/0.0.1.%s/files/Plugins/rcp-be-lol-game-data/default-assets.wad.compressed";
+        System.out.println("Downloading WAD");
+        UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, version);
+        CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
         
-        UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, 60, 100);
-        
-        return parse(path);
-    }
-    
-    private Path getUncompressedPath(Path compressedPath)
-    {
-        String filename = compressedPath.getFileName().toString();
-        filename = filename.substring(0, filename.lastIndexOf(".compressed"));
-        return compressedPath.getParent().resolve(filename);
+        return parse(noCompressionPath);
     }
     
     
@@ -59,32 +64,13 @@ public class WADParser
      */
     public WADFile parse(Path path) throws Exception
     {
-        Path   parsePath = path;
-        String filename  = path.getFileName().toString();
-        
-        if (filename.endsWith(".compressed"))
-        {
-            parsePath = uncompressWAD(path);
-        }
-        
-        RAFReader raf     = new RAFReader(parsePath, ByteOrder.LITTLE_ENDIAN);
+        RAFReader raf     = new RAFReader(path, ByteOrder.LITTLE_ENDIAN);
         WADFile   wadFile = new WADFile(raf);
         
         wadFile.setHeader(parseHeader(raf));
         wadFile.setContentHeaders(parseContent(raf, wadFile.getHeader()));
         
         return wadFile;
-        
-    }
-    
-    private Path uncompressWAD(Path compressedPath) throws IOException
-    {
-        System.out.println("Uncompressing WAD");
-        
-        Path uncompressed = getUncompressedPath(compressedPath);
-        CompressionHandler.uncompressDEFLATE(compressedPath, uncompressed);
-        
-        return uncompressed;
     }
     
     /**

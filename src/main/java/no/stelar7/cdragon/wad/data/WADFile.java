@@ -1,13 +1,11 @@
 package no.stelar7.cdragon.wad.data;
 
 import lombok.*;
-import net.jpountz.xxhash.*;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -99,7 +97,20 @@ public class WADFile
         fileReader.seek(header.getOffset());
         if (header.isCompressed())
         {
-            return CompressionHandler.uncompressGZIP(fileReader.readBytes(header.getCompressedFileSize()));
+            byte[] fileBytes = fileReader.readBytes(header.getCompressedFileSize());
+            if (UtilHandler.isProbableGZIP(fileBytes))
+            {
+                return CompressionHandler.uncompressGZIP(fileBytes);
+            }
+            
+            if (UtilHandler.isProbableZSTD(fileBytes))
+            {
+                return CompressionHandler.uncompressZSTD(fileBytes, header.getFileSize());
+            }
+            
+            Files.write(Paths.get("unknown.file"), fileBytes);
+            System.out.println("");
+            return fileBytes;
         } else
         {
             return fileReader.readBytes(header.getFileSize());

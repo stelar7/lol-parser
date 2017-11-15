@@ -23,7 +23,7 @@ public final class UtilHandler
     private static Map<String, String>           hashNames;
     private static Map<ByteArrayWrapper, String> magicNumbers;
     
-    public static synchronized Map<String, String> getKnownFileHashes()
+    public static Map<String, String> getKnownFileHashes()
     {
         if (hashNames == null)
         {
@@ -57,13 +57,33 @@ public final class UtilHandler
     public static boolean isProbableJSON(byte[] data)
     {
         boolean isJSON       = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
+        boolean isEmptyJSON  = (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x7D));
         boolean isArrayJSON  = (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x22));
         boolean isArrayJSON2 = (isSame(data[0], (byte) 0x5b) && isSame(data[1], (byte) 0xa) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
         
-        return isJSON || isArrayJSON || isArrayJSON2;
+        return isJSON || isArrayJSON || isArrayJSON2 || isEmptyJSON;
     }
     
-    public static synchronized Map<ByteArrayWrapper, String> getMagicNumbers()
+    public static boolean isProbableDEFLATE(byte[] data)
+    {
+        boolean isNoCompress      = isSame(data[0], (byte) 0x78) && isSame(data[1], (byte) 0x01);
+        boolean isBestCompress    = isSame(data[0], (byte) 0x78) && isSame(data[1], (byte) 0xDA);
+        boolean isDefaultCompress = isSame(data[0], (byte) 0x78) && isSame(data[1], (byte) 0x9C);
+        return isNoCompress || isBestCompress || isDefaultCompress;
+        
+    }
+    
+    public static boolean isProbableGZIP(byte[] data)
+    {
+        return isSame(data[0], (byte) 0x1f) && isSame(data[1], (byte) 0x8b);
+    }
+    
+    public static boolean isProbableZSTD(byte[] data)
+    {
+        return isSame(data[0], (byte) 0x28) && isSame(data[1], (byte) 0xB5) && isSame(data[2], (byte) 0x2F) && isSame(data[3], (byte) 0xFD);
+    }
+    
+    public static Map<ByteArrayWrapper, String> getMagicNumbers()
     {
         if (magicNumbers == null)
         {
@@ -89,20 +109,21 @@ public final class UtilHandler
         return magicNumbers;
     }
     
-    public static void tryDownloadVersion(Path output, String url, int min, int max) throws Exception
+    public static String getMaxVersion(String url, int min, int max) throws InterruptedException
     {
         ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         
         System.out.println("Looking for highest version");
-        int[] foundMax = {0};
+        int[]    foundMax   = {0};
+        String[] versionMax = {""};
         for (int i = max; i >= min; i--)
         {
-            final int tryme = i;
+            final int tryme   = i;
+            String    version = "0.0.1." + i;
             service.submit(() -> {
                 try
                 {
-                    
-                    String            finalUrl = String.format(url, tryme);
+                    String            finalUrl = String.format(url, version);
                     HttpURLConnection con      = (HttpURLConnection) new URL(finalUrl).openConnection();
                     if (con.getResponseCode() == 200)
                     {
@@ -111,6 +132,7 @@ public final class UtilHandler
                         if (tryme > foundMax[0])
                         {
                             foundMax[0] = tryme;
+                            versionMax[0] = version;
                         }
                     }
                 } catch (IOException e)
@@ -120,15 +142,18 @@ public final class UtilHandler
             });
         }
         
-        
         service.shutdown();
         service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         
-        String finalUrl = String.format(url, foundMax[0]);
-        System.out.println("Downloading file: " + finalUrl);
+        return versionMax[0];
+    }
+    
+    public static void tryDownloadVersion(Path output, String url, String version) throws Exception
+    {
+        String finalUrl = String.format(url, version);
         
         ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
-        FileOutputStream    fos = new FileOutputStream(output.toFile());
+        FileOutputStream    fos = new FileOutputStream(output.resolve(version).toFile());
         
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
     }
