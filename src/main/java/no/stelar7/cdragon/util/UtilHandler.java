@@ -2,6 +2,7 @@ package no.stelar7.cdragon.util;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import javafx.util.Pair;
 
 import java.io.*;
 import java.net.*;
@@ -10,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.Stream;
 
 public final class UtilHandler
 {
@@ -30,16 +30,14 @@ public final class UtilHandler
             System.out.println("Loading known hashes");
             try
             {
-                StringBuilder sb = new StringBuilder();
-                
-                try (InputStream is = new URL("https://raw.githubusercontent.com/CommunityDragon/RADS-CDragon/Python-Version/wad_parser/hashes.json").openConnection().getInputStream();
-                     BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-                     Stream<String> stream = reader.lines())
-                {
-                    stream.forEach(sb::append);
-                }
+                StringBuilder sb    = new StringBuilder();
+                List<String>  lines = Files.readAllLines(Paths.get("hashes.json"));
+                lines.forEach(sb::append);
                 
                 hashNames = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+                
+                //sortAndWriteHashes();
+                
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -47,6 +45,22 @@ public final class UtilHandler
         }
         
         return hashNames;
+    }
+    
+    private static void sortAndWriteHashes() throws IOException
+    {
+        List<Pair<String, String>> ml = new ArrayList<>();
+        hashNames.forEach((k, v) -> ml.add(new Pair<>(k, v)));
+        ml.sort(Comparator.comparing(Pair::getValue));
+        
+        Path ph = Paths.get("newHash.json");
+        Files.write(ph, "{\n".getBytes(StandardCharsets.UTF_8));
+        for (Pair<String, String> pair : ml)
+        {
+            Files.write(ph, ("\t\"" + pair.getKey() + "\": \"" + pair.getValue() + "\",\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
+        Files.write(ph, "}".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        System.out.println("");
     }
     
     private static boolean isSame(byte a, byte b)

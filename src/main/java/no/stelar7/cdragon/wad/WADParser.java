@@ -49,6 +49,7 @@ public class WADParser
         
         System.out.println("Downloading WAD");
         UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, version);
+        System.out.println("Uncompressing WAD");
         CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
         
         return parse(noCompressionPath);

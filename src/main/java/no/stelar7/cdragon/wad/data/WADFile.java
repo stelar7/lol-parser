@@ -142,13 +142,6 @@ public class WADFile
     {
         try
         {
-            
-            // TODO:
-            // somehow find the real filename
-            //  String hashName     = filename.substring(filename.lastIndexOf('\\') + 1);
-            //  String realFileName = getHash("plugins/rcp-fe-l10n/rcp-fe-l10n/global/licenses.json");
-            // TODOEND
-            
             String        fileType = findFileType(self, data);
             StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
             Path          other    = Paths.get(parent.toString(), sb.toString());
@@ -160,27 +153,4 @@ public class WADFile
             e.printStackTrace();
         }
     }
-    
-    
-    /*
-    private String getHash(String text) throws IOException
-    {
-        XXHashFactory        factory = XXHashFactory.fastestInstance();
-        byte[]               data    = text.getBytes(StandardCharsets.UTF_8);
-        ByteArrayInputStream in      = new ByteArrayInputStream(data);
-        
-        StreamingXXHash64 hash64 = factory.newStreamingHash64(0);
-        byte[]            buf    = new byte[8];
-        for (; ; )
-        {
-            int read = in.read(buf);
-            if (read == -1)
-            {
-                break;
-            }
-            hash64.update(buf, 0, read);
-        }
-        return String.format("%016X", hash64.getValue()).toLowerCase(Locale.ENGLISH);
-    }
-    */
 }
