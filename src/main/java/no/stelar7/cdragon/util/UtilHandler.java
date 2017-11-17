@@ -36,8 +36,7 @@ public final class UtilHandler
                 
                 hashNames = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
                 
-                //sortAndWriteHashes();
-                
+                sortAndWriteHashes();
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -51,16 +50,17 @@ public final class UtilHandler
     {
         List<Pair<String, String>> ml = new ArrayList<>();
         hashNames.forEach((k, v) -> ml.add(new Pair<>(k, v)));
-        ml.sort(Comparator.comparing(Pair::getValue));
+        ml.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
         
-        Path ph = Paths.get("newHash.json");
-        Files.write(ph, "{\n".getBytes(StandardCharsets.UTF_8));
+        Path          pho = Paths.get("hashes.json");
+        StringBuilder sb  = new StringBuilder("{\n");
         for (Pair<String, String> pair : ml)
         {
-            Files.write(ph, ("\t\"" + pair.getKey() + "\": \"" + pair.getValue() + "\",\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
         }
-        Files.write(ph, "}".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-        System.out.println("");
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        
+        Files.write(pho, sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     private static boolean isSame(byte a, byte b)
