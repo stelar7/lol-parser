@@ -6,6 +6,7 @@ import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -27,40 +28,41 @@ public class WADFile
     
     public void extractFiles(Path outputPath)
     {
-        System.out.println("Extracting files");
-        
-        // set this to 1 to reduce memory usage
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
-        
-        for (int index = 0; index < getContentHeaders().size(); index++)
-        {
-            final int selfIndex = index;
-            executor.submit(() ->
-                            {
-                                WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
-                
-                                if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
-                                {
-                                    return;
-                                }
-                
-                                saveFile(fileHeader, outputPath);
-                
-                                if (selfIndex % interval == 0)
-                                {
-                                    System.out.println(selfIndex + "/" + getContentHeaders().size());
-                                }
-                
-                            });
-        }
-        
         try
         {
+            System.out.println("Extracting files");
+            Files.write(Paths.get("unknown.json"), new byte[]{});
+            
+            // set this to 1 to reduce memory usage
+            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
+            
+            for (int index = 0; index < getContentHeaders().size(); index++)
+            {
+                final int selfIndex = index;
+                executor.submit(() ->
+                                {
+                                    WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
+                    
+                                    if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
+                                    {
+                                        return;
+                                    }
+                    
+                                    saveFile(fileHeader, outputPath);
+                    
+                                    if (selfIndex % interval == 0)
+                                    {
+                                        System.out.println(selfIndex + "/" + getContentHeaders().size());
+                                    }
+                    
+                                });
+            }
+            
             executor.shutdown();
             executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
             fileReader.close();
-        } catch (InterruptedException e)
+        } catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -83,6 +85,7 @@ public class WADFile
             
             if ("unknown".equals(parentName))
             {
+                Files.write(Paths.get("unknown.json"), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
                 findFileTypeAndRename(self, data, filename, savePath);
             }
             

@@ -3,6 +3,7 @@ package no.stelar7.cdragon.util;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
+import net.jpountz.xxhash.*;
 
 import java.io.*;
 import java.net.*;
@@ -39,7 +40,8 @@ public final class UtilHandler
                 sortAndWriteHashes();
             } catch (IOException e)
             {
-                e.printStackTrace();
+                hashNames = Collections.emptyMap();
+                System.err.println("File not found: " + e.getMessage());
             }
         }
         
@@ -107,8 +109,10 @@ public final class UtilHandler
             ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{0x1A, 0x45, (byte) 0xDF, (byte) 0xA3});
             ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{0x44, 0x44, 0x53, 0x20});
             ByteArrayWrapper pngMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47});
-            ByteArrayWrapper jpgMagic  = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
-            ByteArrayWrapper jpegMagic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
+            ByteArrayWrapper jpgMagic  = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
+            ByteArrayWrapper jpg2Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
+            ByteArrayWrapper jpg3Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
+            ByteArrayWrapper jpg4Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
             
             
             magicNumbers = new HashMap<>();
@@ -117,10 +121,39 @@ public final class UtilHandler
             magicNumbers.put(ddsMagic, "dds");
             magicNumbers.put(pngMagic, "png");
             magicNumbers.put(jpgMagic, "jpg");
-            magicNumbers.put(jpegMagic, "jpg");
+            magicNumbers.put(jpg2Magic, "jpg");
+            magicNumbers.put(jpg3Magic, "jpg");
+            magicNumbers.put(jpg4Magic, "jpg");
         }
         
         return magicNumbers;
+    }
+    
+    public static String getHash(String text)
+    {
+        try
+        {
+            XXHashFactory        factory = XXHashFactory.fastestInstance();
+            byte[]               data    = text.getBytes(StandardCharsets.UTF_8);
+            ByteArrayInputStream in      = new ByteArrayInputStream(data);
+            
+            StreamingXXHash64 hash64 = factory.newStreamingHash64(0);
+            byte[]            buf    = new byte[8];
+            for (; ; )
+            {
+                int read = in.read(buf);
+                if (read == -1)
+                {
+                    break;
+                }
+                hash64.update(buf, 0, read);
+            }
+            return String.format("%016X", hash64.getValue()).toLowerCase(Locale.ENGLISH);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public static String getMaxVersion(String url, int min, int max) throws InterruptedException
