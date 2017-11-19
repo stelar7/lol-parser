@@ -18,12 +18,13 @@ public class TestHashes
     List<String> hashes = getUnknownHashes();
     
     
-    private final Map<String, Integer[]> folderData = new HashMap<String, Integer[]>()
+    final         int                    iconMax     = 10000;
+    final         int                    championMax = 600;
+    final         int                    skinMax     = 25;
+    private final Map<String, Integer[]> folderData  = new HashMap<String, Integer[]>()
     {{
-        final int iconMax = 10000;
         put("profile-icons", new Integer[]{iconMax});
         
-        final int championMax = 600;
         put("champions", new Integer[]{championMax});
         put("champion-sfx-audios", new Integer[]{championMax});
         put("champion-icons", new Integer[]{championMax});
@@ -31,7 +32,6 @@ public class TestHashes
         put("champion-ban-vo", new Integer[]{championMax});
         put("summoner-backdrops", new Integer[]{championMax});
         
-        final int skinMax = 25;
         put("champion-tiles", new Integer[]{championMax, skinMax});
         put("champion-splashes", new Integer[]{championMax, skinMax});
         put("champion-chroma-images", new Integer[]{championMax, skinMax});
@@ -42,10 +42,17 @@ public class TestHashes
     {
         ExecutorService service = Executors.newFixedThreadPool(8);
         
-        Path file = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
+        Path file  = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
+        Path file2 = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
-        findInFile(file, "perkstyles.json", "iconPath");
-        findInFile(file, "perks.json", "iconPath");
+        findInFile(file, "perkstyles.json", new String[]{"iconPath"});
+        findInFile(file, "perks.json", new String[]{"iconPath"});
+        
+        
+        for (int i = -1; i < championMax; i++)
+        {
+            findInChampionFile(file2, i + ".json", "abilityIconPath");
+        }
         
         for (String ext : exts)
         {
@@ -57,10 +64,81 @@ public class TestHashes
         
         
         folderData.keySet().forEach(s -> combineFolderJSON(s, exts));
+        
+        
+        folderData.put("perkstyles", new Integer[]{1});
+        folderData.put("perks", new Integer[]{1});
+        
+        for (int i = 0; i < championMax; i++)
+        {
+            folderData.put(String.valueOf(i), new Integer[]{1});
+        }
+        
         combineJSON(folderData.keySet());
     }
     
-    private void findInFile(Path filepath, String filename, String fieldToFind) throws IOException
+    private void findInChampionFile(Path filepath, String filename, String fieldToFind) throws IOException
+    {
+        String pre = "plugins/rcp-be-lol-game-data/global/default/";
+        
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        List<String>  lines = Files.readAllLines(path);
+        StringBuilder sb    = new StringBuilder();
+        lines.forEach(sb::append);
+        JsonObject    elem = new JsonParser().parse(sb.toString()).getAsJsonObject();
+        StringBuilder data = new StringBuilder("{");
+        
+        String passive = elem.getAsJsonObject("passive").get(fieldToFind).getAsString().toLowerCase(Locale.ENGLISH);
+        
+        if (!passive.isEmpty())
+        {
+            passive = passive.substring(passive.indexOf("v1"));
+            String hashMe = pre + passive;
+            
+            String hash = UtilHandler.getHash(hashMe);
+            
+            if (hashes.contains(hash))
+            {
+                data.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
+                hashes.remove(hash);
+            }
+        }
+        
+        JsonArray arr = elem.getAsJsonArray("spells");
+        
+        for (JsonElement element : arr)
+        {
+            JsonObject current = element.getAsJsonObject();
+            String     value   = current.getAsJsonObject().get(fieldToFind).getAsString().toLowerCase(Locale.ENGLISH);
+            
+            value = value.substring(value.indexOf("v1"));
+            String hashMe = pre + value;
+            
+            String hash = UtilHandler.getHash(hashMe);
+            
+            if (hashes.contains(hash))
+            {
+                data.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
+                hashes.remove(hash);
+            }
+        }
+        data.reverse().delete(0, 2).reverse().append("\n}");
+        
+        if (data.toString().length() < 10)
+        {
+            return;
+        }
+        
+        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    
+    private void findInFile(Path filepath, String filename, String[] fieldToFind) throws IOException
     {
         String pre = "plugins/rcp-be-lol-game-data/global/default/";
         
@@ -71,9 +149,24 @@ public class TestHashes
         JsonArray   arr  = elem.getAsJsonArray();
         
         StringBuilder data = new StringBuilder("{");
+        
         for (JsonElement element : arr)
         {
-            String value = element.getAsJsonObject().get(fieldToFind).getAsString().toLowerCase(Locale.ENGLISH);
+            JsonObject current = element.getAsJsonObject();
+            String     value   = "";
+            
+            for (int i = 0; i < fieldToFind.length; i++)
+            {
+                String nextField = fieldToFind[i];
+                if (fieldToFind.length - 1 == i)
+                {
+                    value = current.getAsJsonObject().get(nextField).getAsString().toLowerCase(Locale.ENGLISH);
+                } else
+                {
+                    current = current.getAsJsonObject(nextField);
+                }
+            }
+            
             value = value.substring(value.indexOf("v1"));
             String hashMe = pre + value;
             
@@ -81,7 +174,8 @@ public class TestHashes
             
             if (hashes.contains(hash))
             {
-                data.append("\t\"").append(hash).append("\": \"").append(value).append("\",\n");
+                data.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
+                hashes.remove(hash);
             }
         }
         data.reverse().delete(0, 2).reverse().append("\n}");
@@ -91,7 +185,7 @@ public class TestHashes
             return;
         }
         
-        Files.write(Paths.get(filename + ".json"), data.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     private void combineJSON(Set<String> folders)
@@ -215,6 +309,7 @@ public class TestHashes
             if (hashes.contains(hash))
             {
                 sb.append("\t\"").append(hash).append("\": \"").append(value).append("\",\n");
+                hashes.remove(hash);
             }
         }
     }
@@ -240,6 +335,7 @@ public class TestHashes
                 if (hashes.contains(hash))
                 {
                     sb.append("\t\"").append(hash).append("\": \"").append(value).append("\",\n");
+                    hashes.remove(hash);
                 }
             }
         }
