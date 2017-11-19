@@ -54,7 +54,7 @@ public class TestHashes
         parseWardSkins(file, "ward-skins.json");
         parseMasteries(file, "summoner-masteries.json");
         parseEmotes(file, "summoner-emotes.json");
-        
+        parseBanners(file, "summoner-banners.json");
         
         for (int i = -1; i < championMax; i++)
         {
@@ -82,6 +82,7 @@ public class TestHashes
         folderData.put("summoner-masteries", new Integer[]{1});
         folderData.put("ward-skins", new Integer[]{1});
         folderData.put("summoner-emotes", new Integer[]{1});
+        folderData.put("summoner-banners", new Integer[]{1});
         
         
         for (int i = 0; i < championMax; i++)
@@ -90,6 +91,62 @@ public class TestHashes
         }
         
         combineJSON(folderData.keySet());
+    }
+    
+    private void parseBanners(Path filepath, String filename) throws IOException
+    {
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        String pre = "plugins/rcp-be-lol-game-data/global/default/";
+        
+        List<String>  lines = Files.readAllLines(path);
+        StringBuilder sb    = new StringBuilder();
+        lines.forEach(sb::append);
+        JsonObject    elem = new JsonParser().parse(sb.toString()).getAsJsonObject();
+        StringBuilder data = new StringBuilder("{");
+        
+        JsonArray bflags = elem.getAsJsonArray("BannerFlags");
+        for (JsonElement element : bflags)
+        {
+            JsonObject el = element.getAsJsonObject();
+            
+            String wip = el.get("inventoryIcon").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("assets"));
+            hashAndAddToSB(data, pre + wip);
+            
+            wip = el.get("profileIcon").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("assets"));
+            hashAndAddToSB(data, pre + wip);
+        }
+        
+        JsonArray bframes = elem.getAsJsonArray("BannerFrames");
+        for (JsonElement element : bframes)
+        {
+            JsonObject el = element.getAsJsonObject();
+            
+            String wip = el.get("inventoryIcon").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("assets"));
+            hashAndAddToSB(data, pre + wip);
+            
+            if (el.has("profileIcon"))
+            {
+                wip = el.get("profileIcon").getAsString().toLowerCase(Locale.ENGLISH);
+                wip = wip.substring(wip.lastIndexOf("assets"));
+                hashAndAddToSB(data, pre + wip);
+            }
+        }
+        data.reverse().delete(0, 2).reverse().append("\n}");
+        
+        if (data.toString().length() < 10)
+        {
+            return;
+        }
+        
+        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     private void parseEmotes(Path filepath, String filename) throws IOException
