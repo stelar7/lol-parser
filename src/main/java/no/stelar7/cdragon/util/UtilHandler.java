@@ -204,4 +204,18 @@ public final class UtilHandler
         
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
     }
+    
+    public static String readAsString(Path path)
+    {
+        StringBuilder sb = new StringBuilder();
+        try
+        {
+            List<String> lines = Files.readAllLines(path);
+            lines.forEach(sb::append);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return sb.toString();
+    }
 }
