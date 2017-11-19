@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -17,10 +18,32 @@ public class TestHashes
     private final List<String> exts   = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
     private final String       pre    = "plugins/rcp-be-lol-game-data/global/default/";
     private final List<String> hashes = getUnknownHashes();
+    private final Path         folder = Paths.get("tmp");
+    
+    private final List<String> filenames = Arrays.asList(
+            "v1/championperkstylemap.json",
+            "v1/champion-summary.json",
+            "v1/hovertips.json",
+            "v1/items.json",
+            "v1/loot.json",
+            "v1/map-assets/map-assets.json",
+            "v1/maps.json",
+            "v1/perks.json",
+            "v1/perkstyles.json",
+            "v1/profile-icons.json",
+            "v1/queues.json",
+            "v1/runes.json",
+            "v1/skins.json",
+            "v1/summoner-banners.json",
+            "v1/summoner-emotes.json",
+            "v1/summoner-masteries.json",
+            "v1/summoner-spells.json",
+            "v1/ward-skins.json"
+                                                        );
     
     
     final         int                    iconMax     = 10000;
-    final         int                    championMax = 600;
+    final         int                    championMax = 750;
     final         int                    skinMax     = 25;
     private final Map<String, Integer[]> folderData  = new HashMap<String, Integer[]>()
     {{
@@ -38,6 +61,7 @@ public class TestHashes
         put("champion-chroma-images", new Integer[]{championMax, skinMax});
     }};
     
+    
     @Test
     public void testAllHashes() throws IOException, InterruptedException
     {
@@ -45,6 +69,18 @@ public class TestHashes
         
         Path file  = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
         Path file2 = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/champions");
+        
+        if (!Files.exists(folder))
+        {
+            Files.createDirectories(folder);
+        }
+        
+        StringBuilder data = new StringBuilder("{\n");
+        for (String filename : filenames)
+        {
+            hashAndAddToSB(data, pre + filename);
+        }
+        finalizeFileReading("files.json", data);
         
         findIconPathInJsonArrayFile(file, "perkstyles.json");
         findIconPathInJsonArrayFile(file, "perks.json");
@@ -56,6 +92,7 @@ public class TestHashes
         parseMasteries(file, "summoner-masteries.json");
         parseEmotes(file, "summoner-emotes.json");
         parseBanners(file, "summoner-banners.json");
+        parseMapAssets(file, "map-assets/map-assets.json");
         
         for (int i = -1; i < championMax; i++)
         {
@@ -71,9 +108,6 @@ public class TestHashes
         service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         
         
-        folderData.keySet().forEach(s -> combineFolderJSON(s, exts));
-        
-        
         folderData.put("perkstyles", new Integer[]{1});
         folderData.put("perks", new Integer[]{1});
         folderData.put("items", new Integer[]{1});
@@ -83,6 +117,8 @@ public class TestHashes
         folderData.put("ward-skins", new Integer[]{1});
         folderData.put("summoner-emotes", new Integer[]{1});
         folderData.put("summoner-banners", new Integer[]{1});
+        folderData.put("map-assets", new Integer[]{1});
+        folderData.put("files", new Integer[]{1});
         
         
         for (int i = 0; i < championMax; i++)
@@ -90,10 +126,51 @@ public class TestHashes
             folderData.put(String.valueOf(i), new Integer[]{1});
         }
         
-        combineJSON(folderData.keySet());
+        combineAndDeleteTemp();
     }
     
-    private void parseBanners(Path filepath, String filename) throws IOException
+    private void combineAndDeleteTemp() throws IOException
+    {
+        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        
+        Files.walkFileTree(folder, new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+            {
+                Files.deleteIfExists(dir);
+                return FileVisitResult.CONTINUE;
+            }
+            
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> foundHashes.add(new Pair<>(k, v)));
+                Files.deleteIfExists(file);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+        try
+        {
+            foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+            
+            StringBuilder sb = new StringBuilder("{\n");
+            for (Pair<String, String> pair : foundHashes)
+            {
+                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            }
+            sb.reverse().delete(0, 2).reverse().append("\n}");
+            
+            Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private void parseMapAssets(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -102,7 +179,62 @@ public class TestHashes
         }
         
         JsonObject    elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
-        StringBuilder data = new StringBuilder("{");
+        StringBuilder data = new StringBuilder("{\n");
+        
+        for (String key : elem.keySet())
+        {
+            JsonArray array = elem.getAsJsonArray(key);
+            
+            for (JsonElement element : array)
+            {
+                JsonObject obj = element.getAsJsonObject().getAsJsonObject("assets");
+                
+                getElementAndCheckHash(obj, "champ-select-flyout-background", data);
+                getElementAndCheckHash(obj, "champ-select-planning-intro", data);
+                getElementAndCheckHash(obj, "game-select-icon-default", data);
+                getElementAndCheckHash(obj, "game-select-icon-disabled", data);
+                getElementAndCheckHash(obj, "game-select-icon-hover", data);
+                getElementAndCheckHash(obj, "icon-defeat", data);
+                getElementAndCheckHash(obj, "icon-empty", data);
+                getElementAndCheckHash(obj, "icon-hover", data);
+                getElementAndCheckHash(obj, "icon-leaver", data);
+                getElementAndCheckHash(obj, "icon-victory", data);
+                getElementAndCheckHash(obj, "parties-background", data);
+                getElementAndCheckHash(obj, "social-icon-leaver", data);
+                getElementAndCheckHash(obj, "social-icon-victory", data);
+                getElementAndCheckHash(obj, "game-select-icon-active", data);
+                getElementAndCheckHash(obj, "ready-check-background", data);
+                getElementAndCheckHash(obj, "map-north", data);
+                getElementAndCheckHash(obj, "map-south", data);
+                getElementAndCheckHash(obj, "gameflow-background", data);
+                getElementAndCheckHash(obj, "notification-background", data);
+                getElementAndCheckHash(obj, "notification-icon", data);
+                getElementAndCheckHash(obj, "champ-select-background-sound", data);
+                getElementAndCheckHash(obj, "gameselect-button-hover-sound", data);
+                getElementAndCheckHash(obj, "music-inqueue-loop-sound", data);
+                getElementAndCheckHash(obj, "postgame-ambience-loop-sound", data);
+                getElementAndCheckHash(obj, "sfx-ambience-pregame-loop-sound", data);
+                getElementAndCheckHash(obj, "ready-check-background-sound", data);
+                getElementAndCheckHash(obj, "game-select-icon-active-video", data);
+                getElementAndCheckHash(obj, "game-select-icon-intro-video", data);
+                getElementAndCheckHash(obj, "icon-defeat-video", data);
+                getElementAndCheckHash(obj, "icon-victory-video", data);
+            }
+        }
+        
+        finalizeFileReading("map-assets.json", data);
+    }
+    
+    private void parseBanners(Path filepath, String filename)
+    {
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        JsonObject    elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
+        StringBuilder data = new StringBuilder("{\n");
         
         JsonArray bflags = elem.getAsJsonArray("BannerFlags");
         for (JsonElement element : bflags)
@@ -121,25 +253,31 @@ public class TestHashes
             
             if (el.has("profileIcon"))
             {
-                String wip = el.get("profileIcon").getAsString().toLowerCase(Locale.ENGLISH);
-                wip = wip.substring(wip.lastIndexOf("assets"));
-                hashAndAddToSB(data, pre + wip);
+                getElementAndCheckHash(el, "profileIcon", data);
             }
         }
         finalizeFileReading(filename, data);
     }
     
-    private void finalizeFileReading(String filename, StringBuilder data) throws IOException
+    private void finalizeFileReading(String filename, StringBuilder data)
     {
-        data.reverse().delete(0, 2).reverse().append("\n}");
-        if (data.toString().length() < 10)
+        try
         {
-            return;
+            data.reverse().delete(0, 2).reverse().append("\n}");
+            if (data.toString().length() < 10)
+            {
+                return;
+            }
+            
+            Files.write(folder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
-        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
     }
     
-    private void parseEmotes(Path filepath, String filename) throws IOException
+    private void parseEmotes(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -148,7 +286,7 @@ public class TestHashes
         }
         
         JsonArray     elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonArray();
-        StringBuilder data = new StringBuilder("{");
+        StringBuilder data = new StringBuilder("{\n");
         
         for (JsonElement element : elem)
         {
@@ -159,7 +297,7 @@ public class TestHashes
         finalizeFileReading(filename, data);
     }
     
-    private void parseMasteries(Path filepath, String filename) throws IOException
+    private void parseMasteries(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -168,7 +306,7 @@ public class TestHashes
         }
         
         JsonObject    elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject().getAsJsonObject("data");
-        StringBuilder data = new StringBuilder("{");
+        StringBuilder data = new StringBuilder("{\n");
         
         for (String key : elem.keySet())
         {
@@ -180,6 +318,11 @@ public class TestHashes
     
     private void getElementAndCheckHash(JsonObject el, String path, StringBuilder data)
     {
+        if (!el.has(path))
+        {
+            return;
+        }
+        
         String wip = el.get(path).getAsString().toLowerCase(Locale.ENGLISH);
         if (wip.contains("/content/"))
         {
@@ -203,7 +346,7 @@ public class TestHashes
         hashAndAddToSB(data, pre + wip);
     }
     
-    private void parseWardSkins(Path filepath, String filename) throws IOException
+    private void parseWardSkins(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -212,7 +355,7 @@ public class TestHashes
         }
         
         JsonArray     elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonArray();
-        StringBuilder data = new StringBuilder("{");
+        StringBuilder data = new StringBuilder("{\n");
         
         for (JsonElement element : elem)
         {
@@ -224,7 +367,7 @@ public class TestHashes
         finalizeFileReading(filename, data);
     }
     
-    private void findInChampionFile(Path filepath, String filename) throws IOException
+    private void findInChampionFile(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -233,7 +376,7 @@ public class TestHashes
         }
         
         JsonObject    elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
-        StringBuilder data = new StringBuilder("{");
+        StringBuilder data = new StringBuilder("{\n");
         
         String passive = elem.getAsJsonObject("passive").get("abilityIconPath").getAsString().toLowerCase(Locale.ENGLISH);
         
@@ -288,19 +431,7 @@ public class TestHashes
         finalizeFileReading(filename, data);
     }
     
-    private void hashAndAddToSB(StringBuilder sb, String hashMe)
-    {
-        String hash = UtilHandler.getHash(hashMe);
-        
-        if (hashes.contains(hash))
-        {
-            sb.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
-            hashes.remove(hash);
-        }
-    }
-    
-    
-    private void findIconPathInJsonArrayFile(Path filepath, String filename) throws IOException
+    private void findIconPathInJsonArrayFile(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -311,7 +442,7 @@ public class TestHashes
         JsonElement elem = new JsonParser().parse(UtilHandler.readAsString(path));
         JsonArray   arr  = elem.getAsJsonArray();
         
-        StringBuilder data = new StringBuilder("{");
+        StringBuilder data = new StringBuilder("{\n");
         
         for (JsonElement element : arr)
         {
@@ -322,91 +453,9 @@ public class TestHashes
         finalizeFileReading(filename, data);
     }
     
-    private void combineJSON(Set<String> folders)
-    {
-        try
-        {
-            List<Pair<String, String>> ml = new ArrayList<>();
-            
-            for (String folder : folders)
-            {
-                Path p = Paths.get(folder + ".json");
-                if (!Files.exists(p))
-                {
-                    continue;
-                }
-                
-                
-                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(p), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> ml.add(new Pair<>(k, v)));
-                Files.deleteIfExists(p);
-            }
-            
-            if (ml.isEmpty())
-            {
-                return;
-            }
-            
-            ml.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-            
-            StringBuilder sb = new StringBuilder("{\n");
-            for (Pair<String, String> pair : ml)
-            {
-                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
-            }
-            sb.reverse().delete(0, 2).reverse().append("\n}");
-            
-            Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-            
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    private void combineFolderJSON(String folder, List<String> exts)
-    {
-        try
-        {
-            List<Pair<String, String>> ml = new ArrayList<>();
-            
-            for (String ext : exts)
-            {
-                Path p = Paths.get(folder + "." + ext + ".json");
-                if (!Files.exists(p))
-                {
-                    continue;
-                }
-                
-                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(p), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> ml.add(new Pair<>(k, v)));
-                Files.deleteIfExists(p);
-            }
-            
-            if (ml.isEmpty())
-            {
-                return;
-            }
-            
-            ml.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-            
-            StringBuilder sb = new StringBuilder("{\n");
-            for (Pair<String, String> pair : ml)
-            {
-                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
-            }
-            sb.reverse().delete(0, 2).reverse().append("\n}");
-            
-            Files.write(Paths.get(folder + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-            
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
     private void generateHashList(String folderName, Integer[] depths, String fileType, List<String> unknownHashes)
     {
-        String pathPrefix = "plugins/rcp-be-lol-game-data/global/default/v1/" + folderName + "/";
-        Path   p          = Paths.get(folderName + "." + fileType + ".json");
+        String pathPrefix = pre + "v1/" + folderName + "/";
         
         StringBuilder sb = new StringBuilder("{\n");
         
@@ -417,13 +466,8 @@ public class TestHashes
         {
             doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, unknownHashes, sb);
         }
-        sb.reverse().delete(0, 2).reverse();
         
-        if (sb.length() > 0)
-        {
-            sb.append("\n}");
-            writeFile(p, sb.toString());
-        }
+        finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
     private void doLoop(int max, String format, List<String> hashes, StringBuilder sb)
@@ -431,13 +475,7 @@ public class TestHashes
         for (int i = -1; i < max; i++)
         {
             String value = String.format(format, i);
-            String hash  = UtilHandler.getHash(value);
-            
-            if (hashes.contains(hash))
-            {
-                sb.append("\t\"").append(hash).append("\": \"").append(value).append("\",\n");
-                hashes.remove(hash);
-            }
+            hashAndAddToSB(sb, value);
         }
     }
     
@@ -457,14 +495,20 @@ public class TestHashes
                     value = String.format(format, i, i, j);
                 }
                 
-                String hash = UtilHandler.getHash(value);
-                
-                if (hashes.contains(hash))
-                {
-                    sb.append("\t\"").append(hash).append("\": \"").append(value).append("\",\n");
-                    hashes.remove(hash);
-                }
+                hashAndAddToSB(sb, value);
             }
+        }
+    }
+    
+    
+    private void hashAndAddToSB(StringBuilder sb, String hashMe)
+    {
+        String hash = UtilHandler.getHash(hashMe);
+        
+        if (hashes.contains(hash))
+        {
+            sb.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
+            hashes.remove(hash);
         }
     }
     

@@ -14,7 +14,7 @@ public class NaturalOrderComparator implements Comparator<Object>, Serializable
             return 0;
         } else
         {
-            return s.charAt(i);
+            return Character.toLowerCase(s.charAt(i));
         }
     }
     
