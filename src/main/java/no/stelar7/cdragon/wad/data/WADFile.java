@@ -1,6 +1,8 @@
 package no.stelar7.cdragon.wad.data;
 
+import com.google.gson.*;
 import lombok.*;
+import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
@@ -33,30 +35,28 @@ public class WADFile
             System.out.println("Extracting files");
             Files.write(Paths.get("unknown.json"), new byte[]{});
             
-            // set this to 1 to reduce memory usage
             ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
             
             for (int index = 0; index < getContentHeaders().size(); index++)
             {
                 final int selfIndex = index;
-                executor.submit(() ->
-                                {
-                                    WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
+                executor.submit(() -> {
                     
-                                    if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
-                                    {
-                                        return;
-                                    }
+                    WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
                     
-                                    saveFile(fileHeader, outputPath);
+                    if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
+                    {
+                        return;
+                    }
                     
-                                    if (selfIndex % interval == 0)
-                                    {
-                                        System.out.println(selfIndex + "/" + getContentHeaders().size());
-                                    }
+                    saveFile(fileHeader, outputPath);
                     
-                                });
+                    if (selfIndex % interval == 0)
+                    {
+                        System.out.println(selfIndex + "/" + getContentHeaders().size());
+                    }
+                });
             }
             
             executor.shutdown();
@@ -78,15 +78,21 @@ public class WADFile
             
             self.getParent().toFile().mkdirs();
             String parentName = self.getParent().getFileName().toString();
+            byte[] data       = readContentFromHeaderData(header);
             
             
-            byte[] data = readContentFromHeaderData(header);
-            Files.write(self, data);
+            if (filename.endsWith("json"))
+            {
+                data = makePretty(data);
+            }
             
             if ("unknown".equals(parentName))
             {
                 Files.write(Paths.get("unknown.json"), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
                 findFileTypeAndRename(self, data, filename, savePath);
+            } else
+            {
+                Files.write(self, data);
             }
             
         } catch (IOException e)
@@ -141,6 +147,14 @@ public class WADFile
         return "txt";
     }
     
+    private byte[] makePretty(byte[] jsonString)
+    {
+        String      dataString = new String(jsonString, StandardCharsets.UTF_8);
+        JsonElement obj        = new JsonParser().parse(dataString);
+        String      pretty     = Utils.getGson().toJson(obj);
+        return pretty.getBytes(StandardCharsets.UTF_8);
+    }
+    
     private void findFileTypeAndRename(Path self, byte[] data, String filename, Path parent)
     {
         try
@@ -149,7 +163,8 @@ public class WADFile
             StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
             Path          other    = Paths.get(parent.toString(), sb.toString());
             
-            Files.move(self, other, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            
+            Files.write(other, data);
             
         } catch (IOException e)
         {

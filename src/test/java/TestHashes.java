@@ -1,6 +1,5 @@
-package no.stelar7.cdragon.wad;
 
-import com.google.gson.Gson;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
 import no.stelar7.cdragon.util.*;
@@ -16,6 +15,7 @@ public class TestHashes
 {
     
     private final List<String> exts = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
+    List<String> hashes = getUnknownHashes();
     
     
     private final Map<String, Integer[]> folderData = new HashMap<String, Integer[]>()
@@ -29,6 +29,7 @@ public class TestHashes
         put("champion-icons", new Integer[]{championMax});
         put("champion-choose-vo", new Integer[]{championMax});
         put("champion-ban-vo", new Integer[]{championMax});
+        put("summoner-backdrops", new Integer[]{championMax});
         
         final int skinMax = 25;
         put("champion-tiles", new Integer[]{championMax, skinMax});
@@ -36,12 +37,15 @@ public class TestHashes
         put("champion-chroma-images", new Integer[]{championMax, skinMax});
     }};
     
-    
     @Test
     public void testAllHashes() throws IOException, InterruptedException
     {
-        List<String>    hashes  = getUnknownHashes(Paths.get("C:\\Users\\Steffen\\Downloads\\unknown"));
         ExecutorService service = Executors.newFixedThreadPool(8);
+        
+        Path file = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
+        
+        findInFile(file, "perkstyles.json", "iconPath");
+        findInFile(file, "perks.json", "iconPath");
         
         for (String ext : exts)
         {
@@ -51,8 +55,43 @@ public class TestHashes
         service.shutdown();
         service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         
+        
         folderData.keySet().forEach(s -> combineFolderJSON(s, exts));
         combineJSON(folderData.keySet());
+    }
+    
+    private void findInFile(Path filepath, String filename, String fieldToFind) throws IOException
+    {
+        String pre = "plugins/rcp-be-lol-game-data/global/default/";
+        
+        StringBuilder sb    = new StringBuilder();
+        List<String>  lines = Files.readAllLines(filepath.resolve(filename));
+        lines.forEach(sb::append);
+        JsonElement elem = new JsonParser().parse(sb.toString());
+        JsonArray   arr  = elem.getAsJsonArray();
+        
+        StringBuilder data = new StringBuilder("{");
+        for (JsonElement element : arr)
+        {
+            String value = element.getAsJsonObject().get(fieldToFind).getAsString().toLowerCase(Locale.ENGLISH);
+            value = value.substring(value.indexOf("v1"));
+            String hashMe = pre + value;
+            
+            String hash = UtilHandler.getHash(hashMe);
+            
+            if (hashes.contains(hash))
+            {
+                data.append("\t\"").append(hash).append("\": \"").append(value).append("\",\n");
+            }
+        }
+        data.reverse().delete(0, 2).reverse().append("\n}");
+        
+        if (data.toString().length() < 10)
+        {
+            return;
+        }
+        
+        Files.write(Paths.get(filename + ".json"), data.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     private void combineJSON(Set<String> folders)
@@ -155,7 +194,7 @@ public class TestHashes
             doLoop(depths[0], pathPrefix + "%s." + fileType, unknownHashes, sb);
         } else
         {
-            doNestedLoop(depths[0], depths[1], pathPrefix + "%1$d/%1$d%2$03d." + fileType, unknownHashes, sb);
+            doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, unknownHashes, sb);
         }
         sb.reverse().delete(0, 2).reverse();
         
@@ -168,7 +207,7 @@ public class TestHashes
     
     private void doLoop(int max, String format, List<String> hashes, StringBuilder sb)
     {
-        for (int i = 0; i < max; i++)
+        for (int i = -1; i < max; i++)
         {
             String value = String.format(format, i);
             String hash  = UtilHandler.getHash(value);
@@ -182,12 +221,21 @@ public class TestHashes
     
     private void doNestedLoop(int outerMax, int innerMax, String format, List<String> hashes, StringBuilder sb)
     {
-        for (int i = 0; i < outerMax; i++)
+        for (int i = -1; i < outerMax; i++)
         {
-            for (int j = 0; j < innerMax; j++)
+            for (int j = -1; j < innerMax; j++)
             {
-                String value = String.format(format, i, j);
-                String hash  = UtilHandler.getHash(value);
+                String value;
+                if (j == 0)
+                {
+                    value = format.replace("%3$03d", "");
+                    value = String.format(value, i, "metadata");
+                } else
+                {
+                    value = String.format(format, i, i, j);
+                }
+                
+                String hash = UtilHandler.getHash(value);
                 
                 if (hashes.contains(hash))
                 {
@@ -198,9 +246,16 @@ public class TestHashes
     }
     
     
-    private List<String> getUnknownHashes(Path savedPath) throws IOException
+    private List<String> getUnknownHashes()
     {
-        return Files.readAllLines(Paths.get("unknown.json"));
+        try
+        {
+            return Files.readAllLines(Paths.get("unknown.json"));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
     
     
