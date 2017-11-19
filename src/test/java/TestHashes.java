@@ -45,13 +45,20 @@ public class TestHashes
         Path file  = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
         Path file2 = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
-        findInFile(file, "perkstyles.json", new String[]{"iconPath"});
-        findInFile(file, "perks.json", new String[]{"iconPath"});
+        findIconPathInJsonArrayFile(file, "perkstyles.json");
+        findIconPathInJsonArrayFile(file, "perks.json");
+        findIconPathInJsonArrayFile(file, "items.json");
+        findIconPathInJsonArrayFile(file, "summoner-spells.json");
+        findIconPathInJsonArrayFile(file, "profile-icons.json");
+        
+        parseWardSkins(file, "ward-skins.json");
+        parseMasteries(file, "summoner-masteries.json");
+        parseEmotes(file, "summoner-emotes.json");
         
         
         for (int i = -1; i < championMax; i++)
         {
-            findInChampionFile(file2, i + ".json", "abilityIconPath");
+            findInChampionFile(file2, i + ".json");
         }
         
         for (String ext : exts)
@@ -68,6 +75,14 @@ public class TestHashes
         
         folderData.put("perkstyles", new Integer[]{1});
         folderData.put("perks", new Integer[]{1});
+        folderData.put("items", new Integer[]{1});
+        folderData.put("summoner-spells", new Integer[]{1});
+        folderData.put("profile-icons", new Integer[]{1});
+        
+        folderData.put("summoner-masteries", new Integer[]{1});
+        folderData.put("ward-skins", new Integer[]{1});
+        folderData.put("summoner-emotes", new Integer[]{1});
+        
         
         for (int i = 0; i < championMax; i++)
         {
@@ -77,7 +92,113 @@ public class TestHashes
         combineJSON(folderData.keySet());
     }
     
-    private void findInChampionFile(Path filepath, String filename, String fieldToFind) throws IOException
+    private void parseEmotes(Path filepath, String filename) throws IOException
+    {
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        String pre = "plugins/rcp-be-lol-game-data/global/default/";
+        
+        List<String>  lines = Files.readAllLines(path);
+        StringBuilder sb    = new StringBuilder();
+        lines.forEach(sb::append);
+        JsonArray     elem = new JsonParser().parse(sb.toString()).getAsJsonArray();
+        StringBuilder data = new StringBuilder("{");
+        
+        for (JsonElement element : elem)
+        {
+            JsonObject el = element.getAsJsonObject();
+            
+            String wip = el.get("inventoryIcon").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("assets"));
+            hashAndAddToSB(data, pre + wip);
+        }
+        data.reverse().delete(0, 2).reverse().append("\n}");
+        
+        if (data.toString().length() < 10)
+        {
+            return;
+        }
+        
+        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    private void parseMasteries(Path filepath, String filename) throws IOException
+    {
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        String pre = "plugins/rcp-be-lol-game-data/global/default/";
+        
+        List<String>  lines = Files.readAllLines(path);
+        StringBuilder sb    = new StringBuilder();
+        lines.forEach(sb::append);
+        JsonObject    elem = new JsonParser().parse(sb.toString()).getAsJsonObject().getAsJsonObject("data");
+        StringBuilder data = new StringBuilder("{");
+        
+        for (String key : elem.keySet())
+        {
+            JsonObject el = elem.getAsJsonObject(key);
+            
+            String wip = el.get("iconPath").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("content"));
+            hashAndAddToSB(data, pre + wip);
+        }
+        data.reverse().delete(0, 2).reverse().append("\n}");
+        
+        if (data.toString().length() < 10)
+        {
+            return;
+        }
+        
+        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    private void parseWardSkins(Path filepath, String filename) throws IOException
+    {
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        String pre = "plugins/rcp-be-lol-game-data/global/default/";
+        
+        List<String>  lines = Files.readAllLines(path);
+        StringBuilder sb    = new StringBuilder();
+        lines.forEach(sb::append);
+        JsonArray     elem = new JsonParser().parse(sb.toString()).getAsJsonArray();
+        StringBuilder data = new StringBuilder("{");
+        
+        for (JsonElement element : elem)
+        {
+            JsonObject el = element.getAsJsonObject();
+            
+            String wip = el.get("wardImagePath").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("content"));
+            hashAndAddToSB(data, pre + wip);
+            
+            wip = el.get("wardShadowImagePath").getAsString().toLowerCase(Locale.ENGLISH);
+            wip = wip.substring(wip.lastIndexOf("content"));
+            hashAndAddToSB(data, pre + wip);
+        }
+        data.reverse().delete(0, 2).reverse().append("\n}");
+        
+        if (data.toString().length() < 10)
+        {
+            return;
+        }
+        
+        Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    private void findInChampionFile(Path filepath, String filename) throws IOException
     {
         String pre = "plugins/rcp-be-lol-game-data/global/default/";
         
@@ -93,20 +214,14 @@ public class TestHashes
         JsonObject    elem = new JsonParser().parse(sb.toString()).getAsJsonObject();
         StringBuilder data = new StringBuilder("{");
         
-        String passive = elem.getAsJsonObject("passive").get(fieldToFind).getAsString().toLowerCase(Locale.ENGLISH);
+        String passive = elem.getAsJsonObject("passive").get("abilityIconPath").getAsString().toLowerCase(Locale.ENGLISH);
         
         if (!passive.isEmpty())
         {
-            passive = passive.substring(passive.indexOf("v1"));
+            passive = passive.substring(passive.lastIndexOf("v1"));
             String hashMe = pre + passive;
             
-            String hash = UtilHandler.getHash(hashMe);
-            
-            if (hashes.contains(hash))
-            {
-                data.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
-                hashes.remove(hash);
-            }
+            hashAndAddToSB(data, hashMe);
         }
         
         JsonArray arr = elem.getAsJsonArray("spells");
@@ -114,19 +229,67 @@ public class TestHashes
         for (JsonElement element : arr)
         {
             JsonObject current = element.getAsJsonObject();
-            String     value   = current.getAsJsonObject().get(fieldToFind).getAsString().toLowerCase(Locale.ENGLISH);
+            String     value   = current.getAsJsonObject().get("abilityIconPath").getAsString().toLowerCase(Locale.ENGLISH);
             
-            value = value.substring(value.indexOf("v1"));
+            value = value.substring(value.lastIndexOf("v1"));
             String hashMe = pre + value;
             
-            String hash = UtilHandler.getHash(hashMe);
+            hashAndAddToSB(data, hashMe);
+        }
+        
+        arr = elem.getAsJsonArray("recommendedItemDefaults");
+        
+        for (JsonElement element : arr)
+        {
+            String value = element.getAsString().toLowerCase(Locale.ENGLISH);
+            value = value.substring(value.indexOf("data"));
+            String hashMe = pre + value;
             
-            if (hashes.contains(hash))
+            hashAndAddToSB(data, hashMe);
+        }
+        
+        
+        arr = elem.getAsJsonArray("skins");
+        
+        for (JsonElement element : arr)
+        {
+            JsonObject ob = element.getAsJsonObject();
+            
+            String splash = ob.get("splashPath").getAsString().toLowerCase(Locale.ENGLISH);
+            splash = splash.substring(splash.lastIndexOf("v1"));
+            hashAndAddToSB(data, pre + splash);
+            
+            String usplash = ob.get("uncenteredSplashPath").getAsString().toLowerCase(Locale.ENGLISH);
+            usplash = usplash.substring(usplash.lastIndexOf("v1"));
+            hashAndAddToSB(data, pre + usplash);
+            
+            String tile = ob.get("tilePath").getAsString().toLowerCase(Locale.ENGLISH);
+            tile = tile.substring(tile.lastIndexOf("v1"));
+            hashAndAddToSB(data, pre + tile);
+            
+            String load = ob.get("loadScreenPath").getAsString().toLowerCase(Locale.ENGLISH);
+            if (load.contains("/data/"))
             {
-                data.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
-                hashes.remove(hash);
+                load = load.substring(load.lastIndexOf("data"));
+            } else
+            {
+                load = load.substring(load.lastIndexOf("assets"));
+            }
+            hashAndAddToSB(data, pre + load);
+            
+            if (ob.has("chromas"))
+            {
+                JsonArray chrom = ob.getAsJsonArray("chromas");
+                for (JsonElement ch : chrom)
+                {
+                    String cp = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
+                    cp = cp.substring(cp.lastIndexOf("v1"));
+                    hashAndAddToSB(data, pre + cp);
+                }
             }
         }
+        
+        
         data.reverse().delete(0, 2).reverse().append("\n}");
         
         if (data.toString().length() < 10)
@@ -137,8 +300,19 @@ public class TestHashes
         Files.write(Paths.get(filename), data.toString().getBytes(StandardCharsets.UTF_8));
     }
     
+    private void hashAndAddToSB(StringBuilder sb, String hashMe)
+    {
+        String hash = UtilHandler.getHash(hashMe);
+        
+        if (hashes.contains(hash))
+        {
+            sb.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
+            hashes.remove(hash);
+        }
+    }
     
-    private void findInFile(Path filepath, String filename, String[] fieldToFind) throws IOException
+    
+    private void findIconPathInJsonArrayFile(Path filepath, String filename) throws IOException
     {
         String pre = "plugins/rcp-be-lol-game-data/global/default/";
         
@@ -152,31 +326,18 @@ public class TestHashes
         
         for (JsonElement element : arr)
         {
-            JsonObject current = element.getAsJsonObject();
-            String     value   = "";
+            String value = element.getAsJsonObject().get("iconPath").getAsString().toLowerCase(Locale.ENGLISH);
             
-            for (int i = 0; i < fieldToFind.length; i++)
+            if (value.contains("v1"))
             {
-                String nextField = fieldToFind[i];
-                if (fieldToFind.length - 1 == i)
-                {
-                    value = current.getAsJsonObject().get(nextField).getAsString().toLowerCase(Locale.ENGLISH);
-                } else
-                {
-                    current = current.getAsJsonObject(nextField);
-                }
+                value = value.substring(value.lastIndexOf("v1"));
+            } else
+            {
+                value = value.substring(value.lastIndexOf("data"));
             }
             
-            value = value.substring(value.indexOf("v1"));
             String hashMe = pre + value;
-            
-            String hash = UtilHandler.getHash(hashMe);
-            
-            if (hashes.contains(hash))
-            {
-                data.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
-                hashes.remove(hash);
-            }
+            hashAndAddToSB(data, hashMe);
         }
         data.reverse().delete(0, 2).reverse().append("\n}");
         
