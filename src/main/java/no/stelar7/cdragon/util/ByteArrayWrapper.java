@@ -18,7 +18,13 @@ public final class ByteArrayWrapper
         {
             return false;
         }
-        return Arrays.equals(data, ((ByteArrayWrapper) other).data);
+        
+        int len = Math.min(((ByteArrayWrapper) other).data.length, data.length);
+        
+        byte[] otherData = Arrays.copyOfRange(((ByteArrayWrapper) other).data, 0, len);
+        byte[] selfData  = Arrays.copyOfRange(data, 0, len);
+        
+        return Arrays.equals(otherData, selfData);
     }
     
     public byte[] getData()

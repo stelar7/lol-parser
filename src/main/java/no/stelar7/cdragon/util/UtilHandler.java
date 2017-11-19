@@ -73,11 +73,12 @@ public final class UtilHandler
     public static boolean isProbableJSON(byte[] data)
     {
         boolean isJSON       = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
+        boolean isJSON2      = (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
         boolean isEmptyJSON  = (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x7D));
         boolean isArrayJSON  = (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x22));
         boolean isArrayJSON2 = (isSame(data[0], (byte) 0x5b) && isSame(data[1], (byte) 0xa) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
         
-        return isJSON || isArrayJSON || isArrayJSON2 || isEmptyJSON;
+        return isJSON || isJSON2 || isArrayJSON || isArrayJSON2 || isEmptyJSON;
     }
     
     public static boolean isProbableDEFLATE(byte[] data)
@@ -105,10 +106,10 @@ public final class UtilHandler
         {
             System.out.println("Loading magic numbers");
             
-            ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{0x4f, 0x67, 0x67, 0x53});
-            ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{0x1A, 0x45, (byte) 0xDF, (byte) 0xA3});
-            ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{0x44, 0x44, 0x53, 0x20});
-            ByteArrayWrapper pngMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x89, 0x50, 0x4E, 0x47});
+            ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
+            ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
+            ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
+            ByteArrayWrapper pngMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47});
             ByteArrayWrapper jpgMagic  = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
             ByteArrayWrapper jpg2Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
             ByteArrayWrapper jpg3Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
@@ -217,5 +218,26 @@ public final class UtilHandler
             e.printStackTrace();
         }
         return sb.toString();
+    }
+    
+    public static boolean isProbableBOM(byte[] data)
+    {
+        boolean isBOM = isSame(data[0], (byte) 0xEF) && isSame(data[1], (byte) 0xBB) && isSame(data[2], (byte) 0xBF);
+        
+        return isBOM;
+    }
+    
+    public static boolean isProbableJavascript(byte[] data)
+    {
+        boolean isJS = isSame(data[0], (byte) 0x21) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x75) && isSame(data[3], (byte) 0x6E);
+        
+        return isJS;
+    }
+    
+    public static boolean isProbableHTML(byte[] data)
+    {
+        boolean isHTML = isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x72);
+        
+        return isHTML;
     }
 }

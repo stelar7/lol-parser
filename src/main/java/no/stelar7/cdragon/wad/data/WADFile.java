@@ -140,6 +140,20 @@ public class WADFile
         {
             return "json";
         }
+    
+        if (UtilHandler.isProbableJavascript(magic.getData()))
+        {
+            return "js";
+        }
+    
+        if (UtilHandler.isProbableHTML(magic.getData()))
+        {
+            return "html";
+        }
+        
+        if(UtilHandler.isProbableBOM(magic.getData())) {
+            return findFileType(self, Arrays.copyOfRange(data, 3,7));
+        }
         
         System.out.print("Unknown filetype: ");
         System.out.print(self.toString());
