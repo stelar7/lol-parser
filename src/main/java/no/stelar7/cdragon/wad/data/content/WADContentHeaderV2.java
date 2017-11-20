@@ -6,8 +6,7 @@ import lombok.Data;
 public class WADContentHeaderV2 extends WADContentHeaderV1
 {
     private boolean duplicate;
-    private int     unknown;
-    private int     unknown2;
+    private short   padding;
     private long    sha256;
     
     public WADContentHeaderV2(WADContentHeaderV1 header)

@@ -52,9 +52,12 @@ public class WADFile
                     
                     saveFile(fileHeader, outputPath);
                     
-                    if (selfIndex % interval == 0)
+                    if (contentHeaders.size() > 500)
                     {
-                        System.out.println(selfIndex + "/" + getContentHeaders().size());
+                        if (selfIndex % interval == 0)
+                        {
+                            System.out.println(selfIndex + "/" + getContentHeaders().size());
+                        }
                     }
                 });
             }
@@ -107,18 +110,23 @@ public class WADFile
         if (header.isCompressed())
         {
             byte[] fileBytes = fileReader.readBytes(header.getCompressedFileSize());
-            if (UtilHandler.isProbableGZIP(fileBytes))
+            if (header.getCompressed() == 1)
             {
                 return CompressionHandler.uncompressGZIP(fileBytes);
             }
             
-            if (UtilHandler.isProbableZSTD(fileBytes))
+            if (header.getCompressed() == 2)
+            {
+                return fileBytes;
+            }
+            
+            if (header.getCompressed() == 3)
             {
                 return CompressionHandler.uncompressZSTD(fileBytes, header.getFileSize());
             }
             
             Files.write(Paths.get("unknown.file"), fileBytes);
-            System.out.println("");
+            System.out.println("Found file with unknown compression!");
             return fileBytes;
         } else
         {
@@ -140,19 +148,35 @@ public class WADFile
         {
             return "json";
         }
-    
+        
         if (UtilHandler.isProbableJavascript(magic.getData()))
         {
             return "js";
         }
-    
+        
         if (UtilHandler.isProbableHTML(magic.getData()))
         {
             return "html";
         }
         
-        if(UtilHandler.isProbableBOM(magic.getData())) {
-            return findFileType(self, Arrays.copyOfRange(data, 3,7));
+        if (UtilHandler.isProbableCSS(magic.getData()))
+        {
+            return "css";
+        }
+        
+        if (UtilHandler.isProbableTXT(magic.getData()))
+        {
+            return "txt";
+        }
+        
+        if (UtilHandler.isProbableIDX(magic.getData()))
+        {
+            return "idx";
+        }
+    
+        if (UtilHandler.isProbable3DModelStuff(magic.getData()))
+        {
+            return "unknown3DModelStuff";
         }
         
         System.out.print("Unknown filetype: ");

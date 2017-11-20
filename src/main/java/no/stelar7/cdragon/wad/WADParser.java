@@ -61,9 +61,8 @@ public class WADParser
      *
      * @param path path to the file
      * @return WADFile
-     * @throws Exception yes :kappa:
      */
-    public WADFile parse(Path path) throws Exception
+    public WADFile parse(Path path)
     {
         RAFReader raf     = new RAFReader(path, ByteOrder.LITTLE_ENDIAN);
         WADFile   wadFile = new WADFile(raf);
@@ -80,40 +79,43 @@ public class WADParser
      * @param raf  the filereader
      * @param base header containing the major version, and filecount
      * @return {@code List<WADContentHeaderV1>}
-     * @throws Exception yes :kappa:
      */
-    private List<WADContentHeaderV1> parseContent(RAFReader raf, WADHeaderBase base) throws Exception
+    private List<WADContentHeaderV1> parseContent(RAFReader raf, WADHeaderBase base)
     {
         System.out.println("Parsing content headers");
-        
         List<WADContentHeaderV1> content = new ArrayList<>();
         
-        Field field = WADHeaderBase.class.getDeclaredField("fileCount");
-        field.setAccessible(true);
-        long fileCount = (long) field.get(base);
-        
-        for (int i = 0; i < fileCount; i++)
+        try
         {
-            WADContentHeaderV1 header = new WADContentHeaderV1();
-            header.setPathHash(raf.readLong());
-            header.setOffset(raf.readInt());
-            header.setCompressedFileSize(raf.readInt());
-            header.setFileSize(raf.readInt());
-            header.setCompressed(raf.readByte() > 0);
+            Field field = WADHeaderBase.class.getDeclaredField("fileCount");
+            field.setAccessible(true);
+            long fileCount = (long) field.get(base);
             
-            if (base.getMajor() == 2 || base.getMajor() == 3)
+            for (int i = 0; i < fileCount; i++)
             {
-                WADContentHeaderV2 headerv2 = new WADContentHeaderV2(header);
-                headerv2.setDuplicate(raf.readByte() > 0);
-                headerv2.setUnknown(raf.readByte());
-                headerv2.setUnknown2(raf.readByte());
-                headerv2.setSha256(raf.readLong());
+                WADContentHeaderV1 header = new WADContentHeaderV1();
+                header.setPathHash(raf.readLong());
+                header.setOffset(raf.readInt());
+                header.setCompressedFileSize(raf.readInt());
+                header.setFileSize(raf.readInt());
+                header.setCompressed(raf.readByte());
                 
-                content.add(headerv2);
-                continue;
+                if (base.getMajor() == 2 || base.getMajor() == 3)
+                {
+                    WADContentHeaderV2 headerv2 = new WADContentHeaderV2(header);
+                    headerv2.setDuplicate(raf.readByte() > 0);
+                    headerv2.setPadding(raf.readShort());
+                    headerv2.setSha256(raf.readLong());
+                    
+                    content.add(headerv2);
+                    continue;
+                }
+                
+                content.add(header);
             }
-            
-            content.add(header);
+        } catch (NoSuchFieldException | IllegalAccessException e)
+        {
+            e.printStackTrace();
         }
         
         return content;
