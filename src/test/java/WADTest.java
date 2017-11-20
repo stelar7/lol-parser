@@ -7,9 +7,8 @@ import javax.swing.*;
 import javax.swing.undo.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
 
 public class WADTest
@@ -18,24 +17,8 @@ public class WADTest
     public void testWAD() throws Exception
     {
         WADParser parser = new WADParser();
-        
-        Files.walkFileTree(Paths.get("C:\\Riot Games\\League of Legends"), new SimpleFileVisitor<Path>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-            {
-                String[] parts = file.toString().split("\\\\");
-                if (parts[parts.length - 1].contains(".wad"))
-                {
-                    String displayName = parts[parts.length - 2] + File.separator + parts[parts.length - 1];
-                    
-                    System.out.println("Starting: " + displayName);
-                    WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(Paths.get("C:\\Users\\Steffen\\Downloads\\temp\\" + file.getParent().getFileName().toString()));
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
+        WADFile   parsed = parser.parseLatest(Paths.get("C:\\Users\\Steffen\\Downloads"));
+        parsed.extractFiles(Paths.get("C:\\Users\\Steffen\\Downloads"));
         
     }
     

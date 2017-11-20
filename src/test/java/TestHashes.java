@@ -82,6 +82,14 @@ public class TestHashes
         }
         finalizeFileReading("files.json", data);
         
+        StringBuilder data2 = new StringBuilder("{\n");
+        for (String attempt : Files.readAllLines(Paths.get("possibletech.json")))
+        {
+            hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
+            hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
+        }
+        finalizeFileReading("hextech.json", data2);
+        
         findIconPathInJsonArrayFile(file, "perkstyles.json");
         findIconPathInJsonArrayFile(file, "perks.json");
         findIconPathInJsonArrayFile(file, "items.json");
@@ -119,6 +127,7 @@ public class TestHashes
         folderData.put("summoner-banners", new Integer[]{1});
         folderData.put("map-assets", new Integer[]{1});
         folderData.put("files", new Integer[]{1});
+        folderData.put("hextech", new Integer[]{1});
         
         
         for (int i = 0; i < championMax; i++)
@@ -162,7 +171,13 @@ public class TestHashes
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
-            Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+            if (sb.toString().length() > 10)
+            {
+                Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+            } else
+            {
+                Files.deleteIfExists(Paths.get("combined.json"));
+            }
             
         } catch (IOException e)
         {
