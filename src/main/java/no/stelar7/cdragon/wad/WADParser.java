@@ -29,7 +29,7 @@ public class WADParser
     public WADFile parseLatest(Path path) throws Exception
     {
         String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/rcp-be-lol-game-data/default-assets.wad.compressed";
-        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 60, 100);
+        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
         
         Path fileLocation      = path.resolve(version);
         Path noCompressionPath = path.resolve(version + ".nocompress");

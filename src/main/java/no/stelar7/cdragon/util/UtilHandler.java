@@ -11,7 +11,6 @@ import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 public final class UtilHandler
 {
@@ -63,6 +62,31 @@ public final class UtilHandler
         sb.reverse().delete(0, 2).reverse().append("\n}");
         
         Files.write(pho, sb.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    public static long getLongFromIP(String ipAddress)
+    {
+        long     result           = 0;
+        String[] ipAddressInArray = ipAddress.split("\\.");
+        
+        for (int i = 3; i >= 0; i--)
+        {
+            long ip = Long.parseLong(ipAddressInArray[3 - i]);
+            
+            //left shifting 24,16,8,0 and bitwise OR
+            //1. 192 << 24
+            //1. 168 << 16
+            //1. 1   << 8
+            //1. 2   << 0
+            result |= ip << (i * 8);
+        }
+        
+        return result;
+    }
+    
+    public static String getIPFromLong(long ip)
+    {
+        return String.format("%d.%d.%d.%d", (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     }
     
     public static Map<ByteArrayWrapper, String> getMagicNumbers()
@@ -163,43 +187,31 @@ public final class UtilHandler
         }
     }
     
-    public static String getMaxVersion(String url, int min, int max) throws InterruptedException
+    public static String getMaxVersion(String url, int min, int max)
     {
-        ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        
         System.out.println("Looking for highest version");
-        int[]    foundMax   = {0};
-        String[] versionMax = {""};
         for (int i = max; i >= min; i--)
         {
-            final int tryme   = i;
-            String    version = "0.0.1." + i;
-            service.submit(() -> {
-                try
+            try
+            {
+                String ip       = getIPFromLong(i);
+                String finalUrl = String.format(url, ip);
+                
+                HttpURLConnection con = (HttpURLConnection) new URL(finalUrl).openConnection();
+                if (con.getResponseCode() == 200)
                 {
-                    String            finalUrl = String.format(url, version);
-                    HttpURLConnection con      = (HttpURLConnection) new URL(finalUrl).openConnection();
-                    if (con.getResponseCode() == 200)
-                    {
-                        con.disconnect();
-                        
-                        if (tryme > foundMax[0])
-                        {
-                            foundMax[0] = tryme;
-                            versionMax[0] = version;
-                        }
-                    }
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
+                    System.out.println("Found version: " + ip);
+                    return ip;
                 }
-            });
+                
+                con.disconnect();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
         
-        service.shutdown();
-        service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-        
-        return versionMax[0];
+        throw new RuntimeException("No valid version found");
     }
     
     public static void tryDownloadVersion(Path output, String url, String version) throws Exception
