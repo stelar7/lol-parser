@@ -19,7 +19,6 @@ public class WADTest
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parseLatest(Paths.get("C:\\Users\\Steffen\\Downloads"));
         parsed.extractFiles(Paths.get("C:\\Users\\Steffen\\Downloads"));
-        
     }
     
     public static void main(String[] args) throws IOException

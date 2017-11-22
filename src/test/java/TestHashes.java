@@ -1,4 +1,5 @@
 
+import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
@@ -42,9 +43,9 @@ public class TestHashes
                                                         );
     
     
-    final         int                    iconMax     = 10000;
-    final         int                    championMax = 750;
-    final         int                    skinMax     = 25;
+    final         int                    iconMax     = 100000;
+    final         int                    championMax = 7050;
+    final         int                    skinMax     = 50;
     private final Map<String, Integer[]> folderData  = new HashMap<String, Integer[]>()
     {{
         put("profile-icons", new Integer[]{iconMax});
@@ -54,7 +55,7 @@ public class TestHashes
         put("champion-icons", new Integer[]{championMax});
         put("champion-choose-vo", new Integer[]{championMax});
         put("champion-ban-vo", new Integer[]{championMax});
-        put("summoner-backdrops", new Integer[]{championMax});
+        put("summoner-backdrops", new Integer[]{iconMax});
         
         put("champion-tiles", new Integer[]{championMax, skinMax});
         put("champion-splashes", new Integer[]{championMax, skinMax});
@@ -75,6 +76,7 @@ public class TestHashes
             Files.createDirectories(folder);
         }
         
+        System.out.println("Parsing default file locations");
         StringBuilder data = new StringBuilder("{\n");
         for (String filename : filenames)
         {
@@ -82,14 +84,16 @@ public class TestHashes
         }
         finalizeFileReading("files.json", data);
         
+        System.out.println("Parsing hextech");
         StringBuilder data2 = new StringBuilder("{\n");
-        for (String attempt : Files.readAllLines(Paths.get("possibletech.json")))
+        for (String attempt : parseHextechFile())
         {
             hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
             hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
         }
         finalizeFileReading("hextech.json", data2);
         
+        System.out.println("Parsing icon files");
         findIconPathInJsonArrayFile(file, "perkstyles.json");
         findIconPathInJsonArrayFile(file, "perks.json");
         findIconPathInJsonArrayFile(file, "items.json");
@@ -102,11 +106,13 @@ public class TestHashes
         parseBanners(file, "summoner-banners.json");
         parseMapAssets(file, "map-assets/map-assets.json");
         
+        System.out.println("Parsing champion files");
         for (int i = -1; i < championMax; i++)
         {
             findInChampionFile(file2, i + ".json");
         }
         
+        System.out.println("Parsing data from unknown files");
         for (String ext : exts)
         {
             service.submit(() -> folderData.forEach((k, v) -> generateHashList(k, v, ext, hashes)));
@@ -135,7 +141,42 @@ public class TestHashes
             folderData.put(String.valueOf(i), new Integer[]{1});
         }
         
+        System.out.println("Merging files");
         combineAndDeleteTemp();
+    }
+    
+    private List<String> parseHextechFile()
+    {
+        Map<String, String> data = new Gson().fromJson(UtilHandler.readAsString(Paths.get("possibletech.json")), new TypeToken<Map<String, String>>() {}.getType());
+        return transmute(data.keySet());
+    }
+    
+    private List<String> transmute(Set<String> strings)
+    {
+        List<String> all = new ArrayList<>();
+        for (String key : strings)
+        {
+            String[]    keyArray = key.split("_");
+            Set<String> keySet   = new HashSet<>();
+            keySet.addAll(Arrays.asList(keyArray));
+            Set<Set<String>> powers = Sets.powerSet(keySet);
+            
+            for (Set<String> power : powers)
+            {
+                StringJoiner sb = new StringJoiner("_");
+                for (String p : power)
+                {
+                    if (p.isEmpty())
+                    {
+                        continue;
+                    }
+                    
+                    sb.add(p.toLowerCase(Locale.ENGLISH));
+                }
+                all.add(sb.toString());
+            }
+        }
+        return all;
     }
     
     private void combineAndDeleteTemp() throws IOException
@@ -174,9 +215,11 @@ public class TestHashes
             if (sb.toString().length() > 10)
             {
                 Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+                System.out.println("New hashes found!!");
             } else
             {
                 Files.deleteIfExists(Paths.get("combined.json"));
+                System.out.println("No new hashes found");
             }
             
         } catch (IOException e)

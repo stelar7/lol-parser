@@ -336,11 +336,6 @@ public final class UtilHandler
     
     public static boolean isProbableTXT(byte[] data)
     {
-        if (isProbableBOM(data))
-        {
-            return true;
-        }
-        
         ByteArrayWrapper checkTarget = new ByteArrayWrapper(Arrays.copyOf(data, 3));
         boolean          isTXT       = new String(data, StandardCharsets.UTF_8).isEmpty();
         

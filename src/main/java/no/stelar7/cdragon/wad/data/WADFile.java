@@ -144,6 +144,11 @@ public class WADFile
             return result;
         }
         
+        if (UtilHandler.isProbableBOM(magic.getData()))
+        {
+            return findFileType(self, Arrays.copyOfRange(data, 3, 7));
+        }
+        
         if (UtilHandler.isProbableJSON(magic.getData()))
         {
             return "json";
@@ -173,7 +178,7 @@ public class WADFile
         {
             return "idx";
         }
-    
+        
         if (UtilHandler.isProbable3DModelStuff(magic.getData()))
         {
             return "unknown3DModelStuff";
