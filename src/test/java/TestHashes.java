@@ -44,7 +44,7 @@ public class TestHashes
     
     
     final         int                    iconMax     = 100000;
-    final         int                    championMax = 7050;
+    final         int                    championMax = 7500;
     final         int                    skinMax     = 50;
     private final Map<String, Integer[]> folderData  = new HashMap<String, Integer[]>()
     {{
@@ -86,12 +86,48 @@ public class TestHashes
         
         System.out.println("Parsing hextech");
         StringBuilder data2 = new StringBuilder("{\n");
-        for (String attempt : parseHextechFile())
+        for (int i = 0; i < championMax; i++)
         {
-            hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
-            hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/rarity-gem-icons/" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + ".png");
+            
+            for (int j = 0; j < skinMax; j++)
+            {
+                hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
+            }
         }
+        
+        for (int i = 0; i < championMax; i++)
+        {
+            for (int j = 0; j < skinMax; j++)
+            {
+                String skinid = String.format("%d%03d", i, j);
+                hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_" + skinid + ".png ");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_rental_" + skinid + ".png ");
+            }
+        }
+        
+        // constants..
+        // check the lol-loot plugin for more... (4c0ce4a49dbc214c)
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/epic.png");
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/legendary.png");
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/mythic.png");
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/ultimate.png");
+        
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_champion_mastery.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_key_bundle.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_mystery_champion_shard.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_promotion.png");
         finalizeFileReading("hextech.json", data2);
+        
         
         System.out.println("Parsing icon files");
         findIconPathInJsonArrayFile(file, "perkstyles.json");
