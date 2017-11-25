@@ -117,6 +117,8 @@ public final class UtilHandler
             ByteArrayWrapper unkMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x74, (byte) 0x22, (byte) 0x00, (byte) 0x00});
             ByteArrayWrapper luaMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x1B, (byte) 0x4C, (byte) 0x75, (byte) 0x61});
             ByteArrayWrapper hlslMagic = new ByteArrayWrapper(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
+            ByteArrayWrapper oegmMagic = new ByteArrayWrapper(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
+            ByteArrayWrapper fcnfMagic = new ByteArrayWrapper(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
             
             
             magicNumbers = new HashMap<>();
@@ -155,6 +157,8 @@ public final class UtilHandler
             
             // i dont know...?
             magicNumbers.put(unkMagic, "unk");
+            magicNumbers.put(oegmMagic, "oegm");
+            magicNumbers.put(fcnfMagic, "fcnf");
         }
         
         return magicNumbers;
@@ -219,7 +223,7 @@ public final class UtilHandler
         String finalUrl = String.format(url, version);
         
         ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
-        FileOutputStream    fos = new FileOutputStream(output.resolve(version).toFile());
+        FileOutputStream    fos = new FileOutputStream(output.toFile());
         
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
     }
@@ -278,6 +282,7 @@ public final class UtilHandler
     public static boolean isProbableJSON(byte[] data)
     {
         boolean isJSON = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
+        
         isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
         isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x7D));
         isJSON |= (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x5D));
@@ -294,6 +299,7 @@ public final class UtilHandler
     public static boolean isProbableCSS(byte[] data)
     {
         boolean isCSS = isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x62) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6F);
+        
         isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x70) && isSame(data[2], (byte) 0x6C) && isSame(data[3], (byte) 0x6E);
         isCSS |= isSame(data[0], (byte) 0x62) && isSame(data[1], (byte) 0x6F) && isSame(data[2], (byte) 0x64) && isSame(data[3], (byte) 0x79);
         isCSS |= isSame(data[0], (byte) 0x2F) && isSame(data[1], (byte) 0x2A) && isSame(data[2], (byte) 0x40) && isSame(data[3], (byte) 0x69);
@@ -315,12 +321,12 @@ public final class UtilHandler
     public static boolean isProbableJavascript(byte[] data)
     {
         boolean isJS = isSame(data[0], (byte) 0x21) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x75) && isSame(data[3], (byte) 0x6E);
+        
         isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x65) && isSame(data[2], (byte) 0x62) && isSame(data[3], (byte) 0x70);
         isJS |= isSame(data[0], (byte) 0x76) && isSame(data[1], (byte) 0x61) && isSame(data[2], (byte) 0x72) && isSame(data[3], (byte) 0x20);
         isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x6E) && isSame(data[3], (byte) 0x64);
         isJS |= isSame(data[0], (byte) 0x22) && isSame(data[1], (byte) 0x75) && isSame(data[2], (byte) 0x73) && isSame(data[3], (byte) 0x65);
         isJS |= isSame(data[0], (byte) 0x50) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x4C);
-        
         
         return isJS;
     }
@@ -328,6 +334,7 @@ public final class UtilHandler
     public static boolean isProbableHTML(byte[] data)
     {
         boolean isHTML = isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x72);
+        
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x21) && isSame(data[2], (byte) 0x64) && isSame(data[3], (byte) 0x6F);
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x6C) && isSame(data[2], (byte) 0x69) && isSame(data[3], (byte) 0x6E);
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x3F) && isSame(data[2], (byte) 0x78) && isSame(data[3], (byte) 0x6D);
@@ -394,7 +401,15 @@ public final class UtilHandler
                 (byte) 0x54, (byte) 0x45, (byte) 0x52, (byte) 0xD0, (byte) 0xA3, (byte) 0xD0,
                 (byte) 0xD0, (byte) 0x9B, (byte) 0xD0, (byte) 0xEC, (byte) 0x8B, (byte) 0x9C,
                 (byte) 0x43, (byte) 0x6F, (byte) 0x6E, (byte) 0x09, (byte) 0x0D, (byte) 0x0A,
-                (byte) 0x4C, (byte) 0x45, (byte) 0x41,
+                (byte) 0x4C, (byte) 0x45, (byte) 0x41, (byte) 0xE3, (byte) 0x82, (byte) 0xA2,
+                (byte) 0x6C, (byte) 0x65, (byte) 0x73, (byte) 0x37, (byte) 0x31, (byte) 0x37,
+                (byte) 0x61, (byte) 0x34, (byte) 0x75, (byte) 0x40, (byte) 0x21, (byte) 0x40,
+                (byte) 0xD1, (byte) 0x85, (byte) 0xD1, (byte) 0xE3, (byte) 0x84, (byte) 0x85,
+                (byte) 0x31, (byte) 0x6D, (byte) 0x65, (byte) 0x20, (byte) 0x21, (byte) 0x23,
+                (byte) 0x28, (byte) 0x29, (byte) 0x2A, (byte) 0x73, (byte) 0x69, (byte) 0x6B,
+                (byte) 0xE6, (byte) 0x8B, (byte) 0xA6, (byte) 0x70, (byte) 0x65, (byte) 0x72,
+                (byte) 0xE3, (byte) 0x83, (byte) 0xAA,
+                
                 };
         
         

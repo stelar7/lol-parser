@@ -2,7 +2,9 @@ import no.stelar7.cdragon.wad.WADParser;
 import no.stelar7.cdragon.wad.data.WADFile;
 import org.junit.Test;
 
-import java.nio.file.Paths;
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class WADTest
 {
@@ -10,7 +12,34 @@ public class WADTest
     public void testWAD() throws Exception
     {
         WADParser parser = new WADParser();
-        WADFile   parsed = parser.parseLatest(Paths.get("C:\\Users\\Steffen\\Downloads"));
-        parsed.extractFiles(Paths.get("C:\\Users\\Steffen\\Downloads"));
+        
+        String pluginName  = "rcp-be-lol-game-data";
+        Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
+        
+        WADFile parsed = parser.parseLatest(pluginName, extractPath);
+        parsed.extractFiles(extractPath.resolve(pluginName));
+    }
+    
+    @Test
+    public void testClientWAD() throws Exception
+    {
+        WADParser parser = new WADParser();
+        
+        Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
+        Path rito        = Paths.get("C:\\Riot Games");
+        
+        Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                if (file.getFileName().toString().contains(".wad"))
+                {
+                    WADFile parsed = parser.parse(file);
+                    parsed.extractFiles(extractPath.resolve(file.getParent().getFileName()));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

@@ -26,13 +26,14 @@ public class WADParser
      * @return WADFile
      * @throws Exception yes :kappa:
      */
-    public WADFile parseLatest(Path path) throws Exception
+    public WADFile parseLatest(String plugin, Path path) throws Exception
     {
-        String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/rcp-be-lol-game-data/default-assets.wad.compressed";
+        String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + plugin + "/default-assets.wad.compressed";
         String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
         
-        Path fileLocation      = path.resolve(version);
-        Path noCompressionPath = path.resolve(version + ".nocompress");
+        String filename          = String.format("%s-%s", plugin, version);
+        Path   fileLocation      = path.resolve(filename);
+        Path   noCompressionPath = path.resolve(filename + ".nocompress");
         
         if (Files.exists(noCompressionPath))
         {
@@ -48,7 +49,7 @@ public class WADParser
         }
         
         System.out.println("Downloading WAD");
-        UtilHandler.tryDownloadVersion(path, urlWithFormatTokens, version);
+        UtilHandler.tryDownloadVersion(fileLocation, urlWithFormatTokens, version);
         System.out.println("Uncompressing WAD");
         CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
         

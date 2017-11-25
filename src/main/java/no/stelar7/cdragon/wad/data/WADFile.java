@@ -16,11 +16,13 @@ import java.util.concurrent.*;
 @Data
 public class WADFile
 {
+    private String unknownHashContainer = "unknown.json";
+    
     @Setter(value = AccessLevel.NONE)
     @Getter(value = AccessLevel.NONE)
-    private final RAFReader fileReader;
+    private final RAFReader     fileReader;
+    private       WADHeaderBase header;
     
-    private WADHeaderBase header;
     private List<WADContentHeaderV1> contentHeaders = new ArrayList<>();
     
     public WADFile(RAFReader raf)
@@ -33,7 +35,15 @@ public class WADFile
         try
         {
             System.out.println("Extracting files");
-            Files.write(Paths.get("unknown.json"), new byte[]{});
+            Path ukp = outputPath.resolve(unknownHashContainer);
+            
+            if (!Files.exists(ukp))
+            {
+                Files.createDirectories(ukp.getParent());
+                Files.createFile(ukp);
+            }
+            
+            Files.write(ukp, new byte[]{});
             
             ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
@@ -76,8 +86,8 @@ public class WADFile
         try
         {
             String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-            String filename = UtilHandler.getKnownFileHashes().getOrDefault(hash, "\\unknown\\" + hash);
-            Path   self     = Paths.get(savePath.toString(), filename);
+            String filename = UtilHandler.getKnownFileHashes().getOrDefault(hash, "unknown\\" + hash);
+            Path   self     = savePath.resolve(filename);
             
             self.getParent().toFile().mkdirs();
             String parentName = self.getParent().getFileName().toString();
@@ -91,7 +101,7 @@ public class WADFile
             
             if ("unknown".equals(parentName))
             {
-                Files.write(Paths.get("unknown.json"), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                Files.write(savePath.resolve(unknownHashContainer), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
                 findFileTypeAndRename(self, data, filename, savePath);
             } else
             {
@@ -204,8 +214,7 @@ public class WADFile
         {
             String        fileType = findFileType(self, data);
             StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
-            Path          other    = Paths.get(parent.toString(), sb.toString());
-            
+            Path          other    = parent.resolve(sb.toString());
             
             Files.write(other, data);
             
