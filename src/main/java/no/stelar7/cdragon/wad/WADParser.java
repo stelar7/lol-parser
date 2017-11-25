@@ -14,7 +14,6 @@ public class WADParser
 {
     public WADParser()
     {
-        UtilHandler.getKnownFileHashes();
         UtilHandler.getMagicNumbers();
     }
     
@@ -26,12 +25,18 @@ public class WADParser
      * @return WADFile
      * @throws Exception yes :kappa:
      */
-    public WADFile parseLatest(String plugin, Path path) throws Exception
+    public WADFile parseLatest(String pluginName, Path path) throws Exception
     {
-        String urlWithFormatTokens = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + plugin + "/default-assets.wad.compressed";
+        String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
         String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
+        if (version == null)
+        {
+            urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
+            version = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
+        }
         
-        String filename          = String.format("%s-%s", plugin, version);
+        String filename          = String.format("%s-%s", pluginName, version);
         Path   fileLocation      = path.resolve(filename);
         Path   noCompressionPath = path.resolve(filename + ".nocompress");
         
@@ -43,14 +48,14 @@ public class WADParser
         
         if (Files.exists(fileLocation))
         {
-            System.out.println("Found compressed WAD");
+            System.out.println("Uncompressing WAD: " + pluginName);
             CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
             return parse(noCompressionPath);
         }
         
-        System.out.println("Downloading WAD");
+        System.out.println("Downloading " + pluginName);
         UtilHandler.tryDownloadVersion(fileLocation, urlWithFormatTokens, version);
-        System.out.println("Uncompressing WAD");
+        System.out.println("Uncompressing WAD: " + pluginName);
         CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
         
         return parse(noCompressionPath);

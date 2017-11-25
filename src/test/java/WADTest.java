@@ -17,7 +17,7 @@ public class WADTest
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath);
-        parsed.extractFiles(extractPath.resolve(pluginName));
+        parsed.extractFiles(pluginName, null, extractPath);
     }
     
     @Test
@@ -36,7 +36,7 @@ public class WADTest
                 if (file.getFileName().toString().contains(".wad"))
                 {
                     WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(extractPath.resolve(file.getParent().getFileName()));
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath.resolve(file.getParent().getFileName()));
                 }
                 return FileVisitResult.CONTINUE;
             }

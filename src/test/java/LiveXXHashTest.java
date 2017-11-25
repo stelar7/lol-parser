@@ -73,7 +73,10 @@ public class LiveXXHashTest
         output.setEnabled(false);
         output.setDisabledTextColor(Color.BLACK);
         
-        List<String> uk = Files.readAllLines(Paths.get("unknown.json"));
+        JFileChooser chooser = new JFileChooser();
+        chooser.showOpenDialog(null);
+        
+        List<String> uk = Files.readAllLines(chooser.getSelectedFile().toPath());
         
         input.addKeyListener(new KeyListener()
         {

@@ -375,6 +375,11 @@ public class TestHashes
                 return;
             }
             
+            if (!Files.exists(folder))
+            {
+                Files.createDirectories(folder);
+            }
+            
             Files.write(folder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
             
         } catch (IOException e)
@@ -623,7 +628,7 @@ public class TestHashes
     {
         try
         {
-            return Files.readAllLines(Paths.get("unknown.json"));
+            return Files.readAllLines(Paths.get("C:\\Users\\Steffen\\Downloads\\temp\\rcp-be-lol-game-data\\rcp-be-lol-game-data", "unknown.json"));
         } catch (IOException e)
         {
             e.printStackTrace();

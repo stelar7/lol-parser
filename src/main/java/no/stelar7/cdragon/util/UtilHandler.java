@@ -20,40 +20,43 @@ public final class UtilHandler
         // Hide public constructor
     }
     
-    private static Map<String, String>           hashNames;
-    private static Map<ByteArrayWrapper, String> magicNumbers;
+    private static Map<String, Map<String, String>> hashNames    = new HashMap<>();
+    private static Map<ByteArrayWrapper, String>    magicNumbers = new HashMap<>();
     
-    public static Map<String, String> getKnownFileHashes()
+    public static Map<String, String> getKnownFileHashes(String pluginName)
     {
-        if (hashNames == null)
+        if (hashNames.get(pluginName) != null)
         {
-            System.out.println("Loading known hashes");
-            try
-            {
-                StringBuilder sb    = new StringBuilder();
-                List<String>  lines = Files.readAllLines(Paths.get("hashes.json"));
-                lines.forEach(sb::append);
-                
-                hashNames = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
-                
-                sortAndWriteHashes();
-            } catch (IOException e)
-            {
-                hashNames = Collections.emptyMap();
-                System.err.println("File not found: " + e.getMessage());
-            }
+            return hashNames.get(pluginName);
         }
         
-        return hashNames;
+        try
+        {
+            StringBuilder sb    = new StringBuilder();
+            List<String>  lines = Files.readAllLines(Paths.get("hashes", pluginName + ".json"));
+            lines.forEach(sb::append);
+            
+            Map<String, String> pluginData = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+            hashNames.put(pluginName, pluginData);
+            
+            sortAndWriteHashes(pluginName);
+            System.out.println("Loaded known hashes for " + pluginName);
+        } catch (IOException e)
+        {
+            hashNames.put(pluginName, Collections.emptyMap());
+            System.err.println("File not found: " + e.getMessage());
+        }
+        
+        return hashNames.get(pluginName);
     }
     
-    private static void sortAndWriteHashes() throws IOException
+    private static void sortAndWriteHashes(String pluginName) throws IOException
     {
         List<Pair<String, String>> ml = new ArrayList<>();
-        hashNames.forEach((k, v) -> ml.add(new Pair<>(k, v)));
+        hashNames.get(pluginName).forEach((k, v) -> ml.add(new Pair<>(k, v)));
         ml.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
         
-        Path          pho = Paths.get("hashes.json");
+        Path          pho = Paths.get("hashes", pluginName + ".json");
         StringBuilder sb  = new StringBuilder("{\n");
         for (Pair<String, String> pair : ml)
         {
@@ -91,7 +94,7 @@ public final class UtilHandler
     
     public static Map<ByteArrayWrapper, String> getMagicNumbers()
     {
-        if (magicNumbers == null)
+        if (magicNumbers.isEmpty())
         {
             System.out.println("Loading magic numbers");
             
@@ -193,7 +196,7 @@ public final class UtilHandler
     
     public static String getMaxVersion(String url, int min, int max)
     {
-        System.out.println("Looking for highest version");
+        System.out.println("Looking for highest version for " + url);
         for (int i = max; i >= min; i--)
         {
             try
@@ -215,7 +218,7 @@ public final class UtilHandler
             }
         }
         
-        throw new RuntimeException("No valid version found");
+        return null;
     }
     
     public static void tryDownloadVersion(Path output, String url, String version) throws Exception

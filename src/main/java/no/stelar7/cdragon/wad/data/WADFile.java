@@ -30,12 +30,17 @@ public class WADFile
         this.fileReader = raf;
     }
     
-    public void extractFiles(Path outputPath)
+    public void extractFiles(String pluginName, String wadName, Path path)
     {
         try
         {
-            System.out.println("Extracting files");
-            Path ukp = outputPath.resolve(unknownHashContainer);
+            if (wadName == null)
+            {
+                wadName = "assets.wad";
+            }
+            System.out.println("Extracting files from " + pluginName + "/" + wadName);
+            final Path outputPath = path.resolve(pluginName);
+            Path       ukp        = outputPath.resolve(unknownHashContainer);
             
             if (!Files.exists(ukp))
             {
@@ -45,8 +50,8 @@ public class WADFile
             
             Files.write(ukp, new byte[]{});
             
-            ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-            final int       interval = (int) Math.ceil(getContentHeaders().size() / 20f);
+            ExecutorService executor = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors());
+            final int       interval = (int) Math.ceil(getContentHeaders().size() / 10f);
             
             for (int index = 0; index < getContentHeaders().size(); index++)
             {
@@ -60,7 +65,7 @@ public class WADFile
                         return;
                     }
                     
-                    saveFile(fileHeader, outputPath);
+                    saveFile(fileHeader, outputPath, pluginName);
                     
                     if (contentHeaders.size() > 500)
                     {
@@ -81,12 +86,12 @@ public class WADFile
         }
     }
     
-    private void saveFile(WADContentHeaderV1 header, Path savePath)
+    private void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName)
     {
         try
         {
             String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-            String filename = UtilHandler.getKnownFileHashes().getOrDefault(hash, "unknown\\" + hash);
+            String filename = UtilHandler.getKnownFileHashes(pluginName).getOrDefault(hash, "unknown\\" + hash);
             Path   self     = savePath.resolve(filename);
             
             self.getParent().toFile().mkdirs();
