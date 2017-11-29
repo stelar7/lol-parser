@@ -100,7 +100,7 @@ public class TestStoreAsRealName
     
     private void copyFilesToFolders()
     {
-        Path                inputFile = Paths.get("combined.json");
+        Path                inputFile = Paths.get("filenames.json");
         Map<String, String> files     = new Gson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
         Path                baseTo    = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty");
         
@@ -121,6 +121,9 @@ public class TestStoreAsRealName
             {
                 Files.createDirectories(to.getParent());
                 Files.copy(from, to);
+            } catch (FileAlreadyExistsException ex)
+            {
+                // we dont care if the file is already there
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -665,14 +668,18 @@ public class TestStoreAsRealName
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
-            if (sb.toString().length() > 10)
+            Path                filenames = Paths.get("filenames.json");
+            Map<String, String> known     = new Gson().fromJson(UtilHandler.readAsString(filenames), new TypeToken<Map<String, String>>() {}.getType());
+            Map<String, String> thisPass  = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+            known.putAll(thisPass);
+            
+            long oldSize = Files.size(filenames);
+            Files.write(filenames, new Gson().toJson(known).getBytes(StandardCharsets.UTF_8));
+            long newSize = Files.size(filenames);
+            
+            if (newSize > oldSize)
             {
-                Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-                System.out.println("New hashes found!!");
-            } else
-            {
-                Files.deleteIfExists(Paths.get("combined.json"));
-                System.out.println("No new hashes found");
+                System.out.println("Something has changed!");
             }
             
         } catch (IOException e)
