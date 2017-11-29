@@ -96,7 +96,7 @@ public class TestHashes
             hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
         }
         
-        for (int i = 0; i < championMax; i++)
+        for (int i = -1; i < championMax; i++)
         {
             hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
             hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + "_open.png");
@@ -112,7 +112,7 @@ public class TestHashes
             hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + ".png");
             hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + "_open.png");
             
-            for (int j = 0; j < skinMax; j++)
+            for (int j = -1; j < skinMax; j++)
             {
                 hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
                 hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + "_open.png");
@@ -180,7 +180,7 @@ public class TestHashes
         folderData.put("hextech", new Integer[]{1});
         
         
-        for (int i = 0; i < championMax; i++)
+        for (int i = -1; i < championMax; i++)
         {
             folderData.put(String.valueOf(i), new Integer[]{1});
         }
