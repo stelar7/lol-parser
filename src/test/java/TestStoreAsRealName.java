@@ -20,35 +20,13 @@ public class TestStoreAsRealName
     private final String       pre    = "plugins/rcp-be-lol-game-data/global/default/";
     private final Path         folder = Paths.get("tmp");
     
-    private final List<String> filenames = Arrays.asList(
-            "v1/championperkstylemap.json",
-            "v1/champion-summary.json",
-            "v1/hovertips.json",
-            "v1/items.json",
-            "v1/loot.json",
-            "v1/map-assets/map-assets.json",
-            "v1/maps.json",
-            "v1/perks.json",
-            "v1/perkstyles.json",
-            "v1/profile-icons.json",
-            "v1/queues.json",
-            "v1/runes.json",
-            "v1/skins.json",
-            "v1/summoner-banners.json",
-            "v1/summoner-emotes.json",
-            "v1/summoner-masteries.json",
-            "v1/summoner-spells.json",
-            "v1/ward-skins.json"
-                                                        );
-    
     
     final int skinMax     = 50;
-    final int championMax = 7500;
-    final int iconMax     = 100000;
+    final int championMax = 700;
+    final int iconMax     = 2000;
     
     private final Map<String, Integer> folderData = new HashMap<String, Integer>()
     {{
-        put("profile-icons", iconMax);
         put("champion-sfx-audios", championMax);
         put("champion-icons", championMax);
         put("champion-choose-vo", championMax);
@@ -56,6 +34,10 @@ public class TestStoreAsRealName
         put("summoner-backdrops", iconMax);
     }};
     
+    private final Map<String, Integer[]> folderData2 = new HashMap<String, Integer[]>()
+    {{
+        put("champion-tiles", new Integer[]{championMax, skinMax});
+    }};
     
     @Test
     public void testAllImages() throws IOException, InterruptedException
@@ -92,9 +74,11 @@ public class TestStoreAsRealName
         for (String ext : exts)
         {
             folderData.forEach((k, v) -> generateHashList(k, v, ext));
+            folderData2.forEach((k, v) -> generateHashListNested(k, v, ext));
         }
         
         combineAndDeleteTemp();
+        System.out.println("Copying files");
         copyFilesToFolders();
     }
     
@@ -601,17 +585,37 @@ public class TestStoreAsRealName
         String pathPrefix = pre + "v1/" + folderName + "/";
         
         StringBuilder sb = new StringBuilder("{\n");
-        doLoop(depths, pathPrefix + "%s." + fileType, sb);
+        for (int i = -1; i < depths; i++)
+        {
+            String value  = String.format(pathPrefix + "%s." + fileType, i);
+            String pretty = String.format(folderName + "/%s." + fileType, i);
+            addToSB(sb, value, pretty);
+        }
         finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
-    private void doLoop(int max, String format, StringBuilder sb)
+    private void generateHashListNested(String folderName, Integer[] depths, String fileType)
     {
-        for (int i = -1; i < max; i++)
+        String        pathPrefix = pre + "v1/" + folderName + "/";
+        StringBuilder sb         = new StringBuilder("{\n");
+        String        format     = pathPrefix + "%1$s/%2$s%3$03d." + fileType;
+        
+        for (int i = -1; i < depths[0]; i++)
         {
-            String value = String.format(format, i);
-            // addToSB(sb, value);
+            for (int j = -1; j < depths[1]; j++)
+            {
+                String value;
+                if (j > 0)
+                {
+                    value = String.format(format, i, i, j);
+                    String pretty = String.format(folderName + "/%1$s/%2$d." + fileType, i, j);
+                    addToSB(sb, value, pretty);
+                }
+                
+            }
         }
+        
+        finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
     private void addToSB(StringBuilder sb, String hashMe, String realPath)
@@ -669,17 +673,30 @@ public class TestStoreAsRealName
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
             Path                filenames = Paths.get("filenames.json");
-            Map<String, String> known     = new Gson().fromJson(UtilHandler.readAsString(filenames), new TypeToken<Map<String, String>>() {}.getType());
-            Map<String, String> thisPass  = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+            Map<String, String> known;
+            if (Files.exists(filenames))
+            {
+                known = new Gson().fromJson(UtilHandler.readAsString(filenames), new TypeToken<Map<String, String>>() {}.getType());
+            } else
+            {
+                known = new HashMap<>();
+            }
+            Map<String, String> thisPass = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
             known.putAll(thisPass);
             
-            long oldSize = Files.size(filenames);
-            Files.write(filenames, new Gson().toJson(known).getBytes(StandardCharsets.UTF_8));
-            long newSize = Files.size(filenames);
-            
-            if (newSize > oldSize)
+            if (Files.exists(filenames))
             {
-                System.out.println("Something has changed!");
+                long oldSize = Files.size(filenames);
+                Files.write(filenames, new Gson().toJson(known).getBytes(StandardCharsets.UTF_8));
+                long newSize = Files.size(filenames);
+                
+                if (newSize > oldSize)
+                {
+                    System.out.println("Something has changed!");
+                }
+            } else
+            {
+                Files.write(filenames, new Gson().toJson(known).getBytes(StandardCharsets.UTF_8));
             }
             
         } catch (IOException e)
