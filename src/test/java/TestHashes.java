@@ -1,9 +1,10 @@
-
 import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
 import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.wad.WADParser;
+import no.stelar7.cdragon.wad.data.WADFile;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -69,8 +70,8 @@ public class TestHashes
     {
         ExecutorService service = Executors.newFixedThreadPool(8);
         
-        Path file  = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
-        Path file2 = Paths.get("C:/Users/Steffen/Downloads/plugins/rcp-be-lol-game-data/global/default/v1/champions");
+        Path file  = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/");
+        Path file2 = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
         if (!Files.exists(folder))
         {
@@ -85,8 +86,16 @@ public class TestHashes
         }
         finalizeFileReading("files.json", data);
         
+        
         System.out.println("Parsing hextech");
         StringBuilder data2 = new StringBuilder("{\n");
+        
+        for (String attempt : parseHextechFile())
+        {
+            hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
+            hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
+        }
+        
         for (int i = 0; i < championMax; i++)
         {
             hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
@@ -107,27 +116,14 @@ public class TestHashes
             {
                 hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
                 hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + "_open.png");
-            }
-        }
-        
-        for (int i = 0; i < championMax; i++)
-        {
-            for (int j = 0; j < skinMax; j++)
-            {
+                
                 String skinid = String.format("%d%03d", i, j);
                 hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_" + skinid + ".png ");
                 hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_rental_" + skinid + ".png ");
             }
         }
         
-        for (String attempt : parseHextechFile())
-        {
-            hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
-            hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
-        }
-        
         // constants..
-        // check the lol-loot plugin for more... (4c0ce4a49dbc214c)
         hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/epic.png");
         hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/legendary.png");
         hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/mythic.png");
@@ -195,7 +191,24 @@ public class TestHashes
     
     private List<String> parseHextechFile()
     {
-        Map<String, String> data = new Gson().fromJson(UtilHandler.readAsString(Paths.get("possibletech.json")), new TypeToken<Map<String, String>>() {}.getType());
+        
+        // check the lol-loot plugin for more... (4c0ce4a49dbc214c)
+        
+        WADParser parser      = new WADParser();
+        String    pluginName  = "rcp-fe-lol-loot";
+        Path      extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
+        
+        try
+        {
+            WADFile parsed = parser.parseLatest(pluginName, extractPath);
+            parsed.extractFiles(pluginName, null, extractPath);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        
+        Path                possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "4c0ce4a49dbc214c.json");
+        Map<String, String> data         = new Gson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
         return transmute(data.keySet());
     }
     
@@ -518,6 +531,7 @@ public class TestHashes
         
         arr = elem.getAsJsonArray("skins");
         
+        
         for (JsonElement element : arr)
         {
             JsonObject ob = element.getAsJsonObject();
@@ -628,7 +642,7 @@ public class TestHashes
     {
         try
         {
-            return Files.readAllLines(Paths.get("C:\\Users\\Steffen\\Downloads\\temp\\rcp-be-lol-game-data\\rcp-be-lol-game-data", "unknown.json"));
+            return Files.readAllLines(Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data", "unknown.json"));
         } catch (IOException e)
         {
             e.printStackTrace();
