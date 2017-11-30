@@ -74,35 +74,40 @@ public class WADParser
         
         if (Files.exists(noCompressionPath))
         {
-            System.out.println("Found uncompressed WAD");
-            
-            System.out.println("Deleting compressed WAD");
-            Files.deleteIfExists(fileLocation);
-            
+            deleteOld(fileLocation);
             return parse(noCompressionPath);
         }
         
         if (Files.exists(fileLocation))
         {
-            System.out.println("Uncompressing WAD: " + pluginName);
-            CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
-            
-            System.out.println("Deleting compressed WAD");
-            Files.deleteIfExists(fileLocation);
-            
+            uncompress(pluginName, fileLocation, noCompressionPath);
+            deleteOld(fileLocation);
             return parse(noCompressionPath);
         }
         
-        System.out.println("Downloading " + pluginName);
-        UtilHandler.tryDownloadVersion(fileLocation, urlWithFormatTokens, version);
-        
+        download(pluginName, fileLocation, urlWithFormatTokens, version);
+        uncompress(pluginName, fileLocation, noCompressionPath);
+        deleteOld(fileLocation);
+        return parse(noCompressionPath);
+    }
+    
+    
+    private void uncompress(String pluginName, Path fileLocation, Path noCompressionPath) throws IOException
+    {
         System.out.println("Uncompressing WAD: " + pluginName);
         CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
-        
-        System.out.println("Deleting compressed WAD");
+    }
+    
+    private void deleteOld(Path fileLocation) throws IOException
+    {
+        System.out.println("Trying to delete compressed WAD");
         Files.deleteIfExists(fileLocation);
-        
-        return parse(noCompressionPath);
+    }
+    
+    private void download(String pluginName, Path save, String url, String version) throws IOException
+    {
+        System.out.println("Downloading " + pluginName);
+        UtilHandler.tryDownloadVersion(save, url, version);
     }
     
     

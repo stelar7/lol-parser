@@ -226,10 +226,11 @@ public final class UtilHandler
     {
         String finalUrl = String.format(url, version);
         
-        ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
-        FileOutputStream    fos = new FileOutputStream(output.toFile());
-        
-        fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        try (ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
+             FileOutputStream fos = new FileOutputStream(output.toFile()))
+        {
+            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+        }
     }
     
     public static String readAsString(Path path)
