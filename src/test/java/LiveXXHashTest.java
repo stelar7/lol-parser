@@ -74,6 +74,7 @@ public class LiveXXHashTest
         output.setDisabledTextColor(Color.BLACK);
         
         JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(Paths.get(System.getProperty("user.home"), "Downloads").toFile());
         chooser.showOpenDialog(null);
         
         List<String> uk = Files.readAllLines(chooser.getSelectedFile().toPath());

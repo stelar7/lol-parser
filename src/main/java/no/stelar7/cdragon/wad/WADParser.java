@@ -5,6 +5,7 @@ import no.stelar7.cdragon.wad.data.WADFile;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.*;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteOrder;
 import java.nio.file.*;
@@ -29,13 +30,44 @@ public class WADParser
     {
         String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
         String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
-        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
+        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 350);
         if (version == null)
         {
             urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
-            version = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
+            version = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 350);
         }
         
+        return handleReading(pluginName, urlWithFormatTokens, version, path);
+    }
+    
+    /**
+     * Downloads and parses the latest WAD file;
+     * if the file already exists, it parses that file
+     *
+     * @param path path to store the file
+     * @return WADFile
+     * @throws IOException yes :kappa:
+     */
+    public WADFile parseVersion(String pluginName, int versionAsNumber, Path path) throws IOException
+    {
+        String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
+        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
+        if (version == null)
+        {
+            urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
+            version = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
+            if (version == null)
+            {
+                return null;
+            }
+        }
+        
+        return handleReading(pluginName, urlWithFormatTokens, version, path);
+    }
+    
+    private WADFile handleReading(String pluginName, String urlWithFormatTokens, String version, Path path) throws IOException
+    {
         String filename          = String.format("%s-%s", pluginName, version);
         Path   fileLocation      = path.resolve(filename);
         Path   noCompressionPath = path.resolve(filename + ".nocompress");
@@ -43,6 +75,10 @@ public class WADParser
         if (Files.exists(noCompressionPath))
         {
             System.out.println("Found uncompressed WAD");
+            
+            System.out.println("Deleting compressed WAD");
+            Files.deleteIfExists(fileLocation);
+            
             return parse(noCompressionPath);
         }
         
@@ -50,13 +86,21 @@ public class WADParser
         {
             System.out.println("Uncompressing WAD: " + pluginName);
             CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
+            
+            System.out.println("Deleting compressed WAD");
+            Files.deleteIfExists(fileLocation);
+            
             return parse(noCompressionPath);
         }
         
         System.out.println("Downloading " + pluginName);
         UtilHandler.tryDownloadVersion(fileLocation, urlWithFormatTokens, version);
+        
         System.out.println("Uncompressing WAD: " + pluginName);
         CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
+        
+        System.out.println("Deleting compressed WAD");
+        Files.deleteIfExists(fileLocation);
         
         return parse(noCompressionPath);
     }

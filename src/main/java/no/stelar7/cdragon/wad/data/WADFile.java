@@ -50,8 +50,14 @@ public class WADFile
             
             Files.write(ukp, new byte[]{});
             
-            ExecutorService executor = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors());
-            final int       interval = (int) Math.ceil(getContentHeaders().size() / 10f);
+            ExecutorService executor  = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors());
+            final int       interval  = (int) Math.ceil(getContentHeaders().size() / 10f);
+            String          legitName = pluginName;
+            if (pluginName.contains("_"))
+            {
+                legitName = pluginName.substring(0, pluginName.indexOf('_'));
+            }
+            String realName = legitName;
             
             for (int index = 0; index < getContentHeaders().size(); index++)
             {
@@ -65,7 +71,7 @@ public class WADFile
                         return;
                     }
                     
-                    saveFile(fileHeader, outputPath, pluginName);
+                    saveFile(fileHeader, outputPath, realName);
                     
                     if (contentHeaders.size() > 500)
                     {

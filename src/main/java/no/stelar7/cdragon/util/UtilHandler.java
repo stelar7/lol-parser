@@ -196,13 +196,14 @@ public final class UtilHandler
     
     public static String getMaxVersion(String url, int min, int max)
     {
-        System.out.println("Looking for highest version for " + url);
         for (int i = max; i >= min; i--)
         {
             try
             {
                 String ip       = getIPFromLong(i);
                 String finalUrl = String.format(url, ip);
+                
+                System.out.println("Looking for " + finalUrl);
                 
                 HttpURLConnection con = (HttpURLConnection) new URL(finalUrl).openConnection();
                 if (con.getResponseCode() == 200)
@@ -221,7 +222,7 @@ public final class UtilHandler
         return null;
     }
     
-    public static void tryDownloadVersion(Path output, String url, String version) throws Exception
+    public static void tryDownloadVersion(Path output, String url, String version) throws IOException
     {
         String finalUrl = String.format(url, version);
         

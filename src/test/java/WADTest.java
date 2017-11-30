@@ -1,3 +1,4 @@
+import no.stelar7.cdragon.util.UtilHandler;
 import no.stelar7.cdragon.wad.WADParser;
 import no.stelar7.cdragon.wad.data.WADFile;
 import org.junit.Test;
@@ -18,6 +19,24 @@ public class WADTest
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath);
         parsed.extractFiles(pluginName, null, extractPath);
+    }
+    
+    @Test
+    public void testWADAll() throws Exception
+    {
+        WADParser parser = new WADParser();
+        
+        String pluginName  = "rcp-be-lol-game-data";
+        Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
+        
+        for (int i = 350; i > 0; i--)
+        {
+            WADFile parsed = parser.parseVersion(pluginName, i, extractPath);
+            if (parsed != null)
+            {
+                parsed.extractFiles(pluginName + "_" + UtilHandler.getIPFromLong(i), null, extractPath);
+            }
+        }
     }
     
     @Test

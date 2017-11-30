@@ -17,10 +17,9 @@ import java.util.concurrent.*;
 public class TestHashes
 {
     
-    private final List<String> exts   = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
-    private final String       pre    = "plugins/rcp-be-lol-game-data/global/default/";
-    private final List<String> hashes = getUnknownHashes();
-    private final Path         folder = Paths.get("tmp");
+    private final List<String> exts        = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
+    private final String       pre         = "plugins/rcp-be-lol-game-data/global/default/";
+    private final Path         outerFolder = Paths.get("tmp");
     
     private final List<String> filenames = Arrays.asList(
             "v1/championperkstylemap.json",
@@ -64,18 +63,22 @@ public class TestHashes
         put("champion-chroma-images", new Integer[]{championMax, skinMax});
     }};
     
+    private Path         currentInnerFolder;
+    private List<String> hashes;
     
-    @Test
-    public void testAllHashes() throws IOException, InterruptedException
+    private void runDirectory(Path dir) throws IOException, InterruptedException
     {
-        ExecutorService service = Executors.newFixedThreadPool(8);
+        Path file  = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/");
+        Path file2 = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
-        Path file  = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/");
-        Path file2 = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/champions");
+        ExecutorService service     = Executors.newFixedThreadPool(8);
+        Path            innerFolder = outerFolder.resolve(dir.getFileName());
+        currentInnerFolder = innerFolder;
+        hashes = getUnknownHashes(dir);
         
-        if (!Files.exists(folder))
+        if (!Files.exists(innerFolder))
         {
-            Files.createDirectories(folder);
+            Files.createDirectories(innerFolder);
         }
         
         System.out.println("Parsing default file locations");
@@ -189,6 +192,33 @@ public class TestHashes
         combineAndDeleteTemp();
     }
     
+    @Test
+    public void testAllHashes() throws IOException, InterruptedException
+    {
+        Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<Path>()
+        {
+            
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+            {
+                try
+                {
+                    if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads")))
+                    {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    
+                    runDirectory(dir);
+                } catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+            
+        });
+    }
+    
     private List<String> parseHextechFile()
     {
         
@@ -244,7 +274,7 @@ public class TestHashes
     {
         List<Pair<String, String>> foundHashes = new ArrayList<>();
         
-        Files.walkFileTree(folder, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(currentInnerFolder, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
@@ -275,11 +305,12 @@ public class TestHashes
             
             if (sb.toString().length() > 10)
             {
-                Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+                Files.createDirectories(currentInnerFolder);
+                Files.write(currentInnerFolder.resolve("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
                 System.out.println("New hashes found!!");
             } else
             {
-                Files.deleteIfExists(Paths.get("combined.json"));
+                Files.deleteIfExists(currentInnerFolder.resolve("combined.json"));
                 System.out.println("No new hashes found");
             }
             
@@ -388,12 +419,12 @@ public class TestHashes
                 return;
             }
             
-            if (!Files.exists(folder))
+            if (!Files.exists(currentInnerFolder))
             {
-                Files.createDirectories(folder);
+                Files.createDirectories(currentInnerFolder);
             }
             
-            Files.write(folder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+            Files.write(currentInnerFolder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
             
         } catch (IOException e)
         {
@@ -540,6 +571,7 @@ public class TestHashes
             getElementAndCheckHash(ob, "uncenteredSplashPath", data);
             getElementAndCheckHash(ob, "tilePath", data);
             getElementAndCheckHash(ob, "loadScreenPath", data);
+            getElementAndCheckHash(ob, "splashVideoPath", data);
             
             if (ob.has("chromas"))
             {
@@ -638,11 +670,11 @@ public class TestHashes
     }
     
     
-    private List<String> getUnknownHashes()
+    private List<String> getUnknownHashes(Path dir)
     {
         try
         {
-            return Files.readAllLines(Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data", "unknown.json"));
+            return Files.readAllLines(dir.resolve("unknown.json"));
         } catch (IOException e)
         {
             e.printStackTrace();
