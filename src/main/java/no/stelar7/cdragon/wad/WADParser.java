@@ -62,7 +62,32 @@ public class WADParser
                 return null;
             }
         }
-        
+        return handleReading(pluginName, urlWithFormatTokens, version, path);
+    }
+    
+    /**
+     * Downloads and parses the latest WAD file;
+     * if the file already exists, it parses that file
+     *
+     * @param path path to store the file
+     * @return WADFile
+     * @throws IOException yes :kappa:
+     */
+    public WADFile parseVersion(String pluginName, String versionString, Path path) throws IOException
+    {
+        String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
+        int    versionAsNumber     = (int) UtilHandler.getLongFromIP(versionString);
+        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
+        if (version == null)
+        {
+            urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
+            version = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
+            if (version == null)
+            {
+                return null;
+            }
+        }
         return handleReading(pluginName, urlWithFormatTokens, version, path);
     }
     
@@ -72,14 +97,29 @@ public class WADParser
         Path   fileLocation      = path.resolve(filename);
         Path   noCompressionPath = path.resolve(filename + ".nocompress");
         
+        
         if (Files.exists(noCompressionPath))
         {
+            if (Files.size(noCompressionPath) < (Integer.MAX_VALUE / 10))
+            {
+                System.out.println("File too small to be legit, deleting");
+                Files.deleteIfExists(noCompressionPath);
+                return parseVersion(pluginName, version, path);
+            }
+            
             deleteOld(fileLocation);
             return parse(noCompressionPath);
         }
         
         if (Files.exists(fileLocation))
         {
+            if (Files.size(fileLocation) < (Integer.MAX_VALUE / 10))
+            {
+                System.out.println("File too small to be legit, deleting");
+                Files.deleteIfExists(fileLocation);
+                return parseVersion(pluginName, version, path);
+            }
+            
             uncompress(pluginName, fileLocation, noCompressionPath);
             deleteOld(fileLocation);
             return parse(noCompressionPath);

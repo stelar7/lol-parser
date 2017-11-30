@@ -208,6 +208,8 @@ public class TestHashes
                         return FileVisitResult.CONTINUE;
                     }
                     
+                    System.out.println(dir.toAbsolutePath().toString());
+                    
                     runDirectory(dir);
                 } catch (InterruptedException e)
                 {
@@ -216,7 +218,103 @@ public class TestHashes
                 return FileVisitResult.SKIP_SUBTREE;
             }
             
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+            {
+                Path downloadDir = Paths.get(System.getProperty("user.home"), "Downloads");
+                
+                java.nio.file.Files.walkFileTree(dir, new SimpleFileVisitor<Path>()
+                {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+                    {
+                        if (file.getParent().equals(downloadDir) || file.equals(downloadDir))
+                        {
+                            return FileVisitResult.CONTINUE;
+                        }
+                        
+                        Files.deleteIfExists(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+                    
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path file, IOException exc) throws IOException
+                    {
+                        if (file.equals(downloadDir))
+                        {
+                            return FileVisitResult.CONTINUE;
+                        }
+                        
+                        Files.deleteIfExists(file);
+                        return FileVisitResult.CONTINUE;
+                    }
+                });
+                return FileVisitResult.SKIP_SUBTREE;
+            }
         });
+        
+        combineAndDeleteNestedTemp();
+    }
+    
+    private void combineAndDeleteNestedTemp() throws IOException
+    {
+        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        
+        if (!Files.exists(outerFolder))
+        {
+            return;
+        }
+        
+        Files.walkFileTree(outerFolder, new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+            {
+                Files.deleteIfExists(dir);
+                return FileVisitResult.CONTINUE;
+            }
+            
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(new Pair<>(k, v));
+                    }
+                });
+                Files.deleteIfExists(file);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+        try
+        {
+            foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+            
+            StringBuilder sb = new StringBuilder("{\n");
+            for (Pair<String, String> pair : foundHashes)
+            {
+                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            }
+            sb.reverse().delete(0, 2).reverse().append("\n}");
+            
+            if (sb.toString().length() > 10)
+            {
+                Files.createDirectories(outerFolder);
+                Files.write(outerFolder.resolve("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+                System.out.println("New hashes found!!");
+            } else
+            {
+                Files.deleteIfExists(outerFolder.resolve("combined.json"));
+                System.out.println("No new hashes found");
+            }
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     private List<String> parseHextechFile()
@@ -228,13 +326,16 @@ public class TestHashes
         String    pluginName  = "rcp-fe-lol-loot";
         Path      extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
-        try
+        if (!Files.exists(extractPath.resolve(pluginName)))
         {
-            WADFile parsed = parser.parseLatest(pluginName, extractPath);
-            parsed.extractFiles(pluginName, null, extractPath);
-        } catch (Exception e)
-        {
-            e.printStackTrace();
+            try
+            {
+                WADFile parsed = parser.parseLatest(pluginName, extractPath);
+                parsed.extractFiles(pluginName, null, extractPath);
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
         }
         
         Path                possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "4c0ce4a49dbc214c.json");

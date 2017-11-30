@@ -29,12 +29,15 @@ public class WADTest
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
-        for (int i = (int) UtilHandler.getLongFromIP("0.0.1.80"); i > 0; i--)
+        for (int i = (int) UtilHandler.getLongFromIP("0.0.1.76"); i > 0; i--)
         {
             WADFile parsed = parser.parseVersion(pluginName, i, extractPath);
             if (parsed != null)
             {
                 parsed.extractFiles(pluginName + "_" + UtilHandler.getIPFromLong(i), null, extractPath);
+            } else
+            {
+                System.out.println("File not found; " + pluginName + "_" + UtilHandler.getIPFromLong(i));
             }
         }
     }
