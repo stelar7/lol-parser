@@ -37,7 +37,7 @@ public class WADParser
             version = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 350);
         }
         
-        return handleReading(pluginName, urlWithFormatTokens, version, path);
+        return handleAll(pluginName, urlWithFormatTokens, version, path);
     }
     
     /**
@@ -62,7 +62,7 @@ public class WADParser
                 return null;
             }
         }
-        return handleReading(pluginName, urlWithFormatTokens, version, path);
+        return handleAll(pluginName, urlWithFormatTokens, version, path);
     }
     
     /**
@@ -88,10 +88,10 @@ public class WADParser
                 return null;
             }
         }
-        return handleReading(pluginName, urlWithFormatTokens, version, path);
+        return handleAll(pluginName, urlWithFormatTokens, version, path);
     }
     
-    private WADFile handleReading(String pluginName, String urlWithFormatTokens, String version, Path path) throws IOException
+    private WADFile handleAll(String pluginName, String urlWithFormatTokens, String version, Path path) throws IOException
     {
         String filename          = String.format("%s-%s", pluginName, version);
         Path   fileLocation      = path.resolve(filename);
@@ -100,7 +100,7 @@ public class WADParser
         
         if (Files.exists(noCompressionPath))
         {
-            if (Files.size(noCompressionPath) < (Integer.MAX_VALUE / 10))
+            if (Files.size(noCompressionPath) < 734003200L)
             {
                 System.out.println("File too small to be legit, deleting");
                 Files.deleteIfExists(noCompressionPath);
@@ -113,7 +113,7 @@ public class WADParser
         
         if (Files.exists(fileLocation))
         {
-            if (Files.size(fileLocation) < (Integer.MAX_VALUE / 10))
+            if (Files.size(fileLocation) < 734003200L)
             {
                 System.out.println("File too small to be legit, deleting");
                 Files.deleteIfExists(fileLocation);
@@ -126,6 +126,13 @@ public class WADParser
         }
         
         download(pluginName, fileLocation, urlWithFormatTokens, version);
+        if (Files.size(fileLocation) < 734003200L)
+        {
+            System.out.println("File too small to be legit, deleting");
+            Files.deleteIfExists(fileLocation);
+            return null;
+        }
+        
         uncompress(pluginName, fileLocation, noCompressionPath);
         deleteOld(fileLocation);
         return parse(noCompressionPath);

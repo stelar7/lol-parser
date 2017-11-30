@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.concurrent.*;
 
 public class WADTest
 {
@@ -22,23 +23,44 @@ public class WADTest
     }
     
     @Test
-    public void testWADAll() throws Exception
+    public void testWADAll()
     {
         WADParser parser = new WADParser();
         
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
+        ExecutorService executor = Executors.newFixedThreadPool(2);//Runtime.getRuntime().availableProcessors());
         for (int i = (int) UtilHandler.getLongFromIP("0.0.1.76"); i > 0; i--)
         {
-            WADFile parsed = parser.parseVersion(pluginName, i, extractPath);
-            if (parsed != null)
-            {
-                parsed.extractFiles(pluginName + "_" + UtilHandler.getIPFromLong(i), null, extractPath);
-            } else
-            {
-                System.out.println("File not found; " + pluginName + "_" + UtilHandler.getIPFromLong(i));
-            }
+            int ver = i;
+            executor.submit(() -> {
+                try
+                {
+                    WADFile parsed   = parser.parseVersion(pluginName, ver, extractPath);
+                    String  realName = pluginName + "_" + UtilHandler.getIPFromLong(ver);
+                    
+                    if (parsed != null)
+                    {
+                        parsed.extractFiles(realName, null, extractPath);
+                    } else
+                    {
+                        System.out.println("File not found; " + realName);
+                    }
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            });
+        }
+        
+        try
+        {
+            executor.shutdown();
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        } catch (InterruptedException e)
+        {
+            e.printStackTrace();
         }
     }
     
