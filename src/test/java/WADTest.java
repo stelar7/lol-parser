@@ -30,8 +30,8 @@ public class WADTest
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() / 2);
-        for (int i = (int) UtilHandler.getLongFromIP("0.0.1.62"); i > 0; i--)
+        ExecutorService executor = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors() / 2);
+        for (int i = (int) UtilHandler.getLongFromIP("0.0.1.38"); i > 0; i--)
         {
             int ver = i;
             executor.submit(() -> {

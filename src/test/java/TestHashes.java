@@ -71,7 +71,7 @@ public class TestHashes
         Path file  = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/");
         Path file2 = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
-        ExecutorService service     = Executors.newFixedThreadPool(8);
+        ExecutorService service     = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors());
         Path            innerFolder = outerFolder.resolve(dir.getFileName());
         currentInnerFolder = innerFolder;
         hashes = getUnknownHashes(dir);

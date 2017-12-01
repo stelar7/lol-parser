@@ -64,32 +64,34 @@ public class WADFile
         for (int index = 0; index < getContentHeaders().size(); index++)
         {
             final int selfIndex = index;
-            executor.submit(() -> {
-                
-                WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
-                
-                if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
+            // executor.submit(() -> {
+            
+            WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
+            
+            if (contentHeaders.size() > 500)
+            {
+                if (selfIndex % interval == 0)
                 {
-                    // "continue" if not executor
-                    return;
+                    System.out.println(selfIndex + "/" + getContentHeaders().size());
                 }
-                
-                try
-                {
-                    saveFile(fileHeader, outputPath, realName);
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-                
-                if (contentHeaders.size() > 500)
-                {
-                    if (selfIndex % interval == 0)
-                    {
-                        System.out.println(selfIndex + "/" + getContentHeaders().size());
-                    }
-                }
-            });
+            }
+            
+            if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
+            {
+                // "continue" if not executor
+                //System.out.println("Duplicate file, skipping");
+                continue;
+            }
+            
+            try
+            {
+                saveFile(fileHeader, outputPath, realName);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+//            });
         }
         try
         {

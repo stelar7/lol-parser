@@ -229,7 +229,48 @@ public final class UtilHandler
         try (ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
              FileOutputStream fos = new FileOutputStream(output.toFile()))
         {
-            fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            long bytes = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+            if (bytes < 20 * 1028 * 1028)
+            {
+                fos.close();
+                rbc.close();
+                
+                Files.deleteIfExists(output);
+                downloadOldWay(output, finalUrl);
+            }
+        }
+    }
+    
+    
+    private static void downloadOldWay(Path output, String url)
+    {
+        try
+        {
+            System.out.println("Fast download failed, trying old version");
+            final String        USER_AGENT_VALUE = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11";
+            final byte[]        buffer           = new byte[1024];
+            int                 read;
+            final URLConnection uc               = new URL(url).openConnection();
+            uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            uc.setRequestProperty("Content-Language", "en-US");
+            uc.setRequestProperty("User-Agent", USER_AGENT_VALUE);
+            uc.setUseCaches(false);
+            uc.setDoInput(true);
+            uc.setDoOutput(true);
+            try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
+            {
+                while ((read = in.read(buffer)) != -1)
+                {
+                    out.write(buffer, 0, read);
+                }
+                out.flush();
+            } catch (final FileNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
     
