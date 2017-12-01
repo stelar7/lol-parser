@@ -698,7 +698,11 @@ public class TestHashes
         }
         
         JsonElement elem = new JsonParser().parse(UtilHandler.readAsString(path));
-        JsonArray   arr  = elem.getAsJsonArray();
+        if (elem.isJsonNull())
+        {
+            return;
+        }
+        JsonArray arr = elem.getAsJsonArray();
         
         StringBuilder data = new StringBuilder("{\n");
         

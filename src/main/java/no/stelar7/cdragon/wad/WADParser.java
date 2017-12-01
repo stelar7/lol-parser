@@ -100,39 +100,18 @@ public class WADParser
         
         if (Files.exists(noCompressionPath))
         {
-            if (Files.size(noCompressionPath) < 734003200L)
-            {
-                System.out.println("File too small to be legit, deleting");
-                Files.deleteIfExists(noCompressionPath);
-                return parseVersion(pluginName, version, path);
-            }
-            
             deleteOld(fileLocation);
             return parse(noCompressionPath);
         }
         
         if (Files.exists(fileLocation))
         {
-            if (Files.size(fileLocation) < 734003200L)
-            {
-                System.out.println("File too small to be legit, deleting");
-                Files.deleteIfExists(fileLocation);
-                return parseVersion(pluginName, version, path);
-            }
-            
             uncompress(pluginName, fileLocation, noCompressionPath);
             deleteOld(fileLocation);
             return parse(noCompressionPath);
         }
         
         download(pluginName, fileLocation, urlWithFormatTokens, version);
-        if (Files.size(fileLocation) < 734003200L)
-        {
-            System.out.println("File too small to be legit, deleting");
-            Files.deleteIfExists(fileLocation);
-            return null;
-        }
-        
         uncompress(pluginName, fileLocation, noCompressionPath);
         deleteOld(fileLocation);
         return parse(noCompressionPath);
