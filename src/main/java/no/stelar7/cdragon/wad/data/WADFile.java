@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.*;
 
 @Data
 public class WADFile
@@ -38,7 +37,8 @@ public class WADFile
         }
         System.out.println("Extracting files from " + pluginName + "/" + wadName);
         final Path outputPath = path.resolve(pluginName);
-        Path       ukp        = outputPath.resolve(unknownHashContainer);
+        
+        Path ukp = outputPath.resolve(unknownHashContainer);
         try
         {
             if (!Files.exists(ukp))
@@ -52,33 +52,28 @@ public class WADFile
             e.printStackTrace();
         }
         
-        ExecutorService executor  = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors());
-        final int       interval  = (int) Math.ceil(getContentHeaders().size() / 10f);
-        String          legitName = pluginName;
+        String legitName = pluginName;
         if (pluginName.contains("_"))
         {
             legitName = pluginName.substring(0, pluginName.indexOf('_'));
         }
         String realName = legitName;
         
+        final int interval = (int) Math.ceil(getContentHeaders().size() / 10f);
         for (int index = 0; index < getContentHeaders().size(); index++)
         {
-            final int selfIndex = index;
-            // executor.submit(() -> {
-            
-            WADContentHeaderV1 fileHeader = getContentHeaders().get(selfIndex);
+            WADContentHeaderV1 fileHeader = getContentHeaders().get(index);
             
             if (contentHeaders.size() > 500)
             {
-                if (selfIndex % interval == 0)
+                if (index % interval == 0)
                 {
-                    System.out.println(selfIndex + "/" + getContentHeaders().size());
+                    System.out.println(index + "/" + getContentHeaders().size());
                 }
             }
             
             if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
             {
-                // "continue" if not executor
                 //System.out.println("Duplicate file, skipping");
                 continue;
             }
@@ -90,18 +85,9 @@ public class WADFile
             {
                 e.printStackTrace();
             }
-
-//            });
         }
-        try
-        {
-            executor.shutdown();
-            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            fileReader.close();
-        } catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
+        
+        fileReader.close();
     }
     
     private void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName) throws IOException
@@ -207,7 +193,7 @@ public class WADFile
         
         if (UtilHandler.isProbable3DModelStuff(magic.getData()))
         {
-            return "unknown3DModelStuff";
+            return "skn";
         }
         
         System.out.print("Unknown filetype: ");

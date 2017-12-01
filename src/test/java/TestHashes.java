@@ -12,7 +12,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.concurrent.*;
 
 public class TestHashes
 {
@@ -71,8 +70,7 @@ public class TestHashes
         Path file  = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/");
         Path file2 = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
-        ExecutorService service     = Executors.newFixedThreadPool(1);//Runtime.getRuntime().availableProcessors());
-        Path            innerFolder = outerFolder.resolve(dir.getFileName());
+        Path innerFolder = outerFolder.resolve(dir.getFileName());
         currentInnerFolder = innerFolder;
         hashes = getUnknownHashes(dir);
         
@@ -162,11 +160,8 @@ public class TestHashes
         System.out.println("Parsing data from unknown files");
         for (String ext : exts)
         {
-            service.submit(() -> folderData.forEach((k, v) -> generateHashList(k, v, ext, hashes)));
+            folderData.forEach((k, v) -> generateHashList(k, v, ext, hashes));
         }
-        
-        service.shutdown();
-        service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         
         
         folderData.put("perkstyles", new Integer[]{1});
@@ -217,40 +212,6 @@ public class TestHashes
                 }
                 return FileVisitResult.SKIP_SUBTREE;
             }
-            
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
-            {
-                Path downloadDir = Paths.get(System.getProperty("user.home"), "Downloads");
-                
-                java.nio.file.Files.walkFileTree(dir, new SimpleFileVisitor<Path>()
-                {
-                    @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-                    {
-                        if (file.getParent().equals(downloadDir) || file.equals(downloadDir))
-                        {
-                            return FileVisitResult.CONTINUE;
-                        }
-                        
-                        Files.deleteIfExists(file);
-                        return FileVisitResult.CONTINUE;
-                    }
-                    
-                    @Override
-                    public FileVisitResult postVisitDirectory(Path file, IOException exc) throws IOException
-                    {
-                        if (file.equals(downloadDir))
-                        {
-                            return FileVisitResult.CONTINUE;
-                        }
-                        
-                        Files.deleteIfExists(file);
-                        return FileVisitResult.CONTINUE;
-                    }
-                });
-                return FileVisitResult.SKIP_SUBTREE;
-            }
         });
         
         combineAndDeleteNestedTemp();
@@ -265,14 +226,10 @@ public class TestHashes
             return;
         }
         
+        System.out.println("Combining hashes");
+        
         Files.walkFileTree(outerFolder, new SimpleFileVisitor<Path>()
         {
-            @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
-            {
-                Files.deleteIfExists(dir);
-                return FileVisitResult.CONTINUE;
-            }
             
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -284,7 +241,6 @@ public class TestHashes
                         foundHashes.add(new Pair<>(k, v));
                     }
                 });
-                Files.deleteIfExists(file);
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -302,12 +258,11 @@ public class TestHashes
             
             if (sb.toString().length() > 10)
             {
-                Files.createDirectories(outerFolder);
-                Files.write(outerFolder.resolve("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+                Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
                 System.out.println("New hashes found!!");
             } else
             {
-                Files.deleteIfExists(outerFolder.resolve("combined.json"));
+                Files.deleteIfExists(Paths.get("combined.json"));
                 System.out.println("No new hashes found");
             }
             
@@ -387,7 +342,13 @@ public class TestHashes
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> foundHashes.add(new Pair<>(k, v)));
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(new Pair<>(k, v));
+                    }
+                });
                 Files.deleteIfExists(file);
                 return FileVisitResult.CONTINUE;
             }

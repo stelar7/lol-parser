@@ -222,11 +222,17 @@ public final class UtilHandler
         return null;
     }
     
-    public static void tryDownloadVersion(Path output, String url, String version) throws IOException
+    public static void tryDownloadVersion(Path output, String url, String version)
     {
         String finalUrl = String.format(url, version);
         
-        try (ReadableByteChannel rbc = Channels.newChannel(new URL(finalUrl).openStream());
+        //downloadEfficient(output,finalUrl);
+        downloadOldWay(output, finalUrl);
+    }
+    
+    private static void downloadEfficient(Path output, String url)
+    {
+        try (ReadableByteChannel rbc = Channels.newChannel(new URL(url).openStream());
              FileOutputStream fos = new FileOutputStream(output.toFile()))
         {
             long bytes = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -235,9 +241,13 @@ public final class UtilHandler
                 fos.close();
                 rbc.close();
                 
+                System.out.println("Efficient download failed, trying old version");
                 Files.deleteIfExists(output);
-                downloadOldWay(output, finalUrl);
+                downloadOldWay(output, url);
             }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
     
@@ -246,7 +256,6 @@ public final class UtilHandler
     {
         try
         {
-            System.out.println("Fast download failed, trying old version");
             final String        USER_AGENT_VALUE = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11";
             final byte[]        buffer           = new byte[1024];
             int                 read;

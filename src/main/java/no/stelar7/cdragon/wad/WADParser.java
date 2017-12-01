@@ -130,7 +130,7 @@ public class WADParser
         Files.deleteIfExists(fileLocation);
     }
     
-    private void download(String pluginName, Path save, String url, String version) throws IOException
+    private void download(String pluginName, Path save, String url, String version)
     {
         System.out.println("Downloading " + pluginName);
         UtilHandler.tryDownloadVersion(save, url, version);
