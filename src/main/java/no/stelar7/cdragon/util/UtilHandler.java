@@ -226,8 +226,7 @@ public final class UtilHandler
     {
         String finalUrl = String.format(url, version);
         
-        //downloadEfficient(output,finalUrl);
-        downloadOldWay(output, finalUrl);
+        downloadEfficient(output,finalUrl);
     }
     
     private static void downloadEfficient(Path output, String url)
