@@ -30,11 +30,11 @@ public class WADParser
     {
         String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
         String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
-        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 350);
+        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
         if (version == null)
         {
             urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
-            version = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 350);
+            version = UtilHandler.getMaxVersion(urlWithFormatTokens, 340, 360);
         }
         
         return handleAll(pluginName, urlWithFormatTokens, version, path);

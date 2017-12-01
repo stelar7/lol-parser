@@ -59,7 +59,7 @@ public class WADFile
         }
         String realName = legitName;
         
-        final int interval = (int) Math.ceil(getContentHeaders().size() / 10f);
+        final int interval = (int) Math.floor(getContentHeaders().size() / 10f);
         for (int index = 0; index < getContentHeaders().size(); index++)
         {
             WADContentHeaderV1 fileHeader = getContentHeaders().get(index);
