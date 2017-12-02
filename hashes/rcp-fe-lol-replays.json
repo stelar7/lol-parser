@@ -1,0 +1,17 @@
+{
+	"264ffd1fe7ba5228": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_download.png",
+	"728f3c2e884d785f": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_download_click.png",
+	"e89270a96f5ed48c": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_download_disabled.png",
+	"339acaa6d50de4f5": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_download_hover.png",
+	"6c8935108acb6c24": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_error.png",
+	"491c979d4dfe519b": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_error_hover.png",
+	"49ed094ac0dcd410": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_lost.png",
+	"acaa300f36f55185": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_pending.png",
+	"5e73be841f45b5a4": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch.png",
+	"4234b7c2ff22285e": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch_click.png",
+	"6a50a734fe7a2bfe": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch_disabled.png",
+	"b0f6a8af5ce3ce6c": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch_hover.png",
+	"d75cdbca70bbf41f": "plugins/rcp-fe-lol-replays/global/default/index.html",
+	"c6bc91f1bf34308e": "plugins/rcp-fe-lol-replays/global/default/init.js",
+	"ca2889ed8ff08276": "plugins/rcp-fe-lol-replays/global/default/trans.json"
+}

@@ -1,0 +1,18 @@
+{
+	"3771a2d81b81e83b": "plugins/rcp-fe-lol-personalized-offers/global/default/audio/sfx-store-purchase-modal-button-hover.ogg",
+	"663546bae202fc18": "plugins/rcp-fe-lol-personalized-offers/global/default/audio/sfx-ui-personalized-offers-reveal-click.ogg",
+	"07483ab4473a43e2": "plugins/rcp-fe-lol-personalized-offers/global/default/audio/sfx-ui-personalized-offers-stinger.ogg",
+	"729924840b91142b": "plugins/rcp-fe-lol-personalized-offers/global/default/audio/sfx-uikit-button-gold-click.ogg",
+	"df2d927152b25b68": "plugins/rcp-fe-lol-personalized-offers/global/default/audio/sfx-uikit-button-gold-hover.ogg",
+	"963efcb93063fdc6": "plugins/rcp-fe-lol-personalized-offers/global/default/external-link-mask.png",
+	"80212ad240d5bc0f": "plugins/rcp-fe-lol-personalized-offers/global/default/images/card-corner.png",
+	"c6f5037a6240dafe": "plugins/rcp-fe-lol-personalized-offers/global/default/images/icon-helmet.png",
+	"326b50acf5a6259e": "plugins/rcp-fe-lol-personalized-offers/global/default/images/legacy-icon.png",
+	"b08fdc3de4290d65": "plugins/rcp-fe-lol-personalized-offers/global/default/images/main-rule.png",
+	"c52d3ca373bc4dc8": "plugins/rcp-fe-lol-personalized-offers/global/default/images/offer-card-back.png",
+	"9834b173134192ca": "plugins/rcp-fe-lol-personalized-offers/global/default/images/offer-card-front.png",
+	"5b3c4e5e74b849a8": "plugins/rcp-fe-lol-personalized-offers/global/default/images/offer-details-sale-badge.png",
+	"750d855928051138": "plugins/rcp-fe-lol-personalized-offers/global/default/index.html",
+	"90086d29ee86a733": "plugins/rcp-fe-lol-personalized-offers/global/default/rcp-fe-lol-personalized-offers.js",
+	"6c63a4acdb7ab365": "plugins/rcp-fe-lol-personalized-offers/global/default/trans.json"
+}

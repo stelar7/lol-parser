@@ -2,5 +2,6 @@
 	"61c6958a74c8ff89": "plugins/rcp-fe-viewport/global/default/css/main.css",
 	"094749f61b30bb6a": "plugins/rcp-fe-viewport/global/default/index.html",
 	"1b9ef6c6adeccc33": "plugins/rcp-fe-viewport/global/default/init.js",
-	"38b14fc03a9a9e68": "plugins/rcp-fe-viewport/global/default/init.js.map"
+	"38b14fc03a9a9e68": "plugins/rcp-fe-viewport/global/default/init.js.map",
+	"5c3aa8d901af6b5a": "plugins/rcp-fe-viewport/global/default/rcp-fe-viewport.js"
 }

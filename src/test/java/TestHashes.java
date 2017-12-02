@@ -187,35 +187,6 @@ public class TestHashes
         combineAndDeleteTemp();
     }
     
-    @Test
-    public void testAllHashes() throws IOException, InterruptedException
-    {
-        Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<Path>()
-        {
-            
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
-            {
-                try
-                {
-                    if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads")))
-                    {
-                        return FileVisitResult.CONTINUE;
-                    }
-                    
-                    System.out.println(dir.toAbsolutePath().toString());
-                    
-                    runDirectory(dir);
-                } catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                return FileVisitResult.SKIP_SUBTREE;
-            }
-        });
-        
-        combineAndDeleteNestedTemp();
-    }
     
     private void combineAndDeleteNestedTemp() throws IOException
     {
@@ -555,7 +526,7 @@ public class TestHashes
             wip = wip.substring(wip.lastIndexOf("assets"));
         } else
         {
-            System.err.println("WTF??");
+            System.err.println("WTF?? no WIP?");
             System.err.println(wip);
             System.err.println(pre + wip);
         }
@@ -595,54 +566,57 @@ public class TestHashes
         JsonObject    elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
         StringBuilder data = new StringBuilder("{\n");
         
-        String passive = elem.getAsJsonObject("passive").get("abilityIconPath").getAsString().toLowerCase(Locale.ENGLISH);
-        
-        if (!passive.isEmpty())
+        if (elem.has("passive"))
         {
             getElementAndCheckHash(elem.getAsJsonObject("passive"), "abilityIconPath", data);
         }
         
-        JsonArray arr = elem.getAsJsonArray("spells");
-        
-        for (JsonElement element : arr)
+        if (elem.has("spells"))
         {
-            JsonObject current = element.getAsJsonObject();
-            getElementAndCheckHash(current, "abilityIconPath", data);
-        }
-        
-        arr = elem.getAsJsonArray("recommendedItemDefaults");
-        
-        for (JsonElement element : arr)
-        {
-            String value = element.getAsString().toLowerCase(Locale.ENGLISH);
-            value = value.substring(value.indexOf("data"));
-            String hashMe = pre + value;
-            
-            hashAndAddToSB(data, hashMe);
-        }
-        
-        
-        arr = elem.getAsJsonArray("skins");
-        
-        
-        for (JsonElement element : arr)
-        {
-            JsonObject ob = element.getAsJsonObject();
-            
-            getElementAndCheckHash(ob, "splashPath", data);
-            getElementAndCheckHash(ob, "uncenteredSplashPath", data);
-            getElementAndCheckHash(ob, "tilePath", data);
-            getElementAndCheckHash(ob, "loadScreenPath", data);
-            getElementAndCheckHash(ob, "splashVideoPath", data);
-            
-            if (ob.has("chromas"))
+            JsonArray arr = elem.getAsJsonArray("spells");
+            for (JsonElement element : arr)
             {
-                JsonArray chrom = ob.getAsJsonArray("chromas");
-                for (JsonElement ch : chrom)
+                JsonObject current = element.getAsJsonObject();
+                getElementAndCheckHash(current, "abilityIconPath", data);
+            }
+        }
+        
+        if (elem.has("recommendedItemDefaults"))
+        {
+            JsonArray arr = elem.getAsJsonArray("recommendedItemDefaults");
+            for (JsonElement element : arr)
+            {
+                String value = element.getAsString().toLowerCase(Locale.ENGLISH);
+                value = value.substring(value.indexOf("data"));
+                String hashMe = pre + value;
+                
+                hashAndAddToSB(data, hashMe);
+            }
+        }
+        
+        
+        if (elem.has("skins"))
+        {
+            JsonArray arr = elem.getAsJsonArray("skins");
+            for (JsonElement element : arr)
+            {
+                JsonObject ob = element.getAsJsonObject();
+                
+                getElementAndCheckHash(ob, "splashPath", data);
+                getElementAndCheckHash(ob, "uncenteredSplashPath", data);
+                getElementAndCheckHash(ob, "tilePath", data);
+                getElementAndCheckHash(ob, "loadScreenPath", data);
+                getElementAndCheckHash(ob, "splashVideoPath", data);
+                
+                if (ob.has("chromas"))
                 {
-                    String cp = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
-                    cp = cp.substring(cp.lastIndexOf("v1"));
-                    hashAndAddToSB(data, pre + cp);
+                    JsonArray chrom = ob.getAsJsonArray("chromas");
+                    for (JsonElement ch : chrom)
+                    {
+                        String cp = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
+                        cp = cp.substring(cp.lastIndexOf("v1"));
+                        hashAndAddToSB(data, pre + cp);
+                    }
                 }
             }
         }
@@ -758,5 +732,77 @@ public class TestHashes
         {
             e.printStackTrace();
         }
+    }
+    
+    @Test
+    public void testAllHashes() throws IOException, InterruptedException
+    {
+        Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<Path>()
+        {
+            
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+            {
+                try
+                {
+                    if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads")))
+                    {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    
+                    if (dir.toAbsolutePath().toString().contains("lol-loot"))
+                    {
+                        return FileVisitResult.SKIP_SUBTREE;
+                    }
+                    
+                    System.out.println(dir.toAbsolutePath().toString());
+                    
+                    runDirectory(dir);
+                } catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+        });
+        
+        combineAndDeleteNestedTemp();
+    }
+    
+    
+    @Test
+    public void testSortAllHashes() throws IOException
+    {
+        
+        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                System.out.println(file.toAbsolutePath().toString());
+                
+                final List<Pair<String, String>> foundHashes = new ArrayList<>();
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(new Pair<>(k, v));
+                    }
+                });
+                
+                foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+                
+                StringBuilder sb = new StringBuilder("{\n");
+                for (Pair<String, String> pair : foundHashes)
+                {
+                    sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                }
+                sb.reverse().delete(0, 2).reverse().append("\n}");
+                
+                Files.createDirectories(Paths.get("hashes", "fixed"));
+                Files.write(Paths.get("hashes", "fixed", file.getFileName().toString()), sb.toString().getBytes(StandardCharsets.UTF_8));
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
