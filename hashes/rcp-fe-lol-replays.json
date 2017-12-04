@@ -11,6 +11,7 @@
 	"4234b7c2ff22285e": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch_click.png",
 	"6a50a734fe7a2bfe": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch_disabled.png",
 	"b0f6a8af5ce3ce6c": "plugins/rcp-fe-lol-replays/global/default/assets/button-images/btn_replay_watch_hover.png",
+	"83af0c115985c74b": "plugins/rcp-fe-lol-replays/global/default/css/main.css",
 	"d75cdbca70bbf41f": "plugins/rcp-fe-lol-replays/global/default/index.html",
 	"c6bc91f1bf34308e": "plugins/rcp-fe-lol-replays/global/default/init.js",
 	"ca2889ed8ff08276": "plugins/rcp-fe-lol-replays/global/default/trans.json"

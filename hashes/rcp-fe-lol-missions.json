@@ -23,6 +23,7 @@
 	"49ea4251bb69a32a": "plugins/rcp-fe-lol-missions/global/default/eog_missionreward_ward.png",
 	"0f630170ad00c781": "plugins/rcp-fe-lol-missions/global/default/eog_rewardoutro_magic.webm",
 	"c3f62e2573df9fa5": "plugins/rcp-fe-lol-missions/global/default/events/images/eog/rewards/leveling/backgrounds/eog_default.png",
+	"7ae5c8213af20bff": "plugins/rcp-fe-lol-missions/global/default/events/images/missions/leveling/missionicon-wotd.png",
 	"218f6b21d2fb7422": "plugins/rcp-fe-lol-missions/global/default/index.html",
 	"2149f47b9c0ea8fb": "plugins/rcp-fe-lol-missions/global/default/init.js",
 	"a0c49a98a8938d68": "plugins/rcp-fe-lol-missions/global/default/mission_tracker_button.png",
@@ -81,6 +82,8 @@
 	"9d65457430e1b5f0": "plugins/rcp-fe-lol-missions/global/default/rewardicons_xp.png",
 	"ab77acc522384034": "plugins/rcp-fe-lol-missions/global/default/shardframe_4k.png",
 	"cf28f589269e4cee": "plugins/rcp-fe-lol-missions/global/default/shardmask.png",
+	"30900a6345421f23": "plugins/rcp-fe-lol-missions/global/default/sounds/sfx-soc-ui-chatwindow-close.ogg",
+	"1840766eda8e8e45": "plugins/rcp-fe-lol-missions/global/default/sounds/sfx-soc-ui-chatwindow-open.ogg",
 	"da1b97c5755ebad6": "plugins/rcp-fe-lol-missions/global/default/timeleft_alerticon.png",
 	"5abf6883e8f9665c": "plugins/rcp-fe-lol-missions/global/default/trans.json",
 	"ffc3749e59dafcd3": "plugins/rcp-fe-lol-missions/global/default/xmark.png"

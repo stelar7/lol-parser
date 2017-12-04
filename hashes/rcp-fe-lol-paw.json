@@ -1,5 +1,11 @@
 {
 	"c7a2c0f9b9ca183c": "plugins/rcp-fe-lol-paw/global/default/audio/sfx-store-purchase-modal-champ-outro.ogg",
 	"db4593e15d9d479a": "plugins/rcp-fe-lol-paw/global/default/bundle.js",
-	"1524cd46654fd6bb": "plugins/rcp-fe-lol-paw/global/default/index.html"
+	"68f00631120d6ecb": "plugins/rcp-fe-lol-paw/global/default/images/src/images/icon-chroma.png",
+	"b14a7811f5975733": "plugins/rcp-fe-lol-paw/global/default/images/src/images/requirements-not-met-message-border.png",
+	"19034118fe9427b8": "plugins/rcp-fe-lol-paw/global/default/images/src/images/sale-badge.png",
+	"673a5e1a9061cbc9": "plugins/rcp-fe-lol-paw/global/default/images/src/images/spinner.png",
+	"1524cd46654fd6bb": "plugins/rcp-fe-lol-paw/global/default/index.html",
+	"1d9addcc6c2f6c99": "plugins/rcp-fe-lol-paw/global/default/trans.json",
+	"7f4dceffe4c80a79": "plugins/rcp-fe-lol-paw/global/default/videos/unlockceremony.webm"
 }

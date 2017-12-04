@@ -27,5 +27,8 @@
 	"68d2a19c6190db6a": "plugins/rcp-fe-lol-item-sets/global/default/no_champ.png",
 	"117811af79ff9f80": "plugins/rcp-fe-lol-item-sets/global/default/role-filter-disabled.png",
 	"107e630b9620c7a5": "plugins/rcp-fe-lol-item-sets/global/default/role-filter-enabled.png",
+	"23cd3a28664a2fef": "plugins/rcp-fe-lol-item-sets/global/default/sfx-uikit-generic-click-small.ogg",
+	"dcba21e223d1fb02": "plugins/rcp-fe-lol-item-sets/global/default/sfx-uikit-grid-click.ogg",
+	"e998c33bee829006": "plugins/rcp-fe-lol-item-sets/global/default/sfx-uikit-grid-hover.ogg",
 	"0b5c4e1fe9bac13e": "plugins/rcp-fe-lol-item-sets/global/default/trans.json"
 }

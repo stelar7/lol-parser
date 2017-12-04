@@ -1,7 +1,4 @@
 {
-	"e7ff37ffa14398bd": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/bundle.js",
-	"6006852b37289c35": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/images/darkstar.png",
-	"2a345ea8f5061e1c": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/index.html",
 	"1e4dac8e61f4303b": "plugins/rcp-fe-lol-champ-select/global/cs_cz/trans.json",
 	"2eae3432f5f472b5": "plugins/rcp-fe-lol-champ-select/global/de_de/trans.json",
 	"a2005ac5cd9de306": "plugins/rcp-fe-lol-champ-select/global/default/1.bundle.js",
@@ -185,6 +182,7 @@
 	"2702794fcbc72346": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-button-reroll-click.ogg",
 	"5974ed4b77b1115a": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-button-reroll-hover.ogg",
 	"bc5a34d70879848e": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-button-trade-click.ogg",
+	"d8841ae2ba2e9b0d": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-champgrid-button-close.ogg",
 	"43de66d2750f2a3d": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-draft-10ban-enemy-ban.ogg",
 	"eae01ab7f2303469": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-draft-10ban-intro.ogg",
 	"a84fdf65a9aff3c0": "plugins/rcp-fe-lol-champ-select/global/default/sounds/sfx-cs-draft-10ban-team-bans-locked.ogg",

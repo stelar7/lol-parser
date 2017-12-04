@@ -16,9 +16,13 @@ import java.util.*;
 public class TestHashes
 {
     
-    private final List<String> exts        = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
-    private final String       pre         = "plugins/rcp-be-lol-game-data/global/default/";
-    private final Path         outerFolder = Paths.get("tmp");
+    private final List<String> exts      = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
+    private final String       prePre    = "plugins/rcp-be-lol-game-data/";
+    private final String[]     preRegion = {"global", "euw", "na", "br", "jp", "kr", "eune", "tr"};
+    private final String[]     preLang   = {"default", "en_gb"};
+    
+    
+    private final Path outerFolder = Paths.get("tmp");
     
     private final List<String> filenames = Arrays.asList(
             "v1/championperkstylemap.json",
@@ -43,8 +47,8 @@ public class TestHashes
     
     
     final int skinMax     = 50;
-    final int championMax = 7500;
-    final int iconMax     = 100000;
+    final int championMax = 750;
+    final int iconMax     = 10000;
     
     private final Map<String, Integer[]> folderData = new HashMap<String, Integer[]>()
     {{
@@ -83,7 +87,14 @@ public class TestHashes
         StringBuilder data = new StringBuilder("{\n");
         for (String filename : filenames)
         {
-            hashAndAddToSB(data, pre + filename);
+            for (String reg : preRegion)
+            {
+                for (String lan : preLang)
+                {
+                    String pre = prePre + reg + "/" + lan + "/";
+                    hashAndAddToSB(data, pre + filename);
+                }
+            }
         }
         finalizeFileReading("files.json", data);
         
@@ -93,48 +104,69 @@ public class TestHashes
         
         for (String attempt : parseHextechFile())
         {
-            hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
-            hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
+            for (String reg : preRegion)
+            {
+                for (String lan : preLang)
+                {
+                    String pre = prePre + reg + "/" + lan + "/";
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
+                    hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
+                }
+            }
         }
         
         for (int i = -1; i < championMax; i++)
         {
-            hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + "_open.png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + "_open.png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_open.png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/rarity-gem-icons/" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + "_open.png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + "_open.png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + ".png");
-            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + "_open.png");
-            
-            for (int j = -1; j < skinMax; j++)
+            for (String reg : preRegion)
             {
-                hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
-                hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + "_open.png");
-                
-                String skinid = String.format("%d%03d", i, j);
-                hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_" + skinid + ".png ");
-                hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_rental_" + skinid + ".png ");
+                for (String lan : preLang)
+                {
+                    String pre = prePre + reg + "/" + lan + "/";
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + "_open.png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + "_open.png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_open.png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/rarity-gem-icons/" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + "_open.png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + "_open.png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + ".png");
+                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + "_open.png");
+                    
+                    for (int j = -1; j < skinMax; j++)
+                    {
+                        hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
+                        hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + "_open.png");
+                        
+                        String skinid = String.format("%d%03d", i, j);
+                        hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_" + skinid + ".png ");
+                        hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_rental_" + skinid + ".png ");
+                    }
+                }
             }
         }
         
-        // constants..
-        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/epic.png");
-        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/legendary.png");
-        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/mythic.png");
-        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/ultimate.png");
-        
-        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest.png");
-        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_champion_mastery.png");
-        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_key_bundle.png");
-        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_mystery_champion_shard.png");
-        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_promotion.png");
+        for (String reg : preRegion)
+        {
+            for (String lan : preLang)
+            {
+                String pre = prePre + reg + "/" + lan + "/";
+                // constants..
+                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/epic.png");
+                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/legendary.png");
+                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/mythic.png");
+                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/ultimate.png");
+                
+                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest.png");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_champion_mastery.png");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_key_bundle.png");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_mystery_champion_shard.png");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_promotion.png");
+            }
+        }
         finalizeFileReading("hextech.json", data2);
         
         
@@ -366,11 +398,48 @@ public class TestHashes
         
         for (String key : elem.keySet())
         {
-            JsonArray array = elem.getAsJsonArray(key);
-            
-            for (JsonElement element : array)
+            if (elem.get(key).isJsonArray())
             {
-                JsonObject obj = element.getAsJsonObject().getAsJsonObject("assets");
+                
+                JsonArray array = elem.getAsJsonArray(key);
+                for (JsonElement element : array)
+                {
+                    JsonObject obj = element.getAsJsonObject().getAsJsonObject("assets");
+                    
+                    getElementAndCheckHash(obj, "champ-select-flyout-background", data);
+                    getElementAndCheckHash(obj, "champ-select-planning-intro", data);
+                    getElementAndCheckHash(obj, "game-select-icon-default", data);
+                    getElementAndCheckHash(obj, "game-select-icon-disabled", data);
+                    getElementAndCheckHash(obj, "game-select-icon-hover", data);
+                    getElementAndCheckHash(obj, "icon-defeat", data);
+                    getElementAndCheckHash(obj, "icon-empty", data);
+                    getElementAndCheckHash(obj, "icon-hover", data);
+                    getElementAndCheckHash(obj, "icon-leaver", data);
+                    getElementAndCheckHash(obj, "icon-victory", data);
+                    getElementAndCheckHash(obj, "parties-background", data);
+                    getElementAndCheckHash(obj, "social-icon-leaver", data);
+                    getElementAndCheckHash(obj, "social-icon-victory", data);
+                    getElementAndCheckHash(obj, "game-select-icon-active", data);
+                    getElementAndCheckHash(obj, "ready-check-background", data);
+                    getElementAndCheckHash(obj, "map-north", data);
+                    getElementAndCheckHash(obj, "map-south", data);
+                    getElementAndCheckHash(obj, "gameflow-background", data);
+                    getElementAndCheckHash(obj, "notification-background", data);
+                    getElementAndCheckHash(obj, "notification-icon", data);
+                    getElementAndCheckHash(obj, "champ-select-background-sound", data);
+                    getElementAndCheckHash(obj, "gameselect-button-hover-sound", data);
+                    getElementAndCheckHash(obj, "music-inqueue-loop-sound", data);
+                    getElementAndCheckHash(obj, "postgame-ambience-loop-sound", data);
+                    getElementAndCheckHash(obj, "sfx-ambience-pregame-loop-sound", data);
+                    getElementAndCheckHash(obj, "ready-check-background-sound", data);
+                    getElementAndCheckHash(obj, "game-select-icon-active-video", data);
+                    getElementAndCheckHash(obj, "game-select-icon-intro-video", data);
+                    getElementAndCheckHash(obj, "icon-defeat-video", data);
+                    getElementAndCheckHash(obj, "icon-victory-video", data);
+                }
+            } else
+            {
+                JsonObject obj = elem.getAsJsonObject(key).getAsJsonObject("assets");
                 
                 getElementAndCheckHash(obj, "champ-select-flyout-background", data);
                 getElementAndCheckHash(obj, "champ-select-planning-intro", data);
@@ -528,10 +597,24 @@ public class TestHashes
         {
             System.err.println("WTF?? no WIP?");
             System.err.println(wip);
-            System.err.println(pre + wip);
+            for (String reg : preRegion)
+            {
+                for (String lan : preLang)
+                {
+                    String pre = prePre + reg + "/" + lan + "/";
+                    System.err.println(pre + wip);
+                }
+            }
         }
         
-        hashAndAddToSB(data, pre + wip);
+        for (String reg : preRegion)
+        {
+            for (String lan : preLang)
+            {
+                String pre = prePre + reg + "/" + lan + "/";
+                hashAndAddToSB(data, pre + wip);
+            }
+        }
     }
     
     private void parseWardSkins(Path filepath, String filename)
@@ -588,9 +671,15 @@ public class TestHashes
             {
                 String value = element.getAsString().toLowerCase(Locale.ENGLISH);
                 value = value.substring(value.indexOf("data"));
-                String hashMe = pre + value;
-                
-                hashAndAddToSB(data, hashMe);
+                for (String reg : preRegion)
+                {
+                    for (String lan : preLang)
+                    {
+                        String pre    = prePre + reg + "/" + lan + "/";
+                        String hashMe = pre + value;
+                        hashAndAddToSB(data, hashMe);
+                    }
+                }
             }
         }
         
@@ -615,7 +704,14 @@ public class TestHashes
                     {
                         String cp = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
                         cp = cp.substring(cp.lastIndexOf("v1"));
-                        hashAndAddToSB(data, pre + cp);
+                        for (String reg : preRegion)
+                        {
+                            for (String lan : preLang)
+                            {
+                                String pre = prePre + reg + "/" + lan + "/";
+                                hashAndAddToSB(data, pre + cp);
+                            }
+                        }
                     }
                 }
             }
@@ -652,18 +748,22 @@ public class TestHashes
     
     private void generateHashList(String folderName, Integer[] depths, String fileType, List<String> unknownHashes)
     {
-        String pathPrefix = pre + "v1/" + folderName + "/";
-        
         StringBuilder sb = new StringBuilder("{\n");
-        
-        if (depths.length == 1)
+        for (String reg : preRegion)
         {
-            doLoop(depths[0], pathPrefix + "%s." + fileType, unknownHashes, sb);
-        } else
-        {
-            doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, unknownHashes, sb);
+            for (String lan : preLang)
+            {
+                String pre        = prePre + reg + "/" + lan + "/";
+                String pathPrefix = pre + "v1/" + folderName + "/";
+                if (depths.length == 1)
+                {
+                    doLoop(depths[0], pathPrefix + "%s." + fileType, unknownHashes, sb);
+                } else
+                {
+                    doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, unknownHashes, sb);
+                }
+            }
         }
-        
         finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
@@ -802,6 +902,62 @@ public class TestHashes
                 Files.createDirectories(Paths.get("hashes", "fixed"));
                 Files.write(Paths.get("hashes", "fixed", file.getFileName().toString()), sb.toString().getBytes(StandardCharsets.UTF_8));
                 return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    
+    @Test
+    public void testJoinSplitHashes() throws IOException
+    {
+        Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
+        Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        
+        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        
+        Map<String, StringBuilder> pluginData = new HashMap<>();
+        
+        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(new Pair<>(k, v));
+                    }
+                });
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+        ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+            Pair<String, String> data = new Pair<>(k, v);
+            if (!foundHashes.contains(data))
+            {
+                foundHashes.add(new Pair<>(k, v));
+            }
+        });
+        
+        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+        for (Pair<String, String> pair : foundHashes)
+        {
+            String builder = pair.getValue().substring("plugins/".length());
+            builder = builder.substring(0, builder.indexOf('/'));
+            
+            StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
+            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+        }
+        pluginData.forEach((k, sb) -> {
+            sb.reverse().delete(0, 2).reverse().append("\n}");
+            try
+            {
+                Files.createDirectories(newHashStore);
+                Files.write(newHashStore.resolve(k + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
             }
         });
     }
