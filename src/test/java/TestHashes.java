@@ -71,9 +71,6 @@ public class TestHashes
     
     private void runDirectory(Path dir) throws IOException, InterruptedException
     {
-        Path file  = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/");
-        Path file2 = dir.resolve("plugins/rcp-be-lol-game-data/global/default/v1/champions");
-        
         Path innerFolder = outerFolder.resolve(dir.getFileName());
         currentInnerFolder = innerFolder;
         hashes = getUnknownHashes(dir);
@@ -102,11 +99,11 @@ public class TestHashes
         System.out.println("Parsing hextech");
         StringBuilder data2 = new StringBuilder("{\n");
         
-        for (String attempt : parseHextechFile())
+        for (String reg : preRegion)
         {
-            for (String reg : preRegion)
+            for (String lan : preLang)
             {
-                for (String lan : preLang)
+                for (String attempt : parseHextechFile())
                 {
                     String pre = prePre + reg + "/" + lan + "/";
                     hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
@@ -115,11 +112,11 @@ public class TestHashes
             }
         }
         
-        for (int i = -1; i < championMax; i++)
+        for (String lan : preLang)
         {
             for (String reg : preRegion)
             {
-                for (String lan : preLang)
+                for (int i = -1; i < championMax; i++)
                 {
                     String pre = prePre + reg + "/" + lan + "/";
                     hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
@@ -169,24 +166,40 @@ public class TestHashes
         }
         finalizeFileReading("hextech.json", data2);
         
-        
         System.out.println("Parsing icon files");
-        findIconPathInJsonArrayFile(file, "perkstyles.json");
-        findIconPathInJsonArrayFile(file, "perks.json");
-        findIconPathInJsonArrayFile(file, "items.json");
-        findIconPathInJsonArrayFile(file, "summoner-spells.json");
-        findIconPathInJsonArrayFile(file, "profile-icons.json");
-        
-        parseWardSkins(file, "ward-skins.json");
-        parseMasteries(file, "summoner-masteries.json");
-        parseEmotes(file, "summoner-emotes.json");
-        parseBanners(file, "summoner-banners.json");
-        parseMapAssets(file, "map-assets/map-assets.json");
+        for (String reg : preRegion)
+        {
+            for (String lan : preLang)
+            {
+                String pre  = prePre + reg + "/" + lan + "/v1/";
+                Path   file = dir.resolve(pre);
+                findIconPathInJsonArrayFile(file, "perkstyles.json");
+                findIconPathInJsonArrayFile(file, "perks.json");
+                findIconPathInJsonArrayFile(file, "items.json");
+                findIconPathInJsonArrayFile(file, "summoner-spells.json");
+                findIconPathInJsonArrayFile(file, "profile-icons.json");
+                
+                parseWardSkins(file, "ward-skins.json");
+                parseMasteries(file, "summoner-masteries.json");
+                parseEmotes(file, "summoner-emotes.json");
+                parseBanners(file, "summoner-banners.json");
+                parseMapAssets(file, "map-assets/map-assets.json");
+            }
+        }
         
         System.out.println("Parsing champion files");
-        for (int i = -1; i < championMax; i++)
+        
+        for (String reg : preRegion)
         {
-            findInChampionFile(file2, i + ".json");
+            for (String lan : preLang)
+            {
+                String pre   = prePre + reg + "/" + lan + "/";
+                Path   file2 = dir.resolve(pre + "/v1/champions");
+                for (int i = -1; i < championMax; i++)
+                {
+                    findInChampionFile(file2, i + ".json");
+                }
+            }
         }
         
         System.out.println("Parsing data from unknown files");

@@ -129,6 +129,7 @@ public class WADFile
             
             if (header.getCompressed() == 2)
             {
+                System.out.println(new String(fileBytes, StandardCharsets.UTF_8));
                 return fileBytes;
             }
             
