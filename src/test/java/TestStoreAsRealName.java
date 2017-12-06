@@ -5,20 +5,24 @@ import javafx.util.Pair;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.wad.WADParser;
 import no.stelar7.cdragon.wad.data.WADFile;
+import org.apache.commons.compress.archivers.tar.*;
+import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPOutputStream;
 
 public class TestStoreAsRealName
 {
     
     private final List<String> exts   = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
     private final String       pre    = "plugins/rcp-be-lol-game-data/global/default/";
-    private final Path         folder = Paths.get("tmp");
+    private final Path         folder = Paths.get("tmp_gzip");
     
     
     final int skinMax     = 50;
@@ -80,6 +84,80 @@ public class TestStoreAsRealName
         combineAndDeleteTemp();
         System.out.println("Copying files");
         copyFilesToFolders();
+        createTARGZ();
+    }
+    
+    private void createTARGZ() throws IOException
+    {
+        Path base         = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty");
+        Path outputFolder = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty\\zipped-folders");
+        Files.createDirectories(outputFolder);
+        
+        Files.walkFileTree(base, new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+            {
+                if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads", "rcp-be-lol-game-data", "pretty")))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads", "rcp-be-lol-game-data", "pretty", "zipped-folders")))
+                {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+                
+                
+                compressFiles(Files.list(dir).collect(Collectors.toList()), outputFolder.resolve(dir.getFileName() + ".tar.gz"));
+                
+                return FileVisitResult.SKIP_SUBTREE;
+            }
+        });
+    }
+    
+    private void compressFiles(List<Path> files, Path output)
+    {
+        try (FileOutputStream fos = new FileOutputStream(output.toFile());
+             BufferedOutputStream bos = new BufferedOutputStream(fos);
+             GZIPOutputStream gos = new GZIPOutputStream(bos);
+             TarArchiveOutputStream tos = new TarArchiveOutputStream(gos))
+        {
+            tos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_STAR);
+            tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+            
+            for (Path file : files)
+            {
+                addToTar(tos, file, ".");
+            }
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private void addToTar(TarArchiveOutputStream tos, Path file, String dir) throws IOException
+    {
+        tos.putArchiveEntry(new TarArchiveEntry(file.toFile(), dir + "/" + file.getFileName().toString()));
+        if (Files.isDirectory(file))
+        {
+            tos.closeArchiveEntry();
+            for (Path child : Files.list(file).collect(Collectors.toList()))
+            {
+                addToTar(tos, child, dir + "/" + file.getFileName().toString());
+            }
+        } else
+        {
+            try (FileInputStream fis = new FileInputStream(file.toFile());
+                 BufferedInputStream bis = new BufferedInputStream(fis))
+            {
+                IOUtils.copy(bis, tos);
+                tos.closeArchiveEntry();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
     
     private void copyFilesToFolders()
@@ -655,7 +733,13 @@ public class TestStoreAsRealName
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> foundHashes.add(new Pair<>(k, v)));
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(new Pair<>(k, v));
+                    }
+                });
                 Files.deleteIfExists(file);
                 return FileVisitResult.CONTINUE;
             }
