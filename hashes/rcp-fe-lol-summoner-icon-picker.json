@@ -1,4 +1,14 @@
 {
+	"48fe4fc9e5562da9": "plugins/rcp-fe-lol-summoner-icon-picker/euw/default/images/x.png",
+	"6667078d2b1f2660": "plugins/rcp-fe-lol-summoner-icon-picker/euw/default/images/x_active.png",
+	"3af570dee518636a": "plugins/rcp-fe-lol-summoner-icon-picker/euw/default/images/x_hover.png",
+	"5021c59c7cb09ac0": "plugins/rcp-fe-lol-summoner-icon-picker/euw/default/sounds/sfx-summoner-icons-grid-hover.ogg",
+	"1d0f34f07938b468": "plugins/rcp-fe-lol-summoner-icon-picker/euw/default/sounds/sfx-uikit-button-circlegold-click.ogg",
+	"70142b240b83ebdd": "plugins/rcp-fe-lol-summoner-icon-picker/euw/en_gb/images/x.png",
+	"96ae6fa6f572edb0": "plugins/rcp-fe-lol-summoner-icon-picker/euw/en_gb/images/x_active.png",
+	"1df331ce7f532904": "plugins/rcp-fe-lol-summoner-icon-picker/euw/en_gb/images/x_hover.png",
+	"8260725a9d46a62a": "plugins/rcp-fe-lol-summoner-icon-picker/euw/en_gb/sounds/sfx-summoner-icons-grid-hover.ogg",
+	"9dd1dbf80f328527": "plugins/rcp-fe-lol-summoner-icon-picker/euw/en_gb/sounds/sfx-uikit-button-circlegold-click.ogg",
 	"5b4c07d2a0848c62": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/bundle.js",
 	"96fd77d08de09496": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/images/x.png",
 	"63a2d9a18a801d94": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/images/x_active.png",
@@ -7,5 +17,10 @@
 	"9daa20bbacf66a31": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/main.css",
 	"c9b87422baa27860": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/sounds/sfx-summoner-icons-grid-hover.ogg",
 	"658cbc05d2adfbc9": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/sounds/sfx-summoner-icons-select.ogg",
-	"0e665a822ad0c4e1": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/sounds/sfx-uikit-button-circlegold-click.ogg"
+	"0e665a822ad0c4e1": "plugins/rcp-fe-lol-summoner-icon-picker/global/default/sounds/sfx-uikit-button-circlegold-click.ogg",
+	"24f0b5ffef7ebe13": "plugins/rcp-fe-lol-summoner-icon-picker/global/en_gb/images/x.png",
+	"90a48a271d7d7e29": "plugins/rcp-fe-lol-summoner-icon-picker/global/en_gb/images/x_active.png",
+	"56be52e54ae11995": "plugins/rcp-fe-lol-summoner-icon-picker/global/en_gb/images/x_hover.png",
+	"05f5b49ec7cab3ba": "plugins/rcp-fe-lol-summoner-icon-picker/global/en_gb/sounds/sfx-summoner-icons-grid-hover.ogg",
+	"6ba0f1dcc59e75e4": "plugins/rcp-fe-lol-summoner-icon-picker/global/en_gb/sounds/sfx-uikit-button-circlegold-click.ogg"
 }

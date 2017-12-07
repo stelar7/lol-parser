@@ -1,4 +1,10 @@
 {
+	"042f161d372e9f15": "plugins/rcp-fe-lol-paw/euw/default/bundle.js",
+	"fa3d1429b7c40045": "plugins/rcp-fe-lol-paw/euw/default/index.html",
+	"531dd8b0b35785f4": "plugins/rcp-fe-lol-paw/euw/default/trans.json",
+	"89e11c7c79b1947b": "plugins/rcp-fe-lol-paw/euw/en_gb/bundle.js",
+	"9399c3e0ffab1b3f": "plugins/rcp-fe-lol-paw/euw/en_gb/index.html",
+	"f5cce3ac27b3acbc": "plugins/rcp-fe-lol-paw/euw/en_gb/trans.json",
 	"c7a2c0f9b9ca183c": "plugins/rcp-fe-lol-paw/global/default/audio/sfx-store-purchase-modal-champ-outro.ogg",
 	"db4593e15d9d479a": "plugins/rcp-fe-lol-paw/global/default/bundle.js",
 	"68f00631120d6ecb": "plugins/rcp-fe-lol-paw/global/default/images/src/images/icon-chroma.png",
@@ -7,5 +13,8 @@
 	"673a5e1a9061cbc9": "plugins/rcp-fe-lol-paw/global/default/images/src/images/spinner.png",
 	"1524cd46654fd6bb": "plugins/rcp-fe-lol-paw/global/default/index.html",
 	"1d9addcc6c2f6c99": "plugins/rcp-fe-lol-paw/global/default/trans.json",
-	"7f4dceffe4c80a79": "plugins/rcp-fe-lol-paw/global/default/videos/unlockceremony.webm"
+	"7f4dceffe4c80a79": "plugins/rcp-fe-lol-paw/global/default/videos/unlockceremony.webm",
+	"c1c7d97949e940e4": "plugins/rcp-fe-lol-paw/global/en_gb/bundle.js",
+	"181f364fdc8b227e": "plugins/rcp-fe-lol-paw/global/en_gb/index.html",
+	"dd798be17dd01633": "plugins/rcp-fe-lol-paw/global/en_gb/trans.json"
 }

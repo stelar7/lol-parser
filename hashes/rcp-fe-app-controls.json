@@ -1,4 +1,8 @@
 {
+	"6519b475dc309a9a": "plugins/rcp-fe-app-controls/euw/default/control-settings-disabled.png",
+	"5dc57bbba83ce78e": "plugins/rcp-fe-app-controls/euw/default/sfx-soc-ui-click-generic.ogg",
+	"e87425f741dce49e": "plugins/rcp-fe-app-controls/euw/en_gb/control-settings-disabled.png",
+	"6d24b4a4005068cd": "plugins/rcp-fe-app-controls/euw/en_gb/sfx-soc-ui-click-generic.ogg",
 	"a5eedb6ca6faf30e": "plugins/rcp-fe-app-controls/global/cs_cz/trans.json",
 	"8e472ead5772a0e3": "plugins/rcp-fe-app-controls/global/de_de/trans.json",
 	"9783db36a911894a": "plugins/rcp-fe-app-controls/global/default/control-close.png",
@@ -13,6 +17,8 @@
 	"1a1683008f3b659c": "plugins/rcp-fe-app-controls/global/default/trans.json",
 	"24287141fe82e98e": "plugins/rcp-fe-app-controls/global/el_gr/trans.json",
 	"b819862d1361b0d9": "plugins/rcp-fe-app-controls/global/en_au/trans.json",
+	"a79cc8cb24be586f": "plugins/rcp-fe-app-controls/global/en_gb/control-settings-disabled.png",
+	"7219e38409270b6b": "plugins/rcp-fe-app-controls/global/en_gb/sfx-soc-ui-click-generic.ogg",
 	"ec42af09f0c14f6b": "plugins/rcp-fe-app-controls/global/en_gb/trans.json",
 	"f5a0be8cc62881d2": "plugins/rcp-fe-app-controls/global/en_ph/trans.json",
 	"510e110587104096": "plugins/rcp-fe-app-controls/global/en_sg/trans.json",

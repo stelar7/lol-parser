@@ -1,4 +1,6 @@
 {
+	"0395a738b08d76b7": "plugins/rcp-fe-lol-friend-finder/euw/default/add_person_mask.png",
+	"af297b729948dafa": "plugins/rcp-fe-lol-friend-finder/euw/en_gb/add_person_mask.png",
 	"ac242f0e5f848c78": "plugins/rcp-fe-lol-friend-finder/global/cs_cz/trans.json",
 	"2b3dcbf36389a259": "plugins/rcp-fe-lol-friend-finder/global/de_de/trans.json",
 	"6b7c86d4dc319801": "plugins/rcp-fe-lol-friend-finder/global/default/add_person_mask.png",
@@ -44,6 +46,7 @@
 	"08bf334b2e0ea479": "plugins/rcp-fe-lol-friend-finder/global/default/x_mask.png",
 	"a36be5ad9c00bb9b": "plugins/rcp-fe-lol-friend-finder/global/el_gr/trans.json",
 	"31e487f30f345b82": "plugins/rcp-fe-lol-friend-finder/global/en_au/trans.json",
+	"e2d2e66cfffc0a19": "plugins/rcp-fe-lol-friend-finder/global/en_gb/add_person_mask.png",
 	"ffff43e7f6ec2494": "plugins/rcp-fe-lol-friend-finder/global/en_gb/trans.json",
 	"f94a2961691f5ef4": "plugins/rcp-fe-lol-friend-finder/global/en_ph/trans.json",
 	"18708ba8d96d06cf": "plugins/rcp-fe-lol-friend-finder/global/en_sg/trans.json",

@@ -1,4 +1,8 @@
 {
+	"3ae23abab51934b3": "plugins/rcp-fe-lol-new-player-intro/euw/default/bundle.js",
+	"44729eb0b1e25a8a": "plugins/rcp-fe-lol-new-player-intro/euw/default/index.html",
+	"428e7a544ce14c5e": "plugins/rcp-fe-lol-new-player-intro/euw/en_gb/bundle.js",
+	"31bf8472c090b2a0": "plugins/rcp-fe-lol-new-player-intro/euw/en_gb/index.html",
 	"d4bf71c7199c36a6": "plugins/rcp-fe-lol-new-player-intro/global/default/1.bundle.js",
 	"31e73ee3bd2a68f5": "plugins/rcp-fe-lol-new-player-intro/global/default/battle-training-disabled.png",
 	"d7ba2a685ec05af1": "plugins/rcp-fe-lol-new-player-intro/global/default/battle-training-normal.png",
@@ -12,5 +16,7 @@
 	"05086d124af62d46": "plugins/rcp-fe-lol-new-player-intro/global/default/input_error_bg.png",
 	"b4d1157e6153e136": "plugins/rcp-fe-lol-new-player-intro/global/default/tutorial-disabled.png",
 	"592e1c459f33e64e": "plugins/rcp-fe-lol-new-player-intro/global/default/tutorial-normal.png",
-	"931d8e50bbf5edc5": "plugins/rcp-fe-lol-new-player-intro/global/default/tutorial_bg.jpg"
+	"931d8e50bbf5edc5": "plugins/rcp-fe-lol-new-player-intro/global/default/tutorial_bg.jpg",
+	"6d1f2f5ef16613b5": "plugins/rcp-fe-lol-new-player-intro/global/en_gb/bundle.js",
+	"2d63817a1e8c4197": "plugins/rcp-fe-lol-new-player-intro/global/en_gb/index.html"
 }

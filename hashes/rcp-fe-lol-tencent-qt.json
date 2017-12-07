@@ -1,5 +1,11 @@
 {
+	"cb72aebbe4197e14": "plugins/rcp-fe-lol-tencent-qt/euw/default/bundle.js",
+	"a9722c571dbbbd4a": "plugins/rcp-fe-lol-tencent-qt/euw/default/index.html",
+	"fcf73560612c5191": "plugins/rcp-fe-lol-tencent-qt/euw/en_gb/bundle.js",
+	"30b4876e39cfad27": "plugins/rcp-fe-lol-tencent-qt/euw/en_gb/index.html",
 	"77d763b8458342db": "plugins/rcp-fe-lol-tencent-qt/global/default/1.bundle.js",
 	"6560b6ec845927ac": "plugins/rcp-fe-lol-tencent-qt/global/default/bundle.js",
-	"44d480b2bf19fcfe": "plugins/rcp-fe-lol-tencent-qt/global/default/index.html"
+	"44d480b2bf19fcfe": "plugins/rcp-fe-lol-tencent-qt/global/default/index.html",
+	"a849dcf18996d34d": "plugins/rcp-fe-lol-tencent-qt/global/en_gb/bundle.js",
+	"5690f7fdd9dbc3c0": "plugins/rcp-fe-lol-tencent-qt/global/en_gb/index.html"
 }

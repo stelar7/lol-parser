@@ -1,4 +1,10 @@
 {
+	"afeec69d8e174fc2": "plugins/rcp-fe-lol-competitive/euw/default/index.html",
+	"71d4a28f639b7c88": "plugins/rcp-fe-lol-competitive/euw/default/rcp-fe-lol-competitive.js",
+	"d5b80c393a78ed62": "plugins/rcp-fe-lol-competitive/euw/en_gb/index.html",
+	"5200dc56a5696917": "plugins/rcp-fe-lol-competitive/euw/en_gb/rcp-fe-lol-competitive.js",
 	"0065f644db7ec167": "plugins/rcp-fe-lol-competitive/global/default/index.html",
-	"7f61c3d697ac7849": "plugins/rcp-fe-lol-competitive/global/default/rcp-fe-lol-competitive.js"
+	"7f61c3d697ac7849": "plugins/rcp-fe-lol-competitive/global/default/rcp-fe-lol-competitive.js",
+	"a7f6676afbe97b50": "plugins/rcp-fe-lol-competitive/global/en_gb/index.html",
+	"315198a73a25078a": "plugins/rcp-fe-lol-competitive/global/en_gb/rcp-fe-lol-competitive.js"
 }

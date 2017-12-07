@@ -1,4 +1,6 @@
 {
+	"0b9a2ad33fa5cb53": "plugins/rcp-fe-lol-login/euw/default/spinner.png",
+	"e2ec9ae0a1355aba": "plugins/rcp-fe-lol-login/euw/en_gb/spinner.png",
 	"4ac6549232af73b4": "plugins/rcp-fe-lol-login/global/cs_cz/trans.json",
 	"4a7612db40459eb2": "plugins/rcp-fe-lol-login/global/de_de/trans.json",
 	"81eab356c014582f": "plugins/rcp-fe-lol-login/global/default/back_click.png",
@@ -51,6 +53,7 @@
 	"1f6898a7c8d87eae": "plugins/rcp-fe-lol-login/global/default/trans.json",
 	"19b3daee9f438f65": "plugins/rcp-fe-lol-login/global/el_gr/trans.json",
 	"d62da41c0c7fce85": "plugins/rcp-fe-lol-login/global/en_au/trans.json",
+	"065b1ca2cacde453": "plugins/rcp-fe-lol-login/global/en_gb/spinner.png",
 	"a8e86c5c96abafa0": "plugins/rcp-fe-lol-login/global/en_gb/trans.json",
 	"c3c1cc73a4cd22a4": "plugins/rcp-fe-lol-login/global/en_ph/trans.json",
 	"b634f99a8b403ea1": "plugins/rcp-fe-lol-login/global/en_sg/trans.json",

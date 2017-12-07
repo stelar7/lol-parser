@@ -1,4 +1,6 @@
 {
+	"a0e2bda06757aec7": "plugins/rcp-fe-lol-social-avatar/euw/default/images/playerobject_s_sprite.png",
+	"b411e2adc6d2d0d3": "plugins/rcp-fe-lol-social-avatar/euw/en_gb/images/playerobject_s_sprite.png",
 	"0646135cb21cfa22": "plugins/rcp-fe-lol-social-avatar/global/default/components/availability/index.js",
 	"e42d4c887302d778": "plugins/rcp-fe-lol-social-avatar/global/default/components/elements/availability/template.html",
 	"49966e69693dd4bb": "plugins/rcp-fe-lol-social-avatar/global/default/components/elements/icon/template.html",
@@ -11,5 +13,6 @@
 	"9b9196f5bcd9e5f9": "plugins/rcp-fe-lol-social-avatar/global/default/images/playerobject_s_sprite.png",
 	"8566630c5656aba9": "plugins/rcp-fe-lol-social-avatar/global/default/images/status_mobile.png",
 	"84f4fdbc8d8aaad7": "plugins/rcp-fe-lol-social-avatar/global/default/index.html",
-	"38c16ddf6a888aea": "plugins/rcp-fe-lol-social-avatar/global/default/init.js"
+	"38c16ddf6a888aea": "plugins/rcp-fe-lol-social-avatar/global/default/init.js",
+	"c829c2a396614cd7": "plugins/rcp-fe-lol-social-avatar/global/en_gb/images/playerobject_s_sprite.png"
 }

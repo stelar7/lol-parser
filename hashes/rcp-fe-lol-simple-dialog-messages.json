@@ -1,4 +1,10 @@
 {
+	"b06886e20d45ebeb": "plugins/rcp-fe-lol-simple-dialog-messages/euw/default/index.html",
+	"2abe281ee37f28fe": "plugins/rcp-fe-lol-simple-dialog-messages/euw/default/init.js",
+	"9754daacf53a17d6": "plugins/rcp-fe-lol-simple-dialog-messages/euw/en_gb/index.html",
+	"b44c33553de09235": "plugins/rcp-fe-lol-simple-dialog-messages/euw/en_gb/init.js",
 	"dd33d138cf26e01f": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/index.html",
-	"9effe1793430633c": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/init.js"
+	"9effe1793430633c": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/init.js",
+	"faeb4eea16dad1dc": "plugins/rcp-fe-lol-simple-dialog-messages/global/en_gb/index.html",
+	"b0af34d4bec0638f": "plugins/rcp-fe-lol-simple-dialog-messages/global/en_gb/init.js"
 }

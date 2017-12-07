@@ -1,4 +1,8 @@
 {
+	"34c667ca28bcbc8a": "plugins/rcp-fe-lol-honor/euw/default/assets/profile/honor_emblem_generic.png",
+	"8d60131e299be9de": "plugins/rcp-fe-lol-honor/euw/default/assets/profile/honor_emblem_level_5.png",
+	"be46dee21c8a86af": "plugins/rcp-fe-lol-honor/euw/en_gb/assets/profile/honor_emblem_generic.png",
+	"dd20758b7bf68405": "plugins/rcp-fe-lol-honor/euw/en_gb/assets/profile/honor_emblem_level_5.png",
 	"f40f1034116dd8c1": "plugins/rcp-fe-lol-honor/global/default/app/components/honor-day-one-component/index.js",
 	"59b281e322cfcc14": "plugins/rcp-fe-lol-honor/global/default/app/components/honor-day-one-component/layout.hbs",
 	"d37b2c148801f924": "plugins/rcp-fe-lol-honor/global/default/app/components/honor-late-recognition-component/honor-late-recognition-icon-component/index.js",
@@ -156,5 +160,7 @@
 	"ff44ccde1859f261": "plugins/rcp-fe-lol-honor/global/default/rightdefault.png",
 	"001d480d6fcb65d3": "plugins/rcp-fe-lol-honor/global/default/rightdisabled.png",
 	"d2ff874755babd2b": "plugins/rcp-fe-lol-honor/global/default/righthover.png",
-	"840908c5279de45a": "plugins/rcp-fe-lol-honor/global/default/trans.json"
+	"840908c5279de45a": "plugins/rcp-fe-lol-honor/global/default/trans.json",
+	"49251f7ed010cb2b": "plugins/rcp-fe-lol-honor/global/en_gb/assets/profile/honor_emblem_generic.png",
+	"85d43fce3b9e30bb": "plugins/rcp-fe-lol-honor/global/en_gb/assets/profile/honor_emblem_level_5.png"
 }

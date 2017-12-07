@@ -1,4 +1,16 @@
 {
+	"c7ec40ed909e7946": "plugins/rcp-fe-lol-home/euw/default/landing-page-styles.css",
+	"bc7ce4a7d808f2d5": "plugins/rcp-fe-lol-home/euw/default/lcu-article-backdrop.jpg",
+	"62a2e25de26703e5": "plugins/rcp-fe-lol-home/euw/default/magic-bg.jpg",
+	"5921bfda5064dfca": "plugins/rcp-fe-lol-home/euw/default/sfx-uikit-button-gold-click.ogg",
+	"ae02a50b85fcb771": "plugins/rcp-fe-lol-home/euw/default/sfx-uikit-button-gold-hover.ogg",
+	"8796edb8c486d8df": "plugins/rcp-fe-lol-home/euw/default/spinner.png",
+	"4f8c1026f713eee9": "plugins/rcp-fe-lol-home/euw/en_gb/landing-page-styles.css",
+	"0db4dd3856d2f37c": "plugins/rcp-fe-lol-home/euw/en_gb/lcu-article-backdrop.jpg",
+	"9c75ef10de0dfc94": "plugins/rcp-fe-lol-home/euw/en_gb/magic-bg.jpg",
+	"4b1928462eddfd3e": "plugins/rcp-fe-lol-home/euw/en_gb/sfx-uikit-button-gold-click.ogg",
+	"36fc58705f657f50": "plugins/rcp-fe-lol-home/euw/en_gb/sfx-uikit-button-gold-hover.ogg",
+	"972733c3cd4982d6": "plugins/rcp-fe-lol-home/euw/en_gb/spinner.png",
 	"abee4efe8eec46b3": "plugins/rcp-fe-lol-home/global/default/css/main.css",
 	"8f4d8e94a4c269bb": "plugins/rcp-fe-lol-home/global/default/icon-ip.png",
 	"7559536ea958c14e": "plugins/rcp-fe-lol-home/global/default/icon-repair.png",
@@ -32,5 +44,11 @@
 	"72d44e9e3488bf32": "plugins/rcp-fe-lol-home/global/default/sfx-uikit-button-pageup-click.ogg",
 	"b5a6f42fa9e5c426": "plugins/rcp-fe-lol-home/global/default/sfx-uikit-text-click-small.ogg",
 	"d7bcc3071ff26a53": "plugins/rcp-fe-lol-home/global/default/spinner.png",
-	"f43434b761feaeaf": "plugins/rcp-fe-lol-home/global/default/trans.json"
+	"f43434b761feaeaf": "plugins/rcp-fe-lol-home/global/default/trans.json",
+	"d6bfbba92cba6bc8": "plugins/rcp-fe-lol-home/global/en_gb/landing-page-styles.css",
+	"226c25c7f1ccc17a": "plugins/rcp-fe-lol-home/global/en_gb/lcu-article-backdrop.jpg",
+	"5a5cf3ecb49e4b0f": "plugins/rcp-fe-lol-home/global/en_gb/magic-bg.jpg",
+	"ddc0c25d71513ebb": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-button-gold-click.ogg",
+	"be61e505fc970b6a": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-button-gold-hover.ogg",
+	"c6e812bd7cd2f7a4": "plugins/rcp-fe-lol-home/global/en_gb/spinner.png"
 }

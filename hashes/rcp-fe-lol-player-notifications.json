@@ -1,4 +1,6 @@
 {
+	"5e332b92afa26a0e": "plugins/rcp-fe-lol-player-notifications/euw/default/notifications_button_icon.png",
+	"18d84326847510d5": "plugins/rcp-fe-lol-player-notifications/euw/en_gb/notifications_button_icon.png",
 	"7fdf62b8a5b652ba": "plugins/rcp-fe-lol-player-notifications/global/cs_cz/trans.json",
 	"5b7f77df13ce963f": "plugins/rcp-fe-lol-player-notifications/global/de_de/trans.json",
 	"643d221ba04f2070": "plugins/rcp-fe-lol-player-notifications/global/default/clubs-toast.html",
@@ -23,6 +25,7 @@
 	"a2df9bfc0d1fbd26": "plugins/rcp-fe-lol-player-notifications/global/default/x_thin_mask.png",
 	"1aa6c649c0e69f76": "plugins/rcp-fe-lol-player-notifications/global/el_gr/trans.json",
 	"772ef52eb312462d": "plugins/rcp-fe-lol-player-notifications/global/en_au/trans.json",
+	"64fc42ea23f9195d": "plugins/rcp-fe-lol-player-notifications/global/en_gb/notifications_button_icon.png",
 	"04427c479c02e7ba": "plugins/rcp-fe-lol-player-notifications/global/en_gb/trans.json",
 	"9b9682d84e1cb556": "plugins/rcp-fe-lol-player-notifications/global/en_ph/trans.json",
 	"ab36e2f577b8cc3f": "plugins/rcp-fe-lol-player-notifications/global/en_sg/trans.json",

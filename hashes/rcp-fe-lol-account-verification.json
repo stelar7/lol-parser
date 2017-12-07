@@ -1,9 +1,15 @@
 {
+	"e7a4e14c34cfcfde": "plugins/rcp-fe-lol-account-verification/euw/default/index.html",
+	"ff226f100bdbfe6b": "plugins/rcp-fe-lol-account-verification/euw/default/rcp-fe-lol-account-verification.js",
+	"bb396e1170012494": "plugins/rcp-fe-lol-account-verification/euw/en_gb/index.html",
+	"d675c38ee1c8b9b1": "plugins/rcp-fe-lol-account-verification/euw/en_gb/rcp-fe-lol-account-verification.js",
 	"02f7cae3312d0f49": "plugins/rcp-fe-lol-account-verification/global/default/images/bg-radial-ticks.png",
 	"22c252070d0a09f1": "plugins/rcp-fe-lol-account-verification/global/default/images/icon-checkmark.png",
 	"e7bedb4abd797f3f": "plugins/rcp-fe-lol-account-verification/global/default/images/icon-sleeping-poro.png",
 	"2fbf179162c73b66": "plugins/rcp-fe-lol-account-verification/global/default/images/spinner.png",
 	"8cc2c2adc2a252cb": "plugins/rcp-fe-lol-account-verification/global/default/index.html",
 	"532fac34a23906a8": "plugins/rcp-fe-lol-account-verification/global/default/rcp-fe-lol-account-verification.js",
-	"ad5ad6cc6af169ae": "plugins/rcp-fe-lol-account-verification/global/default/trans.json"
+	"ad5ad6cc6af169ae": "plugins/rcp-fe-lol-account-verification/global/default/trans.json",
+	"e391640c6e502598": "plugins/rcp-fe-lol-account-verification/global/en_gb/index.html",
+	"7096d2b10a65e39b": "plugins/rcp-fe-lol-account-verification/global/en_gb/rcp-fe-lol-account-verification.js"
 }

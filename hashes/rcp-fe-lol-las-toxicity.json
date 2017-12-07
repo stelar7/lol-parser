@@ -1,4 +1,10 @@
 {
+	"f6057202eaa17635": "plugins/rcp-fe-lol-las-toxicity/euw/default/index.html",
+	"09e3102a74fe4ea7": "plugins/rcp-fe-lol-las-toxicity/euw/default/init.js",
+	"7554034536072456": "plugins/rcp-fe-lol-las-toxicity/euw/en_gb/index.html",
+	"43d2044ac0878f04": "plugins/rcp-fe-lol-las-toxicity/euw/en_gb/init.js",
 	"62c0d6fe09d1525c": "plugins/rcp-fe-lol-las-toxicity/global/default/index.html",
-	"2fa93e53a4dca715": "plugins/rcp-fe-lol-las-toxicity/global/default/init.js"
+	"2fa93e53a4dca715": "plugins/rcp-fe-lol-las-toxicity/global/default/init.js",
+	"fadaab21280e62cd": "plugins/rcp-fe-lol-las-toxicity/global/en_gb/index.html",
+	"468a3ee1656bda5c": "plugins/rcp-fe-lol-las-toxicity/global/en_gb/init.js"
 }

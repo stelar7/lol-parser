@@ -69,7 +69,7 @@ public class TestHashes
     private Path         currentInnerFolder;
     private List<String> hashes;
     
-    private void runDirectory(Path dir) throws IOException, InterruptedException
+    private void runDirectory(Path dir) throws IOException
     {
         Path innerFolder = outerFolder.resolve(dir.getFileName());
         currentInnerFolder = innerFolder;
@@ -248,7 +248,8 @@ public class TestHashes
         {
             
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            @SuppressWarnings(value = "unchecked")
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
                 ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -319,10 +320,9 @@ public class TestHashes
         List<String> all = new ArrayList<>();
         for (String key : strings)
         {
-            String[]    keyArray = key.split("_");
-            Set<String> keySet   = new HashSet<>();
-            keySet.addAll(Arrays.asList(keyArray));
-            Set<Set<String>> powers = Sets.powerSet(keySet);
+            String[]         keyArray = key.split("_");
+            Set<String>      keySet   = new HashSet<>(Arrays.asList(keyArray));
+            Set<Set<String>> powers   = Sets.powerSet(keySet);
             
             for (Set<String> power : powers)
             {
@@ -848,7 +848,7 @@ public class TestHashes
     }
     
     @Test
-    public void testAllHashes() throws IOException, InterruptedException
+    public void testAllHashes() throws IOException
     {
         Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<Path>()
         {
@@ -856,25 +856,19 @@ public class TestHashes
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
             {
-                try
+                if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads")))
                 {
-                    if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads")))
-                    {
-                        return FileVisitResult.CONTINUE;
-                    }
-                    
-                    if (dir.toAbsolutePath().toString().contains("lol-loot"))
-                    {
-                        return FileVisitResult.SKIP_SUBTREE;
-                    }
-                    
-                    System.out.println(dir.toAbsolutePath().toString());
-                    
-                    runDirectory(dir);
-                } catch (InterruptedException e)
-                {
-                    e.printStackTrace();
+                    return FileVisitResult.CONTINUE;
                 }
+                
+                if (dir.toAbsolutePath().toString().contains("lol-loot"))
+                {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+                
+                System.out.println(dir.toAbsolutePath().toString());
+                runDirectory(dir);
+                
                 return FileVisitResult.SKIP_SUBTREE;
             }
         });
@@ -920,6 +914,62 @@ public class TestHashes
     }
     
     @Test
+    public void testJoinSplitClientHashes() throws IOException
+    {
+        Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
+        Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        
+        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        
+        Map<String, StringBuilder> pluginData = new HashMap<>();
+        
+        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
+            {
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(path), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(data);
+                    }
+                });
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+        ((List<String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>() {}.getType())).forEach((v) -> {
+            Pair<String, String> data = new Pair<>(UtilHandler.getHash(v), v);
+            if (!foundHashes.contains(data))
+            {
+                foundHashes.add(data);
+            }
+        });
+        
+        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+        for (Pair<String, String> pair : foundHashes)
+        {
+            String builder = pair.getValue().substring("plugins/".length());
+            builder = builder.substring(0, builder.indexOf('/'));
+            
+            StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
+            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+        }
+        pluginData.forEach((k, sb) -> {
+            sb.reverse().delete(0, 2).reverse().append("\n}");
+            try
+            {
+                Files.createDirectories(newHashStore);
+                Files.write(newHashStore.resolve(k + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
+    }
+    
+    @Test
     public void testJoinSplitHashes() throws IOException
     {
         Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
@@ -932,7 +982,7 @@ public class TestHashes
         Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
         {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
                 ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);

@@ -1,4 +1,12 @@
 {
+	"30d56afbd540430e": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/default/champion-mastery-trans.json",
+	"1ec2206a5b658806": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/default/index.html",
+	"a6b2a9f1796f6eaf": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/default/init.js",
+	"65b9c7bf11b778fa": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/default/loot-grants-trans.json",
+	"4d64386dc08e6e11": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/en_gb/champion-mastery-trans.json",
+	"19be86b08737c710": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/en_gb/index.html",
+	"e940ba194d67f206": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/en_gb/init.js",
+	"5813db31caa35ae9": "plugins/rcp-fe-lol-champion-mastery-notifications/euw/en_gb/loot-grants-trans.json",
 	"c82d01752ef1ee4b": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/assets/cm_rank_up/5.png",
 	"e14c3a1ab011ca30": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/assets/cm_rank_up/5.webm",
 	"cbefbd243c519c34": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/assets/cm_rank_up/6-locked.png",
@@ -9,5 +17,9 @@
 	"47a3eaecc6a2131b": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/champion-mastery-trans.json",
 	"d85fdb8dfff8f133": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/index.html",
 	"68b30d1b7d76450f": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/init.js",
-	"dd28bfa0585ce4f8": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/loot-grants-trans.json"
+	"dd28bfa0585ce4f8": "plugins/rcp-fe-lol-champion-mastery-notifications/global/default/loot-grants-trans.json",
+	"fe8a46d95f89f0c5": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/champion-mastery-trans.json",
+	"d20cfacbc65ce329": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/index.html",
+	"18262018ef9685b0": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/init.js",
+	"e4627ea4ef223fa4": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/loot-grants-trans.json"
 }

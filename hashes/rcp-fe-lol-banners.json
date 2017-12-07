@@ -1,5 +1,14 @@
 {
+	"f7fdd1d08a8e813a": "plugins/rcp-fe-lol-banners/euw/default/index.html",
+	"f4f2957894dfc02f": "plugins/rcp-fe-lol-banners/euw/default/rcp-fe-lol-banners.js",
+	"10d36670e5807bfd": "plugins/rcp-fe-lol-banners/euw/default/trans.json",
+	"bff5083aed926ebd": "plugins/rcp-fe-lol-banners/euw/en_gb/index.html",
+	"2db3122295a65eb6": "plugins/rcp-fe-lol-banners/euw/en_gb/rcp-fe-lol-banners.js",
+	"4ca309f36c7e63a6": "plugins/rcp-fe-lol-banners/euw/en_gb/trans.json",
 	"57930459258652c5": "plugins/rcp-fe-lol-banners/global/default/index.html",
 	"671cf539e3d4a9ea": "plugins/rcp-fe-lol-banners/global/default/rcp-fe-lol-banners.js",
-	"d7ce39c28652a11b": "plugins/rcp-fe-lol-banners/global/default/trans.json"
+	"d7ce39c28652a11b": "plugins/rcp-fe-lol-banners/global/default/trans.json",
+	"09011ef31e4af0b9": "plugins/rcp-fe-lol-banners/global/en_gb/index.html",
+	"874e9863f1057203": "plugins/rcp-fe-lol-banners/global/en_gb/rcp-fe-lol-banners.js",
+	"66c44b680d1b9eeb": "plugins/rcp-fe-lol-banners/global/en_gb/trans.json"
 }

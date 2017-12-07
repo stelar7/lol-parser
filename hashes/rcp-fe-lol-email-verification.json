@@ -1,8 +1,14 @@
 {
+	"62c20d1fda4ce8f9": "plugins/rcp-fe-lol-email-verification/euw/default/index.html",
+	"56d1e002bb01fa2d": "plugins/rcp-fe-lol-email-verification/euw/default/rcp-fe-lol-email-verification.js",
+	"630b37eb48a38e3d": "plugins/rcp-fe-lol-email-verification/euw/en_gb/index.html",
+	"496477963ec1b504": "plugins/rcp-fe-lol-email-verification/euw/en_gb/rcp-fe-lol-email-verification.js",
 	"02b2139751ab4f03": "plugins/rcp-fe-lol-email-verification/global/default/images/header_braum.png",
 	"f0bf02cf397c6da8": "plugins/rcp-fe-lol-email-verification/global/default/images/header_braum_hand.png",
 	"9964b58cd1a4ccb9": "plugins/rcp-fe-lol-email-verification/global/default/images/icon_warning_mask.png",
 	"ef59de9b7262a076": "plugins/rcp-fe-lol-email-verification/global/default/index.html",
 	"a4f229cf352416e7": "plugins/rcp-fe-lol-email-verification/global/default/rcp-fe-lol-email-verification.js",
-	"be31a1f037bc77b9": "plugins/rcp-fe-lol-email-verification/global/default/trans.json"
+	"be31a1f037bc77b9": "plugins/rcp-fe-lol-email-verification/global/default/trans.json",
+	"28e525936a2bb916": "plugins/rcp-fe-lol-email-verification/global/en_gb/index.html",
+	"ed97c76be0d7b99f": "plugins/rcp-fe-lol-email-verification/global/en_gb/rcp-fe-lol-email-verification.js"
 }

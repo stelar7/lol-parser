@@ -1,4 +1,6 @@
 {
+	"8269c83b0e81d329": "plugins/rcp-fe-lol-store/euw/default/css/images/background.png",
+	"c67a60cd9122fdf5": "plugins/rcp-fe-lol-store/euw/en_gb/css/images/background.png",
 	"ff531a1d9ec835f7": "plugins/rcp-fe-lol-store/global/default/css/images/background.png",
 	"989a4d2abca3375a": "plugins/rcp-fe-lol-store/global/default/css/main.css",
 	"c0baae03bd6b9c0b": "plugins/rcp-fe-lol-store/global/default/d60b38cfdd5a350c9606d85ba30b89b4.png",
@@ -6,5 +8,6 @@
 	"f60fe9a8821205fa": "plugins/rcp-fe-lol-store/global/default/f44a86275d862b55472f76591ec1b943.jpg",
 	"b55a51496472e77f": "plugins/rcp-fe-lol-store/global/default/index.html",
 	"224d869b113fc72f": "plugins/rcp-fe-lol-store/global/default/init.js",
-	"c88d4e84b7ab07e1": "plugins/rcp-fe-lol-store/global/default/trans.json"
+	"c88d4e84b7ab07e1": "plugins/rcp-fe-lol-store/global/default/trans.json",
+	"2d64672a0b842c17": "plugins/rcp-fe-lol-store/global/en_gb/css/images/background.png"
 }

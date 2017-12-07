@@ -1,4 +1,10 @@
 {
+	"fc9dacba376d05d9": "plugins/rcp-fe-lol-leagues/euw/default/bundle.js",
+	"dea4ab30db1ec4e0": "plugins/rcp-fe-lol-leagues/euw/default/index.html",
+	"05bd8d9489a2a261": "plugins/rcp-fe-lol-leagues/euw/default/trans.json",
+	"91b5745077f8cf1b": "plugins/rcp-fe-lol-leagues/euw/en_gb/bundle.js",
+	"e6781b7f3252fd82": "plugins/rcp-fe-lol-leagues/euw/en_gb/index.html",
+	"2808a359f6a4c1d4": "plugins/rcp-fe-lol-leagues/euw/en_gb/trans.json",
 	"95c0590becfdf43b": "plugins/rcp-fe-lol-leagues/global/default/bundle.js",
 	"94aa2264f97ee1dd": "plugins/rcp-fe-lol-leagues/global/default/images/arrows.png",
 	"0a6a475394df289e": "plugins/rcp-fe-lol-leagues/global/default/images/challenger_icon.png",
@@ -23,5 +29,8 @@
 	"3ce7825ccafecbcb": "plugins/rcp-fe-lol-leagues/global/default/images/tier_icons.png",
 	"b8d1877272a03bd0": "plugins/rcp-fe-lol-leagues/global/default/images/title_background.png",
 	"7bdcebc74bd7c573": "plugins/rcp-fe-lol-leagues/global/default/index.html",
-	"2580da23e2bb6351": "plugins/rcp-fe-lol-leagues/global/default/trans.json"
+	"2580da23e2bb6351": "plugins/rcp-fe-lol-leagues/global/default/trans.json",
+	"cbd4187f26af5942": "plugins/rcp-fe-lol-leagues/global/en_gb/bundle.js",
+	"681c92519a416ed4": "plugins/rcp-fe-lol-leagues/global/en_gb/index.html",
+	"2eb9d17c3191b1fc": "plugins/rcp-fe-lol-leagues/global/en_gb/trans.json"
 }

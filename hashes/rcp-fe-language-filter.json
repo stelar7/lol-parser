@@ -1,4 +1,19 @@
 {
+	"2b649558d2a94319": "plugins/rcp-fe-language-filter/euw/default/allowedcharacters.txt",
+	"a91816b761364b50": "plugins/rcp-fe-language-filter/euw/default/bundle.js",
+	"ad9d7624e530b569": "plugins/rcp-fe-language-filter/euw/default/index.html",
+	"fbe5d27e964ff211": "plugins/rcp-fe-language-filter/euw/default/profanities.txt",
+	"eb37127c7df337c4": "plugins/rcp-fe-language-filter/euw/default/restrictedwords.txt",
+	"6b928b8dac228b05": "plugins/rcp-fe-language-filter/euw/en_gb/allowedcharacters.txt",
+	"139e44b1b8c8b83e": "plugins/rcp-fe-language-filter/euw/en_gb/bundle.js",
+	"64e034733995e1bc": "plugins/rcp-fe-language-filter/euw/en_gb/index.html",
+	"35d93aa27e823df8": "plugins/rcp-fe-language-filter/euw/en_gb/profanities.txt",
+	"b42e221f70009df7": "plugins/rcp-fe-language-filter/euw/en_gb/restrictedwords.txt",
 	"8bbf95adaa500d3d": "plugins/rcp-fe-language-filter/global/default/bundle.js",
-	"b9cb2f308a5dc1c9": "plugins/rcp-fe-language-filter/global/default/index.html"
+	"b9cb2f308a5dc1c9": "plugins/rcp-fe-language-filter/global/default/index.html",
+	"25fc6a815ae5bef9": "plugins/rcp-fe-language-filter/global/en_gb/allowedcharacters.txt",
+	"3a0d33b67d4c2c66": "plugins/rcp-fe-language-filter/global/en_gb/bundle.js",
+	"7f8f07f528015106": "plugins/rcp-fe-language-filter/global/en_gb/index.html",
+	"f888ee496de44e58": "plugins/rcp-fe-language-filter/global/en_gb/profanities.txt",
+	"d6c62b49360ae75c": "plugins/rcp-fe-language-filter/global/en_gb/restrictedwords.txt"
 }
