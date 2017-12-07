@@ -67,7 +67,7 @@ public final class UtilHandler
         Files.write(pho, sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     
-    public static long getLongFromIP(String ipAddress)
+    public static int getLongFromIP(String ipAddress)
     {
         long     result           = 0;
         String[] ipAddressInArray = ipAddress.split("\\.");
@@ -84,7 +84,7 @@ public final class UtilHandler
             result |= ip << (i * 8);
         }
         
-        return result;
+        return (int) result;
     }
     
     public static String getIPFromLong(long ip)
@@ -194,39 +194,51 @@ public final class UtilHandler
         }
     }
     
-    public static String getMaxVersion(String url, int min, int max)
+    public static String[] getMaxVersion(String url, int min, int max)
     {
+        String[] urlEnds = {"/default-assets.wad.compressed", "/assets.wad.compressed"};
         for (int i = max; i >= min; i--)
         {
-            try
+            for (String endPart : urlEnds)
             {
-                String ip       = getIPFromLong(i);
-                String finalUrl = String.format(url, ip);
-                
+                String versionAsIP = getIPFromLong(i);
+                String finalUrl    = String.format(url, versionAsIP) + endPart;
                 System.out.println("Looking for " + finalUrl);
                 
-                HttpURLConnection con = (HttpURLConnection) new URL(finalUrl).openConnection();
-                if (con.getResponseCode() == 200)
+                if (checkIfURLExists(finalUrl))
                 {
-                    System.out.println("Found version: " + ip);
-                    return ip;
+                    return new String[]{finalUrl, versionAsIP};
                 }
-                
-                con.disconnect();
-            } catch (IOException e)
-            {
-                e.printStackTrace();
             }
         }
-        
         return null;
     }
+    
+    private static boolean checkIfURLExists(String finalUrl)
+    {
+        try
+        {
+            HttpURLConnection con = (HttpURLConnection) new URL(finalUrl).openConnection();
+            if (con.getResponseCode() == 200)
+            {
+                System.out.println("Found version: " + finalUrl);
+                return true;
+            }
+            con.disconnect();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return false;
+    }
+    
     
     public static void tryDownloadVersion(Path output, String url, String version)
     {
         String finalUrl = String.format(url, version);
         
-        downloadEfficient(output,finalUrl);
+        downloadEfficient(output, finalUrl);
     }
     
     private static void downloadEfficient(Path output, String url)

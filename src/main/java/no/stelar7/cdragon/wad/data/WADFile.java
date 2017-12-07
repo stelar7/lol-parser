@@ -217,6 +217,11 @@ public class WADFile
         StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
         Path          other    = parent.resolve(sb.toString());
         
+        if (filename.endsWith("json"))
+        {
+            data = makePretty(data);
+        }
+        
         Files.write(other, data);
     }
 }

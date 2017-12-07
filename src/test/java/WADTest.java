@@ -29,7 +29,7 @@ public class WADTest
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
-        for (int i = (int) UtilHandler.getLongFromIP("0.0.0.25"); i > 0; i--)
+        for (int i = UtilHandler.getLongFromIP("0.0.0.25"); i > 0; i--)
         {
             try
             {

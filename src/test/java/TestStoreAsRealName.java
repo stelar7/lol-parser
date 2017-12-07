@@ -183,9 +183,9 @@ public class TestStoreAsRealName
             {
                 Files.createDirectories(to.getParent());
                 Files.copy(from, to);
-            } catch (FileAlreadyExistsException ex)
+            } catch (FileAlreadyExistsException | NoSuchFileException ex)
             {
-                // we dont care if the file is already there
+                // we dont care if the file is missing/already there
             } catch (IOException e)
             {
                 e.printStackTrace();

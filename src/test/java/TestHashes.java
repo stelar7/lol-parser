@@ -22,7 +22,7 @@ public class TestHashes
     private final String[]     preLang   = {"default", "en_gb"};
     
     
-    private final Path outerFolder = Paths.get("tmp");
+    private final Path outerFolder = Paths.get("tmp_hashes");
     
     private final List<String> filenames = Arrays.asList(
             "v1/championperkstylemap.json",

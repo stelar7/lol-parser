@@ -28,16 +28,15 @@ public class WADParser
      */
     public WADFile parseLatest(String pluginName, Path path) throws Exception
     {
-        String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
-        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, 0, 360);
-        if (version == null)
+        for (int i = 360; i > 0; i--)
         {
-            urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
-            version = UtilHandler.getMaxVersion(urlWithFormatTokens, 0, 360);
+            WADFile parsed;
+            if ((parsed = parseVersion(pluginName, i, path)) != null)
+            {
+                return parsed;
+            }
         }
-        
-        return handleAll(pluginName, urlWithFormatTokens, version, path);
+        return null;
     }
     
     /**
@@ -50,19 +49,17 @@ public class WADParser
      */
     public WADFile parseVersion(String pluginName, int versionAsNumber, Path path) throws IOException
     {
-        String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
-        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
-        if (version == null)
+        String   urlNoWAD = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String[] data     = UtilHandler.getMaxVersion(urlNoWAD, versionAsNumber, versionAsNumber);
+        if (data == null)
         {
-            urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
-            version = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
-            if (version == null)
-            {
-                return null;
-            }
+            return null;
         }
-        return handleAll(pluginName, urlWithFormatTokens, version, path);
+        
+        String url     = data[0];
+        String version = data[1];
+        
+        return handleAll(pluginName, url, version, path);
     }
     
     /**
@@ -75,20 +72,7 @@ public class WADParser
      */
     public WADFile parseVersion(String pluginName, String versionString, Path path) throws IOException
     {
-        String urlNoWAD            = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        String urlWithFormatTokens = urlNoWAD + "/default-assets.wad.compressed";
-        int    versionAsNumber     = (int) UtilHandler.getLongFromIP(versionString);
-        String version             = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
-        if (version == null)
-        {
-            urlWithFormatTokens = urlNoWAD + "/assets.wad.compressed";
-            version = UtilHandler.getMaxVersion(urlWithFormatTokens, versionAsNumber, versionAsNumber);
-            if (version == null)
-            {
-                return null;
-            }
-        }
-        return handleAll(pluginName, urlWithFormatTokens, version, path);
+        return parseVersion(pluginName, UtilHandler.getLongFromIP(versionString), path);
     }
     
     private WADFile handleAll(String pluginName, String urlWithFormatTokens, String version, Path path) throws IOException
