@@ -3,7 +3,6 @@ import no.stelar7.cdragon.wad.WADParser;
 import no.stelar7.cdragon.wad.data.WADFile;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
@@ -61,7 +60,7 @@ public class WADTest
         Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
         {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
                 if (file.getFileName().toString().contains(".wad"))
                 {

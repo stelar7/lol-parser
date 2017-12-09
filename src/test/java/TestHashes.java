@@ -16,10 +16,70 @@ import java.util.*;
 public class TestHashes
 {
     
-    private final List<String> exts      = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
-    private final String       prePre    = "plugins/rcp-be-lol-game-data/";
-    private final String[]     preRegion = {"global", "euw", "na", "br", "jp", "kr", "eune", "tr"};
-    private final String[]     preLang   = {"default", "en_gb"};
+    private final List<String> exts   = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
+    private final String       prePre = "plugins/rcp-be-lol-game-data/";
+    
+    private final List<String> preRegion = Arrays.asList("global",
+                                                         "br",
+                                                         "cn",
+                                                         "eune",
+                                                         "eun",
+                                                         "euw",
+                                                         "garena",
+                                                         "garena2",
+                                                         "garena3",
+                                                         "id",
+                                                         "jp",
+                                                         "kr",
+                                                         "la",
+                                                         "la1",
+                                                         "la2",
+                                                         "lan",
+                                                         "las",
+                                                         "my",
+                                                         "na",
+                                                         "oc",
+                                                         "oc1",
+                                                         "oce",
+                                                         "pbe",
+                                                         "ph",
+                                                         "ru",
+                                                         "sea",
+                                                         "sg",
+                                                         "tencent",
+                                                         "tr",
+                                                         "th",
+                                                         "tw",
+                                                         "vn"
+                                                        );
+    
+    private final List<String> preLang = Arrays.asList("default",
+                                                       "el_gr",
+                                                       "en_au",
+                                                       "en_gb",
+                                                       "en_ph",
+                                                       "en_sg",
+                                                       "en_us",
+                                                       "en_ar",
+                                                       "es_es",
+                                                       "es_mx",
+                                                       "fr_fr",
+                                                       "hu_hu",
+                                                       "it_it",
+                                                       "ja_jp",
+                                                       "ko_kr",
+                                                       "ms_my",
+                                                       "pl_pl",
+                                                       "pt_br",
+                                                       "ro_ro",
+                                                       "ru_ru",
+                                                       "th_th",
+                                                       "tr_tr",
+                                                       "vn_vn",
+                                                       "zh_cn",
+                                                       "zh_my",
+                                                       "zh_tw"
+                                                      );
     
     
     private final Path outerFolder = Paths.get("tmp_hashes");
@@ -42,6 +102,7 @@ public class TestHashes
             "v1/summoner-emotes.json",
             "v1/summoner-masteries.json",
             "v1/summoner-spells.json",
+            "v1/summoner-trophies.json",
             "v1/ward-skins.json"
                                                         );
     
@@ -80,127 +141,36 @@ public class TestHashes
             Files.createDirectories(innerFolder);
         }
         
-        System.out.println("Parsing default file locations");
-        StringBuilder data = new StringBuilder("{\n");
-        for (String filename : filenames)
-        {
-            for (String reg : preRegion)
-            {
-                for (String lan : preLang)
-                {
-                    String pre = prePre + reg + "/" + lan + "/";
-                    hashAndAddToSB(data, pre + filename);
-                }
-            }
-        }
-        finalizeFileReading("files.json", data);
-        
-        
-        System.out.println("Parsing hextech");
-        StringBuilder data2 = new StringBuilder("{\n");
-        
-        for (String reg : preRegion)
-        {
-            for (String lan : preLang)
-            {
-                for (String attempt : parseHextechFile())
-                {
-                    String pre = prePre + reg + "/" + lan + "/";
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
-                    hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
-                }
-            }
-        }
-        
-        for (String lan : preLang)
-        {
-            for (String reg : preRegion)
-            {
-                for (int i = -1; i < championMax; i++)
-                {
-                    String pre = prePre + reg + "/" + lan + "/";
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + "_open.png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + "_open.png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_open.png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/rarity-gem-icons/" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + "_open.png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + "_open.png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + ".png");
-                    hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + "_open.png");
-                    
-                    for (int j = -1; j < skinMax; j++)
-                    {
-                        hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
-                        hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + "_open.png");
-                        
-                        String skinid = String.format("%d%03d", i, j);
-                        hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_" + skinid + ".png ");
-                        hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_rental_" + skinid + ".png ");
-                    }
-                }
-            }
-        }
-        
-        for (String reg : preRegion)
-        {
-            for (String lan : preLang)
-            {
-                String pre = prePre + reg + "/" + lan + "/";
-                // constants..
-                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/epic.png");
-                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/legendary.png");
-                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/mythic.png");
-                hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/ultimate.png");
-                
-                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest.png");
-                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_champion_mastery.png");
-                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_key_bundle.png");
-                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_mystery_champion_shard.png");
-                hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_promotion.png");
-            }
-        }
-        finalizeFileReading("hextech.json", data2);
-        
-        System.out.println("Parsing icon files");
-        for (String reg : preRegion)
-        {
-            for (String lan : preLang)
-            {
-                String pre  = prePre + reg + "/" + lan + "/v1/";
-                Path   file = dir.resolve(pre);
-                findIconPathInJsonArrayFile(file, "perkstyles.json");
-                findIconPathInJsonArrayFile(file, "perks.json");
-                findIconPathInJsonArrayFile(file, "items.json");
-                findIconPathInJsonArrayFile(file, "summoner-spells.json");
-                findIconPathInJsonArrayFile(file, "profile-icons.json");
-                
-                parseWardSkins(file, "ward-skins.json");
-                parseMasteries(file, "summoner-masteries.json");
-                parseEmotes(file, "summoner-emotes.json");
-                parseBanners(file, "summoner-banners.json");
-                parseMapAssets(file, "map-assets/map-assets.json");
-            }
-        }
-        
-        System.out.println("Parsing champion files");
+        System.out.println("Parsing");
+        StringBuilder filenameBuilder = new StringBuilder("{\n");
+        StringBuilder hextechBuilder  = new StringBuilder("{\n");
+        List<String>  hextechValues   = parseHextechFile();
         
         for (String reg : preRegion)
         {
             for (String lan : preLang)
             {
                 String pre   = prePre + reg + "/" + lan + "/";
+                Path   file  = dir.resolve(pre + "/v1");
                 Path   file2 = dir.resolve(pre + "/v1/champions");
+                
+                for (String filename : filenames)
+                {
+                    hashAndAddToSB(filenameBuilder, pre + filename);
+                }
+                
                 for (int i = -1; i < championMax; i++)
                 {
                     findInChampionFile(file2, i + ".json");
                 }
+                
+                doHextechParse(hextechBuilder, hextechValues, pre);
+                parseIcons(file);
             }
         }
+        
+        finalizeFileReading("files.json", filenameBuilder);
+        finalizeFileReading("hextech.json", hextechBuilder);
         
         System.out.println("Parsing data from unknown files");
         for (String ext : exts)
@@ -229,7 +199,71 @@ public class TestHashes
         }
         
         System.out.println("Merging files");
+        
         combineAndDeleteTemp();
+    }
+    
+    private void parseIcons(Path file)
+    {
+        findIconPathInJsonArrayFile(file, "perkstyles.json");
+        findIconPathInJsonArrayFile(file, "perks.json");
+        findIconPathInJsonArrayFile(file, "items.json");
+        findIconPathInJsonArrayFile(file, "summoner-spells.json");
+        findIconPathInJsonArrayFile(file, "profile-icons.json");
+        
+        parseWardSkins(file, "ward-skins.json");
+        parseMasteries(file, "summoner-masteries.json");
+        parseEmotes(file, "summoner-emotes.json");
+        parseBanners(file, "summoner-banners.json");
+        parseMapAssets(file, "map-assets/map-assets.json");
+    }
+    
+    private void doHextechParse(StringBuilder data2, List<String> hextechValues, String pre)
+    {
+        for (String attempt : hextechValues)
+        {
+            hashAndAddToSB(data2, pre + "v1/hextech-images/" + attempt + ".png");
+            hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/" + attempt + ".png");
+        }
+        
+        for (int i = -1; i < championMax; i++)
+        {
+            hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/chest_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/rarity-gem-icons/" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_generic_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_champion_mastery_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + ".png");
+            hashAndAddToSB(data2, pre + "v1/hextech-images/lootbundle_icon_cosmetic_" + i + "_open.png");
+            
+            for (int j = -1; j < skinMax; j++)
+            {
+                hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + ".png");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/loottable_chest_" + i + "_" + j + "_open.png");
+                
+                String skinid = String.format("%d%03d", i, j);
+                hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_" + skinid + ".png");
+                hashAndAddToSB(data2, pre + "v1/hextech-images/champion_skin_rental_" + skinid + ".png");
+            }
+        }
+        
+        // constants..
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/epic.png");
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/legendary.png");
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/mythic.png");
+        hashAndAddToSB(data2, pre + "v1/rarity-gem-icons/ultimate.png");
+        
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_champion_mastery.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_key_bundle.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_mystery_champion_shard.png");
+        hashAndAddToSB(data2, pre + "v1/hextech-images/hextech-images/chest_promotion.png");
     }
     
     
@@ -813,7 +847,7 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash = UtilHandler.getHash(hashMe);
+        String hash = UtilHandler.getHash(hashMe.trim());
         
         if (hashes.contains(hash))
         {

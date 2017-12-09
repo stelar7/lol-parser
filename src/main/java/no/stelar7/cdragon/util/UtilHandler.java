@@ -20,8 +20,9 @@ public final class UtilHandler
         // Hide public constructor
     }
     
-    private static Map<String, Map<String, String>> hashNames    = new HashMap<>();
-    private static Map<ByteArrayWrapper, String>    magicNumbers = new HashMap<>();
+    private static Map<String, Map<String, String>> hashNames      = new HashMap<>();
+    private static Map<ByteArrayWrapper, String>    magicNumbers   = new HashMap<>();
+    private static XXHashFactory                    XXHASH_FACTORY = XXHashFactory.fastestInstance();
     
     public static Map<String, String> getKnownFileHashes(String pluginName)
     {
@@ -171,19 +172,14 @@ public final class UtilHandler
     {
         try
         {
-            XXHashFactory        factory = XXHashFactory.fastestInstance();
-            byte[]               data    = text.getBytes(StandardCharsets.UTF_8);
-            ByteArrayInputStream in      = new ByteArrayInputStream(data);
+            byte[]               data = text.getBytes(StandardCharsets.UTF_8);
+            ByteArrayInputStream in   = new ByteArrayInputStream(data);
             
-            StreamingXXHash64 hash64 = factory.newStreamingHash64(0);
+            StreamingXXHash64 hash64 = XXHASH_FACTORY.newStreamingHash64(0);
             byte[]            buf    = new byte[8];
-            for (; ; )
+            int               read;
+            while ((read = in.read(buf)) != -1)
             {
-                int read = in.read(buf);
-                if (read == -1)
-                {
-                    break;
-                }
                 hash64.update(buf, 0, read);
             }
             return String.format("%016X", hash64.getValue()).toLowerCase(Locale.ENGLISH);
