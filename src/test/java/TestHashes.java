@@ -141,7 +141,6 @@ public class TestHashes
             Files.createDirectories(innerFolder);
         }
         
-        System.out.println("Parsing");
         StringBuilder filenameBuilder = new StringBuilder("{\n");
         StringBuilder hextechBuilder  = new StringBuilder("{\n");
         List<String>  hextechValues   = parseHextechFile();
@@ -154,17 +153,24 @@ public class TestHashes
                 Path   file  = dir.resolve(pre + "/v1");
                 Path   file2 = dir.resolve(pre + "/v1/champions");
                 
+                System.out.println("Parsing " + pre);
+                
+                System.out.println("Parsing filenames");
                 for (String filename : filenames)
                 {
                     hashAndAddToSB(filenameBuilder, pre + filename);
                 }
-                
+    
+                System.out.println("Parsing champions");
                 for (int i = -1; i < championMax; i++)
                 {
                     findInChampionFile(file2, i + ".json");
                 }
-                
+    
+                System.out.println("Parsing hextech");
                 doHextechParse(hextechBuilder, hextechValues, pre);
+                
+                System.out.println("Parsing icons");
                 parseIcons(file);
             }
         }
