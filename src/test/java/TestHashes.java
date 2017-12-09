@@ -54,17 +54,20 @@ public class TestHashes
                                                         );
     
     private final List<String> preLang = Arrays.asList("default",
+                                                       "cs_cz",
+                                                       "de_de",
                                                        "el_gr",
                                                        "en_au",
                                                        "en_gb",
                                                        "en_ph",
                                                        "en_sg",
                                                        "en_us",
-                                                       "en_ar",
+                                                       "es_ar",
                                                        "es_es",
                                                        "es_mx",
                                                        "fr_fr",
                                                        "hu_hu",
+                                                       "id_id",
                                                        "it_it",
                                                        "ja_jp",
                                                        "ko_kr",
@@ -150,8 +153,8 @@ public class TestHashes
             for (String lan : preLang)
             {
                 String pre   = prePre + reg + "/" + lan + "/";
-                Path   file  = dir.resolve(pre + "/v1");
-                Path   file2 = dir.resolve(pre + "/v1/champions");
+                Path   file  = dir.resolve(pre + "v1");
+                Path   file2 = dir.resolve(pre + "v1/champions");
                 
                 System.out.println("Parsing " + pre);
                 
@@ -160,29 +163,28 @@ public class TestHashes
                 {
                     hashAndAddToSB(filenameBuilder, pre + filename);
                 }
-    
+                
                 System.out.println("Parsing champions");
                 for (int i = -1; i < championMax; i++)
                 {
                     findInChampionFile(file2, i + ".json");
                 }
-    
+                
                 System.out.println("Parsing hextech");
                 doHextechParse(hextechBuilder, hextechValues, pre);
                 
                 System.out.println("Parsing icons");
                 parseIcons(file);
+                
+                for (final String exten : exts)
+                {
+                    folderData.forEach((folderName, depths) -> generateHashList(pre, folderName, depths, exten));
+                }
             }
         }
         
         finalizeFileReading("files.json", filenameBuilder);
         finalizeFileReading("hextech.json", hextechBuilder);
-        
-        System.out.println("Parsing data from unknown files");
-        for (String ext : exts)
-        {
-            folderData.forEach((k, v) -> generateHashList(k, v, ext, hashes));
-        }
         
         
         folderData.put("perkstyles", new Integer[]{1});
@@ -579,7 +581,7 @@ public class TestHashes
                 Files.createDirectories(currentInnerFolder);
             }
             
-            Files.write(currentInnerFolder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+            Files.write(currentInnerFolder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
             
         } catch (IOException e)
         {
@@ -799,28 +801,24 @@ public class TestHashes
         finalizeFileReading(filename, data);
     }
     
-    private void generateHashList(String folderName, Integer[] depths, String fileType, List<String> unknownHashes)
+    private void generateHashList(String pre, String folderName, Integer[] depths, String fileType)
     {
         StringBuilder sb = new StringBuilder("{\n");
-        for (String reg : preRegion)
+        
+        String pathPrefix = pre + "v1/" + folderName + "/";
+        if (depths.length == 1)
         {
-            for (String lan : preLang)
-            {
-                String pre        = prePre + reg + "/" + lan + "/";
-                String pathPrefix = pre + "v1/" + folderName + "/";
-                if (depths.length == 1)
-                {
-                    doLoop(depths[0], pathPrefix + "%s." + fileType, unknownHashes, sb);
-                } else
-                {
-                    doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, unknownHashes, sb);
-                }
-            }
+            doLoop(depths[0], pathPrefix + "%s." + fileType, sb);
+        } else
+        {
+            doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, sb);
         }
+        
         finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
-    private void doLoop(int max, String format, List<String> hashes, StringBuilder sb)
+    
+    private void doLoop(int max, String format, StringBuilder sb)
     {
         for (int i = -1; i < max; i++)
         {
@@ -829,7 +827,7 @@ public class TestHashes
         }
     }
     
-    private void doNestedLoop(int outerMax, int innerMax, String format, List<String> hashes, StringBuilder sb)
+    private void doNestedLoop(int outerMax, int innerMax, String format, StringBuilder sb)
     {
         for (int i = -1; i < outerMax; i++)
         {
