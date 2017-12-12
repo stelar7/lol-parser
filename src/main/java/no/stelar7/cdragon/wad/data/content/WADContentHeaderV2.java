@@ -1,8 +1,10 @@
 package no.stelar7.cdragon.wad.data.content;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class WADContentHeaderV2 extends WADContentHeaderV1
 {
     private boolean duplicate;
