@@ -44,7 +44,7 @@ public class TestStoreAsRealName
     }};
     
     @Test
-    public void testAllImages() throws IOException, InterruptedException
+    public void testAllImages() throws IOException
     {
         Path file  = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/");
         Path file2 = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/champions");
@@ -222,8 +222,7 @@ public class TestStoreAsRealName
         for (String key : strings)
         {
             String[]    keyArray = key.split("_");
-            Set<String> keySet   = new HashSet<>();
-            keySet.addAll(Arrays.asList(keyArray));
+            Set<String> keySet = new HashSet<>(Arrays.asList(keyArray));
             Set<Set<String>> powers = Sets.powerSet(keySet);
             
             for (Set<String> power : powers)

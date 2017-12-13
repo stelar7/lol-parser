@@ -4,12 +4,14 @@
 	"62a2e25de26703e5": "plugins/rcp-fe-lol-home/euw/default/magic-bg.jpg",
 	"5921bfda5064dfca": "plugins/rcp-fe-lol-home/euw/default/sfx-uikit-button-gold-click.ogg",
 	"ae02a50b85fcb771": "plugins/rcp-fe-lol-home/euw/default/sfx-uikit-button-gold-hover.ogg",
+	"3a79fb21748ecdc7": "plugins/rcp-fe-lol-home/euw/default/sfx-uikit-text-click-small.ogg",
 	"8796edb8c486d8df": "plugins/rcp-fe-lol-home/euw/default/spinner.png",
 	"4f8c1026f713eee9": "plugins/rcp-fe-lol-home/euw/en_gb/landing-page-styles.css",
 	"0db4dd3856d2f37c": "plugins/rcp-fe-lol-home/euw/en_gb/lcu-article-backdrop.jpg",
 	"9c75ef10de0dfc94": "plugins/rcp-fe-lol-home/euw/en_gb/magic-bg.jpg",
 	"4b1928462eddfd3e": "plugins/rcp-fe-lol-home/euw/en_gb/sfx-uikit-button-gold-click.ogg",
 	"36fc58705f657f50": "plugins/rcp-fe-lol-home/euw/en_gb/sfx-uikit-button-gold-hover.ogg",
+	"068afc052587069c": "plugins/rcp-fe-lol-home/euw/en_gb/sfx-uikit-text-click-small.ogg",
 	"972733c3cd4982d6": "plugins/rcp-fe-lol-home/euw/en_gb/spinner.png",
 	"abee4efe8eec46b3": "plugins/rcp-fe-lol-home/global/default/css/main.css",
 	"8f4d8e94a4c269bb": "plugins/rcp-fe-lol-home/global/default/icon-ip.png",
@@ -50,5 +52,6 @@
 	"5a5cf3ecb49e4b0f": "plugins/rcp-fe-lol-home/global/en_gb/magic-bg.jpg",
 	"ddc0c25d71513ebb": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-button-gold-click.ogg",
 	"be61e505fc970b6a": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-button-gold-hover.ogg",
+	"4aa2abe27dc3272e": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-text-click-small.ogg",
 	"c6e812bd7cd2f7a4": "plugins/rcp-fe-lol-home/global/en_gb/spinner.png"
 }
