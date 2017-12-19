@@ -29,6 +29,9 @@
 	"ca8ef8327bed229e": "plugins/rcp-fe-lol-loyalty/global/en_gb/trans.json",
 	"9a266633ddeb6bc6": "plugins/rcp-fe-lol-loyalty/global/en_ph/trans.json",
 	"837e221fb3efdbdf": "plugins/rcp-fe-lol-loyalty/global/en_sg/trans.json",
+	"783e64bb71f15181": "plugins/rcp-fe-lol-loyalty/global/en_us/css/main.css",
+	"d90580fef96a8876": "plugins/rcp-fe-lol-loyalty/global/en_us/index.html",
+	"6aebc45aff372d10": "plugins/rcp-fe-lol-loyalty/global/en_us/init.js",
 	"9d7947ce56fe86f5": "plugins/rcp-fe-lol-loyalty/global/en_us/trans.json",
 	"d615c1365db54cf4": "plugins/rcp-fe-lol-loyalty/global/es_ar/trans.json",
 	"23b9001f00ab4111": "plugins/rcp-fe-lol-loyalty/global/es_es/trans.json",
@@ -49,5 +52,13 @@
 	"3f62a9853346360b": "plugins/rcp-fe-lol-loyalty/global/vn_vn/trans.json",
 	"c8efcd1bc657131f": "plugins/rcp-fe-lol-loyalty/global/zh_cn/trans.json",
 	"336cead6441d6a5b": "plugins/rcp-fe-lol-loyalty/global/zh_my/trans.json",
-	"f2c554680fd88331": "plugins/rcp-fe-lol-loyalty/global/zh_tw/trans.json"
+	"f2c554680fd88331": "plugins/rcp-fe-lol-loyalty/global/zh_tw/trans.json",
+	"61399179ebcee065": "plugins/rcp-fe-lol-loyalty/pbe/default/css/main.css",
+	"55f045179ffeb304": "plugins/rcp-fe-lol-loyalty/pbe/default/index.html",
+	"0c2ce58d015cdd76": "plugins/rcp-fe-lol-loyalty/pbe/default/init.js",
+	"5e0c4cdb2cdb24db": "plugins/rcp-fe-lol-loyalty/pbe/default/trans.json",
+	"42690df28d1a426d": "plugins/rcp-fe-lol-loyalty/pbe/en_us/css/main.css",
+	"4f11720a0b9ebb17": "plugins/rcp-fe-lol-loyalty/pbe/en_us/index.html",
+	"c37f815ba68842c9": "plugins/rcp-fe-lol-loyalty/pbe/en_us/init.js",
+	"35b7c5016ec0d3b7": "plugins/rcp-fe-lol-loyalty/pbe/en_us/trans.json"
 }

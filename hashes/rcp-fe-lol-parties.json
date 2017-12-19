@@ -426,6 +426,8 @@
 	"4b798d98724b3f59": "plugins/rcp-fe-lol-parties/global/en_gb/tutorial-hover.png",
 	"be25586d54686621": "plugins/rcp-fe-lol-parties/global/en_ph/trans.json",
 	"91ebe6831d8d2f74": "plugins/rcp-fe-lol-parties/global/en_sg/trans.json",
+	"71277670504eac82": "plugins/rcp-fe-lol-parties/global/en_us/41aef444c2201e0f8c2d9cfd89bf7d06.png",
+	"76e8c1656e621399": "plugins/rcp-fe-lol-parties/global/en_us/2220a58e49de1f10f764ee3bfb4853b0.png",
 	"1049b1c5898ed8b4": "plugins/rcp-fe-lol-parties/global/en_us/trans.json",
 	"ccf4a9b2714482ac": "plugins/rcp-fe-lol-parties/global/es_ar/trans.json",
 	"d64a7e62a2ff02b3": "plugins/rcp-fe-lol-parties/global/es_es/trans.json",
@@ -446,5 +448,9 @@
 	"5668b1ffa7c509c0": "plugins/rcp-fe-lol-parties/global/vn_vn/trans.json",
 	"6fdac816cc265ecd": "plugins/rcp-fe-lol-parties/global/zh_cn/trans.json",
 	"e64819142d44f636": "plugins/rcp-fe-lol-parties/global/zh_my/trans.json",
-	"e78afe064e5639f9": "plugins/rcp-fe-lol-parties/global/zh_tw/trans.json"
+	"e78afe064e5639f9": "plugins/rcp-fe-lol-parties/global/zh_tw/trans.json",
+	"ea2b3c1c6b8cce70": "plugins/rcp-fe-lol-parties/pbe/default/41aef444c2201e0f8c2d9cfd89bf7d06.png",
+	"ba5fff5b0e29d59a": "plugins/rcp-fe-lol-parties/pbe/default/2220a58e49de1f10f764ee3bfb4853b0.png",
+	"18cf82b3dca148df": "plugins/rcp-fe-lol-parties/pbe/en_us/41aef444c2201e0f8c2d9cfd89bf7d06.png",
+	"c24d909e215006d0": "plugins/rcp-fe-lol-parties/pbe/en_us/2220a58e49de1f10f764ee3bfb4853b0.png"
 }

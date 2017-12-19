@@ -12,5 +12,14 @@
 	"9c44f219de5ed24e": "plugins/rcp-fe-lol-kr-legal/global/default/init.js.map",
 	"9793c3a4a471b5e3": "plugins/rcp-fe-lol-kr-legal/global/en_gb/css/main.css",
 	"e12c00e3d7b88b2a": "plugins/rcp-fe-lol-kr-legal/global/en_gb/index.html",
-	"52932d8b65fe3401": "plugins/rcp-fe-lol-kr-legal/global/en_gb/init.js"
+	"52932d8b65fe3401": "plugins/rcp-fe-lol-kr-legal/global/en_gb/init.js",
+	"0e91f17676fb8e1f": "plugins/rcp-fe-lol-kr-legal/global/en_us/css/main.css",
+	"e0473e4e702d6823": "plugins/rcp-fe-lol-kr-legal/global/en_us/index.html",
+	"fe25ee5a7bc958eb": "plugins/rcp-fe-lol-kr-legal/global/en_us/init.js",
+	"2e8bcd617df7b2b4": "plugins/rcp-fe-lol-kr-legal/pbe/default/css/main.css",
+	"070e7653ccdf81c0": "plugins/rcp-fe-lol-kr-legal/pbe/default/index.html",
+	"f943c3c13aecd49f": "plugins/rcp-fe-lol-kr-legal/pbe/default/init.js",
+	"927ccf33347d0b59": "plugins/rcp-fe-lol-kr-legal/pbe/en_us/css/main.css",
+	"ad1aadaead9536dc": "plugins/rcp-fe-lol-kr-legal/pbe/en_us/index.html",
+	"861d488befdd9f29": "plugins/rcp-fe-lol-kr-legal/pbe/en_us/init.js"
 }

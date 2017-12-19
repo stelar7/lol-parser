@@ -19,6 +19,8 @@
 	"384ba62d5229df6d": "plugins/rcp-fe-lol-general-settings/global/en_gb/trans.json",
 	"5f5867bac50b58a2": "plugins/rcp-fe-lol-general-settings/global/en_ph/trans.json",
 	"438924994babdd7e": "plugins/rcp-fe-lol-general-settings/global/en_sg/trans.json",
+	"42c6bced86f5ef58": "plugins/rcp-fe-lol-general-settings/global/en_us/bundle.js",
+	"9c47c4c629d2374c": "plugins/rcp-fe-lol-general-settings/global/en_us/index.html",
 	"f208ef52e899c67b": "plugins/rcp-fe-lol-general-settings/global/en_us/trans.json",
 	"2fd7a40f692bd6ba": "plugins/rcp-fe-lol-general-settings/global/es_ar/trans.json",
 	"70176c95ae9f70ee": "plugins/rcp-fe-lol-general-settings/global/es_es/trans.json",
@@ -39,5 +41,11 @@
 	"9440e143b61d090a": "plugins/rcp-fe-lol-general-settings/global/vn_vn/trans.json",
 	"9733150457ca997b": "plugins/rcp-fe-lol-general-settings/global/zh_cn/trans.json",
 	"3d1ff46d8567c18a": "plugins/rcp-fe-lol-general-settings/global/zh_my/trans.json",
-	"e212124aeb4e0d22": "plugins/rcp-fe-lol-general-settings/global/zh_tw/trans.json"
+	"e212124aeb4e0d22": "plugins/rcp-fe-lol-general-settings/global/zh_tw/trans.json",
+	"4f24d3a25d2de46e": "plugins/rcp-fe-lol-general-settings/pbe/default/bundle.js",
+	"d689e9bbe4520a03": "plugins/rcp-fe-lol-general-settings/pbe/default/index.html",
+	"5a085f6590b13320": "plugins/rcp-fe-lol-general-settings/pbe/default/trans.json",
+	"58254e3564284b6c": "plugins/rcp-fe-lol-general-settings/pbe/en_us/bundle.js",
+	"f24a85bc2599be85": "plugins/rcp-fe-lol-general-settings/pbe/en_us/index.html",
+	"a7cbd141a1ac43f3": "plugins/rcp-fe-lol-general-settings/pbe/en_us/trans.json"
 }

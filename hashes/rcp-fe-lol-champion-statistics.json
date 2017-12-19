@@ -1,4 +1,10 @@
 {
 	"b49658f1dc5fe7de": "plugins/rcp-fe-lol-champion-statistics/global/default/index.html",
-	"b3252a23e553e4ce": "plugins/rcp-fe-lol-champion-statistics/global/default/init.js"
+	"b3252a23e553e4ce": "plugins/rcp-fe-lol-champion-statistics/global/default/init.js",
+	"48b823b96f965e1b": "plugins/rcp-fe-lol-champion-statistics/global/en_us/index.html",
+	"30cf85ad8f3c2101": "plugins/rcp-fe-lol-champion-statistics/global/en_us/init.js",
+	"2925ed00289170c2": "plugins/rcp-fe-lol-champion-statistics/pbe/default/index.html",
+	"49ff146f3b17113c": "plugins/rcp-fe-lol-champion-statistics/pbe/default/init.js",
+	"1377dc26ff9d5e2f": "plugins/rcp-fe-lol-champion-statistics/pbe/en_us/index.html",
+	"487dadf0c5cc7f02": "plugins/rcp-fe-lol-champion-statistics/pbe/en_us/init.js"
 }

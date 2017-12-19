@@ -93,5 +93,17 @@
 	"cc12c1a869c60e2c": "plugins/rcp-fe-lol-item-sets/global/en_gb/map_12_on.png",
 	"ce7686299fa8e48e": "plugins/rcp-fe-lol-item-sets/global/en_gb/no_champ.png",
 	"e97591c7964dfd0c": "plugins/rcp-fe-lol-item-sets/global/en_gb/sfx-uikit-generic-click-small.ogg",
-	"454f372718e3fa58": "plugins/rcp-fe-lol-item-sets/global/en_gb/sfx-uikit-grid-hover.ogg"
+	"454f372718e3fa58": "plugins/rcp-fe-lol-item-sets/global/en_gb/sfx-uikit-grid-hover.ogg",
+	"688c88da1cb5e4f6": "plugins/rcp-fe-lol-item-sets/global/en_us/bundle.js",
+	"f8e0da35d3281444": "plugins/rcp-fe-lol-item-sets/global/en_us/index.html",
+	"f71d354b7e8aae3e": "plugins/rcp-fe-lol-item-sets/global/en_us/no_champ.png",
+	"b27f42472596d1d4": "plugins/rcp-fe-lol-item-sets/global/en_us/trans.json",
+	"de4d2cff1b33e519": "plugins/rcp-fe-lol-item-sets/pbe/default/bundle.js",
+	"17a8a73df95112b7": "plugins/rcp-fe-lol-item-sets/pbe/default/index.html",
+	"953e9f37a85b4f6c": "plugins/rcp-fe-lol-item-sets/pbe/default/no_champ.png",
+	"9b3cf8c9a11cecb7": "plugins/rcp-fe-lol-item-sets/pbe/default/trans.json",
+	"382e42cb594c0528": "plugins/rcp-fe-lol-item-sets/pbe/en_us/bundle.js",
+	"db5a29bf23649138": "plugins/rcp-fe-lol-item-sets/pbe/en_us/index.html",
+	"d7171df684fd4d06": "plugins/rcp-fe-lol-item-sets/pbe/en_us/no_champ.png",
+	"9a6005f19ee071ed": "plugins/rcp-fe-lol-item-sets/pbe/en_us/trans.json"
 }

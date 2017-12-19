@@ -21,5 +21,17 @@
 	"fe8a46d95f89f0c5": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/champion-mastery-trans.json",
 	"d20cfacbc65ce329": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/index.html",
 	"18262018ef9685b0": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/init.js",
-	"e4627ea4ef223fa4": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/loot-grants-trans.json"
+	"e4627ea4ef223fa4": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_gb/loot-grants-trans.json",
+	"2a3ea106023b0058": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_us/champion-mastery-trans.json",
+	"5ed38318de26b928": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_us/index.html",
+	"93be2dff484b66ef": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_us/init.js",
+	"4d79fab8bd6a41d0": "plugins/rcp-fe-lol-champion-mastery-notifications/global/en_us/loot-grants-trans.json",
+	"af0301b73e286aac": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/default/champion-mastery-trans.json",
+	"490f5cf4fc9db725": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/default/index.html",
+	"a575e69f0ea71683": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/default/init.js",
+	"3ea547a0e3e9f242": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/default/loot-grants-trans.json",
+	"491350ee64fb28a8": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/en_us/champion-mastery-trans.json",
+	"5c6fae1f3f8d20fe": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/en_us/index.html",
+	"d4bc94d17291c8a2": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/en_us/init.js",
+	"056c2ecfce9e53ac": "plugins/rcp-fe-lol-champion-mastery-notifications/pbe/en_us/loot-grants-trans.json"
 }

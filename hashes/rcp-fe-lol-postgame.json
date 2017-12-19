@@ -121,6 +121,8 @@
 	"c176b61f2c2df7fc": "plugins/rcp-fe-lol-postgame/global/en_gb/trans.json",
 	"cdaa20b5b51354b7": "plugins/rcp-fe-lol-postgame/global/en_ph/trans.json",
 	"00e04996e70e9b27": "plugins/rcp-fe-lol-postgame/global/en_sg/trans.json",
+	"cf41ecda4ed4ca12": "plugins/rcp-fe-lol-postgame/global/en_us/bundle.js",
+	"6489211d7ed31405": "plugins/rcp-fe-lol-postgame/global/en_us/index.html",
 	"e785c4e9145e4d60": "plugins/rcp-fe-lol-postgame/global/en_us/trans.json",
 	"321eb740dd5edc8a": "plugins/rcp-fe-lol-postgame/global/es_ar/trans.json",
 	"d5b5587e9c74d47c": "plugins/rcp-fe-lol-postgame/global/es_es/trans.json",
@@ -141,5 +143,9 @@
 	"67410735e5bae8a4": "plugins/rcp-fe-lol-postgame/global/vn_vn/trans.json",
 	"5df95398abcd589d": "plugins/rcp-fe-lol-postgame/global/zh_cn/trans.json",
 	"3a5f5a31247e8726": "plugins/rcp-fe-lol-postgame/global/zh_my/trans.json",
-	"60f033e2b109175c": "plugins/rcp-fe-lol-postgame/global/zh_tw/trans.json"
+	"60f033e2b109175c": "plugins/rcp-fe-lol-postgame/global/zh_tw/trans.json",
+	"b704632ffe1cc606": "plugins/rcp-fe-lol-postgame/pbe/default/bundle.js",
+	"df0f6aed8e80e9ac": "plugins/rcp-fe-lol-postgame/pbe/default/index.html",
+	"7c6d3288ca3eb12f": "plugins/rcp-fe-lol-postgame/pbe/en_us/bundle.js",
+	"8b68cde9eb14b559": "plugins/rcp-fe-lol-postgame/pbe/en_us/index.html"
 }

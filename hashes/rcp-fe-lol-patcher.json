@@ -132,7 +132,10 @@
 	"5aac459272f3a83d": "plugins/rcp-fe-lol-patcher/global/en_gb/videos/play-button-release.webm",
 	"d10912bc079f9d0d": "plugins/rcp-fe-lol-patcher/global/en_ph/trans.json",
 	"d0bca291822d329e": "plugins/rcp-fe-lol-patcher/global/en_sg/trans.json",
+	"0a215e1bb1c4541f": "plugins/rcp-fe-lol-patcher/global/en_us/ff4199e7afeafa2832203271c32a3e36.png",
 	"a238eff4cd419021": "plugins/rcp-fe-lol-patcher/global/en_us/trans.json",
+	"f1c5d88200444ab6": "plugins/rcp-fe-lol-patcher/global/en_us/videos/league-logo-loop-active.webm",
+	"54e5ff5a7bb9d9e7": "plugins/rcp-fe-lol-patcher/global/en_us/videos/progress-bar-tip-loop.webm",
 	"243766ac864072f0": "plugins/rcp-fe-lol-patcher/global/es_ar/trans.json",
 	"4ec1560c79886464": "plugins/rcp-fe-lol-patcher/global/es_es/trans.json",
 	"e3a682c39cbbff6c": "plugins/rcp-fe-lol-patcher/global/es_mx/trans.json",
@@ -152,5 +155,11 @@
 	"f2c292cbfabcaa20": "plugins/rcp-fe-lol-patcher/global/vn_vn/trans.json",
 	"72e612e23ced7207": "plugins/rcp-fe-lol-patcher/global/zh_cn/trans.json",
 	"343192895af0b294": "plugins/rcp-fe-lol-patcher/global/zh_my/trans.json",
-	"b57342fc6516e9da": "plugins/rcp-fe-lol-patcher/global/zh_tw/trans.json"
+	"b57342fc6516e9da": "plugins/rcp-fe-lol-patcher/global/zh_tw/trans.json",
+	"91ccd469d538b9dd": "plugins/rcp-fe-lol-patcher/pbe/default/ff4199e7afeafa2832203271c32a3e36.png",
+	"4e3a49a70d137f14": "plugins/rcp-fe-lol-patcher/pbe/default/videos/league-logo-loop-active.webm",
+	"8beaaa7bcef8f9ee": "plugins/rcp-fe-lol-patcher/pbe/default/videos/progress-bar-tip-loop.webm",
+	"024d475e9489aa4e": "plugins/rcp-fe-lol-patcher/pbe/en_us/ff4199e7afeafa2832203271c32a3e36.png",
+	"6cf109fbeda66b84": "plugins/rcp-fe-lol-patcher/pbe/en_us/videos/league-logo-loop-active.webm",
+	"3b688b1bea1aefd7": "plugins/rcp-fe-lol-patcher/pbe/en_us/videos/progress-bar-tip-loop.webm"
 }

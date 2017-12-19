@@ -21,5 +21,20 @@
 	"b5037bdfac5f8ddd": "plugins/rcp-fe-lol-store/global/en_gb/css/main.css",
 	"85fad5b97de919ee": "plugins/rcp-fe-lol-store/global/en_gb/index.html",
 	"d1ecb2e3f7da14b5": "plugins/rcp-fe-lol-store/global/en_gb/init.js",
-	"0591c08d20f28547": "plugins/rcp-fe-lol-store/global/en_gb/trans.json"
+	"0591c08d20f28547": "plugins/rcp-fe-lol-store/global/en_gb/trans.json",
+	"9d49765cdd79923a": "plugins/rcp-fe-lol-store/global/en_us/css/images/background.png",
+	"3c961f6b0d3bf03c": "plugins/rcp-fe-lol-store/global/en_us/css/main.css",
+	"d3ba80bff8aa1d81": "plugins/rcp-fe-lol-store/global/en_us/index.html",
+	"df331dabd953f65d": "plugins/rcp-fe-lol-store/global/en_us/init.js",
+	"81a20a12b35442c3": "plugins/rcp-fe-lol-store/global/en_us/trans.json",
+	"391c9a929864163a": "plugins/rcp-fe-lol-store/pbe/default/css/images/background.png",
+	"b9a13f73577fc7c0": "plugins/rcp-fe-lol-store/pbe/default/css/main.css",
+	"e4f826eb900732b6": "plugins/rcp-fe-lol-store/pbe/default/index.html",
+	"3cf2b3d5f79a20c7": "plugins/rcp-fe-lol-store/pbe/default/init.js",
+	"902c20fe1906a1bb": "plugins/rcp-fe-lol-store/pbe/default/trans.json",
+	"6b386547a0491d07": "plugins/rcp-fe-lol-store/pbe/en_us/css/images/background.png",
+	"129cef554b910a89": "plugins/rcp-fe-lol-store/pbe/en_us/css/main.css",
+	"d2baac6f44d5913e": "plugins/rcp-fe-lol-store/pbe/en_us/index.html",
+	"62269176443143b5": "plugins/rcp-fe-lol-store/pbe/en_us/init.js",
+	"873f14b7e154c89b": "plugins/rcp-fe-lol-store/pbe/en_us/trans.json"
 }

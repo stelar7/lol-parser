@@ -25,5 +25,20 @@
 	"06387ecf0cfb6feb": "plugins/rcp-fe-lol-block-list-settings/global/en_gb/index.html",
 	"58eaf2ba35914820": "plugins/rcp-fe-lol-block-list-settings/global/en_gb/init.js",
 	"15b75bde41dcf67a": "plugins/rcp-fe-lol-block-list-settings/global/en_gb/poro_smile.png",
-	"6fa85aae2d24f07d": "plugins/rcp-fe-lol-block-list-settings/global/en_gb/trans.json"
+	"6fa85aae2d24f07d": "plugins/rcp-fe-lol-block-list-settings/global/en_gb/trans.json",
+	"8d9621f7d71873bc": "plugins/rcp-fe-lol-block-list-settings/global/en_us/blocked-summoner.html",
+	"0531b0d351949db2": "plugins/rcp-fe-lol-block-list-settings/global/en_us/blocked-summoners.html",
+	"b05abcb0b62beaa0": "plugins/rcp-fe-lol-block-list-settings/global/en_us/index.html",
+	"3d329c223454883c": "plugins/rcp-fe-lol-block-list-settings/global/en_us/init.js",
+	"4958a05240f3a0a6": "plugins/rcp-fe-lol-block-list-settings/global/en_us/trans.json",
+	"f628ce7eb581880f": "plugins/rcp-fe-lol-block-list-settings/pbe/default/blocked-summoner.html",
+	"2869216a9ef06627": "plugins/rcp-fe-lol-block-list-settings/pbe/default/blocked-summoners.html",
+	"d757c9d232d60acc": "plugins/rcp-fe-lol-block-list-settings/pbe/default/index.html",
+	"1cbf850112fc7dbe": "plugins/rcp-fe-lol-block-list-settings/pbe/default/init.js",
+	"19abe225907e9fe9": "plugins/rcp-fe-lol-block-list-settings/pbe/default/trans.json",
+	"d74a0e3f24b8cb32": "plugins/rcp-fe-lol-block-list-settings/pbe/en_us/blocked-summoner.html",
+	"e18be58f08458223": "plugins/rcp-fe-lol-block-list-settings/pbe/en_us/blocked-summoners.html",
+	"95532e38d5627c75": "plugins/rcp-fe-lol-block-list-settings/pbe/en_us/index.html",
+	"94d53a6d4261be13": "plugins/rcp-fe-lol-block-list-settings/pbe/en_us/init.js",
+	"ec2633f29fc55b76": "plugins/rcp-fe-lol-block-list-settings/pbe/en_us/trans.json"
 }

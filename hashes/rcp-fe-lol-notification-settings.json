@@ -10,5 +10,14 @@
 	"76703bf8199d89ee": "plugins/rcp-fe-lol-notification-settings/global/default/trans.json",
 	"49d72352f643a5f3": "plugins/rcp-fe-lol-notification-settings/global/en_gb/bundle.js",
 	"7cda0d03e0cc05a0": "plugins/rcp-fe-lol-notification-settings/global/en_gb/index.html",
-	"12df78189a7b66cb": "plugins/rcp-fe-lol-notification-settings/global/en_gb/trans.json"
+	"12df78189a7b66cb": "plugins/rcp-fe-lol-notification-settings/global/en_gb/trans.json",
+	"9456783410fb0e0e": "plugins/rcp-fe-lol-notification-settings/global/en_us/bundle.js",
+	"f47a1baddf6c76f8": "plugins/rcp-fe-lol-notification-settings/global/en_us/index.html",
+	"cfa2d89e7aeb1408": "plugins/rcp-fe-lol-notification-settings/global/en_us/trans.json",
+	"c3473f82aa2ea338": "plugins/rcp-fe-lol-notification-settings/pbe/default/bundle.js",
+	"28f7b2cb8ac8fe25": "plugins/rcp-fe-lol-notification-settings/pbe/default/index.html",
+	"4bd94e8bfaf5ad2a": "plugins/rcp-fe-lol-notification-settings/pbe/default/trans.json",
+	"d406a2f2e4b9ddea": "plugins/rcp-fe-lol-notification-settings/pbe/en_us/bundle.js",
+	"8ec651f35d928cc4": "plugins/rcp-fe-lol-notification-settings/pbe/en_us/index.html",
+	"a928d1a10baf12ed": "plugins/rcp-fe-lol-notification-settings/pbe/en_us/trans.json"
 }

@@ -24,5 +24,14 @@
 	"4b22b55cfd5edd4d": "plugins/rcp-fe-lol-game-settings/global/en_gb/hotkeybg.png",
 	"a795ac3154dba487": "plugins/rcp-fe-lol-game-settings/global/en_gb/index.html",
 	"8779c9ac963d1c77": "plugins/rcp-fe-lol-game-settings/global/en_gb/quickcasticons.png",
-	"b15fdc743c963cd8": "plugins/rcp-fe-lol-game-settings/global/en_gb/trans.json"
+	"b15fdc743c963cd8": "plugins/rcp-fe-lol-game-settings/global/en_gb/trans.json",
+	"39901dd533ba976a": "plugins/rcp-fe-lol-game-settings/global/en_us/bundle.js",
+	"19de387d890768a7": "plugins/rcp-fe-lol-game-settings/global/en_us/index.html",
+	"549d7ced1c20012e": "plugins/rcp-fe-lol-game-settings/global/en_us/trans.json",
+	"ff44d9cb7786a5ba": "plugins/rcp-fe-lol-game-settings/pbe/default/bundle.js",
+	"2bd3eb3c9e1261f4": "plugins/rcp-fe-lol-game-settings/pbe/default/index.html",
+	"142b26b8d08b5469": "plugins/rcp-fe-lol-game-settings/pbe/default/trans.json",
+	"306a577314cbbf45": "plugins/rcp-fe-lol-game-settings/pbe/en_us/bundle.js",
+	"ae39c7e119fe7d7a": "plugins/rcp-fe-lol-game-settings/pbe/en_us/index.html",
+	"b103cc06586d0485": "plugins/rcp-fe-lol-game-settings/pbe/en_us/trans.json"
 }

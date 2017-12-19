@@ -13,5 +13,14 @@
 	"f0110dc3e7d98b4a": "plugins/rcp-fe-lol-account-verification-settings/global/default/trans.json",
 	"d48aedc4c0e23215": "plugins/rcp-fe-lol-account-verification-settings/global/en_gb/index.html",
 	"7b57629aa7974394": "plugins/rcp-fe-lol-account-verification-settings/global/en_gb/init.js",
-	"df30a80212d3068f": "plugins/rcp-fe-lol-account-verification-settings/global/en_gb/trans.json"
+	"df30a80212d3068f": "plugins/rcp-fe-lol-account-verification-settings/global/en_gb/trans.json",
+	"0e51fd95730a4472": "plugins/rcp-fe-lol-account-verification-settings/global/en_us/index.html",
+	"aad9c845b21e6374": "plugins/rcp-fe-lol-account-verification-settings/global/en_us/init.js",
+	"5ea12e9b9741dac5": "plugins/rcp-fe-lol-account-verification-settings/global/en_us/trans.json",
+	"33d20bd1141aaf0c": "plugins/rcp-fe-lol-account-verification-settings/pbe/default/index.html",
+	"fb8eae90db640d04": "plugins/rcp-fe-lol-account-verification-settings/pbe/default/init.js",
+	"5c6ebe912cb05f5f": "plugins/rcp-fe-lol-account-verification-settings/pbe/default/trans.json",
+	"b839e87000b8108d": "plugins/rcp-fe-lol-account-verification-settings/pbe/en_us/index.html",
+	"2a2621c54b157b3a": "plugins/rcp-fe-lol-account-verification-settings/pbe/en_us/init.js",
+	"efa9f7b803643e4e": "plugins/rcp-fe-lol-account-verification-settings/pbe/en_us/trans.json"
 }

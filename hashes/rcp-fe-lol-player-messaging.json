@@ -7,5 +7,11 @@
 	"774663a78145d3a5": "plugins/rcp-fe-lol-player-messaging/global/default/index.html",
 	"8b3616fbda36efac": "plugins/rcp-fe-lol-player-messaging/global/default/init.js",
 	"7f4ee4c962b45d77": "plugins/rcp-fe-lol-player-messaging/global/en_gb/index.html",
-	"61a84bda1a511ece": "plugins/rcp-fe-lol-player-messaging/global/en_gb/init.js"
+	"61a84bda1a511ece": "plugins/rcp-fe-lol-player-messaging/global/en_gb/init.js",
+	"082b2dbc7eafcacc": "plugins/rcp-fe-lol-player-messaging/global/en_us/index.html",
+	"75aef0131b1087c7": "plugins/rcp-fe-lol-player-messaging/global/en_us/init.js",
+	"812cd63e2281d9a2": "plugins/rcp-fe-lol-player-messaging/pbe/default/index.html",
+	"c8ef1462b410c050": "plugins/rcp-fe-lol-player-messaging/pbe/default/init.js",
+	"49aca26388cd502f": "plugins/rcp-fe-lol-player-messaging/pbe/en_us/index.html",
+	"f3df8eac7dda5845": "plugins/rcp-fe-lol-player-messaging/pbe/en_us/init.js"
 }

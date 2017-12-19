@@ -34,6 +34,7 @@
 	"ec42af09f0c14f6b": "plugins/rcp-fe-app-controls/global/en_gb/trans.json",
 	"f5a0be8cc62881d2": "plugins/rcp-fe-app-controls/global/en_ph/trans.json",
 	"510e110587104096": "plugins/rcp-fe-app-controls/global/en_sg/trans.json",
+	"8319b6f8403e8702": "plugins/rcp-fe-app-controls/global/en_us/control-settings-disabled.png",
 	"e22e7a7c05e9e2b3": "plugins/rcp-fe-app-controls/global/en_us/trans.json",
 	"de9c9ed108e236b8": "plugins/rcp-fe-app-controls/global/es_ar/trans.json",
 	"279ac2b9e4556b9b": "plugins/rcp-fe-app-controls/global/es_es/trans.json",
@@ -54,5 +55,7 @@
 	"dac97b96b09506da": "plugins/rcp-fe-app-controls/global/vn_vn/trans.json",
 	"e76eef6a2c5ab75d": "plugins/rcp-fe-app-controls/global/zh_cn/trans.json",
 	"dd8b34e4332735e5": "plugins/rcp-fe-app-controls/global/zh_my/trans.json",
-	"d6c76759637d4142": "plugins/rcp-fe-app-controls/global/zh_tw/trans.json"
+	"d6c76759637d4142": "plugins/rcp-fe-app-controls/global/zh_tw/trans.json",
+	"2fb9b709688815d8": "plugins/rcp-fe-app-controls/pbe/default/control-settings-disabled.png",
+	"655c7007750be459": "plugins/rcp-fe-app-controls/pbe/en_us/control-settings-disabled.png"
 }

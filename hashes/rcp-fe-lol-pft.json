@@ -15,5 +15,17 @@
 	"ab33e9bcb343a3c1": "plugins/rcp-fe-lol-pft/global/en_gb/index.html",
 	"4ee7f28fbecea8ec": "plugins/rcp-fe-lol-pft/global/en_gb/init.js",
 	"85048f7c38237921": "plugins/rcp-fe-lol-pft/global/en_gb/main.css",
-	"b4b5b4dc1693a71a": "plugins/rcp-fe-lol-pft/global/en_gb/trans.json"
+	"b4b5b4dc1693a71a": "plugins/rcp-fe-lol-pft/global/en_gb/trans.json",
+	"b746995279b4c7aa": "plugins/rcp-fe-lol-pft/global/en_us/index.html",
+	"3a9d3257d4e7f0b3": "plugins/rcp-fe-lol-pft/global/en_us/init.js",
+	"8070b26f792df9e0": "plugins/rcp-fe-lol-pft/global/en_us/main.css",
+	"24816407f8754ff3": "plugins/rcp-fe-lol-pft/global/en_us/trans.json",
+	"8099dd2bbbd2fcdf": "plugins/rcp-fe-lol-pft/pbe/default/index.html",
+	"32657acf78a56dc1": "plugins/rcp-fe-lol-pft/pbe/default/init.js",
+	"eba7f9ded0abac60": "plugins/rcp-fe-lol-pft/pbe/default/main.css",
+	"68a81e4c9b67726f": "plugins/rcp-fe-lol-pft/pbe/default/trans.json",
+	"5a0f8a9a62b3e493": "plugins/rcp-fe-lol-pft/pbe/en_us/index.html",
+	"7a47a5b5ab2d3a02": "plugins/rcp-fe-lol-pft/pbe/en_us/init.js",
+	"a0cde3f0301b1995": "plugins/rcp-fe-lol-pft/pbe/en_us/main.css",
+	"e9711ee69f05a972": "plugins/rcp-fe-lol-pft/pbe/en_us/trans.json"
 }

@@ -16,5 +16,14 @@
 	"7f4dceffe4c80a79": "plugins/rcp-fe-lol-paw/global/default/videos/unlockceremony.webm",
 	"c1c7d97949e940e4": "plugins/rcp-fe-lol-paw/global/en_gb/bundle.js",
 	"181f364fdc8b227e": "plugins/rcp-fe-lol-paw/global/en_gb/index.html",
-	"dd798be17dd01633": "plugins/rcp-fe-lol-paw/global/en_gb/trans.json"
+	"dd798be17dd01633": "plugins/rcp-fe-lol-paw/global/en_gb/trans.json",
+	"27e69bda75d5207c": "plugins/rcp-fe-lol-paw/global/en_us/bundle.js",
+	"29f7ebe9d35241a9": "plugins/rcp-fe-lol-paw/global/en_us/index.html",
+	"4b3793654e298a9c": "plugins/rcp-fe-lol-paw/global/en_us/trans.json",
+	"d394e2a90131bf13": "plugins/rcp-fe-lol-paw/pbe/default/bundle.js",
+	"3418951de88c08d3": "plugins/rcp-fe-lol-paw/pbe/default/index.html",
+	"1bc77e7cfa152bcc": "plugins/rcp-fe-lol-paw/pbe/default/trans.json",
+	"d3daca3ea635a110": "plugins/rcp-fe-lol-paw/pbe/en_us/bundle.js",
+	"f99624b9b058d72a": "plugins/rcp-fe-lol-paw/pbe/en_us/index.html",
+	"b3735fbb64325e1c": "plugins/rcp-fe-lol-paw/pbe/en_us/trans.json"
 }

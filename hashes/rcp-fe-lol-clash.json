@@ -987,5 +987,14 @@
 	"41ecd3166ff3c218": "plugins/rcp-fe-lol-clash/global/en_gb/rightdefault.png",
 	"0d8d8bf774b2a812": "plugins/rcp-fe-lol-clash/global/en_gb/rightdisabled.png",
 	"6f4e9984f88f81e5": "plugins/rcp-fe-lol-clash/global/en_gb/righthover.png",
-	"360a128ee0bbf698": "plugins/rcp-fe-lol-clash/global/en_gb/trans.json"
+	"360a128ee0bbf698": "plugins/rcp-fe-lol-clash/global/en_gb/trans.json",
+	"af9f1fcfb620aa6d": "plugins/rcp-fe-lol-clash/global/en_us/index.html",
+	"d792549cdb4e3eb5": "plugins/rcp-fe-lol-clash/global/en_us/rcp-fe-lol-clash.js",
+	"20030005b7e5cf29": "plugins/rcp-fe-lol-clash/global/en_us/trans.json",
+	"8060dc2e1fd760d0": "plugins/rcp-fe-lol-clash/pbe/default/index.html",
+	"e105d268c6d63187": "plugins/rcp-fe-lol-clash/pbe/default/rcp-fe-lol-clash.js",
+	"8bd8a24ec889afbe": "plugins/rcp-fe-lol-clash/pbe/default/trans.json",
+	"4ade5d348c474d68": "plugins/rcp-fe-lol-clash/pbe/en_us/index.html",
+	"71b8c655e150cf32": "plugins/rcp-fe-lol-clash/pbe/en_us/rcp-fe-lol-clash.js",
+	"bf289d68346b3386": "plugins/rcp-fe-lol-clash/pbe/en_us/trans.json"
 }

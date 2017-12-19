@@ -10,5 +10,14 @@
 	"87d6a3d385981cf0": "plugins/rcp-fe-payments/global/default/init.js",
 	"82e80f9501fcd5de": "plugins/rcp-fe-payments/global/en_gb/css/main.css",
 	"a97e72444484f618": "plugins/rcp-fe-payments/global/en_gb/index.html",
-	"6d88af9dc8c96838": "plugins/rcp-fe-payments/global/en_gb/init.js"
+	"6d88af9dc8c96838": "plugins/rcp-fe-payments/global/en_gb/init.js",
+	"c8c5369db4b2d4ee": "plugins/rcp-fe-payments/global/en_us/css/main.css",
+	"60b41ecb9f456af6": "plugins/rcp-fe-payments/global/en_us/index.html",
+	"3db5f30be65626b0": "plugins/rcp-fe-payments/global/en_us/init.js",
+	"2f21a9afbacae4b3": "plugins/rcp-fe-payments/pbe/default/css/main.css",
+	"dac9c4026f0ecd7a": "plugins/rcp-fe-payments/pbe/default/index.html",
+	"c5fd764cea0feb20": "plugins/rcp-fe-payments/pbe/default/init.js",
+	"b2882b4c7cf1026a": "plugins/rcp-fe-payments/pbe/en_us/css/main.css",
+	"9306619e69afdb65": "plugins/rcp-fe-payments/pbe/en_us/index.html",
+	"1a92815869c805d7": "plugins/rcp-fe-payments/pbe/en_us/init.js"
 }

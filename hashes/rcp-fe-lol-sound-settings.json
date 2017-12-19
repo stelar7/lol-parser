@@ -10,5 +10,14 @@
 	"eb8c48f32c27267f": "plugins/rcp-fe-lol-sound-settings/global/default/trans.json",
 	"7c80e7e7b4b91d36": "plugins/rcp-fe-lol-sound-settings/global/en_gb/bundle.js",
 	"3ce4c4e281c8e8ae": "plugins/rcp-fe-lol-sound-settings/global/en_gb/index.html",
-	"fbf5ff23747d0e86": "plugins/rcp-fe-lol-sound-settings/global/en_gb/trans.json"
+	"fbf5ff23747d0e86": "plugins/rcp-fe-lol-sound-settings/global/en_gb/trans.json",
+	"d52b1560483d6ffb": "plugins/rcp-fe-lol-sound-settings/global/en_us/bundle.js",
+	"40663301794abec0": "plugins/rcp-fe-lol-sound-settings/global/en_us/index.html",
+	"eff1f2367928c1c0": "plugins/rcp-fe-lol-sound-settings/global/en_us/trans.json",
+	"c6c6ea3e5a37155d": "plugins/rcp-fe-lol-sound-settings/pbe/default/bundle.js",
+	"b4e7d8144c4ac362": "plugins/rcp-fe-lol-sound-settings/pbe/default/index.html",
+	"8270e1148cd4dff1": "plugins/rcp-fe-lol-sound-settings/pbe/default/trans.json",
+	"17668dc8670d4b6a": "plugins/rcp-fe-lol-sound-settings/pbe/en_us/bundle.js",
+	"0ab6cfd2a147eb23": "plugins/rcp-fe-lol-sound-settings/pbe/en_us/index.html",
+	"54584584de89bd9d": "plugins/rcp-fe-lol-sound-settings/pbe/en_us/trans.json"
 }

@@ -9,5 +9,14 @@
 	"66165e0ceda6af78": "plugins/rcp-fe-lol-battle-training/global/default/index.html",
 	"42dcc929dff8c962": "plugins/rcp-fe-lol-battle-training/global/en_gb/bundle.js",
 	"421ae4d6c880a6b7": "plugins/rcp-fe-lol-battle-training/global/en_gb/index.html",
-	"3fc1ce20f3ebe6cf": "plugins/rcp-fe-lol-battle-training/global/en_gb/trans.json"
+	"3fc1ce20f3ebe6cf": "plugins/rcp-fe-lol-battle-training/global/en_gb/trans.json",
+	"f16a9abdbcf85cb2": "plugins/rcp-fe-lol-battle-training/global/en_us/bundle.js",
+	"4304d5eeadf6777d": "plugins/rcp-fe-lol-battle-training/global/en_us/index.html",
+	"6f74528c925eb344": "plugins/rcp-fe-lol-battle-training/global/en_us/trans.json",
+	"9c1372d530420deb": "plugins/rcp-fe-lol-battle-training/pbe/default/bundle.js",
+	"4982cba892eead71": "plugins/rcp-fe-lol-battle-training/pbe/default/index.html",
+	"0699e78cb76cf867": "plugins/rcp-fe-lol-battle-training/pbe/default/trans.json",
+	"906f3918b69a9595": "plugins/rcp-fe-lol-battle-training/pbe/en_us/bundle.js",
+	"bb39a370b01f405e": "plugins/rcp-fe-lol-battle-training/pbe/en_us/index.html",
+	"d38a3d3354991077": "plugins/rcp-fe-lol-battle-training/pbe/en_us/trans.json"
 }

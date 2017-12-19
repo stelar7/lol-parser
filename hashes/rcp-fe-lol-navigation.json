@@ -52,6 +52,10 @@
 	"42d2e791689ad95a": "plugins/rcp-fe-lol-navigation/global/en_gb/trans.json",
 	"d28db5aea8324929": "plugins/rcp-fe-lol-navigation/global/en_ph/trans.json",
 	"64caa65679538a32": "plugins/rcp-fe-lol-navigation/global/en_sg/trans.json",
+	"2f4b4e894d61f4f2": "plugins/rcp-fe-lol-navigation/global/en_us/blue-essence.png",
+	"9da2ba42979434ed": "plugins/rcp-fe-lol-navigation/global/en_us/question-mark.png",
+	"89c038ede6dbe14c": "plugins/rcp-fe-lol-navigation/global/en_us/store-ip.png",
+	"a0309b2631a87672": "plugins/rcp-fe-lol-navigation/global/en_us/store-rp.png",
 	"ed2a4dac94f59194": "plugins/rcp-fe-lol-navigation/global/en_us/trans.json",
 	"8de231a19eb55844": "plugins/rcp-fe-lol-navigation/global/es_ar/trans.json",
 	"7e1d84d5e886040e": "plugins/rcp-fe-lol-navigation/global/es_es/trans.json",
@@ -72,5 +76,13 @@
 	"bebb610c421afb07": "plugins/rcp-fe-lol-navigation/global/vn_vn/trans.json",
 	"9435ad6216f17929": "plugins/rcp-fe-lol-navigation/global/zh_cn/trans.json",
 	"1ed1ce5ba4b6c6e6": "plugins/rcp-fe-lol-navigation/global/zh_my/trans.json",
-	"61984da6e4fb866f": "plugins/rcp-fe-lol-navigation/global/zh_tw/trans.json"
+	"61984da6e4fb866f": "plugins/rcp-fe-lol-navigation/global/zh_tw/trans.json",
+	"2242d377978ed191": "plugins/rcp-fe-lol-navigation/pbe/default/blue-essence.png",
+	"0cbbbf31890ed117": "plugins/rcp-fe-lol-navigation/pbe/default/question-mark.png",
+	"50f17cee3b2c1760": "plugins/rcp-fe-lol-navigation/pbe/default/store-ip.png",
+	"ff804bb262131b73": "plugins/rcp-fe-lol-navigation/pbe/default/store-rp.png",
+	"11b56c306c05d7d9": "plugins/rcp-fe-lol-navigation/pbe/en_us/blue-essence.png",
+	"cf6f04a86d7cb2b0": "plugins/rcp-fe-lol-navigation/pbe/en_us/question-mark.png",
+	"c2bfb1811a01df34": "plugins/rcp-fe-lol-navigation/pbe/en_us/store-ip.png",
+	"760631764ab8a636": "plugins/rcp-fe-lol-navigation/pbe/en_us/store-rp.png"
 }

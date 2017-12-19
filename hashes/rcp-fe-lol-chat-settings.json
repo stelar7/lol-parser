@@ -10,5 +10,14 @@
 	"6fe780e0c267d928": "plugins/rcp-fe-lol-chat-settings/global/default/trans.json",
 	"85cd525658ae66dc": "plugins/rcp-fe-lol-chat-settings/global/en_gb/bundle.js",
 	"33237dd8e51ef94b": "plugins/rcp-fe-lol-chat-settings/global/en_gb/index.html",
-	"fd5a55ef79df94ad": "plugins/rcp-fe-lol-chat-settings/global/en_gb/trans.json"
+	"fd5a55ef79df94ad": "plugins/rcp-fe-lol-chat-settings/global/en_gb/trans.json",
+	"308df9f3f0601d1b": "plugins/rcp-fe-lol-chat-settings/global/en_us/bundle.js",
+	"fc34e09fa74ef0d6": "plugins/rcp-fe-lol-chat-settings/global/en_us/index.html",
+	"93b6e0250660d2ab": "plugins/rcp-fe-lol-chat-settings/global/en_us/trans.json",
+	"cdfa05d7a2b079fd": "plugins/rcp-fe-lol-chat-settings/pbe/default/bundle.js",
+	"56e61ab309bef9ea": "plugins/rcp-fe-lol-chat-settings/pbe/default/index.html",
+	"558f8d842b106a74": "plugins/rcp-fe-lol-chat-settings/pbe/default/trans.json",
+	"85eaf435dd8d06ee": "plugins/rcp-fe-lol-chat-settings/pbe/en_us/bundle.js",
+	"12ce0e520f4a78ee": "plugins/rcp-fe-lol-chat-settings/pbe/en_us/index.html",
+	"9a0345314d0da69f": "plugins/rcp-fe-lol-chat-settings/pbe/en_us/trans.json"
 }

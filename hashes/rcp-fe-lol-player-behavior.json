@@ -19,6 +19,8 @@
 	"67a30b308e2f931a": "plugins/rcp-fe-lol-player-behavior/global/en_gb/trans.json",
 	"74f33d1d23fb624c": "plugins/rcp-fe-lol-player-behavior/global/en_ph/trans.json",
 	"6c4205ee9f9e7028": "plugins/rcp-fe-lol-player-behavior/global/en_sg/trans.json",
+	"85d41efe0daff84b": "plugins/rcp-fe-lol-player-behavior/global/en_us/bundle.js",
+	"f2c0b7b89c88f794": "plugins/rcp-fe-lol-player-behavior/global/en_us/index.html",
 	"be1d0c64dd849e0a": "plugins/rcp-fe-lol-player-behavior/global/en_us/trans.json",
 	"c2874d1a078c7fcd": "plugins/rcp-fe-lol-player-behavior/global/es_ar/trans.json",
 	"3ecb942081506e2c": "plugins/rcp-fe-lol-player-behavior/global/es_es/trans.json",
@@ -39,5 +41,11 @@
 	"7c0d7e9ae2e60b3c": "plugins/rcp-fe-lol-player-behavior/global/vn_vn/trans.json",
 	"1d9f7869abb2f339": "plugins/rcp-fe-lol-player-behavior/global/zh_cn/trans.json",
 	"28bc9ba3de03e2b8": "plugins/rcp-fe-lol-player-behavior/global/zh_my/trans.json",
-	"db06ce0a2a59164b": "plugins/rcp-fe-lol-player-behavior/global/zh_tw/trans.json"
+	"db06ce0a2a59164b": "plugins/rcp-fe-lol-player-behavior/global/zh_tw/trans.json",
+	"f0403e4a9de335ed": "plugins/rcp-fe-lol-player-behavior/pbe/default/bundle.js",
+	"33ab2062e77c5747": "plugins/rcp-fe-lol-player-behavior/pbe/default/index.html",
+	"01ed47dd65ac8f73": "plugins/rcp-fe-lol-player-behavior/pbe/default/trans.json",
+	"4357413f214f7425": "plugins/rcp-fe-lol-player-behavior/pbe/en_us/bundle.js",
+	"1b3ef58962eec810": "plugins/rcp-fe-lol-player-behavior/pbe/en_us/index.html",
+	"f6f0395a92534519": "plugins/rcp-fe-lol-player-behavior/pbe/en_us/trans.json"
 }

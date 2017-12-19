@@ -60,5 +60,14 @@
 	"a5397d36f7c47148": "plugins/rcp-fe-lol-personalized-offers/global/en_gb/images/seasonal-background.png",
 	"e6cb8d5a6ebbf453": "plugins/rcp-fe-lol-personalized-offers/global/en_gb/index.html",
 	"a5f0cb96e6ee3892": "plugins/rcp-fe-lol-personalized-offers/global/en_gb/rcp-fe-lol-personalized-offers.js",
-	"4331d3dd36d3a8ba": "plugins/rcp-fe-lol-personalized-offers/global/en_gb/trans.json"
+	"4331d3dd36d3a8ba": "plugins/rcp-fe-lol-personalized-offers/global/en_gb/trans.json",
+	"d0906e9c3fb2212b": "plugins/rcp-fe-lol-personalized-offers/global/en_us/index.html",
+	"ad7c1101d7e4dc21": "plugins/rcp-fe-lol-personalized-offers/global/en_us/rcp-fe-lol-personalized-offers.js",
+	"8cfacd4c2837c4b2": "plugins/rcp-fe-lol-personalized-offers/global/en_us/trans.json",
+	"d71acecbb2d04e1c": "plugins/rcp-fe-lol-personalized-offers/pbe/default/index.html",
+	"028905285acc9e36": "plugins/rcp-fe-lol-personalized-offers/pbe/default/rcp-fe-lol-personalized-offers.js",
+	"ddbbd7d82c481311": "plugins/rcp-fe-lol-personalized-offers/pbe/default/trans.json",
+	"41cc176cc1b79c3a": "plugins/rcp-fe-lol-personalized-offers/pbe/en_us/index.html",
+	"732bc9600c7ce445": "plugins/rcp-fe-lol-personalized-offers/pbe/en_us/rcp-fe-lol-personalized-offers.js",
+	"3b4646a2c7e0301b": "plugins/rcp-fe-lol-personalized-offers/pbe/en_us/trans.json"
 }

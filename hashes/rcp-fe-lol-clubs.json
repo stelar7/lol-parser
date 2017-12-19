@@ -31,5 +31,14 @@
 	"00639326d1d46051": "plugins/rcp-fe-lol-clubs/global/en_gb/external-link-mask.png",
 	"5cccecb7be18e84c": "plugins/rcp-fe-lol-clubs/global/en_gb/icon_dimond_bullet.png",
 	"86147422699c9655": "plugins/rcp-fe-lol-clubs/global/en_gb/index.html",
-	"a95c08f3471a27d4": "plugins/rcp-fe-lol-clubs/global/en_gb/trans.json"
+	"a95c08f3471a27d4": "plugins/rcp-fe-lol-clubs/global/en_gb/trans.json",
+	"d19304d024444e3a": "plugins/rcp-fe-lol-clubs/global/en_us/bundle.js",
+	"375acbab71148187": "plugins/rcp-fe-lol-clubs/global/en_us/index.html",
+	"630b6ea2fbdc736b": "plugins/rcp-fe-lol-clubs/global/en_us/trans.json",
+	"c192a9fd8d05a1f8": "plugins/rcp-fe-lol-clubs/pbe/default/bundle.js",
+	"829eb332649fc08b": "plugins/rcp-fe-lol-clubs/pbe/default/index.html",
+	"1f45b896067d0082": "plugins/rcp-fe-lol-clubs/pbe/default/trans.json",
+	"7203ecc9c68547c8": "plugins/rcp-fe-lol-clubs/pbe/en_us/bundle.js",
+	"79cbf2327995cf09": "plugins/rcp-fe-lol-clubs/pbe/en_us/index.html",
+	"f69020b747d0a64d": "plugins/rcp-fe-lol-clubs/pbe/en_us/trans.json"
 }

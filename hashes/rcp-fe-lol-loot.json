@@ -314,5 +314,17 @@
 	"88388b7a3045967b": "plugins/rcp-fe-lol-loot/global/en_gb/bundle.js",
 	"a1bf9c68b48a099e": "plugins/rcp-fe-lol-loot/global/en_gb/index.html",
 	"5f856d979ce671d3": "plugins/rcp-fe-lol-loot/global/en_gb/summonericon.json",
-	"843c08178f39fe02": "plugins/rcp-fe-lol-loot/global/en_gb/trans.json"
+	"843c08178f39fe02": "plugins/rcp-fe-lol-loot/global/en_gb/trans.json",
+	"1da4bbe896e86011": "plugins/rcp-fe-lol-loot/global/en_us/bundle.js",
+	"ff110e130bbf9e5e": "plugins/rcp-fe-lol-loot/global/en_us/index.html",
+	"5cd280db4dcc3198": "plugins/rcp-fe-lol-loot/global/en_us/summonericon.json",
+	"790cc278f4757ec9": "plugins/rcp-fe-lol-loot/global/en_us/trans.json",
+	"15e8ab5479ce4f52": "plugins/rcp-fe-lol-loot/pbe/default/bundle.js",
+	"3d6ffea04d06fdfa": "plugins/rcp-fe-lol-loot/pbe/default/index.html",
+	"1f2f75352786d76f": "plugins/rcp-fe-lol-loot/pbe/default/summonericon.json",
+	"87cae412841a1648": "plugins/rcp-fe-lol-loot/pbe/default/trans.json",
+	"f04f56f703dbb8f5": "plugins/rcp-fe-lol-loot/pbe/en_us/bundle.js",
+	"9dff45749198d6e9": "plugins/rcp-fe-lol-loot/pbe/en_us/index.html",
+	"159f47d692995225": "plugins/rcp-fe-lol-loot/pbe/en_us/summonericon.json",
+	"876836bab67c92e6": "plugins/rcp-fe-lol-loot/pbe/en_us/trans.json"
 }

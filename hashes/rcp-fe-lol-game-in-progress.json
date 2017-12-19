@@ -22,6 +22,8 @@
 	"be2c70acf51e47f1": "plugins/rcp-fe-lol-game-in-progress/global/en_gb/trans.json",
 	"0a1df310fd47a56f": "plugins/rcp-fe-lol-game-in-progress/global/en_ph/trans.json",
 	"6b6cedb246b6cf08": "plugins/rcp-fe-lol-game-in-progress/global/en_sg/trans.json",
+	"294c5987568450c3": "plugins/rcp-fe-lol-game-in-progress/global/en_us/index.html",
+	"306d9599e7d33b66": "plugins/rcp-fe-lol-game-in-progress/global/en_us/init.js",
 	"05b694e66a039a61": "plugins/rcp-fe-lol-game-in-progress/global/en_us/trans.json",
 	"d4d43b1224eb20b9": "plugins/rcp-fe-lol-game-in-progress/global/es_ar/trans.json",
 	"2926fc244f80eb84": "plugins/rcp-fe-lol-game-in-progress/global/es_es/trans.json",
@@ -42,5 +44,11 @@
 	"9acd11cd56d18cd9": "plugins/rcp-fe-lol-game-in-progress/global/vn_vn/trans.json",
 	"b2a538f9a4e054a4": "plugins/rcp-fe-lol-game-in-progress/global/zh_cn/trans.json",
 	"1f40372d005f5faf": "plugins/rcp-fe-lol-game-in-progress/global/zh_my/trans.json",
-	"331cd7e861de05b3": "plugins/rcp-fe-lol-game-in-progress/global/zh_tw/trans.json"
+	"331cd7e861de05b3": "plugins/rcp-fe-lol-game-in-progress/global/zh_tw/trans.json",
+	"761512ff3cdfc784": "plugins/rcp-fe-lol-game-in-progress/pbe/default/index.html",
+	"af48551834c54ee1": "plugins/rcp-fe-lol-game-in-progress/pbe/default/init.js",
+	"5bd501e9b8871628": "plugins/rcp-fe-lol-game-in-progress/pbe/default/trans.json",
+	"18f23fd9b6132396": "plugins/rcp-fe-lol-game-in-progress/pbe/en_us/index.html",
+	"d91f28c29bdae28f": "plugins/rcp-fe-lol-game-in-progress/pbe/en_us/init.js",
+	"8a62330a3f6a186b": "plugins/rcp-fe-lol-game-in-progress/pbe/en_us/trans.json"
 }

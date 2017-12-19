@@ -53,5 +53,8 @@
 	"ddc0c25d71513ebb": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-button-gold-click.ogg",
 	"be61e505fc970b6a": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-button-gold-hover.ogg",
 	"4aa2abe27dc3272e": "plugins/rcp-fe-lol-home/global/en_gb/sfx-uikit-text-click-small.ogg",
-	"c6e812bd7cd2f7a4": "plugins/rcp-fe-lol-home/global/en_gb/spinner.png"
+	"c6e812bd7cd2f7a4": "plugins/rcp-fe-lol-home/global/en_gb/spinner.png",
+	"56474b9d074c583b": "plugins/rcp-fe-lol-home/global/en_us/spinner.png",
+	"1a3b8cad44acfd55": "plugins/rcp-fe-lol-home/pbe/default/spinner.png",
+	"52428aa007a30ceb": "plugins/rcp-fe-lol-home/pbe/en_us/spinner.png"
 }

@@ -16,5 +16,14 @@
 	"e0d51a7d96d23e34": "plugins/rcp-fe-lol-reward-notifications/global/default/trans.json",
 	"5b78acbd2e53ec35": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/bundle.js",
 	"748fed7e66389f0e": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/index.html",
-	"10ea20c2923f59c2": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/trans.json"
+	"10ea20c2923f59c2": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/trans.json",
+	"a0acbc00beab7192": "plugins/rcp-fe-lol-reward-notifications/global/en_us/bundle.js",
+	"39c78aecb2669814": "plugins/rcp-fe-lol-reward-notifications/global/en_us/index.html",
+	"8f120b7041e6b482": "plugins/rcp-fe-lol-reward-notifications/global/en_us/trans.json",
+	"daab2151c3af6f74": "plugins/rcp-fe-lol-reward-notifications/pbe/default/bundle.js",
+	"25ae7ff18f05fab7": "plugins/rcp-fe-lol-reward-notifications/pbe/default/index.html",
+	"019f7840fd92aeae": "plugins/rcp-fe-lol-reward-notifications/pbe/default/trans.json",
+	"b38b189df46750ba": "plugins/rcp-fe-lol-reward-notifications/pbe/en_us/bundle.js",
+	"f2939c4cc7bbae55": "plugins/rcp-fe-lol-reward-notifications/pbe/en_us/index.html",
+	"68fa60ab34366443": "plugins/rcp-fe-lol-reward-notifications/pbe/en_us/trans.json"
 }

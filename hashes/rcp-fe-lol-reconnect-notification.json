@@ -24,6 +24,9 @@
 	"b1e3b92699aac81c": "plugins/rcp-fe-lol-reconnect-notification/global/en_gb/trans.json",
 	"6bc308d7916c25db": "plugins/rcp-fe-lol-reconnect-notification/global/en_ph/trans.json",
 	"23d3970157b6c497": "plugins/rcp-fe-lol-reconnect-notification/global/en_sg/trans.json",
+	"5d4a0a168907e8e7": "plugins/rcp-fe-lol-reconnect-notification/global/en_us/css/main.css",
+	"1c6fde5849126673": "plugins/rcp-fe-lol-reconnect-notification/global/en_us/index.html",
+	"e66c3427bc8efa4b": "plugins/rcp-fe-lol-reconnect-notification/global/en_us/init.js",
 	"4ba3cc4f4c9baa5e": "plugins/rcp-fe-lol-reconnect-notification/global/en_us/trans.json",
 	"2485ac4c9a0b2f41": "plugins/rcp-fe-lol-reconnect-notification/global/es_ar/trans.json",
 	"bcbc628515c8a56f": "plugins/rcp-fe-lol-reconnect-notification/global/es_es/trans.json",
@@ -44,5 +47,13 @@
 	"6cd31180bc4c056d": "plugins/rcp-fe-lol-reconnect-notification/global/vn_vn/trans.json",
 	"2ebbde753c3447d3": "plugins/rcp-fe-lol-reconnect-notification/global/zh_cn/trans.json",
 	"c5f5b25bc32a730c": "plugins/rcp-fe-lol-reconnect-notification/global/zh_my/trans.json",
-	"f6611f69268e390e": "plugins/rcp-fe-lol-reconnect-notification/global/zh_tw/trans.json"
+	"f6611f69268e390e": "plugins/rcp-fe-lol-reconnect-notification/global/zh_tw/trans.json",
+	"e926314fca75add8": "plugins/rcp-fe-lol-reconnect-notification/pbe/default/css/main.css",
+	"224b0fc3c9c5cbaf": "plugins/rcp-fe-lol-reconnect-notification/pbe/default/index.html",
+	"ed3506fdddcad5ca": "plugins/rcp-fe-lol-reconnect-notification/pbe/default/init.js",
+	"bd26ba78134d002b": "plugins/rcp-fe-lol-reconnect-notification/pbe/default/trans.json",
+	"642a151522cf0b15": "plugins/rcp-fe-lol-reconnect-notification/pbe/en_us/css/main.css",
+	"3b224379be87f21d": "plugins/rcp-fe-lol-reconnect-notification/pbe/en_us/index.html",
+	"7d37b5ff6facefc3": "plugins/rcp-fe-lol-reconnect-notification/pbe/en_us/init.js",
+	"079353d852c1d4d6": "plugins/rcp-fe-lol-reconnect-notification/pbe/en_us/trans.json"
 }

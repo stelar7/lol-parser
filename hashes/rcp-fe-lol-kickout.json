@@ -6,5 +6,11 @@
 	"fb9700d9d50dd6cc": "plugins/rcp-fe-lol-kickout/global/default/index.html",
 	"9f4c2c72bfc2d167": "plugins/rcp-fe-lol-kickout/global/default/init.js",
 	"7e9c44df568a6840": "plugins/rcp-fe-lol-kickout/global/en_gb/index.html",
-	"68f0683af4badd87": "plugins/rcp-fe-lol-kickout/global/en_gb/init.js"
+	"68f0683af4badd87": "plugins/rcp-fe-lol-kickout/global/en_gb/init.js",
+	"08f67b879b341268": "plugins/rcp-fe-lol-kickout/global/en_us/index.html",
+	"7d5d829f21040148": "plugins/rcp-fe-lol-kickout/global/en_us/init.js",
+	"6265ee307331cdb4": "plugins/rcp-fe-lol-kickout/pbe/default/index.html",
+	"44eff11b0ae55270": "plugins/rcp-fe-lol-kickout/pbe/default/init.js",
+	"463f942596213acd": "plugins/rcp-fe-lol-kickout/pbe/en_us/index.html",
+	"877ec619b89505f0": "plugins/rcp-fe-lol-kickout/pbe/en_us/init.js"
 }

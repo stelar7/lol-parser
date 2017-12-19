@@ -11,5 +11,11 @@
 	"532fac34a23906a8": "plugins/rcp-fe-lol-account-verification/global/default/rcp-fe-lol-account-verification.js",
 	"ad5ad6cc6af169ae": "plugins/rcp-fe-lol-account-verification/global/default/trans.json",
 	"e391640c6e502598": "plugins/rcp-fe-lol-account-verification/global/en_gb/index.html",
-	"7096d2b10a65e39b": "plugins/rcp-fe-lol-account-verification/global/en_gb/rcp-fe-lol-account-verification.js"
+	"7096d2b10a65e39b": "plugins/rcp-fe-lol-account-verification/global/en_gb/rcp-fe-lol-account-verification.js",
+	"fd862b555d90b44b": "plugins/rcp-fe-lol-account-verification/global/en_us/index.html",
+	"0e9914aa149f96cf": "plugins/rcp-fe-lol-account-verification/global/en_us/rcp-fe-lol-account-verification.js",
+	"6754d72cb1effd33": "plugins/rcp-fe-lol-account-verification/pbe/default/index.html",
+	"2d815d2330e34c74": "plugins/rcp-fe-lol-account-verification/pbe/default/rcp-fe-lol-account-verification.js",
+	"608a2f6f27acbd03": "plugins/rcp-fe-lol-account-verification/pbe/en_us/index.html",
+	"f6c21d2b458720d3": "plugins/rcp-fe-lol-account-verification/pbe/en_us/rcp-fe-lol-account-verification.js"
 }

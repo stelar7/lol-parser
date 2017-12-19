@@ -22,6 +22,8 @@
 	"5723e3b9e7a04124": "plugins/rcp-fe-lol-license-settings/global/en_gb/trans.json",
 	"5e4dffcfae9ad734": "plugins/rcp-fe-lol-license-settings/global/en_ph/trans.json",
 	"ae83ea68b1ea574d": "plugins/rcp-fe-lol-license-settings/global/en_sg/trans.json",
+	"443fd90f33610307": "plugins/rcp-fe-lol-license-settings/global/en_us/bundle.js",
+	"f7cad5942b03c2d4": "plugins/rcp-fe-lol-license-settings/global/en_us/index.html",
 	"20476eac3511ed2a": "plugins/rcp-fe-lol-license-settings/global/en_us/trans.json",
 	"2fa9bff39780e576": "plugins/rcp-fe-lol-license-settings/global/es_ar/trans.json",
 	"9a9e97a9dd9ce115": "plugins/rcp-fe-lol-license-settings/global/es_es/trans.json",
@@ -42,5 +44,11 @@
 	"ab3dcc194cc9b3d0": "plugins/rcp-fe-lol-license-settings/global/vn_vn/trans.json",
 	"a0f399c54acdcfc4": "plugins/rcp-fe-lol-license-settings/global/zh_cn/trans.json",
 	"255feb89998b1caa": "plugins/rcp-fe-lol-license-settings/global/zh_my/trans.json",
-	"0a025eb648bfc7e1": "plugins/rcp-fe-lol-license-settings/global/zh_tw/trans.json"
+	"0a025eb648bfc7e1": "plugins/rcp-fe-lol-license-settings/global/zh_tw/trans.json",
+	"a14f936370d52bae": "plugins/rcp-fe-lol-license-settings/pbe/default/bundle.js",
+	"5c3aece44f23668a": "plugins/rcp-fe-lol-license-settings/pbe/default/index.html",
+	"717aec193b22858c": "plugins/rcp-fe-lol-license-settings/pbe/default/trans.json",
+	"d274c23392685b0b": "plugins/rcp-fe-lol-license-settings/pbe/en_us/bundle.js",
+	"d4df787fab4dd94a": "plugins/rcp-fe-lol-license-settings/pbe/en_us/index.html",
+	"01e127d9b430688a": "plugins/rcp-fe-lol-license-settings/pbe/en_us/trans.json"
 }

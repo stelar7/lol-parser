@@ -222,6 +222,10 @@
 	"5ed6f349939c5569": "plugins/rcp-fe-lol-match-history/global/en_gb/vertmeter-fill.png",
 	"c49c38db82d85af7": "plugins/rcp-fe-lol-match-history/global/en_ph/trans.json",
 	"e7e702c324b67119": "plugins/rcp-fe-lol-match-history/global/en_sg/trans.json",
+	"e7b3026203191598": "plugins/rcp-fe-lol-match-history/global/en_us/1.bundle.js",
+	"d058255de4af5509": "plugins/rcp-fe-lol-match-history/global/en_us/bundle.js",
+	"805f4f9bff14f08b": "plugins/rcp-fe-lol-match-history/global/en_us/index.html",
+	"e00a20f7093be389": "plugins/rcp-fe-lol-match-history/global/en_us/spinner.png",
 	"44bb2bcc00f55f2a": "plugins/rcp-fe-lol-match-history/global/en_us/trans.json",
 	"7f01dbaa3869f674": "plugins/rcp-fe-lol-match-history/global/es_ar/trans.json",
 	"f52b2451de0362d2": "plugins/rcp-fe-lol-match-history/global/es_es/trans.json",
@@ -242,5 +246,15 @@
 	"5d803c5a15891feb": "plugins/rcp-fe-lol-match-history/global/vn_vn/trans.json",
 	"8620832781a1aa3f": "plugins/rcp-fe-lol-match-history/global/zh_cn/trans.json",
 	"66988d7efb1e153b": "plugins/rcp-fe-lol-match-history/global/zh_my/trans.json",
-	"7c5411db397409a9": "plugins/rcp-fe-lol-match-history/global/zh_tw/trans.json"
+	"7c5411db397409a9": "plugins/rcp-fe-lol-match-history/global/zh_tw/trans.json",
+	"9b3c9fc91876a5a4": "plugins/rcp-fe-lol-match-history/pbe/default/1.bundle.js",
+	"07a36f4e33951d3f": "plugins/rcp-fe-lol-match-history/pbe/default/bundle.js",
+	"f9a7d269b96f8c97": "plugins/rcp-fe-lol-match-history/pbe/default/index.html",
+	"d934c881e5880885": "plugins/rcp-fe-lol-match-history/pbe/default/spinner.png",
+	"cd8d48888c6dad43": "plugins/rcp-fe-lol-match-history/pbe/default/trans.json",
+	"7d192e6d9c43f781": "plugins/rcp-fe-lol-match-history/pbe/en_us/1.bundle.js",
+	"2be88c1bae142429": "plugins/rcp-fe-lol-match-history/pbe/en_us/bundle.js",
+	"a343aa620600c6e0": "plugins/rcp-fe-lol-match-history/pbe/en_us/index.html",
+	"58ec1aa26fbfddc7": "plugins/rcp-fe-lol-match-history/pbe/en_us/spinner.png",
+	"d35c36c290e20c5f": "plugins/rcp-fe-lol-match-history/pbe/en_us/trans.json"
 }
