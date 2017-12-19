@@ -274,6 +274,8 @@
 	"afeb6cee164e1b09": "plugins/rcp-fe-lol-loot/global/default/rightdefault.png",
 	"2325544718cceb61": "plugins/rcp-fe-lol-loot/global/default/rightdisabled.png",
 	"573f4f69abf68d90": "plugins/rcp-fe-lol-loot/global/default/righthover.png",
+	"112c1d48f7b9b224": "plugins/rcp-fe-lol-loot/global/default/summonericon.json",
+	"5c39ed61f54bf855": "plugins/rcp-fe-lol-loot/global/default/trans.json",
 	"c71ef495b7444639": "plugins/rcp-fe-lol-loot/global/en_gb/assets/audio/sfx-loot-button-generic-hover.ogg",
 	"118779973bdad4ee": "plugins/rcp-fe-lol-loot/global/en_gb/assets/audio/sfx-loot-button-purchase-chest-click.ogg",
 	"e3ff111454a0b07c": "plugins/rcp-fe-lol-loot/global/en_gb/assets/audio/sfx-loot-grid-click.ogg",

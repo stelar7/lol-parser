@@ -811,7 +811,7 @@ public class TestHashes {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
                     if (!knownHashes.contains(data)) {
-                        knownHashes.add(new Pair<>(k, v));
+                        knownHashes.add(data);
                     }
                 });
 
@@ -830,7 +830,7 @@ public class TestHashes {
                     for (String lan : preLang) {
                         System.out.println(lan);
 
-                        String pre = prePre + reg + "/" + lan + "/";
+                        String pre = "plugins/" + filename + "/" + reg + "/" + lan + "/";
                         for (String end : foundHashes) {
 
                             String hashMe = pre + end;

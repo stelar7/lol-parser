@@ -8,6 +8,7 @@
 	"b411baf662347e35": "plugins/rcp-fe-l10n/global/default/bundle.js",
 	"8a761ac4adccaa2c": "plugins/rcp-fe-l10n/global/default/index.html",
 	"2ec722f1b522363c": "plugins/rcp-fe-l10n/global/default/locales.json",
+	"a8295a74f9c022db": "plugins/rcp-fe-l10n/global/default/moment-locale.js",
 	"e6a7d32ea8a87b6f": "plugins/rcp-fe-l10n/global/default/trans.json",
 	"c2fe30dfdc9660fe": "plugins/rcp-fe-l10n/global/el_gr/moment-locale.js",
 	"bfc9112604de546a": "plugins/rcp-fe-l10n/global/el_gr/trans.json",
