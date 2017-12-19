@@ -61,6 +61,7 @@
 	"21aa79c8dc072f2d": "plugins/rcp-fe-lol-uikit/euw/default/sfx-uikit-button-circlex-click.ogg",
 	"128d7540fbce822a": "plugins/rcp-fe-lol-uikit/euw/default/sfx-uikit-button-locked-click.ogg",
 	"2b7a14f415aff536": "plugins/rcp-fe-lol-uikit/euw/default/sfx-uikit-dropdown-select.ogg",
+	"b871cacd0be137b0": "plugins/rcp-fe-lol-uikit/euw/default/sfx-uikit-radio-click.ogg",
 	"7cbe91880d5ddeb2": "plugins/rcp-fe-lol-uikit/euw/en_gb/images/backdrop-magic.png",
 	"cc594cb2bbecd313": "plugins/rcp-fe-lol-uikit/euw/en_gb/images/border-arrow-click.png",
 	"8dd93a5be636eae6": "plugins/rcp-fe-lol-uikit/euw/en_gb/images/border-arrow-disabled.png",
@@ -123,6 +124,7 @@
 	"7dcdd2783b7debe1": "plugins/rcp-fe-lol-uikit/euw/en_gb/sfx-uikit-button-circlex-click.ogg",
 	"84f27b0078e97b8d": "plugins/rcp-fe-lol-uikit/euw/en_gb/sfx-uikit-button-locked-click.ogg",
 	"415706655d94aad6": "plugins/rcp-fe-lol-uikit/euw/en_gb/sfx-uikit-dropdown-select.ogg",
+	"62dc20778bd8182c": "plugins/rcp-fe-lol-uikit/euw/en_gb/sfx-uikit-radio-click.ogg",
 	"e5b1ff6c3a7b3e65": "plugins/rcp-fe-lol-uikit/global/default/3b56689fd75b39ea4f861b31a3d4a1eb.ogg",
 	"24d012b910ef0f47": "plugins/rcp-fe-lol-uikit/global/default/3f0b6bf53bcbccc4d1f01b07c4e333c0.ogg",
 	"c1462ef3109506ee": "plugins/rcp-fe-lol-uikit/global/default/9d0be2c30ef5b6058587568fdfbe1a37.ogg",
@@ -530,5 +532,6 @@
 	"dd8f9bf348dc5990": "plugins/rcp-fe-lol-uikit/global/en_gb/sfx-uikit-button-circlegold-hover.ogg",
 	"56eb6d8fdd9c40fb": "plugins/rcp-fe-lol-uikit/global/en_gb/sfx-uikit-button-circlex-click.ogg",
 	"9ccd809faee96f26": "plugins/rcp-fe-lol-uikit/global/en_gb/sfx-uikit-button-locked-click.ogg",
-	"824ec07e64fcfe9f": "plugins/rcp-fe-lol-uikit/global/en_gb/sfx-uikit-dropdown-select.ogg"
+	"824ec07e64fcfe9f": "plugins/rcp-fe-lol-uikit/global/en_gb/sfx-uikit-dropdown-select.ogg",
+	"ae29a766f108ea71": "plugins/rcp-fe-lol-uikit/global/en_gb/sfx-uikit-radio-click.ogg"
 }

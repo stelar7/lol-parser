@@ -1,5 +1,14 @@
 {
+	"828419a20a611541": "plugins/rcp-fe-lol-notification-settings/euw/default/bundle.js",
+	"e7dd79cd69045e67": "plugins/rcp-fe-lol-notification-settings/euw/default/index.html",
+	"9e42d64e72a790f1": "plugins/rcp-fe-lol-notification-settings/euw/default/trans.json",
+	"3dc9e776e9dff748": "plugins/rcp-fe-lol-notification-settings/euw/en_gb/bundle.js",
+	"f0f58b331043a153": "plugins/rcp-fe-lol-notification-settings/euw/en_gb/index.html",
+	"d7da959d2137e61d": "plugins/rcp-fe-lol-notification-settings/euw/en_gb/trans.json",
 	"e6471c89c808f753": "plugins/rcp-fe-lol-notification-settings/global/default/bundle.js",
 	"2d34eca6d688bdac": "plugins/rcp-fe-lol-notification-settings/global/default/index.html",
-	"76703bf8199d89ee": "plugins/rcp-fe-lol-notification-settings/global/default/trans.json"
+	"76703bf8199d89ee": "plugins/rcp-fe-lol-notification-settings/global/default/trans.json",
+	"49d72352f643a5f3": "plugins/rcp-fe-lol-notification-settings/global/en_gb/bundle.js",
+	"7cda0d03e0cc05a0": "plugins/rcp-fe-lol-notification-settings/global/en_gb/index.html",
+	"12df78189a7b66cb": "plugins/rcp-fe-lol-notification-settings/global/en_gb/trans.json"
 }

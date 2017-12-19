@@ -1,5 +1,11 @@
 {
+	"7edb95ea3f526627": "plugins/rcp-fe-lol-champ-select-darkstar/euw/default/bundle.js",
+	"ce8c3161fce202d0": "plugins/rcp-fe-lol-champ-select-darkstar/euw/default/index.html",
+	"33cda108aef0e30a": "plugins/rcp-fe-lol-champ-select-darkstar/euw/en_gb/bundle.js",
+	"6bba82a6f38df4ea": "plugins/rcp-fe-lol-champ-select-darkstar/euw/en_gb/index.html",
 	"e7ff37ffa14398bd": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/bundle.js",
 	"6006852b37289c35": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/images/darkstar.png",
-	"2a345ea8f5061e1c": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/index.html"
+	"2a345ea8f5061e1c": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/index.html",
+	"b4e5b2bc9b59e71c": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_gb/bundle.js",
+	"2b67c03fb99afb11": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_gb/index.html"
 }

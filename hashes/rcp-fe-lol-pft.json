@@ -1,7 +1,19 @@
 {
+	"8bad5a54a3f84514": "plugins/rcp-fe-lol-pft/euw/default/index.html",
+	"2b2fa14c4d33ed21": "plugins/rcp-fe-lol-pft/euw/default/init.js",
+	"8eb7824d70bfeb57": "plugins/rcp-fe-lol-pft/euw/default/main.css",
+	"acd452cd032d3b90": "plugins/rcp-fe-lol-pft/euw/default/trans.json",
+	"a7a39fafb1f1f470": "plugins/rcp-fe-lol-pft/euw/en_gb/index.html",
+	"0320413d55d109a5": "plugins/rcp-fe-lol-pft/euw/en_gb/init.js",
+	"c230ff2c47a682eb": "plugins/rcp-fe-lol-pft/euw/en_gb/main.css",
+	"50c7714fa5bb4fea": "plugins/rcp-fe-lol-pft/euw/en_gb/trans.json",
 	"5ecf17ba07140ba1": "plugins/rcp-fe-lol-pft/global/default/images/button-survey-sprite.png",
 	"f81b472f06f5129b": "plugins/rcp-fe-lol-pft/global/default/index.html",
 	"eed888e7cdf65dfc": "plugins/rcp-fe-lol-pft/global/default/init.js",
 	"c87f543eb53ebb51": "plugins/rcp-fe-lol-pft/global/default/main.css",
-	"b95d378f63bdc7d9": "plugins/rcp-fe-lol-pft/global/default/trans.json"
+	"b95d378f63bdc7d9": "plugins/rcp-fe-lol-pft/global/default/trans.json",
+	"ab33e9bcb343a3c1": "plugins/rcp-fe-lol-pft/global/en_gb/index.html",
+	"4ee7f28fbecea8ec": "plugins/rcp-fe-lol-pft/global/en_gb/init.js",
+	"85048f7c38237921": "plugins/rcp-fe-lol-pft/global/en_gb/main.css",
+	"b4b5b4dc1693a71a": "plugins/rcp-fe-lol-pft/global/en_gb/trans.json"
 }

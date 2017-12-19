@@ -1,4 +1,10 @@
 {
+	"6dc4a91640109b06": "plugins/rcp-fe-lol-reward-notifications/euw/default/bundle.js",
+	"2c4d077ba11d5fa2": "plugins/rcp-fe-lol-reward-notifications/euw/default/index.html",
+	"c8a8aaf7f5ca4b07": "plugins/rcp-fe-lol-reward-notifications/euw/default/trans.json",
+	"1c4bff8b252c69a1": "plugins/rcp-fe-lol-reward-notifications/euw/en_gb/bundle.js",
+	"1fbfb028e7dea9f0": "plugins/rcp-fe-lol-reward-notifications/euw/en_gb/index.html",
+	"3246d9328a65ecb5": "plugins/rcp-fe-lol-reward-notifications/euw/en_gb/trans.json",
 	"cbe7a87a9f3c92a3": "plugins/rcp-fe-lol-reward-notifications/global/default/bundle.js",
 	"ff5587a6fe3d8cbf": "plugins/rcp-fe-lol-reward-notifications/global/default/images/celebration-chest.png",
 	"cbec3511c478eb2c": "plugins/rcp-fe-lol-reward-notifications/global/default/images/celebration-plat.png",
@@ -7,5 +13,8 @@
 	"3ab3fa1bd30d422d": "plugins/rcp-fe-lol-reward-notifications/global/default/images/celebration-rune-red.png",
 	"10d5d642dbe8efd6": "plugins/rcp-fe-lol-reward-notifications/global/default/images/celebration-rune-yellow.png",
 	"34839b5791247439": "plugins/rcp-fe-lol-reward-notifications/global/default/index.html",
-	"e0d51a7d96d23e34": "plugins/rcp-fe-lol-reward-notifications/global/default/trans.json"
+	"e0d51a7d96d23e34": "plugins/rcp-fe-lol-reward-notifications/global/default/trans.json",
+	"5b78acbd2e53ec35": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/bundle.js",
+	"748fed7e66389f0e": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/index.html",
+	"10ea20c2923f59c2": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/trans.json"
 }

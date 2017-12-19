@@ -1,6 +1,14 @@
 {
 	"8269c83b0e81d329": "plugins/rcp-fe-lol-store/euw/default/css/images/background.png",
+	"0176bc26c19a1542": "plugins/rcp-fe-lol-store/euw/default/css/main.css",
+	"1600afd092fb725c": "plugins/rcp-fe-lol-store/euw/default/index.html",
+	"b21c8afd10302f98": "plugins/rcp-fe-lol-store/euw/default/init.js",
+	"0929292797fa91bf": "plugins/rcp-fe-lol-store/euw/default/trans.json",
 	"c67a60cd9122fdf5": "plugins/rcp-fe-lol-store/euw/en_gb/css/images/background.png",
+	"76c431c830b65ba2": "plugins/rcp-fe-lol-store/euw/en_gb/css/main.css",
+	"9569fb12cc235565": "plugins/rcp-fe-lol-store/euw/en_gb/index.html",
+	"a6ecd8cd238b914c": "plugins/rcp-fe-lol-store/euw/en_gb/init.js",
+	"e6b2bebcbc7f41cb": "plugins/rcp-fe-lol-store/euw/en_gb/trans.json",
 	"ff531a1d9ec835f7": "plugins/rcp-fe-lol-store/global/default/css/images/background.png",
 	"989a4d2abca3375a": "plugins/rcp-fe-lol-store/global/default/css/main.css",
 	"c0baae03bd6b9c0b": "plugins/rcp-fe-lol-store/global/default/d60b38cfdd5a350c9606d85ba30b89b4.png",
@@ -9,5 +17,9 @@
 	"b55a51496472e77f": "plugins/rcp-fe-lol-store/global/default/index.html",
 	"224d869b113fc72f": "plugins/rcp-fe-lol-store/global/default/init.js",
 	"c88d4e84b7ab07e1": "plugins/rcp-fe-lol-store/global/default/trans.json",
-	"2d64672a0b842c17": "plugins/rcp-fe-lol-store/global/en_gb/css/images/background.png"
+	"2d64672a0b842c17": "plugins/rcp-fe-lol-store/global/en_gb/css/images/background.png",
+	"b5037bdfac5f8ddd": "plugins/rcp-fe-lol-store/global/en_gb/css/main.css",
+	"85fad5b97de919ee": "plugins/rcp-fe-lol-store/global/en_gb/index.html",
+	"d1ecb2e3f7da14b5": "plugins/rcp-fe-lol-store/global/en_gb/init.js",
+	"0591c08d20f28547": "plugins/rcp-fe-lol-store/global/en_gb/trans.json"
 }

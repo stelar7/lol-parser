@@ -1,7 +1,16 @@
 {
+	"f6014230315ba6f3": "plugins/rcp-fe-lol-kr-legal/euw/default/css/main.css",
+	"da0824646612e5c4": "plugins/rcp-fe-lol-kr-legal/euw/default/index.html",
+	"1d40347690bb58bf": "plugins/rcp-fe-lol-kr-legal/euw/default/init.js",
+	"0f589396bc052a60": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/css/main.css",
+	"477d9145a8eca2a1": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/index.html",
+	"5b655714d69a3674": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/init.js",
 	"07bcaee6c1c57ac7": "plugins/rcp-fe-lol-kr-legal/global/default/css/main.css",
 	"96ac48febc7008f8": "plugins/rcp-fe-lol-kr-legal/global/default/images/kr-rating-screen.png",
 	"9b8a5abce6291d3d": "plugins/rcp-fe-lol-kr-legal/global/default/index.html",
 	"5c49f93c342f7072": "plugins/rcp-fe-lol-kr-legal/global/default/init.js",
-	"9c44f219de5ed24e": "plugins/rcp-fe-lol-kr-legal/global/default/init.js.map"
+	"9c44f219de5ed24e": "plugins/rcp-fe-lol-kr-legal/global/default/init.js.map",
+	"9793c3a4a471b5e3": "plugins/rcp-fe-lol-kr-legal/global/en_gb/css/main.css",
+	"e12c00e3d7b88b2a": "plugins/rcp-fe-lol-kr-legal/global/en_gb/index.html",
+	"52932d8b65fe3401": "plugins/rcp-fe-lol-kr-legal/global/en_gb/init.js"
 }

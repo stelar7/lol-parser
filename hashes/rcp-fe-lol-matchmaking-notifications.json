@@ -1,5 +1,14 @@
 {
+	"15dff12e091ea829": "plugins/rcp-fe-lol-matchmaking-notifications/euw/default/index.html",
+	"481cce27effd7f29": "plugins/rcp-fe-lol-matchmaking-notifications/euw/default/init.js",
+	"8c882c50da99ffdd": "plugins/rcp-fe-lol-matchmaking-notifications/euw/default/trans.json",
+	"db6e88de4985b052": "plugins/rcp-fe-lol-matchmaking-notifications/euw/en_gb/index.html",
+	"ff3e9ab9eb7ad828": "plugins/rcp-fe-lol-matchmaking-notifications/euw/en_gb/init.js",
+	"e61eb1c7c36363ed": "plugins/rcp-fe-lol-matchmaking-notifications/euw/en_gb/trans.json",
 	"8da9c847cb5b6c25": "plugins/rcp-fe-lol-matchmaking-notifications/global/default/index.html",
 	"bad42ecb2f9b3729": "plugins/rcp-fe-lol-matchmaking-notifications/global/default/init.js",
-	"a25614e1b3520bb5": "plugins/rcp-fe-lol-matchmaking-notifications/global/default/trans.json"
+	"a25614e1b3520bb5": "plugins/rcp-fe-lol-matchmaking-notifications/global/default/trans.json",
+	"b74940e7d769a27d": "plugins/rcp-fe-lol-matchmaking-notifications/global/en_gb/index.html",
+	"7c2b2c1f8bcfa4d4": "plugins/rcp-fe-lol-matchmaking-notifications/global/en_gb/init.js",
+	"eae410094f8ca167": "plugins/rcp-fe-lol-matchmaking-notifications/global/en_gb/trans.json"
 }

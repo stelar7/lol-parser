@@ -1,5 +1,14 @@
 {
+	"772875e48c101de8": "plugins/rcp-fe-payments/euw/default/css/main.css",
+	"805558f2cb7a0004": "plugins/rcp-fe-payments/euw/default/index.html",
+	"47a15127128b07b5": "plugins/rcp-fe-payments/euw/default/init.js",
+	"bd710ca85b49c07c": "plugins/rcp-fe-payments/euw/en_gb/css/main.css",
+	"bf62ae64aca0ef92": "plugins/rcp-fe-payments/euw/en_gb/index.html",
+	"f7c68f1f561de5cd": "plugins/rcp-fe-payments/euw/en_gb/init.js",
 	"9203523cc6c71825": "plugins/rcp-fe-payments/global/default/css/main.css",
 	"59e7243eaa292d5f": "plugins/rcp-fe-payments/global/default/index.html",
-	"87d6a3d385981cf0": "plugins/rcp-fe-payments/global/default/init.js"
+	"87d6a3d385981cf0": "plugins/rcp-fe-payments/global/default/init.js",
+	"82e80f9501fcd5de": "plugins/rcp-fe-payments/global/en_gb/css/main.css",
+	"a97e72444484f618": "plugins/rcp-fe-payments/global/en_gb/index.html",
+	"6d88af9dc8c96838": "plugins/rcp-fe-payments/global/en_gb/init.js"
 }
