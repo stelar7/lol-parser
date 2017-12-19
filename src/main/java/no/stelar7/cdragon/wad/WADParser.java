@@ -28,7 +28,7 @@ public class WADParser
      */
     public WADFile parseLatest(String pluginName, Path path) throws Exception
     {
-        for (int i = 360; i > 0; i--)
+        for (int i = 365; i > 0; i--)
         {
             WADFile parsed;
             if ((parsed = parseVersion(pluginName, i, path)) != null)

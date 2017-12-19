@@ -32,5 +32,8 @@
 	"41bbd7138fd6e8bf": "plugins/rcp-fe-lol-splash/global/en_gb/index.html",
 	"249e26074d9e8ec8": "plugins/rcp-fe-lol-splash/global/en_gb/splash-assets/snowdown2017/config.json",
 	"7268f6a08eecf261": "plugins/rcp-fe-lol-splash/global/en_gb/splash-assets/zoe/video-splash-zoe.webm",
-	"70ae3112e96d3efe": "plugins/rcp-fe-lol-splash/global/en_gb/trans.json"
+	"70ae3112e96d3efe": "plugins/rcp-fe-lol-splash/global/en_gb/trans.json",
+	"13ed557e257295ab": "plugins/rcp-fe-lol-splash/global/en_us/splash-assets/snowdown2017/video-splash-snowdown2017.webm",
+	"a5c80ef37b2c499f": "plugins/rcp-fe-lol-splash/pbe/default/splash-assets/snowdown2017/video-splash-snowdown2017.webm",
+	"7404ab7ad9f884aa": "plugins/rcp-fe-lol-splash/pbe/en_us/splash-assets/snowdown2017/video-splash-snowdown2017.webm"
 }

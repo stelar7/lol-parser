@@ -65,6 +65,7 @@
 	"a8e86c5c96abafa0": "plugins/rcp-fe-lol-login/global/en_gb/trans.json",
 	"c3c1cc73a4cd22a4": "plugins/rcp-fe-lol-login/global/en_ph/trans.json",
 	"b634f99a8b403ea1": "plugins/rcp-fe-lol-login/global/en_sg/trans.json",
+	"ab4c02ced988f658": "plugins/rcp-fe-lol-login/global/en_us/spinner.png",
 	"63b14d5c3a43c2c1": "plugins/rcp-fe-lol-login/global/en_us/trans.json",
 	"45ed6f22dcbfddf5": "plugins/rcp-fe-lol-login/global/es_ar/trans.json",
 	"3738a45ce7f787f3": "plugins/rcp-fe-lol-login/global/es_es/trans.json",
@@ -85,5 +86,7 @@
 	"356a2dd399efe5bb": "plugins/rcp-fe-lol-login/global/vn_vn/trans.json",
 	"bb91f424f8ae7fe5": "plugins/rcp-fe-lol-login/global/zh_cn/trans.json",
 	"63c306e582189600": "plugins/rcp-fe-lol-login/global/zh_my/trans.json",
-	"0e52f21272c11aac": "plugins/rcp-fe-lol-login/global/zh_tw/trans.json"
+	"0e52f21272c11aac": "plugins/rcp-fe-lol-login/global/zh_tw/trans.json",
+	"f21babcf21390e9d": "plugins/rcp-fe-lol-login/pbe/default/spinner.png",
+	"a7c1dd27c4b8a603": "plugins/rcp-fe-lol-login/pbe/en_us/spinner.png"
 }

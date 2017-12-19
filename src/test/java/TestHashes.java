@@ -18,7 +18,8 @@ public class TestHashes {
     private final List<String> exts = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
     private final String prePre = "plugins/rcp-be-lol-game-data/";
 
-    private final List<String> preRegion = Arrays.asList("global",
+    private final List<String> preRegion = Arrays.asList(
+            "global",
             "br",
             "cn",
             "eune",
@@ -52,7 +53,8 @@ public class TestHashes {
             "vn"
     );
 
-    private final List<String> preLang = Arrays.asList("default",
+    private final List<String> preLang = Arrays.asList(
+            "default",
             "cs_cz",
             "de_de",
             "el_gr",
@@ -795,6 +797,70 @@ public class TestHashes {
         combineAndDeleteNestedTemp();
     }
 
+    @Test
+    public void testAllLangKnownPaths() throws IOException {
+        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                String filename = file.getFileName().toString().substring(0, file.getFileName().toString().lastIndexOf('.'));
+
+                final List<String> foundHashes = new ArrayList<>();
+                final List<Pair<String, String>> knownHashes = new ArrayList<>();
+
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {
+                }.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!knownHashes.contains(data)) {
+                        knownHashes.add(new Pair<>(k, v));
+                    }
+                });
+
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {
+                }.getType())).forEach((k, v) -> {
+                    String insert = v.substring(("plugins/" + filename + "/").length());
+                    insert = insert.substring(insert.indexOf('/') + 1);
+                    insert = insert.substring(insert.indexOf('/') + 1);
+                    if (!foundHashes.contains(insert)) {
+                        foundHashes.add(insert);
+                    }
+                });
+
+                for (String reg : preRegion) {
+                    System.out.println(reg);
+                    for (String lan : preLang) {
+                        System.out.println(lan);
+
+                        String pre = prePre + reg + "/" + lan + "/";
+                        for (String end : foundHashes) {
+
+                            String hashMe = pre + end;
+                            String hash = UtilHandler.getHash(hashMe.trim());
+
+                            Pair<String, String> data = new Pair<>(hash, hashMe);
+                            if (!knownHashes.contains(data)) {
+                                knownHashes.add(data);
+                            }
+                        }
+
+
+                    }
+                }
+
+                knownHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+
+                StringBuilder sb = new StringBuilder("{\n");
+                for (Pair<String, String> pair : knownHashes) {
+                    sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                }
+                sb.reverse().delete(0, 2).reverse().append("\n}");
+
+                Files.createDirectories(Paths.get("hashes", "fixed"));
+                Files.write(Paths.get("hashes", "fixed", file.getFileName().toString()), sb.toString().getBytes(StandardCharsets.UTF_8));
+
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
 
     @Test
     public void testSortAllHashes() throws IOException {

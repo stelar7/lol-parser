@@ -57,6 +57,7 @@
 	"6217bbcb1e7a77bc": "plugins/rcp-fe-lol-hover-card/global/en_gb/trans.json",
 	"4be92ed13f20187a": "plugins/rcp-fe-lol-hover-card/global/en_ph/trans.json",
 	"997263c3becf6409": "plugins/rcp-fe-lol-hover-card/global/en_sg/trans.json",
+	"26d6586c14cbbd4a": "plugins/rcp-fe-lol-hover-card/global/en_us/hovercard_default_bg.jpg",
 	"5fc02d7ee6dbb256": "plugins/rcp-fe-lol-hover-card/global/en_us/trans.json",
 	"0aa6c682210d5efa": "plugins/rcp-fe-lol-hover-card/global/es_ar/trans.json",
 	"82c35dd90c667bcb": "plugins/rcp-fe-lol-hover-card/global/es_es/trans.json",
@@ -77,5 +78,7 @@
 	"f810d1826f6392c0": "plugins/rcp-fe-lol-hover-card/global/vn_vn/trans.json",
 	"1cc12ef70c351f72": "plugins/rcp-fe-lol-hover-card/global/zh_cn/trans.json",
 	"699ccf988ed4f850": "plugins/rcp-fe-lol-hover-card/global/zh_my/trans.json",
-	"6f0aa0f2661c4dc8": "plugins/rcp-fe-lol-hover-card/global/zh_tw/trans.json"
+	"6f0aa0f2661c4dc8": "plugins/rcp-fe-lol-hover-card/global/zh_tw/trans.json",
+	"3938ed5f7354717f": "plugins/rcp-fe-lol-hover-card/pbe/default/hovercard_default_bg.jpg",
+	"750420e71c25f9db": "plugins/rcp-fe-lol-hover-card/pbe/en_us/hovercard_default_bg.jpg"
 }

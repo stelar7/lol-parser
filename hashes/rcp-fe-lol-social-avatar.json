@@ -14,5 +14,8 @@
 	"8566630c5656aba9": "plugins/rcp-fe-lol-social-avatar/global/default/images/status_mobile.png",
 	"84f4fdbc8d8aaad7": "plugins/rcp-fe-lol-social-avatar/global/default/index.html",
 	"38c16ddf6a888aea": "plugins/rcp-fe-lol-social-avatar/global/default/init.js",
-	"c829c2a396614cd7": "plugins/rcp-fe-lol-social-avatar/global/en_gb/images/playerobject_s_sprite.png"
+	"c829c2a396614cd7": "plugins/rcp-fe-lol-social-avatar/global/en_gb/images/playerobject_s_sprite.png",
+	"73fc6e89712358ab": "plugins/rcp-fe-lol-social-avatar/global/en_us/images/playerobject_s_sprite.png",
+	"7500a485ce7146df": "plugins/rcp-fe-lol-social-avatar/pbe/default/images/playerobject_s_sprite.png",
+	"489b81ea0a916994": "plugins/rcp-fe-lol-social-avatar/pbe/en_us/images/playerobject_s_sprite.png"
 }
