@@ -1,5 +1,8 @@
 {
+	"195e391ee0ba1644": "plugins/rcp-fe-plugin-runner/description.json",
+	"25d3b320a01367fb": "plugins/rcp-fe-plugin-runner/global/default/description.json",
 	"8686222183b0dba8": "plugins/rcp-fe-plugin-runner/global/default/index.html",
+	"8bd81d7e9967d58b": "plugins/rcp-fe-plugin-runner/global/default/license.json",
 	"8093732410d91be5": "plugins/rcp-fe-plugin-runner/global/default/loader.js",
 	"bee916c79ac21631": "plugins/rcp-fe-plugin-runner/global/default/loader.js.map"
 }

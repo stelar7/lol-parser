@@ -1,4 +1,5 @@
 {
+	"54dfc27cab99b5fd": "plugins/rcp-fe-common-libs/description.json",
 	"28dc962139be1103": "plugins/rcp-fe-common-libs/global/default/1.bundle.js",
 	"2c5eccd03fca89e1": "plugins/rcp-fe-common-libs/global/default/2.bundle.js",
 	"27a01eb535505271": "plugins/rcp-fe-common-libs/global/default/3.bundle.js",
@@ -8,5 +9,7 @@
 	"59a4823d8cdb9664": "plugins/rcp-fe-common-libs/global/default/7.bundle.js",
 	"975ad257e209ad7f": "plugins/rcp-fe-common-libs/global/default/8.bundle.js",
 	"12976024db9046a0": "plugins/rcp-fe-common-libs/global/default/bundle.js",
-	"8f542fa8b7c0b3f9": "plugins/rcp-fe-common-libs/global/default/index.html"
+	"a7d38d47bd590b1e": "plugins/rcp-fe-common-libs/global/default/description.json",
+	"8f542fa8b7c0b3f9": "plugins/rcp-fe-common-libs/global/default/index.html",
+	"ada7b8e76bfa88ab": "plugins/rcp-fe-common-libs/global/default/license.json"
 }

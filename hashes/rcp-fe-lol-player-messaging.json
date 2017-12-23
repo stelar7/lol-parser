@@ -1,17 +1,8 @@
 {
-	"fd10d30c26368b4b": "plugins/rcp-fe-lol-player-messaging/euw/default/index.html",
-	"d0057f7e70a8afb3": "plugins/rcp-fe-lol-player-messaging/euw/default/init.js",
-	"45f4156419ad8eed": "plugins/rcp-fe-lol-player-messaging/euw/en_gb/index.html",
-	"70964c94baaf71b7": "plugins/rcp-fe-lol-player-messaging/euw/en_gb/init.js",
+	"631210ad0e1a9ab4": "plugins/rcp-fe-lol-player-messaging/description.json",
+	"4e59a4b3b9f25187": "plugins/rcp-fe-lol-player-messaging/global/default/description.json",
 	"1aea24857d54ce03": "plugins/rcp-fe-lol-player-messaging/global/default/images/celebration-chest.png",
 	"774663a78145d3a5": "plugins/rcp-fe-lol-player-messaging/global/default/index.html",
 	"8b3616fbda36efac": "plugins/rcp-fe-lol-player-messaging/global/default/init.js",
-	"7f4ee4c962b45d77": "plugins/rcp-fe-lol-player-messaging/global/en_gb/index.html",
-	"61a84bda1a511ece": "plugins/rcp-fe-lol-player-messaging/global/en_gb/init.js",
-	"082b2dbc7eafcacc": "plugins/rcp-fe-lol-player-messaging/global/en_us/index.html",
-	"75aef0131b1087c7": "plugins/rcp-fe-lol-player-messaging/global/en_us/init.js",
-	"812cd63e2281d9a2": "plugins/rcp-fe-lol-player-messaging/pbe/default/index.html",
-	"c8ef1462b410c050": "plugins/rcp-fe-lol-player-messaging/pbe/default/init.js",
-	"49aca26388cd502f": "plugins/rcp-fe-lol-player-messaging/pbe/en_us/index.html",
-	"f3df8eac7dda5845": "plugins/rcp-fe-lol-player-messaging/pbe/en_us/init.js"
+	"120ba28379180f46": "plugins/rcp-fe-lol-player-messaging/global/default/license.json"
 }

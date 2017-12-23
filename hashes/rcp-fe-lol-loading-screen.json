@@ -1,4 +1,7 @@
 {
+	"b3a5d9022e8d3d28": "plugins/rcp-fe-lol-loading-screen/description.json",
+	"b9d0b0006c95beeb": "plugins/rcp-fe-lol-loading-screen/global/default/description.json",
 	"4c87aa82729bcff8": "plugins/rcp-fe-lol-loading-screen/global/default/index.html",
-	"7ff6bacc7f112e05": "plugins/rcp-fe-lol-loading-screen/global/default/init.js"
+	"7ff6bacc7f112e05": "plugins/rcp-fe-lol-loading-screen/global/default/init.js",
+	"bd74b28d49b495b1": "plugins/rcp-fe-lol-loading-screen/global/default/license.json"
 }

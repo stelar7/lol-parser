@@ -1,5 +1,8 @@
 {
+	"3e1892c861b00cf4": "plugins/rcp-fe-components-js-libs/description.json",
 	"861130998e93072e": "plugins/rcp-fe-components-js-libs/global/default/0.bundle.js",
 	"2db162facc1b8b7e": "plugins/rcp-fe-components-js-libs/global/default/bundle.js",
-	"74ae9c95141b5e08": "plugins/rcp-fe-components-js-libs/global/default/index.html"
+	"46360f2d3b676e28": "plugins/rcp-fe-components-js-libs/global/default/description.json",
+	"74ae9c95141b5e08": "plugins/rcp-fe-components-js-libs/global/default/index.html",
+	"1b98a6e0e83f9e11": "plugins/rcp-fe-components-js-libs/global/default/license.json"
 }

@@ -1,5 +1,8 @@
 {
+	"44397b16be8b5165": "plugins/rcp-fe-lol-settings/description.json",
 	"b8a044b880c25b6f": "plugins/rcp-fe-lol-settings/global/default/bundle.js",
+	"ac2d650e4e1c5b3a": "plugins/rcp-fe-lol-settings/global/default/description.json",
 	"51abd36def7fac9d": "plugins/rcp-fe-lol-settings/global/default/index.html",
+	"da4865d9e80f86bb": "plugins/rcp-fe-lol-settings/global/default/license.json",
 	"760d9114055479af": "plugins/rcp-fe-lol-settings/global/default/trans.json"
 }

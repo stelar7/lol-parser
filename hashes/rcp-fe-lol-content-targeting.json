@@ -1,6 +1,9 @@
 {
+	"bab65c9e2c207e8a": "plugins/rcp-fe-lol-content-targeting/description.json",
+	"ea39f31878aeb248": "plugins/rcp-fe-lol-content-targeting/global/default/description.json",
 	"1ebd7485a63c0e99": "plugins/rcp-fe-lol-content-targeting/global/default/images/janna.png",
 	"8b74fce8f801ecec": "plugins/rcp-fe-lol-content-targeting/global/default/index.html",
 	"724df06ff51eb13a": "plugins/rcp-fe-lol-content-targeting/global/default/init.js",
+	"d5589c2bd44180b0": "plugins/rcp-fe-lol-content-targeting/global/default/license.json",
 	"d1a6e10aba13ed02": "plugins/rcp-fe-lol-content-targeting/global/default/trans.json"
 }

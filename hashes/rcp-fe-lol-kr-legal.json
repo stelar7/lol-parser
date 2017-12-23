@@ -1,25 +1,10 @@
 {
-	"f6014230315ba6f3": "plugins/rcp-fe-lol-kr-legal/euw/default/css/main.css",
-	"da0824646612e5c4": "plugins/rcp-fe-lol-kr-legal/euw/default/index.html",
-	"1d40347690bb58bf": "plugins/rcp-fe-lol-kr-legal/euw/default/init.js",
-	"0f589396bc052a60": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/css/main.css",
-	"477d9145a8eca2a1": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/index.html",
-	"5b655714d69a3674": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/init.js",
+	"50ec9fafe912276a": "plugins/rcp-fe-lol-kr-legal/description.json",
 	"07bcaee6c1c57ac7": "plugins/rcp-fe-lol-kr-legal/global/default/css/main.css",
+	"dd8cd9f4c5d0dccb": "plugins/rcp-fe-lol-kr-legal/global/default/description.json",
 	"96ac48febc7008f8": "plugins/rcp-fe-lol-kr-legal/global/default/images/kr-rating-screen.png",
 	"9b8a5abce6291d3d": "plugins/rcp-fe-lol-kr-legal/global/default/index.html",
 	"5c49f93c342f7072": "plugins/rcp-fe-lol-kr-legal/global/default/init.js",
 	"9c44f219de5ed24e": "plugins/rcp-fe-lol-kr-legal/global/default/init.js.map",
-	"9793c3a4a471b5e3": "plugins/rcp-fe-lol-kr-legal/global/en_gb/css/main.css",
-	"e12c00e3d7b88b2a": "plugins/rcp-fe-lol-kr-legal/global/en_gb/index.html",
-	"52932d8b65fe3401": "plugins/rcp-fe-lol-kr-legal/global/en_gb/init.js",
-	"0e91f17676fb8e1f": "plugins/rcp-fe-lol-kr-legal/global/en_us/css/main.css",
-	"e0473e4e702d6823": "plugins/rcp-fe-lol-kr-legal/global/en_us/index.html",
-	"fe25ee5a7bc958eb": "plugins/rcp-fe-lol-kr-legal/global/en_us/init.js",
-	"2e8bcd617df7b2b4": "plugins/rcp-fe-lol-kr-legal/pbe/default/css/main.css",
-	"070e7653ccdf81c0": "plugins/rcp-fe-lol-kr-legal/pbe/default/index.html",
-	"f943c3c13aecd49f": "plugins/rcp-fe-lol-kr-legal/pbe/default/init.js",
-	"927ccf33347d0b59": "plugins/rcp-fe-lol-kr-legal/pbe/en_us/css/main.css",
-	"ad1aadaead9536dc": "plugins/rcp-fe-lol-kr-legal/pbe/en_us/index.html",
-	"861d488befdd9f29": "plugins/rcp-fe-lol-kr-legal/pbe/en_us/init.js"
+	"52d2b8b2b71c9bf4": "plugins/rcp-fe-lol-kr-legal/global/default/license.json"
 }

@@ -1,23 +1,8 @@
 {
-	"7523ea3ab623f9f6": "plugins/rcp-fe-lol-chat-settings/euw/default/bundle.js",
-	"7dbc63990e745fbc": "plugins/rcp-fe-lol-chat-settings/euw/default/index.html",
-	"e7862ec8dc0f4a10": "plugins/rcp-fe-lol-chat-settings/euw/default/trans.json",
-	"c0de0806bdfb73b0": "plugins/rcp-fe-lol-chat-settings/euw/en_gb/bundle.js",
-	"c6209d8681cb42e6": "plugins/rcp-fe-lol-chat-settings/euw/en_gb/index.html",
-	"013d7e44ddcfb1bc": "plugins/rcp-fe-lol-chat-settings/euw/en_gb/trans.json",
+	"dc0bf141f71b11b8": "plugins/rcp-fe-lol-chat-settings/description.json",
 	"b64709d11bc83dac": "plugins/rcp-fe-lol-chat-settings/global/default/bundle.js",
+	"562ac080de62afc6": "plugins/rcp-fe-lol-chat-settings/global/default/description.json",
 	"5a9ca5758b78ed53": "plugins/rcp-fe-lol-chat-settings/global/default/index.html",
-	"6fe780e0c267d928": "plugins/rcp-fe-lol-chat-settings/global/default/trans.json",
-	"85cd525658ae66dc": "plugins/rcp-fe-lol-chat-settings/global/en_gb/bundle.js",
-	"33237dd8e51ef94b": "plugins/rcp-fe-lol-chat-settings/global/en_gb/index.html",
-	"fd5a55ef79df94ad": "plugins/rcp-fe-lol-chat-settings/global/en_gb/trans.json",
-	"308df9f3f0601d1b": "plugins/rcp-fe-lol-chat-settings/global/en_us/bundle.js",
-	"fc34e09fa74ef0d6": "plugins/rcp-fe-lol-chat-settings/global/en_us/index.html",
-	"93b6e0250660d2ab": "plugins/rcp-fe-lol-chat-settings/global/en_us/trans.json",
-	"cdfa05d7a2b079fd": "plugins/rcp-fe-lol-chat-settings/pbe/default/bundle.js",
-	"56e61ab309bef9ea": "plugins/rcp-fe-lol-chat-settings/pbe/default/index.html",
-	"558f8d842b106a74": "plugins/rcp-fe-lol-chat-settings/pbe/default/trans.json",
-	"85eaf435dd8d06ee": "plugins/rcp-fe-lol-chat-settings/pbe/en_us/bundle.js",
-	"12ce0e520f4a78ee": "plugins/rcp-fe-lol-chat-settings/pbe/en_us/index.html",
-	"9a0345314d0da69f": "plugins/rcp-fe-lol-chat-settings/pbe/en_us/trans.json"
+	"d97205b36bdd47bb": "plugins/rcp-fe-lol-chat-settings/global/default/license.json",
+	"6fe780e0c267d928": "plugins/rcp-fe-lol-chat-settings/global/default/trans.json"
 }

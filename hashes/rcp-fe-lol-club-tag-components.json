@@ -1,4 +1,9 @@
 {
+	"95776b59147976eb": "plugins/rcp-fe-lol-club-tag-components/description.json",
+	"898435eaa9c4eb87": "plugins/rcp-fe-lol-club-tag-components/global/default/css/main.css",
+	"d6fb61493a60aa96": "plugins/rcp-fe-lol-club-tag-components/global/default/description.json",
 	"72a8ec4437cfeb8b": "plugins/rcp-fe-lol-club-tag-components/global/default/index.html",
-	"ae5f508b6720b28f": "plugins/rcp-fe-lol-club-tag-components/global/default/input.js"
+	"ae5f508b6720b28f": "plugins/rcp-fe-lol-club-tag-components/global/default/input.js",
+	"7aacce9a86d787ad": "plugins/rcp-fe-lol-club-tag-components/global/default/license.json",
+	"431aaad4a802010f": "plugins/rcp-fe-lol-club-tag-components/global/default/trans.json"
 }

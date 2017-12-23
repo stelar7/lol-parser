@@ -1,4 +1,7 @@
 {
+	"b46847a143186496": "plugins/rcp-fe-error-reporter/description.json",
+	"b7607fbd5eb31c95": "plugins/rcp-fe-error-reporter/global/default/description.json",
 	"8f730c612e1e1066": "plugins/rcp-fe-error-reporter/global/default/index.html",
-	"09a2d5555b47668b": "plugins/rcp-fe-error-reporter/global/default/init.js"
+	"09a2d5555b47668b": "plugins/rcp-fe-error-reporter/global/default/init.js",
+	"bd9414977f692a14": "plugins/rcp-fe-error-reporter/global/default/license.json"
 }

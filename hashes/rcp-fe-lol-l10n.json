@@ -1,4 +1,10 @@
 {
+	"4f7d109a92727dc9": "plugins/rcp-fe-lol-l10n/description.json",
 	"6754921e1fd8bf62": "plugins/rcp-fe-lol-l10n/global/default/bundle.js",
-	"17a575e4c2ee4421": "plugins/rcp-fe-lol-l10n/global/default/index.html"
+	"d6ce246b3ade46cd": "plugins/rcp-fe-lol-l10n/global/default/description.json",
+	"17a575e4c2ee4421": "plugins/rcp-fe-lol-l10n/global/default/index.html",
+	"1e09779339a2dc50": "plugins/rcp-fe-lol-l10n/global/default/license.json",
+	"5183973e202d757d": "plugins/rcp-fe-lol-l10n/global/default/locales.json",
+	"31367a00754cf89b": "plugins/rcp-fe-lol-l10n/global/default/moment-locale.js",
+	"98b0e53189aee5bd": "plugins/rcp-fe-lol-l10n/global/default/trans.json"
 }

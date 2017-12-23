@@ -1,12 +1,13 @@
 {
-	"a0e2bda06757aec7": "plugins/rcp-fe-lol-social-avatar/euw/default/images/playerobject_s_sprite.png",
-	"b411e2adc6d2d0d3": "plugins/rcp-fe-lol-social-avatar/euw/en_gb/images/playerobject_s_sprite.png",
+	"ed26f4ca2ab6c5ff": "plugins/rcp-fe-lol-social-avatar/description.json",
 	"0646135cb21cfa22": "plugins/rcp-fe-lol-social-avatar/global/default/components/availability/index.js",
 	"e42d4c887302d778": "plugins/rcp-fe-lol-social-avatar/global/default/components/elements/availability/template.html",
 	"49966e69693dd4bb": "plugins/rcp-fe-lol-social-avatar/global/default/components/elements/icon/template.html",
 	"afd961aa4865f3b8": "plugins/rcp-fe-lol-social-avatar/global/default/components/icon/index.js",
+	"7e02a3e005fe85bf": "plugins/rcp-fe-lol-social-avatar/global/default/components/index.html",
 	"7fd28767c8fb6801": "plugins/rcp-fe-lol-social-avatar/global/default/components/shadow-element.js",
 	"41ccdfc6cc50ee86": "plugins/rcp-fe-lol-social-avatar/global/default/components/subdoc-proxy.js",
+	"a79116b66676ff48": "plugins/rcp-fe-lol-social-avatar/global/default/description.json",
 	"c52cfa90459a6736": "plugins/rcp-fe-lol-social-avatar/global/default/images/groupicon_hover_bg.png",
 	"e002d46b1a1b5a02": "plugins/rcp-fe-lol-social-avatar/global/default/images/person_mask.png",
 	"92c66e4731b66b81": "plugins/rcp-fe-lol-social-avatar/global/default/images/playerobject_m_sprite.png",
@@ -14,8 +15,5 @@
 	"8566630c5656aba9": "plugins/rcp-fe-lol-social-avatar/global/default/images/status_mobile.png",
 	"84f4fdbc8d8aaad7": "plugins/rcp-fe-lol-social-avatar/global/default/index.html",
 	"38c16ddf6a888aea": "plugins/rcp-fe-lol-social-avatar/global/default/init.js",
-	"c829c2a396614cd7": "plugins/rcp-fe-lol-social-avatar/global/en_gb/images/playerobject_s_sprite.png",
-	"73fc6e89712358ab": "plugins/rcp-fe-lol-social-avatar/global/en_us/images/playerobject_s_sprite.png",
-	"7500a485ce7146df": "plugins/rcp-fe-lol-social-avatar/pbe/default/images/playerobject_s_sprite.png",
-	"489b81ea0a916994": "plugins/rcp-fe-lol-social-avatar/pbe/en_us/images/playerobject_s_sprite.png"
+	"0694b7b64a3e55c0": "plugins/rcp-fe-lol-social-avatar/global/default/license.json"
 }

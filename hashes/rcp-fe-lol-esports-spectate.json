@@ -1,22 +1,13 @@
 {
-	"e00ea63c823a1eb2": "plugins/rcp-fe-lol-esports-spectate/euw/default/bundle.js",
-	"d60d962da924d4c1": "plugins/rcp-fe-lol-esports-spectate/euw/default/index.html",
-	"270f9cd20893404e": "plugins/rcp-fe-lol-esports-spectate/euw/en_gb/bundle.js",
-	"6118d32792758785": "plugins/rcp-fe-lol-esports-spectate/euw/en_gb/index.html",
+	"4b2557ac448a93d7": "plugins/rcp-fe-lol-esports-spectate/description.json",
 	"b0b5f549261203e6": "plugins/rcp-fe-lol-esports-spectate/global/default/1.bundle.js",
 	"92bc25fbb95d78bc": "plugins/rcp-fe-lol-esports-spectate/global/default/assets/ban-icon.png",
 	"b630bc71e93ba58d": "plugins/rcp-fe-lol-esports-spectate/global/default/assets/shentox/shentox-light.ttf",
 	"1c5798f1b7abbe4b": "plugins/rcp-fe-lol-esports-spectate/global/default/assets/shentox/shentox-semibold.ttf",
 	"a9d14ea19769c7b1": "plugins/rcp-fe-lol-esports-spectate/global/default/assets/shentox/shentox.ttf",
 	"9ff7cac9d1cfbf35": "plugins/rcp-fe-lol-esports-spectate/global/default/bundle.js",
+	"d703687c5fb39309": "plugins/rcp-fe-lol-esports-spectate/global/default/description.json",
 	"abe197619c22e872": "plugins/rcp-fe-lol-esports-spectate/global/default/index.html",
-	"00fbbb0e1e988105": "plugins/rcp-fe-lol-esports-spectate/global/default/trans.json",
-	"c0fca04f6d35b777": "plugins/rcp-fe-lol-esports-spectate/global/en_gb/bundle.js",
-	"5fa83ad3e2e3a26a": "plugins/rcp-fe-lol-esports-spectate/global/en_gb/index.html",
-	"501fb71056614937": "plugins/rcp-fe-lol-esports-spectate/global/en_us/bundle.js",
-	"f0efa94345ab21d8": "plugins/rcp-fe-lol-esports-spectate/global/en_us/index.html",
-	"1112a1ddaa8c7d31": "plugins/rcp-fe-lol-esports-spectate/pbe/default/bundle.js",
-	"0287b63a97496aeb": "plugins/rcp-fe-lol-esports-spectate/pbe/default/index.html",
-	"77f436a95f8f7dd5": "plugins/rcp-fe-lol-esports-spectate/pbe/en_us/bundle.js",
-	"f74b21270a65cd47": "plugins/rcp-fe-lol-esports-spectate/pbe/en_us/index.html"
+	"4ea3b70cf307f247": "plugins/rcp-fe-lol-esports-spectate/global/default/license.json",
+	"00fbbb0e1e988105": "plugins/rcp-fe-lol-esports-spectate/global/default/trans.json"
 }

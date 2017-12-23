@@ -1,5 +1,8 @@
 {
+	"d0e5100292bf5cb2": "plugins/rcp-fe-lol-league-tier-names/description.json",
+	"1be01f028ae272ef": "plugins/rcp-fe-lol-league-tier-names/global/default/description.json",
 	"fbe5a93e20b9dd97": "plugins/rcp-fe-lol-league-tier-names/global/default/index.html",
 	"0fc9155fe2623ac4": "plugins/rcp-fe-lol-league-tier-names/global/default/init.js",
+	"8646d37017908799": "plugins/rcp-fe-lol-league-tier-names/global/default/license.json",
 	"52f9df0c39ce5046": "plugins/rcp-fe-lol-league-tier-names/global/default/trans.json"
 }

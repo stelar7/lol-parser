@@ -1,21 +1,12 @@
 {
-	"e7a4e14c34cfcfde": "plugins/rcp-fe-lol-account-verification/euw/default/index.html",
-	"ff226f100bdbfe6b": "plugins/rcp-fe-lol-account-verification/euw/default/rcp-fe-lol-account-verification.js",
-	"bb396e1170012494": "plugins/rcp-fe-lol-account-verification/euw/en_gb/index.html",
-	"d675c38ee1c8b9b1": "plugins/rcp-fe-lol-account-verification/euw/en_gb/rcp-fe-lol-account-verification.js",
+	"78b4afa0e6019260": "plugins/rcp-fe-lol-account-verification/description.json",
+	"803a97ebe349e32e": "plugins/rcp-fe-lol-account-verification/global/default/description.json",
 	"02f7cae3312d0f49": "plugins/rcp-fe-lol-account-verification/global/default/images/bg-radial-ticks.png",
 	"22c252070d0a09f1": "plugins/rcp-fe-lol-account-verification/global/default/images/icon-checkmark.png",
 	"e7bedb4abd797f3f": "plugins/rcp-fe-lol-account-verification/global/default/images/icon-sleeping-poro.png",
 	"2fbf179162c73b66": "plugins/rcp-fe-lol-account-verification/global/default/images/spinner.png",
 	"8cc2c2adc2a252cb": "plugins/rcp-fe-lol-account-verification/global/default/index.html",
+	"86f96273c4030f42": "plugins/rcp-fe-lol-account-verification/global/default/license.json",
 	"532fac34a23906a8": "plugins/rcp-fe-lol-account-verification/global/default/rcp-fe-lol-account-verification.js",
-	"ad5ad6cc6af169ae": "plugins/rcp-fe-lol-account-verification/global/default/trans.json",
-	"e391640c6e502598": "plugins/rcp-fe-lol-account-verification/global/en_gb/index.html",
-	"7096d2b10a65e39b": "plugins/rcp-fe-lol-account-verification/global/en_gb/rcp-fe-lol-account-verification.js",
-	"fd862b555d90b44b": "plugins/rcp-fe-lol-account-verification/global/en_us/index.html",
-	"0e9914aa149f96cf": "plugins/rcp-fe-lol-account-verification/global/en_us/rcp-fe-lol-account-verification.js",
-	"6754d72cb1effd33": "plugins/rcp-fe-lol-account-verification/pbe/default/index.html",
-	"2d815d2330e34c74": "plugins/rcp-fe-lol-account-verification/pbe/default/rcp-fe-lol-account-verification.js",
-	"608a2f6f27acbd03": "plugins/rcp-fe-lol-account-verification/pbe/en_us/index.html",
-	"f6c21d2b458720d3": "plugins/rcp-fe-lol-account-verification/pbe/en_us/rcp-fe-lol-account-verification.js"
+	"ad5ad6cc6af169ae": "plugins/rcp-fe-lol-account-verification/global/default/trans.json"
 }

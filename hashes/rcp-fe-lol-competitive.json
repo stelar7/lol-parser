@@ -1,16 +1,8 @@
 {
-	"afeec69d8e174fc2": "plugins/rcp-fe-lol-competitive/euw/default/index.html",
-	"71d4a28f639b7c88": "plugins/rcp-fe-lol-competitive/euw/default/rcp-fe-lol-competitive.js",
-	"d5b80c393a78ed62": "plugins/rcp-fe-lol-competitive/euw/en_gb/index.html",
-	"5200dc56a5696917": "plugins/rcp-fe-lol-competitive/euw/en_gb/rcp-fe-lol-competitive.js",
+	"2bec2363f85b49be": "plugins/rcp-fe-lol-competitive/description.json",
+	"aae45e027c135604": "plugins/rcp-fe-lol-competitive/global/default/description.json",
 	"0065f644db7ec167": "plugins/rcp-fe-lol-competitive/global/default/index.html",
+	"30ec2eb8bb1d89c1": "plugins/rcp-fe-lol-competitive/global/default/license.json",
 	"7f61c3d697ac7849": "plugins/rcp-fe-lol-competitive/global/default/rcp-fe-lol-competitive.js",
-	"a7f6676afbe97b50": "plugins/rcp-fe-lol-competitive/global/en_gb/index.html",
-	"315198a73a25078a": "plugins/rcp-fe-lol-competitive/global/en_gb/rcp-fe-lol-competitive.js",
-	"c771abb95406a9ae": "plugins/rcp-fe-lol-competitive/global/en_us/index.html",
-	"92cf4658af83a982": "plugins/rcp-fe-lol-competitive/global/en_us/rcp-fe-lol-competitive.js",
-	"e66a6330893bc218": "plugins/rcp-fe-lol-competitive/pbe/default/index.html",
-	"190167e3fc99607c": "plugins/rcp-fe-lol-competitive/pbe/default/rcp-fe-lol-competitive.js",
-	"079f5a56c350b4f4": "plugins/rcp-fe-lol-competitive/pbe/en_us/index.html",
-	"9e37875e3b77648a": "plugins/rcp-fe-lol-competitive/pbe/en_us/rcp-fe-lol-competitive.js"
+	"59b358cd0729d4e6": "plugins/rcp-fe-lol-competitive/global/default/trans.json"
 }
