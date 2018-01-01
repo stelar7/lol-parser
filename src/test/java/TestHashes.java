@@ -971,7 +971,6 @@ public class TestHashes
                         String pre = "plugins/" + filename + "/" + reg + "/" + lan + "/";
                         for (String end : foundHashes)
                         {
-                            
                             String hashMe = pre + end;
                             String hash   = UtilHandler.getHash(hashMe.trim());
                             
@@ -981,13 +980,10 @@ public class TestHashes
                                 knownHashes.add(data);
                             }
                         }
-                        
-                        
                     }
                 }
                 
                 knownHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-                
                 StringBuilder sb = new StringBuilder("{\n");
                 for (Pair<String, String> pair : knownHashes)
                 {
@@ -1083,6 +1079,11 @@ public class TestHashes
         for (Pair<String, String> pair : foundHashes)
         {
             String builder = pair.getValue().substring("plugins/".length());
+            if (builder.indexOf('/') < 0)
+            {
+                System.out.println(pair.getValue());
+            }
+            
             builder = builder.substring(0, builder.indexOf('/'));
             
             StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
