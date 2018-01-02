@@ -120,7 +120,10 @@ public class RandomAccessReader implements AutoCloseable
         return buffer.get() > 0;
     }
     
-    public String readToNull(int offset)
+    /**
+     * Reads untill 0x00 is read.
+     */
+    public String readFromOffset(int offset)
     {
         int pos = buffer.position();
         buffer.position(0);
@@ -137,5 +140,16 @@ public class RandomAccessReader implements AutoCloseable
         }
         
         return new String(temp, StandardCharsets.UTF_8).trim();
+    }
+    
+    public void printBuffer()
+    {
+        int pos = buffer.position();
+        while (buffer.hasRemaining())
+        {
+            System.out.print(buffer.get() + ", ");
+        }
+        System.out.println();
+        buffer.position(pos);
     }
 }

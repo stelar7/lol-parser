@@ -37,9 +37,6 @@ public class InibinParser
         maskBytes.put(UtilHandler.longToBitSet(0b1000000000000), this::takeString);
     }
     
-    private int index;
-    private int data;
-    
     private String takeBoolean(RandomAccessReader raf)
     {
         if (index++ % 8 == 0)
@@ -54,8 +51,6 @@ public class InibinParser
     }
     
     
-    private int stringStart = -1;
-    
     private String takeString(RandomAccessReader raf, int segmentKeyCount)
     {
         if (stringStart == -1)
@@ -64,15 +59,23 @@ public class InibinParser
         }
         
         int offset = raf.readShort();
-        return raf.readToNull(stringStart + offset);
+        return raf.readFromOffset(stringStart + offset);
     }
     
-    private InibinFile file;
+    private InibinFile         file;
+    private RandomAccessReader raf;
+    private int stringStart = -1;
+    private int index       = 0;
+    private int data        = 0;
     
     public InibinFile parse(Path path)
     {
-        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
         file = new InibinFile(path);
+        
+        stringStart = -1;
+        index = 0;
+        data = 0;
         
         file.setHeader(parseHeader(raf));
         file.setKeys(parseKeys(raf));
