@@ -15,7 +15,7 @@ public class WADParser
 {
     public WADParser()
     {
-        UtilHandler.getMagicNumbers();
+        FileTypeHandler.getMagicNumbers();
     }
     
     /**
@@ -129,8 +129,8 @@ public class WADParser
      */
     public WADFile parse(Path path)
     {
-        RAFReader raf     = new RAFReader(path, ByteOrder.LITTLE_ENDIAN);
-        WADFile   wadFile = new WADFile(raf);
+        RandomAccessReader raf     = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        WADFile            wadFile = new WADFile(raf);
         
         wadFile.setHeader(parseHeader(raf));
         wadFile.setContentHeaders(parseContent(raf, wadFile.getHeader()));
@@ -145,7 +145,7 @@ public class WADParser
      * @param base header containing the major version, and filecount
      * @return {@code List<WADContentHeaderV1>}
      */
-    private List<WADContentHeaderV1> parseContent(RAFReader raf, WADHeaderBase base)
+    private List<WADContentHeaderV1> parseContent(RandomAccessReader raf, WADHeaderBase base)
     {
         System.out.println("Parsing content headers");
         List<WADContentHeaderV1> content = new ArrayList<>();
@@ -193,7 +193,7 @@ public class WADParser
      * @return WADHeaderBase
      */
     
-    private WADHeaderBase parseHeader(RAFReader raf)
+    private WADHeaderBase parseHeader(RandomAccessReader raf)
     {
         System.out.println("Parsing WAD header");
         

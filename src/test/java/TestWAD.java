@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public class WADTest
+public class TestWAD
 {
     @Test
     public void testWAD() throws Exception
@@ -62,7 +62,7 @@ public class WADTest
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                if (file.getFileName().toString().contains(".wad"))
+                if (file.getFileName().toString().endsWith(".wad") || file.getFileName().toString().endsWith(".wad.client"))
                 {
                     WADFile parsed = parser.parse(file);
                     parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath.resolve(file.getParent().getFileName()));

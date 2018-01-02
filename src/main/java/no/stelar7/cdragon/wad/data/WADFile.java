@@ -1,8 +1,6 @@
 package no.stelar7.cdragon.wad.data;
 
-import com.google.gson.*;
 import lombok.*;
-import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.wad.data.content.*;
 import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
@@ -19,12 +17,12 @@ public class WADFile
     
     @Setter(value = AccessLevel.NONE)
     @Getter(value = AccessLevel.NONE)
-    private final RAFReader     fileReader;
-    private       WADHeaderBase header;
+    private final RandomAccessReader fileReader;
+    private       WADHeaderBase      header;
     
     private List<WADContentHeaderV1> contentHeaders = new ArrayList<>();
     
-    public WADFile(RAFReader raf)
+    public WADFile(RandomAccessReader raf)
     {
         this.fileReader = raf;
     }
@@ -103,7 +101,7 @@ public class WADFile
         
         if (filename.endsWith("json"))
         {
-            data = makePretty(data);
+            data = FileTypeHandler.makePrettyJson(data);
         }
         
         if ("unknown".equals(parentName))
@@ -147,79 +145,16 @@ public class WADFile
         }
     }
     
-    private String findFileType(Path self, byte[] data)
-    {
-        ByteArrayWrapper magic  = new ByteArrayWrapper(Arrays.copyOf(data, 4));
-        String           result = UtilHandler.getMagicNumbers().get(magic);
-        
-        if (result != null)
-        {
-            return result;
-        }
-        
-        if (UtilHandler.isProbableBOM(magic.getData()))
-        {
-            return findFileType(self, Arrays.copyOfRange(data, 3, 7));
-        }
-        
-        if (UtilHandler.isProbableJSON(magic.getData()))
-        {
-            return "json";
-        }
-        
-        if (UtilHandler.isProbableJavascript(magic.getData()))
-        {
-            return "js";
-        }
-        
-        if (UtilHandler.isProbableHTML(magic.getData()))
-        {
-            return "html";
-        }
-        
-        if (UtilHandler.isProbableCSS(magic.getData()))
-        {
-            return "css";
-        }
-        
-        if (UtilHandler.isProbableTXT(magic.getData()))
-        {
-            return "txt";
-        }
-        
-        if (UtilHandler.isProbableIDX(magic.getData()))
-        {
-            return "idx";
-        }
-        
-        if (UtilHandler.isProbable3DModelStuff(magic.getData()))
-        {
-            return "skn";
-        }
-        
-        System.out.print("Unknown filetype: ");
-        System.out.print(self.toString());
-        System.out.println(magic.toString());
-        return "txt";
-    }
-    
-    private byte[] makePretty(byte[] jsonString)
-    {
-        String      dataString = new String(jsonString, StandardCharsets.UTF_8);
-        JsonElement obj        = new JsonParser().parse(dataString);
-        String      pretty     = Utils.getGson().toJson(obj);
-        return pretty.getBytes(StandardCharsets.UTF_8);
-    }
     
     private void findFileTypeAndRename(Path self, byte[] data, String filename, Path parent) throws IOException
     {
-        String        fileType = findFileType(self, data);
+        String        fileType = FileTypeHandler.findFileType(data, self);
         StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
         Path          other    = parent.resolve(sb.toString());
         
         if (filename.endsWith("json"))
         {
-            data = makePretty(data);
+            data = FileTypeHandler.makePrettyJson(data);
         }
         
         Files.write(other, data);

@@ -10,14 +10,16 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-public class RAFReader implements AutoCloseable
+public class RandomAccessReader implements AutoCloseable
 {
     private MappedByteBuffer buffer;
+    private Path             path;
     
-    public RAFReader(Path path, ByteOrder order)
+    public RandomAccessReader(Path path, ByteOrder order)
     {
         try
         {
+            this.path = path;
             RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r");
             
             this.buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
@@ -36,7 +38,16 @@ public class RAFReader implements AutoCloseable
         /*
          This is really hacky, but its a workaround to http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4715154
           */
-        ((DirectBuffer) buffer).cleaner().clean();
+        
+        if (buffer != null && ((DirectBuffer) buffer).cleaner() != null)
+        {
+            ((DirectBuffer) buffer).cleaner().clean();
+        }
+    }
+    
+    public int pos()
+    {
+        return buffer.position();
     }
     
     
@@ -89,14 +100,42 @@ public class RAFReader implements AutoCloseable
     
     public byte[] readBytes(int length)
     {
-        return readBytes(length, 0);
-    }
-    
-    public byte[] readBytes(int length, int offset)
-    {
         byte[] tempData = new byte[length];
-        buffer.get(tempData, offset, length);
+        buffer.get(tempData, 0, length);
         return Arrays.copyOf(tempData, length);
     }
     
+    public Path getPath()
+    {
+        return path;
+    }
+    
+    public float readFloat()
+    {
+        return buffer.getFloat();
+    }
+    
+    public boolean readBoolean()
+    {
+        return buffer.get() > 0;
+    }
+    
+    public String readToNull(int offset)
+    {
+        int pos = buffer.position();
+        buffer.position(0);
+        byte[] tempData = new byte[buffer.remaining()];
+        buffer.get(tempData, 0, buffer.remaining());
+        buffer.position(pos);
+        
+        byte[] temp  = new byte[65536];
+        byte   b;
+        int    index = offset;
+        while ((b = tempData[index++]) != 0)
+        {
+            temp[index - offset] = b;
+        }
+        
+        return new String(temp, StandardCharsets.UTF_8).trim();
+    }
 }

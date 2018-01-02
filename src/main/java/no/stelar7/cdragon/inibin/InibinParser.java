@@ -1,0 +1,137 @@
+package no.stelar7.cdragon.inibin;
+
+import no.stelar7.cdragon.inibin.data.*;
+import no.stelar7.cdragon.util.*;
+
+import java.nio.ByteOrder;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.function.BiFunction;
+
+public class InibinParser
+{
+    private static Map<BitSet, BiFunction<RandomAccessReader, Integer, Object>> maskBytes = new HashMap<>();
+    
+    {
+        // U32
+        maskBytes.put(UtilHandler.longToBitSet(0b1), (raf, nan) -> raf.readInt());
+        // F32
+        maskBytes.put(UtilHandler.longToBitSet(0b10), (raf, nan) -> raf.readFloat());
+        // U8 / 10
+        maskBytes.put(UtilHandler.longToBitSet(0b100), (raf, nan) -> raf.readByte() / 10f);
+        // U16
+        maskBytes.put(UtilHandler.longToBitSet(0b1000), (raf, nan) -> raf.readShort());
+        // U8
+        maskBytes.put(UtilHandler.longToBitSet(0b10000), (raf, nan) -> raf.readByte());
+        // bool
+        maskBytes.put(UtilHandler.longToBitSet(0b100000), (raf, nan) -> takeBoolean(raf));
+        // RGB
+        maskBytes.put(UtilHandler.longToBitSet(0b1000000), (raf, nan) -> raf.readBytes(3));
+        // Unknown
+        maskBytes.put(UtilHandler.longToBitSet(0b10000000), (raf, nan) -> raf.readBytes(3 * Float.BYTES));
+        // RGBA
+        maskBytes.put(UtilHandler.longToBitSet(0b10000000000), (raf, nan) -> raf.readBytes(4));
+        // Unknown (Rage values?)
+        maskBytes.put(UtilHandler.longToBitSet(0b100000000000), (raf, nan) -> raf.readBytes(Float.BYTES * 3));
+        // Strings
+        maskBytes.put(UtilHandler.longToBitSet(0b1000000000000), this::takeString);
+    }
+    
+    private int index;
+    private int data;
+    
+    private String takeBoolean(RandomAccessReader raf)
+    {
+        if (index++ % 8 == 0)
+        {
+            data = raf.readByte();
+        } else
+        {
+            data = data >> 1;
+        }
+        
+        return String.valueOf((data & 0x1) > 0);
+    }
+    
+    
+    private int stringStart = -1;
+    
+    private String takeString(RandomAccessReader raf, int segmentKeyCount)
+    {
+        if (stringStart == -1)
+        {
+            stringStart = raf.pos() + segmentKeyCount * 2;
+        }
+        
+        int offset = raf.readShort();
+        return raf.readToNull(stringStart + offset);
+    }
+    
+    private InibinFile file;
+    
+    public InibinFile parse(Path path)
+    {
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        file = new InibinFile(path);
+        
+        file.setHeader(parseHeader(raf));
+        file.setKeys(parseKeys(raf));
+        return file;
+    }
+    
+    private Map<String, Object> parseKeys(RandomAccessReader raf)
+    {
+        Map<String, Object> keys = new HashMap<>();
+        
+        BitSet comparator = new BitSet(16);
+        BitSet selfBits   = UtilHandler.longToBitSet(file.getHeader().getBitmask());
+        
+        for (int i = 0; i < selfBits.length(); i++)
+        {
+            comparator.set(i);
+            comparator.and(selfBits);
+            if (comparator.isEmpty())
+            {
+                continue;
+            }
+            
+            BiFunction<RandomAccessReader, Integer, Object> function = maskBytes.get(comparator);
+            if (function == null)
+            {
+                System.out.println("No comparator for bit no. " + comparator.toString());
+            }
+            
+            List<Integer> segmentKeys = new ArrayList<>();
+            int           count       = raf.readShort();
+            for (int j = 0; j < count; j++)
+            {
+                segmentKeys.add(raf.readInt());
+            }
+            segmentKeys.forEach(key -> keys.put(Integer.toUnsignedString(key), function.apply(raf, segmentKeys.size())));
+            stringStart = -1;
+            
+            comparator.set(i, false);
+        }
+        
+        
+        return keys;
+    }
+    
+    private InibinHeader parseHeader(RandomAccessReader raf)
+    {
+        InibinHeader header = new InibinHeader();
+        
+        header.setVersion(raf.readByte());
+        header.setTableLength(raf.readShort());
+        header.setBitmask(raf.readShort());
+        
+        if (header.getVersion() != 2)
+        {
+            throw new RuntimeException(String.format("Unknown inibin version (%d), only version 2 is supported", header.getVersion()));
+        }
+        
+        return header;
+    }
+    
+    
+}
