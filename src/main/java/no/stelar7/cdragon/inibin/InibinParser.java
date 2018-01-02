@@ -8,31 +8,32 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
 
-public class InibinParser
+public final class InibinParser
 {
     private static Map<BitSet, BiFunction<RandomAccessReader, Integer, Object>> maskBytes = new HashMap<>();
     
+    public InibinParser()
     {
         // U32
-        maskBytes.put(UtilHandler.longToBitSet(0b1), (raf, nan) -> raf.readInt());
+        maskBytes.put(UtilHandler.longToBitSet(0b1), (reader, nan) -> reader.readInt());
         // F32
-        maskBytes.put(UtilHandler.longToBitSet(0b10), (raf, nan) -> raf.readFloat());
+        maskBytes.put(UtilHandler.longToBitSet(0b10), (reader, nan) -> reader.readFloat());
         // U8 / 10
-        maskBytes.put(UtilHandler.longToBitSet(0b100), (raf, nan) -> raf.readByte() / 10f);
+        maskBytes.put(UtilHandler.longToBitSet(0b100), (reader, nan) -> reader.readByte() / 10f);
         // U16
-        maskBytes.put(UtilHandler.longToBitSet(0b1000), (raf, nan) -> raf.readShort());
+        maskBytes.put(UtilHandler.longToBitSet(0b1000), (reader, nan) -> reader.readShort());
         // U8
-        maskBytes.put(UtilHandler.longToBitSet(0b10000), (raf, nan) -> raf.readByte());
+        maskBytes.put(UtilHandler.longToBitSet(0b10000), (reader, nan) -> reader.readByte());
         // bool
-        maskBytes.put(UtilHandler.longToBitSet(0b100000), (raf, nan) -> takeBoolean(raf));
+        maskBytes.put(UtilHandler.longToBitSet(0b100000), (reader, nan) -> takeBoolean(reader));
         // RGB
-        maskBytes.put(UtilHandler.longToBitSet(0b1000000), (raf, nan) -> raf.readBytes(3));
+        maskBytes.put(UtilHandler.longToBitSet(0b1000000), (reader, nan) -> reader.readBytes(3));
         // Unknown
-        maskBytes.put(UtilHandler.longToBitSet(0b10000000), (raf, nan) -> raf.readBytes(3 * Float.BYTES));
+        maskBytes.put(UtilHandler.longToBitSet(0b10000000), (reader, nan) -> reader.readBytes(3 * Float.BYTES));
         // RGBA
-        maskBytes.put(UtilHandler.longToBitSet(0b10000000000), (raf, nan) -> raf.readBytes(4));
+        maskBytes.put(UtilHandler.longToBitSet(0b10000000000), (reader, nan) -> reader.readBytes(4));
         // Unknown (Rage values?)
-        maskBytes.put(UtilHandler.longToBitSet(0b100000000000), (raf, nan) -> raf.readBytes(Float.BYTES * 3));
+        maskBytes.put(UtilHandler.longToBitSet(0b100000000000), (reader, nan) -> reader.readBytes(Float.BYTES * 3));
         // Strings
         maskBytes.put(UtilHandler.longToBitSet(0b1000000000000), this::takeString);
     }
@@ -77,12 +78,12 @@ public class InibinParser
         index = 0;
         data = 0;
         
-        file.setHeader(parseHeader(raf));
-        file.setKeys(parseKeys(raf));
+        file.setHeader(parseHeader());
+        file.setKeys(parseKeys());
         return file;
     }
     
-    private Map<String, Object> parseKeys(RandomAccessReader raf)
+    private Map<String, Object> parseKeys()
     {
         Map<String, Object> keys = new HashMap<>();
         
@@ -120,7 +121,7 @@ public class InibinParser
         return keys;
     }
     
-    private InibinHeader parseHeader(RandomAccessReader raf)
+    private InibinHeader parseHeader()
     {
         InibinHeader header = new InibinHeader();
         
