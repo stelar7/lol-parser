@@ -20,8 +20,10 @@ public final class UtilHandler
         // Hide public constructor
     }
     
-    private static Map<String, Map<String, String>> hashNames     = new HashMap<>();
-    private static XXHashFactory                    xxHashFactory = XXHashFactory.fastestInstance();
+    private static       Map<String, Map<String, String>> hashNames     = new HashMap<>();
+    private static       XXHashFactory                    xxHashFactory = XXHashFactory.fastestInstance();
+    private static final char[]                           hexArray      = "0123456789ABCDEF".toCharArray();
+    
     
     public static Map<String, String> getKnownFileHashes(String pluginName)
     {
@@ -260,4 +262,16 @@ public final class UtilHandler
         return sb.toString();
     }
     
+    
+    public static String toHex(byte[] bytes)
+    {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++)
+        {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
 }
