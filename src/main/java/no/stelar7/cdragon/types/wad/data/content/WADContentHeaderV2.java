@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.wad.data.content;
+package no.stelar7.cdragon.types.wad.data.content;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

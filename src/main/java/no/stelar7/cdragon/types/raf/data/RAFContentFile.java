@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.raf.data;
+package no.stelar7.cdragon.types.raf.data;
 
 import lombok.Data;
 

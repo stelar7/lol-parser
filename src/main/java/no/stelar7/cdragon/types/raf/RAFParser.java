@@ -1,6 +1,6 @@
-package no.stelar7.cdragon.raf;
+package no.stelar7.cdragon.types.raf;
 
-import no.stelar7.cdragon.raf.data.*;
+import no.stelar7.cdragon.types.raf.data.*;
 import no.stelar7.cdragon.util.RandomAccessReader;
 
 import java.nio.ByteOrder;

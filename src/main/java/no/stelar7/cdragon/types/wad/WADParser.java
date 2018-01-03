@@ -1,9 +1,9 @@
-package no.stelar7.cdragon.wad;
+package no.stelar7.cdragon.types.wad;
 
 import no.stelar7.cdragon.util.*;
-import no.stelar7.cdragon.wad.data.WADFile;
-import no.stelar7.cdragon.wad.data.content.*;
-import no.stelar7.cdragon.wad.data.header.*;
+import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.types.wad.data.content.*;
+import no.stelar7.cdragon.types.wad.data.header.*;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -24,9 +24,8 @@ public class WADParser
      *
      * @param path path to store the file
      * @return WADFile
-     * @throws Exception yes :kappa:
      */
-    public WADFile parseLatest(String pluginName, Path path) throws Exception
+    public WADFile parseLatest(String pluginName, Path path)
     {
         for (int i = 365; i > 0; i--)
         {
@@ -45,9 +44,8 @@ public class WADParser
      *
      * @param path path to store the file
      * @return WADFile
-     * @throws IOException yes :kappa:
      */
-    public WADFile parseVersion(String pluginName, int versionAsNumber, Path path) throws IOException
+    public WADFile parseVersion(String pluginName, int versionAsNumber, Path path)
     {
         String   urlNoWAD = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
         String[] data     = UtilHandler.getMaxVersion(urlNoWAD, versionAsNumber, versionAsNumber);
@@ -68,14 +66,13 @@ public class WADParser
      *
      * @param path path to store the file
      * @return WADFile
-     * @throws IOException yes :kappa:
      */
-    public WADFile parseVersion(String pluginName, String versionString, Path path) throws IOException
+    public WADFile parseVersion(String pluginName, String versionString, Path path)
     {
         return parseVersion(pluginName, UtilHandler.getLongFromIP(versionString), path);
     }
     
-    private WADFile handleAll(String pluginName, String urlWithFormatTokens, String version, Path path) throws IOException
+    private WADFile handleAll(String pluginName, String urlWithFormatTokens, String version, Path path)
     {
         String filename          = String.format("%s-%s", pluginName, version);
         Path   fileLocation      = path.resolve(filename);
@@ -102,16 +99,22 @@ public class WADParser
     }
     
     
-    private void uncompress(String pluginName, Path fileLocation, Path noCompressionPath) throws IOException
+    private void uncompress(String pluginName, Path fileLocation, Path noCompressionPath)
     {
         System.out.println("Uncompressing WAD: " + pluginName);
         CompressionHandler.uncompressDEFLATE(fileLocation, noCompressionPath);
     }
     
-    private void deleteOld(Path fileLocation) throws IOException
+    private void deleteOld(Path fileLocation)
     {
-        System.out.println("Trying to delete compressed WAD");
-        Files.deleteIfExists(fileLocation);
+        try
+        {
+            System.out.println("Trying to delete compressed WAD");
+            Files.deleteIfExists(fileLocation);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     private void download(String pluginName, Path save, String url, String version)

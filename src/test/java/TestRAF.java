@@ -1,5 +1,5 @@
-import no.stelar7.cdragon.raf.RAFParser;
-import no.stelar7.cdragon.raf.data.RAFFile;
+import no.stelar7.cdragon.types.raf.RAFParser;
+import no.stelar7.cdragon.types.raf.data.RAFFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import org.junit.Test;
 

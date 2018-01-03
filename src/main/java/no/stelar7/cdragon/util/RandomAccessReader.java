@@ -78,6 +78,21 @@ public class RandomAccessReader implements AutoCloseable
         return new String(temp, StandardCharsets.UTF_8).trim();
     }
     
+    /**
+     * Reads untill EOF
+     */
+    public String readAsString()
+    {
+        byte[] temp  = new byte[65536];
+        int    index = 0;
+        while (buffer.hasRemaining())
+        {
+            temp[index++] = buffer.get();
+        }
+        
+        return new String(temp, StandardCharsets.UTF_8).trim();
+    }
+    
     public long readLong()
     {
         return buffer.getLong();

@@ -1,5 +1,5 @@
-import no.stelar7.cdragon.inibin.InibinParser;
-import no.stelar7.cdragon.inibin.data.InibinFile;
+import no.stelar7.cdragon.types.inibin.InibinParser;
+import no.stelar7.cdragon.types.inibin.data.InibinFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import org.junit.Test;
 

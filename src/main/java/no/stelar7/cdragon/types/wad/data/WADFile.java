@@ -1,9 +1,9 @@
-package no.stelar7.cdragon.wad.data;
+package no.stelar7.cdragon.types.wad.data;
 
 import lombok.*;
 import no.stelar7.cdragon.util.*;
-import no.stelar7.cdragon.wad.data.content.*;
-import no.stelar7.cdragon.wad.data.header.WADHeaderBase;
+import no.stelar7.cdragon.types.wad.data.content.*;
+import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

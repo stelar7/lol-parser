@@ -3,8 +3,8 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
 import no.stelar7.cdragon.util.*;
-import no.stelar7.cdragon.wad.WADParser;
-import no.stelar7.cdragon.wad.data.WADFile;
+import no.stelar7.cdragon.types.wad.WADParser;
+import no.stelar7.cdragon.types.wad.data.WADFile;
 import org.junit.Test;
 
 import java.io.IOException;

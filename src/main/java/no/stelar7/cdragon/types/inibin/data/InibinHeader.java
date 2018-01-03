@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.inibin.data;
+package no.stelar7.cdragon.types.inibin.data;
 
 import lombok.Data;
 

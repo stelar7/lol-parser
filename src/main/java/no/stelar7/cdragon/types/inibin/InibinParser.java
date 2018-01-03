@@ -1,6 +1,6 @@
-package no.stelar7.cdragon.inibin;
+package no.stelar7.cdragon.types.inibin;
 
-import no.stelar7.cdragon.inibin.data.*;
+import no.stelar7.cdragon.types.inibin.data.*;
 import no.stelar7.cdragon.util.*;
 
 import java.nio.ByteOrder;
