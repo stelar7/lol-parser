@@ -929,7 +929,8 @@ public class TestHashes
     @Test
     public void testAllLangKnownPaths() throws IOException
     {
-        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        Path hashStore = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
+        Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1002,8 +1003,8 @@ public class TestHashes
     @Test
     public void testSortAllHashes() throws IOException
     {
-        
-        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        Path hashStore = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
+        Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1042,12 +1043,13 @@ public class TestHashes
     {
         Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
         Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        Path hashStore    = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
         
         List<Pair<String, String>> foundHashes = new ArrayList<>();
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
@@ -1103,13 +1105,64 @@ public class TestHashes
     }
     
     @Test
+    public void testDiffPupix() throws IOException
+    {
+        Path hashStore    = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
+        Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
+        Path pupix        = Paths.get(System.getProperty("user.home"), "Downloads", "league_client");
+        
+        final List<Pair<String, String>> foundHashes = new ArrayList<>();
+        FileVisitor<Path> findHashes = new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                if (!file.getFileName().toString().endsWith(".json"))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                
+                System.out.println(file.toAbsolutePath().toString());
+                
+                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                {
+                }.getType())).forEach((k, v) -> {
+                    Pair<String, String> data = new Pair<>(k, v);
+                    if (!foundHashes.contains(data))
+                    {
+                        foundHashes.add(new Pair<>(k, v));
+                    }
+                });
+                return FileVisitResult.CONTINUE;
+            }
+        };
+        
+        Files.walkFileTree(hashStore, findHashes);
+        Files.walkFileTree(pupix, findHashes);
+        
+        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+        
+        
+        StringBuilder sb = new StringBuilder("{\n");
+        for (Pair<String, String> pair : foundHashes)
+        {
+            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+        }
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        
+        Files.write(newHashStore, sb.toString().getBytes(StandardCharsets.UTF_8));
+        
+    }
+    
+    @Test
     public void testMakePure() throws IOException
     {
-        Path                       newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        Path                       newHashStore = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\newFixed");
+        Path                       hashStore    = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\fixed");
         List<Pair<String, String>> foundHashes  = new ArrayList<>();
         Map<String, StringBuilder> pluginData   = new HashMap<>();
         
-        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -1175,12 +1228,13 @@ public class TestHashes
     {
         Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
         Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        Path hashStore    = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
         
         List<Pair<String, String>> foundHashes = new ArrayList<>();
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(Paths.get("hashes"), new SimpleFileVisitor<Path>()
+        Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
