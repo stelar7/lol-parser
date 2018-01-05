@@ -32,16 +32,10 @@ public class TestRAF
             }
         });
         
-        paths.sort(new NaturalOrderComparator());
+        paths.sort(new NaturalOrderComparator().reversed());
         
         for (Path file : paths)
         {
-            
-            if (!file.toString().contains("0.0.1.49"))
-            {
-                continue;
-            }
-            
             System.out.println("Parsing: " + file.toString());
             RAFFile parsed = parser.parse(file);
             parsed.extractFiles(extractPath);

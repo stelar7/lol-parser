@@ -56,6 +56,11 @@
             <version>1.11</version>
         </dependency>
 
+        <dependency>
+            <groupId>net.nikr</groupId>
+            <artifactId>dds</artifactId>
+            <version>1.0.0</version>
+        </dependency>
 
     </dependencies>
 
@@ -63,6 +68,12 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+
+        <repository>
+            <id>maven.nikr.net</id>
+            <name>maven.nikr.net</name>
+            <url>http://maven.nikr.net/</url>
         </repository>
     </repositories>
 
