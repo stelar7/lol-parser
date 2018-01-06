@@ -1,6 +1,6 @@
 import no.stelar7.cdragon.types.inibin.InibinParser;
 import no.stelar7.cdragon.types.inibin.data.InibinFile;
-import no.stelar7.cdragon.util.NaturalOrderComparator;
+import no.stelar7.cdragon.util.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -42,6 +42,28 @@ public class TestInibin
             InibinFile parsed = parser.parse(file);
             parsed.extractFile(extractPath);
         }
+    }
+    
+    @Test
+    public void testDownloadedInibin() throws IOException
+    {
+        InibinParser parser = new InibinParser();
+        Path         file   = Paths.get(System.getProperty("user.home"), "Downloads", "pman_inibin");
+        Files.walkFileTree(file, new SimpleFileVisitor<Path>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                if (Files.isDirectory(file))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                
+                InibinFile parsed = parser.parseCompressed(file);
+                parsed.extractFile(file.getParent());
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
     
     @Test

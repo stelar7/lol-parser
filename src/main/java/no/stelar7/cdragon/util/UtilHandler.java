@@ -170,59 +170,22 @@ public final class UtilHandler
     }
     
     
-    public static void tryDownloadVersion(Path output, String url, String version)
-    {
-        String finalUrl = String.format(url, version);
-        
-        downloadEfficient(output, finalUrl);
-    }
-    
-    private static void downloadEfficient(Path output, String url)
-    {
-        try (ReadableByteChannel rbc = Channels.newChannel(new URL(url).openStream());
-             FileOutputStream fos = new FileOutputStream(output.toFile()))
-        {
-            long bytes = fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-            if (bytes < 20 * 1028 * 1028)
-            {
-                fos.close();
-                rbc.close();
-                
-                System.out.println("Efficient download failed, trying old version");
-                Files.deleteIfExists(output);
-                downloadOldWay(output, url);
-            }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-    }
-    
-    
-    private static void downloadOldWay(Path output, String url)
+    public static void downloadEfficient(Path output, String url)
     {
         try
         {
-            final String        USER_AGENT_VALUE = "Mozilla/5.0 (Windows NT 5.1) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.56 Safari/535.11";
-            final byte[]        buffer           = new byte[1024];
-            int                 read;
-            final URLConnection uc               = new URL(url).openConnection();
-            uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            uc.setRequestProperty("Content-Language", "en-US");
-            uc.setRequestProperty("User-Agent", USER_AGENT_VALUE);
-            uc.setUseCaches(false);
-            uc.setDoInput(true);
-            uc.setDoOutput(true);
-            try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
+            if (Files.exists(output))
             {
-                while ((read = in.read(buffer)) != -1)
-                {
-                    out.write(buffer, 0, read);
-                }
-                out.flush();
-            } catch (final FileNotFoundException e)
+                System.err.println("This file already exists: " + output.toString());
+                return;
+            }
+            
+            Files.createDirectories(output.getParent());
+            try (ReadableByteChannel rbc = Channels.newChannel(new URL(url).openStream());
+                 FileOutputStream fos = new FileOutputStream(output.toFile()))
             {
-                e.printStackTrace();
+                Files.createDirectories(output.getParent());
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
         } catch (IOException e)
         {

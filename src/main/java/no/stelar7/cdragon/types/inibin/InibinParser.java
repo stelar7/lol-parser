@@ -3,8 +3,9 @@ package no.stelar7.cdragon.types.inibin;
 import no.stelar7.cdragon.types.inibin.data.*;
 import no.stelar7.cdragon.util.*;
 
+import java.io.IOException;
 import java.nio.ByteOrder;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -83,6 +84,31 @@ public final class InibinParser
         return file;
     }
     
+    
+    public InibinFile parseCompressed(Path path)
+    {
+        try
+        {
+            byte[] dataBytes = CompressionHandler.uncompressDEFLATE(Files.readAllBytes(path));
+            raf = new RandomAccessReader(dataBytes, ByteOrder.LITTLE_ENDIAN);
+            
+            file = new InibinFile(path);
+            
+            stringStart = -1;
+            index = 0;
+            data = 0;
+            
+            file.setHeader(parseHeader());
+            file.setKeys(parseKeys());
+            return file;
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    
     private Map<String, Object> parseKeys()
     {
         Map<String, Object> keys = new HashMap<>();
@@ -136,6 +162,5 @@ public final class InibinParser
         
         return header;
     }
-    
     
 }

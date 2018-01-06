@@ -23,10 +23,41 @@ public final class InibinHash
         return transforms.getOrDefault(key, i -> i).apply(hash).toString();
     }
     
-    private static final Function<Object, Object> percent          = v -> ((v instanceof Integer) ? (Integer.valueOf((String) v) * 10) : (Float.valueOf((String) v) * 100f));
-    private static final Function<Object, Object> attckspeed       = v -> (0.625f / (1.0f + Float.valueOf((String) v)));
-    private static final Function<Object, Object> attckspeedPerLvl = v -> ((Number) v).floatValue() * 0.01f;
-    private static final Function<Object, Object> regenPer5        = v -> ((Number) v).floatValue() * 5;
+    private static final Function<Object, Object> percent          = (Object v) -> {
+        if (v instanceof Integer)
+        {
+            return (Integer.valueOf((String) v) * 10);
+        }
+        if (v instanceof Float)
+        {
+            return (Float.valueOf((String) v) * 100f);
+        }
+        
+        return 0;
+    };
+    private static final Function<Object, Object> attckspeed       = (Object v) -> {
+        if (v instanceof Float)
+        {
+            return (0.625f / (1.0f + (float) v));
+        }
+        
+        return 0;
+    };
+    private static final Function<Object, Object> attckspeedPerLvl = (Object v) -> {
+        if (v instanceof Float)
+        {
+            return (float) v * 0.01f;
+        }
+        
+        return 0;
+    };
+    private static final Function<Object, Object> regenPer5        = (Object v) -> {
+        if (v instanceof Float)
+        {
+            return (float) v * 5f;
+        }
+        return 0;
+    };
     
     
     static

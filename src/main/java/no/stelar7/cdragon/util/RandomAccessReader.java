@@ -12,8 +12,8 @@ import java.util.Arrays;
 
 public class RandomAccessReader implements AutoCloseable
 {
-    private MappedByteBuffer buffer;
-    private Path             path;
+    private ByteBuffer buffer;
+    private Path       path;
     
     public RandomAccessReader(Path path, ByteOrder order)
     {
@@ -30,6 +30,12 @@ public class RandomAccessReader implements AutoCloseable
             e.printStackTrace();
             throw new RuntimeException("Invalid file?");
         }
+    }
+    
+    public RandomAccessReader(byte[] dataBytes, ByteOrder order)
+    {
+        this.buffer = ByteBuffer.wrap(dataBytes);
+        this.buffer.order(order);
     }
     
     @Override
@@ -83,7 +89,7 @@ public class RandomAccessReader implements AutoCloseable
      */
     public String readAsString()
     {
-        byte[] temp  = new byte[65536];
+        byte[] temp  = new byte[buffer.remaining()];
         int    index = 0;
         while (buffer.hasRemaining())
         {
