@@ -1,9 +1,8 @@
 package no.stelar7.cdragon.util;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import javafx.util.Pair;
 import net.jpountz.xxhash.*;
+import no.stelar7.api.l4j8.basic.utils.Utils;
 
 import java.io.*;
 import java.net.*;
@@ -23,6 +22,7 @@ public final class UtilHandler
     private static       Map<String, Map<String, String>> hashNames     = new HashMap<>();
     private static       XXHashFactory                    xxHashFactory = XXHashFactory.fastestInstance();
     private static final char[]                           hexArray      = "0123456789ABCDEF".toCharArray();
+    public static final  Path                             HASH_STORE    = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
     
     
     public static Map<String, String> getKnownFileHashes(String pluginName)
@@ -35,13 +35,12 @@ public final class UtilHandler
         try
         {
             StringBuilder sb    = new StringBuilder();
-            List<String>  lines = Files.readAllLines(Paths.get("hashes", pluginName + ".json"));
+            List<String>  lines = Files.readAllLines(HASH_STORE.resolve(pluginName + ".json"));
             lines.forEach(sb::append);
             
-            Map<String, String> pluginData = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+            Map<String, String> pluginData = Utils.getGson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
             hashNames.put(pluginName, pluginData);
             
-            sortAndWriteHashes(pluginName);
             System.out.println("Loaded known hashes for " + pluginName);
         } catch (IOException e)
         {
@@ -50,23 +49,6 @@ public final class UtilHandler
         }
         
         return hashNames.get(pluginName);
-    }
-    
-    private static void sortAndWriteHashes(String pluginName) throws IOException
-    {
-        List<Pair<String, String>> ml = new ArrayList<>();
-        hashNames.get(pluginName).forEach((k, v) -> ml.add(new Pair<>(k, v)));
-        ml.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-        
-        Path          pho = Paths.get("hashes", pluginName + ".json");
-        StringBuilder sb  = new StringBuilder("{\n");
-        for (Pair<String, String> pair : ml)
-        {
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
-        }
-        sb.reverse().delete(0, 2).reverse().append("\n}");
-        
-        Files.write(pho, sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     public static String pathToFilename(Path path)

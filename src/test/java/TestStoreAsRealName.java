@@ -2,9 +2,10 @@ import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.util.*;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
@@ -163,7 +164,7 @@ public class TestStoreAsRealName
     private void copyFilesToFolders()
     {
         Path                inputFile = Paths.get("filenames.json");
-        Map<String, String> files     = new Gson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
+        Map<String, String> files     = Utils.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
         Path                baseTo    = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty");
         
         try
@@ -212,7 +213,7 @@ public class TestStoreAsRealName
         }
         
         Path                possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "4c0ce4a49dbc214c.json");
-        Map<String, String> data         = new Gson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
+        Map<String, String> data         = Utils.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
         return transmute(data.keySet());
     }
     
@@ -732,7 +733,7 @@ public class TestStoreAsRealName
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                ((Map<String, String>) new Gson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
+                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
                     if (!foundHashes.contains(data))
                     {
@@ -759,18 +760,18 @@ public class TestStoreAsRealName
             Map<String, String> known;
             if (Files.exists(filenames))
             {
-                known = new Gson().fromJson(UtilHandler.readAsString(filenames), new TypeToken<Map<String, String>>() {}.getType());
+                known = Utils.getGson().fromJson(UtilHandler.readAsString(filenames), new TypeToken<Map<String, String>>() {}.getType());
             } else
             {
                 known = new HashMap<>();
             }
-            Map<String, String> thisPass = new Gson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+            Map<String, String> thisPass = Utils.getGson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
             known.putAll(thisPass);
             
             if (Files.exists(filenames))
             {
                 long oldSize = Files.size(filenames);
-                Files.write(filenames, new Gson().toJson(known).getBytes(StandardCharsets.UTF_8));
+                Files.write(filenames, Utils.getGson().toJson(known).getBytes(StandardCharsets.UTF_8));
                 long newSize = Files.size(filenames);
                 
                 if (newSize > oldSize)
@@ -779,7 +780,7 @@ public class TestStoreAsRealName
                 }
             } else
             {
-                Files.write(filenames, new Gson().toJson(known).getBytes(StandardCharsets.UTF_8));
+                Files.write(filenames, Utils.getGson().toJson(known).getBytes(StandardCharsets.UTF_8));
             }
             
         } catch (IOException e)

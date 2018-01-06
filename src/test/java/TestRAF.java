@@ -32,7 +32,7 @@ public class TestRAF
             }
         });
         
-        paths.sort(new NaturalOrderComparator().reversed());
+        paths.sort(new NaturalOrderComparator());
         
         for (Path file : paths)
         {

@@ -86,7 +86,7 @@ public final class FileTypeHandler
         if (magicNumbers.isEmpty())
         {
             System.out.println("Loading magic numbers");
-            
+    
             ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
             ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
             ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
@@ -98,13 +98,13 @@ public final class FileTypeHandler
             ByteArrayWrapper bnkMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
             ByteArrayWrapper anmMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x72, (byte) 0x33, (byte) 0x64, (byte) 0x32});
             ByteArrayWrapper cgcMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});
-            ByteArrayWrapper rmvbMagic = new ByteArrayWrapper(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
+            ByteArrayWrapper binMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
             ByteArrayWrapper lcovMagic = new ByteArrayWrapper(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
             ByteArrayWrapper gifMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
             ByteArrayWrapper zipMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04});
             ByteArrayWrapper ttfMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00});
             ByteArrayWrapper otfMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x4F, (byte) 0x54, (byte) 0x54, (byte) 0x4F});
-            ByteArrayWrapper matMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x33, (byte) 0x22, (byte) 0x11, (byte) 0x00});
+            ByteArrayWrapper sknMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x33, (byte) 0x22, (byte) 0x11, (byte) 0x00});
             ByteArrayWrapper objMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x5B, (byte) 0x4F, (byte) 0x62, (byte) 0x6A});
             ByteArrayWrapper unkMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x74, (byte) 0x22, (byte) 0x00, (byte) 0x00});
             ByteArrayWrapper luaMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x1B, (byte) 0x4C, (byte) 0x75, (byte) 0x61});
@@ -142,9 +142,9 @@ public final class FileTypeHandler
             magicNumbers.put(ddsMagic, "dds");
             magicNumbers.put(anmMagic, "anm");
             magicNumbers.put(cgcMagic, "cgc");
-            magicNumbers.put(rmvbMagic, "rmvb");
+            magicNumbers.put(binMagic, "bin");
             magicNumbers.put(lcovMagic, "info");
-            magicNumbers.put(matMagic, "mat");
+            magicNumbers.put(sknMagic, "skn");
             magicNumbers.put(objMagic, "obj");
             
             // i dont know...?
