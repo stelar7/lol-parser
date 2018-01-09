@@ -12,10 +12,11 @@ public class TestReleasemanifest
     {
         ReleasemanifestParser parser = new ReleasemanifestParser();
         
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads", "releasemanifest");
-        
+        Path file = Paths.get(System.getProperty("user.home"), "Downloads", "releasemanifest (1)");
         System.out.println("Parsing: " + file.toString());
+        
         ReleasemanifestDirectory parsed = parser.parse(file);
+        parsed.printLines("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/0.0.0.1/files", ".compressed");
         System.out.println();
     }
 }

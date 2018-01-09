@@ -17,11 +17,11 @@ public class TestDDS
         {
             DDSParser parser = new DDSParser();
             
-            Path file   = Paths.get(System.getProperty("user.home"), "Downloads", "Season_5_Borders.dds");
+            Path file   = Paths.get(System.getProperty("user.home"), "Downloads", "MordekaiserLoadScreen_5.dds.compressed");
             Path output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
             System.out.println("Parsing: " + file.toString());
             
-            BufferedImage image = parser.parse(file);
+            BufferedImage image = parser.parseCompressed(file);
             ImageIO.write(image, "png", output.toFile());
         } catch (IOException e)
         {
