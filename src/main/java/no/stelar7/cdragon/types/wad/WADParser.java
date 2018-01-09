@@ -121,7 +121,7 @@ public class WADParser
     {
         System.out.println("Downloading " + pluginName);
         String finalUrl = String.format(url, version);
-        UtilHandler.downloadEfficient(save, finalUrl);
+        UtilHandler.downloadFile(save, finalUrl);
     }
     
     

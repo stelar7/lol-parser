@@ -9,7 +9,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class TestWAD
 {
     @Test
-    public void testWAD() throws Exception
+    public void testWAD() 
     {
         WADParser parser = new WADParser();
         

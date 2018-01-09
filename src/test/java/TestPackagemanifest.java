@@ -23,7 +23,7 @@ public class TestPackagemanifest
         {
             String version  = UtilHandler.getIPFromLong(i);
             String download = String.format(url, version);
-            UtilHandler.downloadEfficient(extractPath.resolve(version), download);
+            UtilHandler.downloadFile(extractPath.resolve(version), download);
         }
     }
     
@@ -40,7 +40,7 @@ public class TestPackagemanifest
         for (String version : files)
         {
             String download = String.format(url, version);
-            UtilHandler.downloadEfficient(extractPath.resolve(version), download);
+            UtilHandler.downloadFile(extractPath.resolve(version), download);
         }
     }
     
@@ -95,7 +95,7 @@ public class TestPackagemanifest
                 unknown.add(alias);
             }
             
-            UtilHandler.downloadEfficient(extractPath2.resolve(alias + ".inibin.compressed"), furl);
+            UtilHandler.downloadFile(extractPath2.resolve(alias + ".inibin.compressed"), furl);
         }
         
         System.out.println();

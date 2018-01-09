@@ -6,7 +6,6 @@ import no.stelar7.api.l4j8.basic.utils.Utils;
 
 import java.io.*;
 import java.net.*;
-import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -170,7 +169,7 @@ public final class UtilHandler
     }
     
     
-    public static void downloadEfficient(Path output, String url)
+    public static void downloadFile(Path output, String url)
     {
         try
         {
@@ -179,13 +178,18 @@ public final class UtilHandler
                 System.err.println("This file already exists: " + output.toString());
                 return;
             }
-            
             Files.createDirectories(output.getParent());
-            try (ReadableByteChannel rbc = Channels.newChannel(new URL(url).openStream());
-                 FileOutputStream fos = new FileOutputStream(output.toFile()))
+            
+            int                 read;
+            final byte[]        buffer = new byte[4096];
+            final URLConnection uc     = new URL(url).openConnection();
+            try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
             {
-                Files.createDirectories(output.getParent());
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                while ((read = in.read(buffer)) != -1)
+                {
+                    out.write(buffer, 0, read);
+                }
+                out.flush();
             }
         } catch (IOException e)
         {
