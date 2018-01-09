@@ -1,3 +1,5 @@
+package wad;
+
 import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;

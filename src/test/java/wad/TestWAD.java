@@ -1,3 +1,5 @@
+package wad;
+
 import no.stelar7.cdragon.util.UtilHandler;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
