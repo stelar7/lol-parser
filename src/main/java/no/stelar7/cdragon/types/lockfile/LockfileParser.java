@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.lockfile;
 
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
-import no.stelar7.cdragon.util.RandomAccessReader;
+import no.stelar7.cdragon.util.reader.RandomAccessReader;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;

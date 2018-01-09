@@ -2,6 +2,7 @@ package no.stelar7.cdragon.types.raf.data;
 
 import lombok.*;
 import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.reader.RandomAccessReader;
 
 import java.io.IOException;
 import java.nio.ByteOrder;

@@ -1,6 +1,7 @@
-package no.stelar7.cdragon.util;
+package no.stelar7.cdragon.util.reader;
 
 
+import no.stelar7.cdragon.util.reader.types.*;
 import sun.nio.ch.DirectBuffer;
 
 import java.io.*;
@@ -136,6 +137,7 @@ public class RandomAccessReader implements AutoCloseable
         return buffer.getFloat();
     }
     
+    
     public boolean readBoolean()
     {
         return buffer.get() > 0;
@@ -172,5 +174,33 @@ public class RandomAccessReader implements AutoCloseable
         }
         System.out.println();
         buffer.position(pos);
+    }
+    
+    public Vector3 readVec3F()
+    {
+        Vector3<Float> vector = new Vector3<>();
+        vector.setX(buffer.getFloat());
+        vector.setY(buffer.getFloat());
+        vector.setZ(buffer.getFloat());
+        return vector;
+    }
+    
+    public Vector3 readVec3S()
+    {
+        Vector3<Short> vector = new Vector3<>();
+        vector.setX(buffer.getShort());
+        vector.setY(buffer.getShort());
+        vector.setZ(buffer.getShort());
+        return vector;
+    }
+    
+    public Quaternion<Float> readQuaternion()
+    {
+        Quaternion<Float> vector = new Quaternion();
+        vector.setX(buffer.getFloat());
+        vector.setY(buffer.getFloat());
+        vector.setZ(buffer.getFloat());
+        vector.setW(buffer.getFloat());
+        return vector;
     }
 }

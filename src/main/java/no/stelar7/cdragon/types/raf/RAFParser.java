@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.raf;
 
 import no.stelar7.cdragon.types.raf.data.*;
-import no.stelar7.cdragon.util.RandomAccessReader;
+import no.stelar7.cdragon.util.reader.RandomAccessReader;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;

@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.packagemanifest;
 
 import no.stelar7.cdragon.types.packagemanifest.data.PackagemanifestLine;
-import no.stelar7.cdragon.util.RandomAccessReader;
+import no.stelar7.cdragon.util.reader.RandomAccessReader;
 
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
