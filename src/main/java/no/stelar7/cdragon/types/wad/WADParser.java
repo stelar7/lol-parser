@@ -167,7 +167,14 @@ public class WADParser
                 header.setOffset(raf.readInt());
                 header.setCompressedFileSize(raf.readInt());
                 header.setFileSize(raf.readInt());
-                header.setCompressed(raf.readByte());
+                
+                if (base.getMajor() > 1)
+                {
+                    header.setCompressed(raf.readByte());
+                } else
+                {
+                    header.setCompressed((byte) raf.readInt());
+                }
                 
                 if (base.getMajor() == 2 || base.getMajor() == 3)
                 {
