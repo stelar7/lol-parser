@@ -32,6 +32,6 @@ public class ANMDataVersion4
     private int unknown8;
     
     private List<Vector3<Float>>         positions = new ArrayList<>();
-    private List<Quaternion<Float>>      rotations = new ArrayList<>();
+    private List<Vector4<Float>>         rotations = new ArrayList<>();
     private Map<Integer, List<ANMFrame>> frames    = new HashMap<>();
 }

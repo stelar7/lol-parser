@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.reader.types;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
 public class Vector3<T>

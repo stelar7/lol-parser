@@ -1,9 +1,9 @@
 package no.stelar7.cdragon.util.reader.types;
 
-import lombok.Data;
+import lombok.*;
 
 @Data
-public class Quaternion<T>
+public class Vector4<T>
 {
     private T x;
     private T y;

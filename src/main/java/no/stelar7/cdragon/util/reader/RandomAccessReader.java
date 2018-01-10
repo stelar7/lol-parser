@@ -194,13 +194,39 @@ public class RandomAccessReader implements AutoCloseable
         return vector;
     }
     
-    public Quaternion<Float> readQuaternion()
+    public Vector4<Float> readQuaternion()
     {
-        Quaternion<Float> vector = new Quaternion();
+        Vector4<Float> vector = new Vector4();
         vector.setX(buffer.getFloat());
         vector.setY(buffer.getFloat());
         vector.setZ(buffer.getFloat());
         vector.setW(buffer.getFloat());
+        return vector;
+    }
+    
+    public Vector2<Integer> readVec2I()
+    {
+        Vector2<Integer> vector = new Vector2<>();
+        vector.setX(buffer.getInt());
+        vector.setY(buffer.getInt());
+        return vector;
+    }
+    
+    public Vector2<Float> readVec2F()
+    {
+        Vector2<Float> vector = new Vector2<>();
+        vector.setX(buffer.getFloat());
+        vector.setY(buffer.getFloat());
+        return vector;
+    }
+    
+    public Vector4<Byte> readVec4B()
+    {
+        Vector4<Byte> vector = new Vector4();
+        vector.setX(buffer.get());
+        vector.setY(buffer.get());
+        vector.setZ(buffer.get());
+        vector.setW(buffer.get());
         return vector;
     }
 }
