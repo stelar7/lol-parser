@@ -17,59 +17,66 @@ public final class FileTypeHandler
     
     public static String findFileType(byte[] data, Path file)
     {
-        ByteArrayWrapper magic  = new ByteArrayWrapper(Arrays.copyOf(data, 4));
-        String           result = FileTypeHandler.getMagicNumbers().get(magic);
+        ByteArrayWrapper magic4 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
+        ByteArrayWrapper magic8 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
+        String           result = FileTypeHandler.getMagicNumbers().get(magic4);
         
         if (result != null)
         {
             return result;
         }
         
-        if (FileTypeHandler.isProbableBOM(magic.getData()))
+        if (FileTypeHandler.isProbableBOM(magic4))
         {
             return findFileType(Arrays.copyOfRange(data, 3, 7), file);
         }
         
-        if (FileTypeHandler.isProbableJSON(magic.getData()))
+        if (FileTypeHandler.isProbableJSON(magic4))
         {
             return "json";
         }
         
-        if (FileTypeHandler.isProbableJavascript(magic.getData()))
+        if (FileTypeHandler.isProbableJavascript(magic4))
         {
             return "js";
         }
         
-        if (FileTypeHandler.isProbableHTML(magic.getData()))
+        if (FileTypeHandler.isProbableHTML(magic4))
         {
             return "html";
         }
         
-        if (FileTypeHandler.isProbableCSS(magic.getData()))
+        if (FileTypeHandler.isProbableCSS(magic4))
         {
             return "css";
         }
         
-        if (FileTypeHandler.isProbableTXT(magic.getData()))
+        if (FileTypeHandler.isProbableTXT(magic4))
         {
             return "txt";
         }
         
-        if (FileTypeHandler.isProbableIDX(magic.getData()))
+        if (FileTypeHandler.isProbableSKL(magic8))
+        {
+            return "skl";
+        }
+        
+        if (FileTypeHandler.isProbableIDX(magic4))
         {
             return "idx";
         }
         
-        if (FileTypeHandler.isProbable3DModelStuff(magic.getData()))
+        if (FileTypeHandler.isProbable3DModelStuff(magic4))
         {
             return "skn";
         }
         
         System.out.print("Unknown filetype: ");
         System.out.print(file.toString());
-        System.out.println(magic.toString());
+        System.out.println(magic4.toString());
         return "txt";
     }
+    
     
     public static byte[] makePrettyJson(byte[] jsonString)
     {
@@ -86,7 +93,7 @@ public final class FileTypeHandler
         if (magicNumbers.isEmpty())
         {
             System.out.println("Loading magic numbers");
-    
+            
             ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
             ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
             ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
@@ -180,8 +187,9 @@ public final class FileTypeHandler
         return isSame(data[0], (byte) 0x28) && isSame(data[1], (byte) 0xB5) && isSame(data[2], (byte) 0x2F) && isSame(data[3], (byte) 0xFD);
     }
     
-    public static boolean isProbableBOM(byte[] data)
+    public static boolean isProbableBOM(ByteArrayWrapper wrapper)
     {
+        byte[]  data       = wrapper.getData();
         boolean isUTF8BOM  = isSame(data[0], (byte) 0xEF) && isSame(data[1], (byte) 0xBB) && isSame(data[2], (byte) 0xBF);
         boolean isUTF16BOM = isSame(data[0], (byte) 0xFE) && isSame(data[1], (byte) 0xFF);
         boolean isUTF32BOM = isSame(data[0], (byte) 0x00) && isSame(data[1], (byte) 0x00) && isSame(data[2], (byte) 0xFE) && isSame(data[3], (byte) 0xFF);
@@ -193,8 +201,9 @@ public final class FileTypeHandler
     
     //<editor-fold desc="Shitty byte-comparisons, need to fix..">
     
-    public static boolean isProbableJSON(byte[] data)
+    public static boolean isProbableJSON(ByteArrayWrapper wrapper)
     {
+        byte[]  data   = wrapper.getData();
         boolean isJSON = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
         
         isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
@@ -210,8 +219,9 @@ public final class FileTypeHandler
         return isJSON;
     }
     
-    public static boolean isProbableCSS(byte[] data)
+    public static boolean isProbableCSS(ByteArrayWrapper wrapper)
     {
+        byte[]  data  = wrapper.getData();
         boolean isCSS = isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x62) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6F);
         
         isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x70) && isSame(data[2], (byte) 0x6C) && isSame(data[3], (byte) 0x6E);
@@ -232,8 +242,9 @@ public final class FileTypeHandler
         return isCSS;
     }
     
-    public static boolean isProbableJavascript(byte[] data)
+    public static boolean isProbableJavascript(ByteArrayWrapper wrapper)
     {
+        byte[]  data = wrapper.getData();
         boolean isJS = isSame(data[0], (byte) 0x21) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x75) && isSame(data[3], (byte) 0x6E);
         
         isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x65) && isSame(data[2], (byte) 0x62) && isSame(data[3], (byte) 0x70);
@@ -245,8 +256,9 @@ public final class FileTypeHandler
         return isJS;
     }
     
-    public static boolean isProbableHTML(byte[] data)
+    public static boolean isProbableHTML(ByteArrayWrapper wrapper)
     {
+        byte[]  data   = wrapper.getData();
         boolean isHTML = isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x72);
         
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x21) && isSame(data[2], (byte) 0x64) && isSame(data[3], (byte) 0x6F);
@@ -267,8 +279,9 @@ public final class FileTypeHandler
     
     private static List<ByteArrayWrapper> possibleTextTargets = loadTextTargets();
     
-    public static boolean isProbableTXT(byte[] data)
+    public static boolean isProbableTXT(ByteArrayWrapper wrapper)
     {
+        byte[]           data        = wrapper.getData();
         ByteArrayWrapper checkTarget = new ByteArrayWrapper(Arrays.copyOf(data, 3));
         boolean          isTXT       = new String(data, StandardCharsets.UTF_8).isEmpty();
         
@@ -336,14 +349,21 @@ public final class FileTypeHandler
         return list;
     }
     
-    public static boolean isProbableIDX(byte[] data)
+    public static boolean isProbableIDX(ByteArrayWrapper wrapper)
     {
+        byte[] data = wrapper.getData();
         return !isSame(data[0], (byte) 0x00) && isSame(data[1], (byte) 0x00) && isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
-    public static boolean isProbable3DModelStuff(byte[] data)
+    public static boolean isProbable3DModelStuff(ByteArrayWrapper wrapper)
     {
+        byte[] data = wrapper.getData();
         return isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
+    }
+    
+    private static boolean isProbableSKL(ByteArrayWrapper wrapper)
+    {
+        return wrapper.equals(new ByteArrayWrapper(new byte[]{(byte) 0x34, (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0xC3, (byte) 0x4F, (byte) 0xFD, (byte) 0x22}));
     }
     
     //</editor-fold>

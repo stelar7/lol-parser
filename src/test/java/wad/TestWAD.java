@@ -57,7 +57,7 @@ public class TestWAD
         WADParser parser = new WADParser();
         
         Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
-        Path rito        = Paths.get("C:\\Riot Games");
+        Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
         Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
         {
