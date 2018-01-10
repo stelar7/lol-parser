@@ -1,4 +1,4 @@
-package wad;
+package util;
 
 import com.google.common.collect.Sets;
 import com.google.gson.*;
@@ -867,7 +867,7 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash = UtilHandler.getHash(hashMe.trim());
+        String hash = UtilHandler.getXXHash64(hashMe.trim());
         
         if (hashes.contains(hash))
         {
@@ -932,7 +932,7 @@ public class TestHashes
     @Test
     public void testAllLangKnownPaths() throws IOException
     {
-        Files.walkFileTree(UtilHandler.HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -975,7 +975,7 @@ public class TestHashes
                         for (String end : foundHashes)
                         {
                             String hashMe = pre + end;
-                            String hash   = UtilHandler.getHash(hashMe.trim());
+                            String hash   = UtilHandler.getXXHash64(hashMe.trim());
                             
                             Pair<String, String> data = new Pair<>(hash, hashMe);
                             if (!knownHashes.contains(data))
@@ -1005,7 +1005,7 @@ public class TestHashes
     @Test
     public void testSortAllHashes() throws IOException
     {
-        Files.walkFileTree(UtilHandler.HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1049,7 +1049,7 @@ public class TestHashes
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(UtilHandler.HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
@@ -1070,7 +1070,7 @@ public class TestHashes
         ((List<String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
         {
         }.getType())).forEach((v) -> {
-            Pair<String, String> data = new Pair<>(UtilHandler.getHash(v), v);
+            Pair<String, String> data = new Pair<>(UtilHandler.getXXHash64(v), v);
             if (!foundHashes.contains(data))
             {
                 foundHashes.add(data);
@@ -1136,7 +1136,7 @@ public class TestHashes
             }
         };
         
-        Files.walkFileTree(UtilHandler.HASH_STORE, findHashes);
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, findHashes);
         Files.walkFileTree(pupix, findHashes);
         
         foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
@@ -1232,7 +1232,7 @@ public class TestHashes
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(UtilHandler.HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

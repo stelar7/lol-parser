@@ -1,4 +1,4 @@
-package wad;
+package util;
 
 import com.google.common.collect.Sets;
 import com.google.gson.*;

@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class BINValue
 {
-    private int    hash;
+    private String hash;
     private byte   type;
     private Object value;
 }

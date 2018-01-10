@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.types.bin.data.*;
+import no.stelar7.cdragon.util.UtilHandler;
 import no.stelar7.cdragon.util.reader.RandomAccessReader;
 import no.stelar7.cdragon.util.reader.types.Vector2;
 
@@ -31,7 +32,7 @@ public class BINParser
             
             int lengthCheck = raf.pos() + Integer.BYTES;
             entry.setLenght(raf.readInt());
-            entry.setHash(raf.readInt());
+            entry.setHash(UtilHandler.getBINHash(raf.readInt()));
             entry.setValueCount(raf.readShort());
             
             for (int j = 0; j < entry.getValueCount(); j++)
@@ -53,7 +54,7 @@ public class BINParser
     {
         BINValue value = new BINValue();
         
-        value.setHash(raf.readInt());
+        value.setHash(UtilHandler.getBINHash(raf.readInt()));
         value.setType(raf.readByte());
         value.setValue(readByType(value.getType(), raf));
         

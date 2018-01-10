@@ -1,4 +1,4 @@
-package wad;
+package util;
 
 import no.stelar7.cdragon.util.UtilHandler;
 
@@ -96,7 +96,7 @@ public class LiveXXHashTest
             @Override
             public void keyReleased(KeyEvent e)
             {
-                output.setText(UtilHandler.getHash(input.getText()));
+                output.setText(UtilHandler.getXXHash64(input.getText()));
                 output.setDisabledTextColor(uk.contains(output.getText()) ? Color.GREEN : Color.RED);
             }
         });

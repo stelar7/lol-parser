@@ -7,9 +7,9 @@ import java.util.*;
 @Data
 public class BINEntry
 {
-    private int            lenght;
-    private int            hash;
-    private short          valueCount;
+    private int    lenght;
+    private String hash;
+    private short  valueCount;
     private List<BINValue> values = new ArrayList<>();
     
 }

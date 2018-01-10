@@ -18,36 +18,64 @@ public final class UtilHandler
         // Hide public constructor
     }
     
-    private static       Map<String, Map<String, String>> hashNames     = new HashMap<>();
-    private static       XXHashFactory                    xxHashFactory = XXHashFactory.fastestInstance();
-    private static final char[]                           hexArray      = "0123456789ABCDEF".toCharArray();
-    public static final  Path                             HASH_STORE    = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
+    private static Map<Long, String> binHashNames;
     
+    private static       Map<String, Map<String, String>> wadHashNames   = new HashMap<>();
+    private static       XXHashFactory                    xxHashFactory  = XXHashFactory.fastestInstance();
+    private static final char[]                           hexArray       = "0123456789ABCDEF".toCharArray();
+    public static final  Path                             WAD_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
+    public static final  Path                             BIN_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\bin\\data\\binhash.json");
     
-    public static Map<String, String> getKnownFileHashes(String pluginName)
+    public static String getBINHash(int hash)
     {
-        if (hashNames.get(pluginName) != null)
+        Long val = Integer.toUnsignedLong(hash);
+        
+        if (binHashNames != null)
         {
-            return hashNames.get(pluginName);
+            if(binHashNames.containsKey(val)) {
+                System.out.println();
+            }
+            return binHashNames.getOrDefault(val, String.valueOf(val));
         }
         
         try
         {
-            StringBuilder sb    = new StringBuilder();
-            List<String>  lines = Files.readAllLines(HASH_STORE.resolve(pluginName + ".json"));
-            lines.forEach(sb::append);
+            binHashNames = new HashMap<>();
+            String            sb         = new String(Files.readAllBytes(WAD_HASH_STORE), StandardCharsets.UTF_8);
+            Map<Long, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            binHashNames.putAll(pluginData);
             
-            Map<String, String> pluginData = Utils.getGson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
-            hashNames.put(pluginName, pluginData);
+            System.out.println("Loaded known bin hashes");
+        } catch (IOException e)
+        {
+            wadHashNames = Collections.emptyMap();
+            System.err.println("File not found: " + e.getMessage());
+        }
+        
+        return getBINHash(hash);
+    }
+    
+    public static Map<String, String> getKnownWADFileHashes(String pluginName)
+    {
+        if (wadHashNames.get(pluginName) != null)
+        {
+            return wadHashNames.get(pluginName);
+        }
+        
+        try
+        {
+            String              sb         = new String(Files.readAllBytes(WAD_HASH_STORE), StandardCharsets.UTF_8);
+            Map<String, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+            wadHashNames.put(pluginName, pluginData);
             
             System.out.println("Loaded known hashes for " + pluginName);
         } catch (IOException e)
         {
-            hashNames.put(pluginName, Collections.emptyMap());
+            wadHashNames.put(pluginName, Collections.emptyMap());
             System.err.println("File not found: " + e.getMessage());
         }
         
-        return hashNames.get(pluginName);
+        return getKnownWADFileHashes(pluginName);
     }
     
     public static String pathToFilename(Path path)
@@ -107,7 +135,7 @@ public final class UtilHandler
     }
     
     
-    public static String getHash(String text)
+    public static String getXXHash64(String text)
     {
         try
         {
