@@ -23,7 +23,7 @@ public class TestHashes
     private final String       prePre = "plugins/rcp-be-lol-game-data/";
     
     private final List<String> preRegion = Arrays.asList(
-            "global",
+            "global"/*,
             "br",
             "cn",
             "eune",
@@ -54,11 +54,11 @@ public class TestHashes
             "tr",
             "th",
             "tw",
-            "vn"
+            "vn"*/
                                                         );
     
     private final List<String> preLang = Arrays.asList(
-            "default",
+            "default"/*,
             "cs_cz",
             "de_de",
             "el_gr",
@@ -86,7 +86,7 @@ public class TestHashes
             "vn_vn",
             "zh_cn",
             "zh_my",
-            "zh_tw"
+            "zh_tw"*/
                                                       );
     
     

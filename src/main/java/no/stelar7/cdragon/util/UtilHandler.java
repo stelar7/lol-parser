@@ -32,9 +32,6 @@ public final class UtilHandler
         
         if (binHashNames != null)
         {
-            if(binHashNames.containsKey(val)) {
-                System.out.println();
-            }
             return binHashNames.getOrDefault(val, String.valueOf(val));
         }
         
@@ -64,7 +61,7 @@ public final class UtilHandler
         
         try
         {
-            String              sb         = new String(Files.readAllBytes(WAD_HASH_STORE), StandardCharsets.UTF_8);
+            String              sb         = new String(Files.readAllBytes(WAD_HASH_STORE.resolve(pluginName + ".json")), StandardCharsets.UTF_8);
             Map<String, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
             wadHashNames.put(pluginName, pluginData);
             
