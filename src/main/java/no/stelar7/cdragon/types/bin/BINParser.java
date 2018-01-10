@@ -29,6 +29,7 @@ public class BINParser
         {
             BINEntry entry = new BINEntry();
             
+            int lengthCheck = raf.pos() + Integer.BYTES;
             entry.setLenght(raf.readInt());
             entry.setHash(raf.readInt());
             entry.setValueCount(raf.readShort());
@@ -40,6 +41,11 @@ public class BINParser
             }
             
             file.getEntries().add(entry);
+            
+            if (lengthCheck + entry.getLenght() != raf.pos())
+            {
+                System.out.format("Wrong detail size from %s to %s, value %s, expected %s%n", lengthCheck, raf.pos(), raf.pos() - lengthCheck, entry.getLenght());
+            }
         }
     }
     
@@ -154,6 +160,11 @@ public class BINParser
         header.setMagic(raf.readString(4));
         header.setVersion(raf.readInt());
         header.setEntryCount(raf.readInt());
+        
+        for (int i = 0; i < header.getEntryCount(); i++)
+        {
+            header.getEntryTypes().add(raf.readInt());
+        }
         
         return header;
     }
