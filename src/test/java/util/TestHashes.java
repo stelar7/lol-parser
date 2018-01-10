@@ -8,6 +8,7 @@ import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.util.reader.types.UInt32;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -1280,5 +1281,29 @@ public class TestHashes
                 e.printStackTrace();
             }
         });
+    }
+    
+    @Test
+    public void testBINHash()
+    {
+        List<String> values = Arrays.asList("Characters/Blitzcrank/Skins/Skin0", "Characters/Blitzcrank/Skins/Skin1", "UseEffect");
+        UInt32       hash   = new UInt32(Integer.parseUnsignedInt("2166136261"));
+        UInt32       mask   = new UInt32(16777619);
+        
+        for (String value : values)
+        {
+            for (int i = 0; i < value.length(); i++)
+            {
+                UInt32 temp = new UInt32(value.charAt(i));
+                
+                UInt32 store = hash.xor(temp);
+                hash = store.multiply(mask);
+            }
+            
+            long transformed = hash.toInt();
+            
+            String data = String.format("\"%s\":\"%s\",", transformed, value);
+            System.out.println(data);
+        }
     }
 }

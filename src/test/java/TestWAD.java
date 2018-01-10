@@ -11,7 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 public class TestWAD
 {
     @Test
-    public void testWAD() 
+    public void testWAD()
     {
         WADParser parser = new WADParser();
         
