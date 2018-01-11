@@ -7,7 +7,6 @@ import no.stelar7.cdragon.util.reader.types.Vector2;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
-import java.util.*;
 
 public class BINParser
 {
@@ -63,94 +62,108 @@ public class BINParser
     
     private Object readByType(byte type, RandomAccessReader raf)
     {
-        if (type == 0)
+        switch (type)
         {
-            return raf.readVec3S();
-        } else if (type == 1)
-        {
-            return raf.readBoolean();
-        } else if (type == 3)
-        {
-            return raf.readByte();
-        } else if (type == 5)
-        {
-            return raf.readShort();
-        } else if (type == 6 || type == 7 || type == 17)
-        {
-            return raf.readInt();
-        } else if (type == 9)
-        {
-            return raf.readVec2I();
-        } else if (type == 10)
-        {
-            return raf.readFloat();
-        } else if (type == 11)
-        {
-            return raf.readVec2F();
-        } else if (type == 12)
-        {
-            return raf.readVec3F();
-        } else if (type == 13)
-        {
-            return raf.readQuaternion();
-        } else if (type == 15 || type == 21)
-        {
-            return raf.readVec4B();
-        } else if (type == 16)
-        {
-            return raf.readString(raf.readShort());
-        } else if (type == 18)
-        {
-            List<Object> datai = new ArrayList<>();
-            byte         typei = raf.readByte();
-            // int sizei
-            raf.readInt();
-            int counti = raf.readInt();
-            for (int i = 0; i < counti; i++)
+            case 0:
+                return raf.readVec3S();
+            case 1:
+                return raf.readBoolean();
+            case 2:
+                return raf.readByte();
+            case 3:
+                return raf.readByte();
+            case 4:
+                return raf.readShort();
+            case 5:
+                return raf.readShort();
+            case 6:
+                return raf.readInt();
+            case 7:
+                return raf.readInt();
+            case 8:
+                return raf.readLong();
+            case 9:
+                return raf.readLong();
+            case 10:
+                return raf.readFloat();
+            case 11:
+                return raf.readVec2F();
+            case 12:
+                return raf.readVec3F();
+            case 13:
+                return raf.readVec4F();
+            case 14:
+                return raf.readMatrix4x4();
+            case 15:
+                return raf.readVec4B();
+            case 16:
+                return raf.readString(raf.readShort());
+            case 17:
+                return raf.readInt();
+            case 18:
             {
-                datai.add(readByType(typei, raf));
+                BINContainer bc = new BINContainer();
+                
+                bc.setType(raf.readByte());
+                bc.setSize(raf.readInt());
+                bc.setCount(raf.readInt());
+                for (int i = 0; i < bc.getCount(); i++)
+                {
+                    bc.getData().add(readByType(bc.getType(), raf));
+                }
+                
+                return bc;
             }
-            return datai;
-        } else if (type == 19 || type == 20)
-        {
-            List<Object> datai = new ArrayList<>();
-            // int hashi
-            // int entryi
-            raf.readInt();
-            raf.readInt();
-            short counti = raf.readShort();
-            for (int i = 0; i < counti; i++)
+            case 19:
+            case 20:
             {
-                datai.add(readValue(raf));
+                BINStruct bs = new BINStruct();
+                
+                bs.setHash(raf.readInt());
+                bs.setEntry(raf.readInt());
+                bs.setCount(raf.readShort());
+                for (int i = 0; i < bs.getCount(); i++)
+                {
+                    bs.getData().add(readValue(raf));
+                }
+                
+                return bs;
             }
-            return datai;
-        } else if (type == 22)
-        {
-            List<Object> datai  = new ArrayList<>();
-            byte         typei  = raf.readByte();
-            byte         counti = raf.readByte();
-            for (int i = 0; i < counti; i++)
+            case 21:
+                return raf.readInt();
+            case 22:
             {
-                datai.add(readByType(typei, raf));
+                BINData bd = new BINData();
+                
+                bd.setType(raf.readByte());
+                bd.setCount(raf.readByte());
+                for (int i = 0; i < bd.getCount(); i++)
+                {
+                    bd.getData().add(readByType(bd.getType(), raf));
+                }
+                
+                return bd;
             }
-            return datai;
-        } else if (type == 23)
-        {
-            List<Object> datai  = new ArrayList<>();
-            byte         typei  = raf.readByte();
-            byte         typei2 = raf.readByte();
-            // int sizei
-            raf.readInt();
-            int counti = raf.readInt();
-            for (int i = 0; i < counti; i++)
+            case 23:
             {
-                datai.add(new Vector2<>(readByType(typei, raf), readByType(typei2, raf)));
+                BINMap bm = new BINMap();
+                bm.setType1(raf.readByte());
+                bm.setType2(raf.readByte());
+                bm.setSize(raf.readInt());
+                bm.setCount(raf.readInt());
+                for (int i = 0; i < bm.getCount(); i++)
+                {
+                    bm.getData().add(new Vector2<>(readByType(bm.getType1(), raf), readByType(bm.getType2(), raf)));
+                }
+                return bm;
             }
-            return datai;
-        } else
-        {
-            System.out.println("Unknown type: " + type);
-            return null;
+            case 24:
+            {
+                return raf.readByte();
+            }
+            default:
+                System.out.println("Unknown type: " + type);
+                return null;
         }
     }
     

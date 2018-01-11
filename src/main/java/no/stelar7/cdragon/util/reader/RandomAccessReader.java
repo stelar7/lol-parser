@@ -229,4 +229,41 @@ public class RandomAccessReader implements AutoCloseable
         vector.setW(buffer.get());
         return vector;
     }
+    
+    public Vector4<Float> readVec4F()
+    {
+        Vector4<Float> vector = new Vector4<>();
+        vector.setX(buffer.getFloat());
+        vector.setY(buffer.getFloat());
+        vector.setZ(buffer.getFloat());
+        vector.setW(buffer.getFloat());
+        return vector;
+    }
+    
+    public Matrix4x4<Float> readMatrix4x4()
+    {
+        Matrix4x4<Float> vector = new Matrix4x4<>();
+        
+        vector.setM00(buffer.getFloat());
+        vector.setM01(buffer.getFloat());
+        vector.setM02(buffer.getFloat());
+        vector.setM03(buffer.getFloat());
+        
+        vector.setM10(buffer.getFloat());
+        vector.setM11(buffer.getFloat());
+        vector.setM12(buffer.getFloat());
+        vector.setM13(buffer.getFloat());
+        
+        vector.setM20(buffer.getFloat());
+        vector.setM21(buffer.getFloat());
+        vector.setM22(buffer.getFloat());
+        vector.setM23(buffer.getFloat());
+        
+        vector.setM30(buffer.getFloat());
+        vector.setM31(buffer.getFloat());
+        vector.setM32(buffer.getFloat());
+        vector.setM33(buffer.getFloat());
+        
+        return vector;
+    }
 }
