@@ -5,10 +5,9 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
 import no.stelar7.api.l4j8.basic.utils.Utils;
-import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
-import no.stelar7.cdragon.util.reader.types.UInt32;
+import no.stelar7.cdragon.util.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,6 +16,7 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
+@SuppressWarnings("unchecked")
 public class TestHashes
 {
     
@@ -1284,26 +1284,41 @@ public class TestHashes
     }
     
     @Test
-    public void testBINHash()
+    public void testBINHash() throws IOException
     {
-        List<String> values = Arrays.asList("Characters/Blitzcrank/Skins/Skin0", "Characters/Blitzcrank/Skins/Skin1", "UseEffect");
-        UInt32       hash   = new UInt32(Integer.parseUnsignedInt("2166136261"));
-        UInt32       mask   = new UInt32(16777619);
+        Path                     hashMe       = Paths.get(System.getProperty("user.home"), "Downloads", "fnvhashes2.txt");
+        Path                     newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "binHashes.json");
+        List<String>             values       = Files.readAllLines(hashMe);
+        List<Pair<Long, String>> hashs        = new ArrayList<>();
         
-        for (String value : values)
+        // 2166136261L as sint32
+        int hash = -2128831035;
+        int mask = 16777619;
+        
+        for (String val : values)
         {
+            String value = val.toLowerCase(Locale.ENGLISH);
             for (int i = 0; i < value.length(); i++)
             {
-                UInt32 temp = new UInt32(value.charAt(i));
-                
-                UInt32 store = hash.xor(temp);
-                hash = store.multiply(mask);
+                int temp = value.charAt(i);
+                hash = hash ^ temp;
+                hash = hash * mask;
             }
             
-            long transformed = hash.toInt();
+            long transformed = Integer.toUnsignedLong(hash);
             
-            String data = String.format("\"%s\":\"%s\",", transformed, value);
-            System.out.println(data);
+            hashs.add(new Pair<>(transformed, val));
         }
+        
+        hashs.sort(Comparator.comparing(Pair::getKey, new NaturalOrderComparator()));
+        StringBuilder sb = new StringBuilder("{\n");
+        for (Pair<Long, String> pair : hashs)
+        {
+            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+        }
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        
+        Files.createDirectories(newHashStore.getParent());
+        Files.write(newHashStore, sb.toString().getBytes(StandardCharsets.UTF_8));
     }
 }

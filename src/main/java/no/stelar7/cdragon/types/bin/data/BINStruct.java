@@ -7,8 +7,8 @@ import java.util.*;
 @Data
 public class BINStruct
 {
-    private int   hash;
-    private int   entry;
-    private short count;
+    private String hash;
+    private int    entry;
+    private short  count;
     private List<Object> data = new ArrayList<>();
 }

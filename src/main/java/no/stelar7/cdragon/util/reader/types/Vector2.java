@@ -17,4 +17,9 @@ public class Vector2<T>
         this.x = o;
         this.y = o1;
     }
+    
+    public String toString()
+    {
+        return String.format("{\"x\":%s,\"y\":%s}", x, y);
+    }
 }

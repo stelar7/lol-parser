@@ -61,6 +61,11 @@ public final class FileTypeHandler
             return "skl";
         }
         
+        if (FileTypeHandler.isProbableSCB(magic8))
+        {
+            return "scb";
+        }
+        
         if (FileTypeHandler.isProbableIDX(magic4))
         {
             return "idx";
@@ -103,7 +108,6 @@ public final class FileTypeHandler
             ByteArrayWrapper jpg3Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
             ByteArrayWrapper jpg4Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
             ByteArrayWrapper bnkMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
-            ByteArrayWrapper anmMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x72, (byte) 0x33, (byte) 0x64, (byte) 0x32});
             ByteArrayWrapper cgcMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});
             ByteArrayWrapper binMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
             ByteArrayWrapper lcovMagic = new ByteArrayWrapper(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
@@ -147,7 +151,6 @@ public final class FileTypeHandler
             // 3D model
             magicNumbers.put(bnkMagic, "bnk");
             magicNumbers.put(ddsMagic, "dds");
-            magicNumbers.put(anmMagic, "anm");
             magicNumbers.put(cgcMagic, "cgc");
             magicNumbers.put(binMagic, "bin");
             magicNumbers.put(lcovMagic, "info");
@@ -361,11 +364,26 @@ public final class FileTypeHandler
         return isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
+    public static boolean isProbableSCB(ByteArrayWrapper wrapper)
+    {
+        // r3d2Mesh
+        ByteArrayWrapper scb = new ByteArrayWrapper(new byte[]{(byte) 0x72, (byte) 0x33, (byte) 0x64, (byte) 0x32, (byte) 0x4D, (byte) 0x65, (byte) 0x73, (byte) 0x68});
+        
+        return scb.equals(wrapper);
+    }
+    
     private static boolean isProbableSKL(ByteArrayWrapper wrapper)
     {
+        // TODO: r3d2sklt
         return wrapper.equals(new ByteArrayWrapper(new byte[]{(byte) 0x34, (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0xC3, (byte) 0x4F, (byte) 0xFD, (byte) 0x22}));
     }
     
+    // TODO: r3d2anmd = anm
+    // TODO: r3d2canm = anm
+    // TODO: bkhd = bnk
+    // TODO: [Obj = sco
+    // TODO: LuaQ = luaobj
+    // TODO: PreLoad = preload
     //</editor-fold>
     
     

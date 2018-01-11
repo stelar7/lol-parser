@@ -19,16 +19,23 @@ public final class UtilHandler
     }
     
     private static Map<Long, String> binHashNames;
+    private static Map<Long, String> iniHashNames;
     
     private static       Map<String, Map<String, String>> wadHashNames   = new HashMap<>();
     private static       XXHashFactory                    xxHashFactory  = XXHashFactory.fastestInstance();
     private static final char[]                           hexArray       = "0123456789ABCDEF".toCharArray();
     public static final  Path                             WAD_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
     public static final  Path                             BIN_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\bin\\data\\binhash.json");
+    public static final  Path                             INI_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\inibin\\data\\inihash.json");
     
     public static String getBINHash(int hash)
     {
-        Long val = Integer.toUnsignedLong(hash);
+        long val = Integer.toUnsignedLong(hash);
+        
+        if (val == 2563339134L)
+        {
+            System.out.println();
+        }
         
         if (binHashNames != null)
         {
@@ -38,19 +45,46 @@ public final class UtilHandler
         try
         {
             binHashNames = new HashMap<>();
-            String            sb         = new String(Files.readAllBytes(WAD_HASH_STORE), StandardCharsets.UTF_8);
+            String            sb         = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
             Map<Long, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             binHashNames.putAll(pluginData);
             
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
         {
-            wadHashNames = Collections.emptyMap();
+            binHashNames = Collections.emptyMap();
             System.err.println("File not found: " + e.getMessage());
         }
         
         return getBINHash(hash);
     }
+    
+    public static String getINIHash(int hash)
+    {
+        Long val = Integer.toUnsignedLong(hash);
+        
+        if (iniHashNames != null)
+        {
+            return iniHashNames.getOrDefault(val, String.valueOf(val));
+        }
+        
+        try
+        {
+            iniHashNames = new HashMap<>();
+            String            sb         = new String(Files.readAllBytes(INI_HASH_STORE), StandardCharsets.UTF_8);
+            Map<Long, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            iniHashNames.putAll(pluginData);
+            
+            System.out.println("Loaded known bin hashes");
+        } catch (IOException e)
+        {
+            iniHashNames = Collections.emptyMap();
+            System.err.println("File not found: " + e.getMessage());
+        }
+        
+        return getINIHash(hash);
+    }
+    
     
     public static Map<String, String> getKnownWADFileHashes(String pluginName)
     {

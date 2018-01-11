@@ -119,7 +119,7 @@ public class BINParser
             {
                 BINStruct bs = new BINStruct();
                 
-                bs.setHash(raf.readInt());
+                bs.setHash(UtilHandler.getBINHash(raf.readInt()));
                 bs.setEntry(raf.readInt());
                 bs.setCount(raf.readShort());
                 for (int i = 0; i < bs.getCount(); i++)

@@ -9,5 +9,10 @@ public class Vector4<T>
     private T y;
     private T z;
     private T w;
+    
+    public String toString()
+    {
+        return String.format("{\"x\":%s,\"y\":%s,\"z\":%s,\"w\":%s}", x, y, z, w);
+    }
 }
 

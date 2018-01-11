@@ -16,7 +16,7 @@ public final class InibinHash
     
     public static String getHash(String hash)
     {
-        return UtilHandler.getBINHash(Integer.parseUnsignedInt(hash));
+        return UtilHandler.getINIHash(Integer.parseUnsignedInt(hash));
     }
     
     public static String getTransformed(String key, Object hash)
