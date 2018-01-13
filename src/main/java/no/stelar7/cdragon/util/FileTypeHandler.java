@@ -51,11 +51,6 @@ public final class FileTypeHandler
             return "css";
         }
         
-        if (FileTypeHandler.isProbableTXT(magic4))
-        {
-            return "txt";
-        }
-        
         if (FileTypeHandler.isProbableSKL(magic8))
         {
             return "skl";
@@ -66,6 +61,29 @@ public final class FileTypeHandler
             return "scb";
         }
         
+        if (FileTypeHandler.isProbableANM(magic8))
+        {
+            return "anm";
+        }
+        
+        if (FileTypeHandler.isProbableBNK(magic4))
+        {
+            return "bnk";
+        }
+    
+        if (FileTypeHandler.isProbableSCO(magic4))
+        {
+            return "sco";
+        }
+        if (FileTypeHandler.isProbableLUAOBJ(magic8))
+        {
+            return "luaobj";
+        }
+        if (FileTypeHandler.isProbablePRELOAD(magic4))
+        {
+            return "preload";
+        }
+        
         if (FileTypeHandler.isProbableIDX(magic4))
         {
             return "idx";
@@ -74,6 +92,11 @@ public final class FileTypeHandler
         if (FileTypeHandler.isProbable3DModelStuff(magic4))
         {
             return "skn";
+        }
+        
+        if (FileTypeHandler.isProbableTXT(magic4))
+        {
+            return "txt";
         }
         
         System.out.print("Unknown filetype: ");
@@ -364,26 +387,43 @@ public final class FileTypeHandler
         return isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
-    public static boolean isProbableSCB(ByteArrayWrapper wrapper)
+    private static boolean isProbableSCB(ByteArrayWrapper wrapper)
     {
-        // r3d2Mesh
-        ByteArrayWrapper scb = new ByteArrayWrapper(new byte[]{(byte) 0x72, (byte) 0x33, (byte) 0x64, (byte) 0x32, (byte) 0x4D, (byte) 0x65, (byte) 0x73, (byte) 0x68});
-        
-        return scb.equals(wrapper);
+        return wrapper.equals(new ByteArrayWrapper("r3d2Mesh".getBytes(StandardCharsets.UTF_8)));
     }
     
     private static boolean isProbableSKL(ByteArrayWrapper wrapper)
     {
-        // TODO: r3d2sklt
-        return wrapper.equals(new ByteArrayWrapper(new byte[]{(byte) 0x34, (byte) 0x01, (byte) 0x00, (byte) 0x00, (byte) 0xC3, (byte) 0x4F, (byte) 0xFD, (byte) 0x22}));
+        return wrapper.equals(new ByteArrayWrapper("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
     }
     
-    // TODO: r3d2anmd = anm
-    // TODO: r3d2canm = anm
-    // TODO: bkhd = bnk
-    // TODO: [Obj = sco
-    // TODO: LuaQ = luaobj
-    // TODO: PreLoad = preload
+    private static boolean isProbableANM(ByteArrayWrapper wrapper)
+    {
+        boolean isEqual = wrapper.equals(new ByteArrayWrapper("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
+        isEqual |= wrapper.equals(new ByteArrayWrapper("r3d2canm".getBytes(StandardCharsets.UTF_8)));
+        return isEqual;
+    }
+    
+    private static boolean isProbableBNK(ByteArrayWrapper wrapper)
+    {
+        return wrapper.equals(new ByteArrayWrapper("BKHD".getBytes(StandardCharsets.UTF_8)));
+    }
+    
+    private static boolean isProbableSCO(ByteArrayWrapper wrapper)
+    {
+        return wrapper.equals(new ByteArrayWrapper("[Obj".getBytes(StandardCharsets.UTF_8)));
+    }
+    
+    private static boolean isProbableLUAOBJ(ByteArrayWrapper wrapper)
+    {
+        return wrapper.equals(new ByteArrayWrapper("LuaQ".getBytes(StandardCharsets.UTF_8)));
+    }
+    
+    private static boolean isProbablePRELOAD(ByteArrayWrapper wrapper)
+    {
+        return wrapper.equals(new ByteArrayWrapper("PreLoad".getBytes(StandardCharsets.UTF_8)));
+    }
+    
     //</editor-fold>
     
     

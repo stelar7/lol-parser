@@ -868,7 +868,7 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash = UtilHandler.getXXHash64(hashMe.trim());
+        String hash = UtilHandler.generateXXHash64(hashMe.trim());
         
         if (hashes.contains(hash))
         {
@@ -976,7 +976,7 @@ public class TestHashes
                         for (String end : foundHashes)
                         {
                             String hashMe = pre + end;
-                            String hash   = UtilHandler.getXXHash64(hashMe.trim());
+                            String hash   = UtilHandler.generateXXHash64(hashMe.trim());
                             
                             Pair<String, String> data = new Pair<>(hash, hashMe);
                             if (!knownHashes.contains(data))
@@ -1071,7 +1071,7 @@ public class TestHashes
         ((List<String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
         {
         }.getType())).forEach((v) -> {
-            Pair<String, String> data = new Pair<>(UtilHandler.getXXHash64(v), v);
+            Pair<String, String> data = new Pair<>(UtilHandler.generateXXHash64(v), v);
             if (!foundHashes.contains(data))
             {
                 foundHashes.add(data);
@@ -1291,34 +1291,12 @@ public class TestHashes
         List<String>             values       = Files.readAllLines(hashMe);
         List<Pair<Long, String>> hashs        = new ArrayList<>();
         
-        // 2166136261L as sint32
-        int hash = -2128831035;
-        int mask = 16777619;
-        
         for (String val : values)
         {
-            String value = val.toLowerCase(Locale.ENGLISH);
-            for (int i = 0; i < value.length(); i++)
-            {
-                int temp = value.charAt(i);
-                hash = hash ^ temp;
-                hash = hash * mask;
-            }
-            
-            long transformed = Integer.toUnsignedLong(hash);
-            
-            hashs.add(new Pair<>(transformed, val));
+            hashs.add(new Pair<>(UtilHandler.generateBINHash(val), val));
         }
         
         hashs.sort(Comparator.comparing(Pair::getKey, new NaturalOrderComparator()));
-        StringBuilder sb = new StringBuilder("{\n");
-        for (Pair<Long, String> pair : hashs)
-        {
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
-        }
-        sb.reverse().delete(0, 2).reverse().append("\n}");
-        
-        Files.createDirectories(newHashStore.getParent());
-        Files.write(newHashStore, sb.toString().getBytes(StandardCharsets.UTF_8));
+        UtilHandler.pairPrintout(newHashStore, hashs);
     }
 }

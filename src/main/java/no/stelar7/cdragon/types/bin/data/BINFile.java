@@ -11,7 +11,7 @@ public class BINFile
     private BINHeader header;
     private List<BINEntry> entries = new ArrayList<>();
     
-    public void print()
+    public String toJSON()
     {
         StringBuilder sb = new StringBuilder("{");
         for (BINEntry entry : entries)
@@ -22,7 +22,7 @@ public class BINFile
         removeTrailingComma(sb);
         sb.append("}");
         
-        System.out.println(sb.toString());
+        return sb.toString();
     }
     
     private void printEntry(BINEntry entry, StringBuilder sb)
@@ -89,8 +89,17 @@ public class BINFile
         sb.append("{");
         for (Object o : value.getData())
         {
-            Vector2<?> obj = (Vector2<?>) o;
-            sb.append("\"").append(obj.getX()).append("\"").append(":").append("\"").append(obj.getY()).append("\",");
+            Vector2<?>    obj  = (Vector2<?>) o;
+            StringBuilder temp = new StringBuilder();
+            
+            printType("", value.getType1(), obj.getX(), temp);
+            String val1 = temp.toString();
+            
+            temp = new StringBuilder();
+            printType("", value.getType2(), obj.getY(), temp);
+            String val2 = temp.toString();
+            
+            sb.append("\"").append(val1).append("\"").append(":").append(val2).append(",");
         }
         removeTrailingComma(sb);
         sb.append("}");

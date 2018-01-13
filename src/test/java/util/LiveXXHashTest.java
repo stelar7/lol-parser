@@ -96,7 +96,7 @@ public class LiveXXHashTest
             @Override
             public void keyReleased(KeyEvent e)
             {
-                output.setText(UtilHandler.getXXHash64(input.getText()));
+                output.setText(UtilHandler.generateXXHash64(input.getText()));
                 output.setDisabledTextColor(uk.contains(output.getText()) ? Color.GREEN : Color.RED);
             }
         });

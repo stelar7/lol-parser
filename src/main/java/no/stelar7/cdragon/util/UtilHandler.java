@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.util;
 
 import com.google.gson.reflect.TypeToken;
+import javafx.util.Pair;
 import net.jpountz.xxhash.*;
 import no.stelar7.api.l4j8.basic.utils.Utils;
 
@@ -166,7 +167,7 @@ public final class UtilHandler
     }
     
     
-    public static String getXXHash64(String text)
+    public static String generateXXHash64(String text)
     {
         try
         {
@@ -185,6 +186,40 @@ public final class UtilHandler
         {
             e.printStackTrace();
             return null;
+        }
+    }
+    
+    public static long generateBINHash(String input)
+    {
+        String toHash = input.toLowerCase(Locale.ENGLISH);
+        int    hash   = Integer.parseUnsignedInt("2166136261");
+        int    mask   = Integer.parseUnsignedInt("16777619");
+        
+        for (int i = 0; i < toHash.length(); i++)
+        {
+            hash = hash ^ toHash.charAt(i);
+            hash = hash * mask;
+        }
+        
+        return Integer.toUnsignedLong(hash);
+    }
+    
+    public static <T, Y> void pairPrintout(Path outputFile, List<Pair<T, Y>> data)
+    {
+        StringBuilder sb = new StringBuilder("{\n");
+        for (Pair<?, ?> pair : data)
+        {
+            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+        }
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        
+        try
+        {
+            Files.createDirectories(outputFile.getParent());
+            Files.write(outputFile, sb.toString().getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
     

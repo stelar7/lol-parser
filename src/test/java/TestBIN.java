@@ -15,7 +15,6 @@ public class TestBIN
         System.out.println("Parsing: " + file.toString());
     
         BINFile data = parser.parse(file);
-        data.print();
-        System.out.println();
+        System.out.println(data.toJSON());
     }
 }
