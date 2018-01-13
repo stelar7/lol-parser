@@ -275,15 +275,15 @@ public final class UtilHandler
             }
             Files.createDirectories(output.getParent());
             
-            int                 read;
-            final byte[]        buffer = new byte[4096];
+            int          read;
+            final byte[] buffer = new byte[4096];
             
-            // Fake being a browser
-            final URLConnection uc     = new URL(url).openConnection();
-            uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            uc.setRequestProperty("Content-Language", "en-US");
-            uc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36");
-            uc.setRequestProperty("Host", "l3cdn.riotgames.com");
+            // TODO Fake being a browser "better"
+            final URLConnection uc = new URL(url).openConnection();
+            //uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            //uc.setRequestProperty("Content-Language", "en-US");
+            //uc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36");
+            //uc.setRequestProperty("Host", "l3cdn.riotgames.com");
             
             try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
             {
