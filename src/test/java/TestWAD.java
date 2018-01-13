@@ -23,6 +23,15 @@ public class TestWAD
     }
     
     @Test
+    public void testWEB()
+    {
+        WADParser parser = new WADParser();
+        
+        WADFile parsed = parser.parse(Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\Zoe.wad.client"));
+        parsed.extractFiles("Champions", "Zoe.client", Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\Zoe"));
+    }
+    
+    @Test
     public void testWADAll()
     {
         WADParser parser = new WADParser();

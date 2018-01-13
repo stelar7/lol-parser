@@ -10,6 +10,7 @@ import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class UtilHandler
 {
@@ -276,7 +277,14 @@ public final class UtilHandler
             
             int                 read;
             final byte[]        buffer = new byte[4096];
+            
+            // Fake being a browser
             final URLConnection uc     = new URL(url).openConnection();
+            uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            uc.setRequestProperty("Content-Language", "en-US");
+            uc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36");
+            uc.setRequestProperty("Host", "l3cdn.riotgames.com");
+            
             try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
             {
                 while ((read = in.read(buffer)) != -1)
@@ -316,5 +324,25 @@ public final class UtilHandler
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+    
+    public static List<String> readWeb(String url)
+    {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8)))
+        {
+            
+            StringBuilder response = new StringBuilder();
+            String        inputLine;
+            
+            while ((inputLine = in.readLine()) != null)
+            {
+                response.append(inputLine).append("\n");
+            }
+            return Arrays.stream(response.toString().split("\n")).collect(Collectors.toList());
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

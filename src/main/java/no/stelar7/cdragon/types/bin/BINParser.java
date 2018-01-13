@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.UtilHandler;
+import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.util.reader.RandomAccessReader;
 import no.stelar7.cdragon.util.reader.types.Vector2;
 
@@ -16,8 +16,12 @@ public class BINParser
         RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
         
         BINFile file = new BINFile();
+        parseHeader(file, raf);
+        if (file.getHeader() == null)
+        {
+            return null;
+        }
         
-        file.setHeader(parseHeader(raf));
         parseEntries(file, raf);
         
         return file;
@@ -162,24 +166,40 @@ public class BINParser
                 return raf.readByte();
             }
             default:
-                System.out.println("Unknown type: " + type);
-                return null;
+                throw new RuntimeException("Unknown type: " + type);
         }
     }
     
-    private BINHeader parseHeader(RandomAccessReader raf)
+    private void parseHeader(BINFile file, RandomAccessReader raf)
     {
         BINHeader header = new BINHeader();
-        
         header.setMagic(raf.readString(4));
-        header.setVersion(raf.readInt());
-        header.setEntryCount(raf.readInt());
         
+        if (!"PROP".equalsIgnoreCase(header.getMagic()))
+        {
+            file.setHeader(null);
+            return;
+        }
+        
+        header.setVersion(raf.readInt());
+        
+        if (header.getVersion() >= 2)
+        {
+            header.setLinkedFileCount(raf.readInt());
+            for (int i = 0; i < header.getLinkedFileCount(); i++)
+            {
+                short length = raf.readShort();
+                String link = raf.readString(length);
+                header.getLinkedFiles().add(link);
+            }
+        }
+        
+        header.setEntryCount(raf.readInt());
         for (int i = 0; i < header.getEntryCount(); i++)
         {
             header.getEntryTypes().add(raf.readInt());
         }
         
-        return header;
+        file.setHeader(header);
     }
 }

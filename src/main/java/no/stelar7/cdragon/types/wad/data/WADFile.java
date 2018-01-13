@@ -7,6 +7,7 @@ import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.reader.RandomAccessReader;
 
 import java.io.IOException;
+import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -128,7 +129,13 @@ public class WADFile
             
             if (header.getCompressed() == 2)
             {
-                System.out.println(new String(fileBytes, StandardCharsets.UTF_8));
+                ByteBuffer wrap   = ByteBuffer.wrap(fileBytes).order(ByteOrder.LITTLE_ENDIAN);
+                int        lenght = wrap.getInt();
+                byte[]     data   = new byte[lenght];
+                wrap.get(data, 0, lenght);
+                String reference = new String(data, StandardCharsets.UTF_8).trim();
+                
+                System.out.println("Content is file reference: " + reference);
                 return fileBytes;
             }
             

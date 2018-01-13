@@ -21,6 +21,7 @@ public final class CompressionHandler
              InflaterInputStream in = new InflaterInputStream(bis)
         )
         {
+            Files.createDirectories(uncompressPath.getParent());
             Files.copy(in, uncompressPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e)
         {

@@ -18,22 +18,24 @@ public class TestPackagemanifest
     {
         Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
         
+        String       files = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
+        List<String> lines = UtilHandler.readWeb(files);
+        
         String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest";
-        for (int i = UtilHandler.getLongFromIP("0.0.2.0"); i > 0; i--)
+        for (String version : lines)
         {
-            String version  = UtilHandler.getIPFromLong(i);
             String download = String.format(url, version);
             UtilHandler.downloadFile(extractPath.resolve(version), download);
         }
     }
     
     @Test
-    public void testDownloadMissing() throws IOException
+    public void testDownloadMissing()
     {
         PackagemanifestParser parser      = new PackagemanifestParser();
-        Path                  file        = Paths.get(System.getProperty("user.home"), "Downloads", "releaselisting_EUW");
+        String                data        = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
+        List<String>          files       = UtilHandler.readWeb(data);
         Path                  extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
-        List<String>          files       = Files.readAllLines(file);
         
         files.removeAll(Arrays.asList(extractPath.toFile().list()));
         String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client_en_gb/releases/%s/packages/files/packagemanifest";
@@ -45,7 +47,7 @@ public class TestPackagemanifest
     }
     
     @Test
-    public void testFindLatestInibin() throws IOException
+    public void testFindLatest() throws IOException
     {
         PackagemanifestParser parser      = new PackagemanifestParser();
         Map<String, String>   data        = new HashMap<>();
@@ -56,7 +58,7 @@ public class TestPackagemanifest
         JsonElement           summaryData = new JsonParser().parse(new String(Files.readAllBytes(summaryPath), StandardCharsets.UTF_8));
         
         Path extractPath  = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
-        Path extractPath2 = Paths.get(System.getProperty("user.home"), "Downloads", "pman_inibin");
+        Path extractPath2 = Paths.get(System.getProperty("user.home"), "Downloads", "pman_out");
         
         Files.walkFileTree(extractPath, new SimpleFileVisitor<Path>()
         {
@@ -81,24 +83,42 @@ public class TestPackagemanifest
             }
         }
         
+        data.forEach((k, v) -> {
+            if (v.toLowerCase(Locale.ENGLISH).contains("zoe"))
+            {
+                System.out.println(v);
+            }
+        });
         
-        String path = "files/DATA/Characters/%s/%s.inibin.compressed";
-        String url  = "http://l3cdn.riotgames.com/releases/live%s";
+        String inibinPath = "files/DATA/Characters/%s/%s.inibin.compressed";
+        String binPath    = "files/DATA/Characters/%s/%s.bin.compressed";
+        String url        = "http://l3cdn.riotgames.com/releases/live%s";
         for (JsonElement element : summaryData.getAsJsonArray())
         {
             JsonObject datum = element.getAsJsonObject();
             String     alias = datum.get("alias").getAsString();
-            String     furl  = String.format(url, data.get(String.format(path, alias, alias)));
+            String     furl  = String.format(url, data.get(String.format(inibinPath, alias, alias)));
+            String     furl2 = String.format(url, data.get(String.format(binPath, alias, alias)));
             
             if (furl.toLowerCase().contains("null"))
             {
-                unknown.add(alias);
+                unknown.add("INIBIN: " + alias);
+            } else
+            {
+                UtilHandler.downloadFile(extractPath2.resolve(alias + ".inibin.compressed"), furl);
             }
             
-            UtilHandler.downloadFile(extractPath2.resolve(alias + ".inibin.compressed"), furl);
+            if (furl2.toLowerCase().contains("null"))
+            {
+                unknown.add("BIN: " + alias);
+            } else
+            {
+                UtilHandler.downloadFile(extractPath2.resolve(alias + ".bin.compressed"), furl2);
+            }
         }
         
         System.out.println();
+        unknown.sort(new NaturalOrderComparator());
         for (String s : unknown)
         {
             System.out.println(s);

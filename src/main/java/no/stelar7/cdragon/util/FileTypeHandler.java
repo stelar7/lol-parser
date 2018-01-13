@@ -387,39 +387,39 @@ public final class FileTypeHandler
         return isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
-    private static boolean isProbableSCB(ByteArrayWrapper wrapper)
+    public static boolean isProbableSCB(ByteArrayWrapper wrapper)
     {
         return wrapper.equals(new ByteArrayWrapper("r3d2Mesh".getBytes(StandardCharsets.UTF_8)));
     }
     
-    private static boolean isProbableSKL(ByteArrayWrapper wrapper)
+    public static boolean isProbableSKL(ByteArrayWrapper wrapper)
     {
         return wrapper.equals(new ByteArrayWrapper("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
     }
     
-    private static boolean isProbableANM(ByteArrayWrapper wrapper)
+    public static boolean isProbableANM(ByteArrayWrapper wrapper)
     {
         boolean isEqual = wrapper.equals(new ByteArrayWrapper("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
         isEqual |= wrapper.equals(new ByteArrayWrapper("r3d2canm".getBytes(StandardCharsets.UTF_8)));
         return isEqual;
     }
     
-    private static boolean isProbableBNK(ByteArrayWrapper wrapper)
+    public static boolean isProbableBNK(ByteArrayWrapper wrapper)
     {
         return wrapper.equals(new ByteArrayWrapper("BKHD".getBytes(StandardCharsets.UTF_8)));
     }
     
-    private static boolean isProbableSCO(ByteArrayWrapper wrapper)
+    public static boolean isProbableSCO(ByteArrayWrapper wrapper)
     {
         return wrapper.equals(new ByteArrayWrapper("[Obj".getBytes(StandardCharsets.UTF_8)));
     }
     
-    private static boolean isProbableLUAOBJ(ByteArrayWrapper wrapper)
+    public static boolean isProbableLUAOBJ(ByteArrayWrapper wrapper)
     {
         return wrapper.equals(new ByteArrayWrapper("LuaQ".getBytes(StandardCharsets.UTF_8)));
     }
     
-    private static boolean isProbablePRELOAD(ByteArrayWrapper wrapper)
+    public static boolean isProbablePRELOAD(ByteArrayWrapper wrapper)
     {
         return wrapper.equals(new ByteArrayWrapper("PreLoad".getBytes(StandardCharsets.UTF_8)));
     }
