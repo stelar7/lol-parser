@@ -365,7 +365,7 @@ public class TestHashes
             }
         }
         
-        Path possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\plugins\\rcp-fe-lol-loot\\global\\default", "trans.json");
+        Path possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "8e45023d7d142cbf.json");
         Map<String, String> data = Utils.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>()
         {
         }.getType());
