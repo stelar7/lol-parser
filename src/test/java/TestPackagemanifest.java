@@ -16,29 +16,12 @@ public class TestPackagemanifest
     @Test
     public void testDownloadAll()
     {
-        Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
-        
-        String       files = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
-        List<String> lines = UtilHandler.readWeb(files);
-        
-        String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest";
-        for (String version : lines)
-        {
-            String download = String.format(url, version);
-            UtilHandler.downloadFile(extractPath.resolve(version), download);
-        }
-    }
-    
-    @Test
-    public void testDownloadMissing()
-    {
-        PackagemanifestParser parser      = new PackagemanifestParser();
-        String                data        = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
-        List<String>          files       = UtilHandler.readWeb(data);
-        Path                  extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
+        String       data        = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
+        List<String> files       = UtilHandler.readWeb(data);
+        Path         extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
         
         files.removeAll(Arrays.asList(extractPath.toFile().list()));
-        String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client_en_gb/releases/%s/packages/files/packagemanifest";
+        String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest";
         for (String version : files)
         {
             String download = String.format(url, version);
@@ -82,13 +65,6 @@ public class TestPackagemanifest
                 data.putIfAbsent(line.getFilePath().substring(line.getFilePath().indexOf("files")), line.getFilePath());
             }
         }
-        
-        data.forEach((k, v) -> {
-            if (v.toLowerCase(Locale.ENGLISH).contains("zoe"))
-            {
-                System.out.println(v);
-            }
-        });
         
         String inibinPath = "files/DATA/Characters/%s/%s.inibin.compressed";
         String binPath    = "files/DATA/Characters/%s/%s.bin.compressed";
