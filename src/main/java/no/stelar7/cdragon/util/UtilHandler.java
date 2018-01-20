@@ -34,11 +34,6 @@ public final class UtilHandler
     {
         long val = Integer.toUnsignedLong(hash);
         
-        if (val == 2563339134L)
-        {
-            System.out.println();
-        }
-        
         if (binHashNames != null)
         {
             return binHashNames.getOrDefault(val, String.valueOf(val));
@@ -292,6 +287,9 @@ public final class UtilHandler
                     out.write(buffer, 0, read);
                 }
                 out.flush();
+            } catch (SocketTimeoutException e)
+            {
+                downloadFile(output, url);
             }
         } catch (IOException e)
         {
