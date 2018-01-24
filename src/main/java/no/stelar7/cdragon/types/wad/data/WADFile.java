@@ -46,7 +46,6 @@ public class WADFile
                 Files.createDirectories(ukp.getParent());
                 Files.createFile(ukp);
             }
-            Files.write(ukp, new byte[]{});
         } catch (IOException e)
         {
             e.printStackTrace();

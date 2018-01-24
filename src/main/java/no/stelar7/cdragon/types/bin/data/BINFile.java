@@ -22,7 +22,7 @@ public class BINFile
         removeTrailingComma(sb);
         sb.append("}");
         
-        return sb.toString();
+        return sb.toString().replace("\\\"", "\"");
     }
     
     private void printEntry(BINEntry entry, StringBuilder sb)
@@ -89,9 +89,9 @@ public class BINFile
         sb.append("{");
         for (Object o : value.getData())
         {
-            Vector2<?>    obj  = (Vector2<?>) o;
-            StringBuilder temp = new StringBuilder();
+            Vector2<?> obj = (Vector2<?>) o;
             
+            StringBuilder temp = new StringBuilder();
             printType("", value.getType1(), obj.getX(), temp);
             String val1 = temp.toString();
             
@@ -99,7 +99,15 @@ public class BINFile
             printType("", value.getType2(), obj.getY(), temp);
             String val2 = temp.toString();
             
-            sb.append("\"").append(val1).append("\"").append(":").append(val2).append(",");
+            if (val1.startsWith("\""))
+            {
+                sb.append(val1);
+            } else
+            {
+                sb.append("\"").append(val1).append("\"");
+            }
+            
+            sb.append(":").append(val2).append(",");
         }
         removeTrailingComma(sb);
         sb.append("}");

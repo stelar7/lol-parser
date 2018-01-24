@@ -1,6 +1,6 @@
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
-import no.stelar7.cdragon.util.UtilHandler;
+import no.stelar7.cdragon.util.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -73,6 +73,7 @@ public class TestBIN
         };
         
         paths.sort(c);
+        
         for (Path path : paths)
         {
             try
@@ -80,7 +81,10 @@ public class TestBIN
                 System.out.println("Parsing file: " + path);
                 BINFile parsed = parser.parse(path);
                 Files.createDirectories(extractPath);
-                Files.write(extractPath.resolve(UtilHandler.pathToFilename(path)+".json"), parsed.toJSON().getBytes(StandardCharsets.UTF_8));
+                //Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json.bak"), parsed.toJSON().getBytes(StandardCharsets.UTF_8));
+                
+                byte[]  data   = FileTypeHandler.makePrettyJson(parsed.toJSON().getBytes(StandardCharsets.UTF_8));
+                Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
             } catch (RuntimeException ex)
             {
                 // ignore it

@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.anm.data.versioned;
 
 import lombok.Data;
 import no.stelar7.cdragon.types.anm.data.ANMEntry;
-import org.joml.Vector3f;
+import no.stelar7.cdragon.util.reader.types.Vector3f;
 
 import java.util.*;
 

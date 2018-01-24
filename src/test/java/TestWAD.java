@@ -65,6 +65,7 @@ public class TestWAD
         
         Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
+        //Path rito        = Paths.get("C:\\Riot Games\\League of Legends\\RADS\\projects\\lol_game_client\\releases\\0.0.1.141\\deploy\\DATA\\FINAL\\Champions");
         
         Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
         {

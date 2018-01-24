@@ -17,4 +17,10 @@ public class Vector2<T>
         this.x = x;
         this.y = y;
     }
+    
+    @Override
+    public String toString()
+    {
+        return String.format("{\"x\":%s, \"y\":%s}", x, y);
+    }
 }

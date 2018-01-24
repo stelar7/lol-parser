@@ -1,14 +1,7 @@
 package no.stelar7.cdragon.util.reader.types;
 
-import lombok.Data;
-
-@Data
-public class Vector3b
+public class Vector3f extends org.joml.Vector3f
 {
-    private byte x;
-    private byte y;
-    private byte z;
-    
     @Override
     public String toString()
     {

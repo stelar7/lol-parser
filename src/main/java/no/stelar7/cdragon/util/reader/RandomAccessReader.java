@@ -1,7 +1,12 @@
 package no.stelar7.cdragon.util.reader;
 
 
+import no.stelar7.cdragon.util.reader.types.Vector2f;
+import no.stelar7.cdragon.util.reader.types.Vector2i;
 import no.stelar7.cdragon.util.reader.types.*;
+import no.stelar7.cdragon.util.reader.types.Vector3f;
+import no.stelar7.cdragon.util.reader.types.Vector3i;
+import no.stelar7.cdragon.util.reader.types.Vector4f;
 import org.joml.*;
 import sun.nio.ch.DirectBuffer;
 
