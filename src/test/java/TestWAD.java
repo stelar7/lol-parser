@@ -74,7 +74,7 @@ public class TestWAD
                 if (file.getFileName().toString().endsWith(".wad") || file.getFileName().toString().endsWith(".wad.client"))
                 {
                     WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath.resolve(file.getParent().getFileName()));
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
                 }
                 return FileVisitResult.CONTINUE;
             }

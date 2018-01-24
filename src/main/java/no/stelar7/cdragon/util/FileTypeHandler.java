@@ -19,12 +19,6 @@ public final class FileTypeHandler
     {
         ByteArrayWrapper magic4 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
         ByteArrayWrapper magic8 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
-        String           result = FileTypeHandler.getMagicNumbers().get(magic4);
-        
-        if (result != null)
-        {
-            return result;
-        }
         
         if (FileTypeHandler.isProbableBOM(magic4))
         {
@@ -70,7 +64,7 @@ public final class FileTypeHandler
         {
             return "bnk";
         }
-    
+        
         if (FileTypeHandler.isProbableSCO(magic4))
         {
             return "sco";
@@ -97,6 +91,13 @@ public final class FileTypeHandler
         if (FileTypeHandler.isProbableTXT(magic4))
         {
             return "txt";
+        }
+        
+        String result = FileTypeHandler.getMagicNumbers().get(magic4);
+        
+        if (result != null)
+        {
+            return result;
         }
         
         System.out.print("Unknown filetype: ");
