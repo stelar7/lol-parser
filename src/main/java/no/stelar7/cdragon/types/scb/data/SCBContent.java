@@ -14,7 +14,7 @@ public class SCBContent
     private int colored;
     
     private Vector3f center;
-    private Vector3f extents;
+    private Vector3f pivot;
     
     private List<Vector3f> vertices = new ArrayList<>();
     private List<Integer>  indecies = new ArrayList<>();

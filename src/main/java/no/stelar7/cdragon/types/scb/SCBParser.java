@@ -30,7 +30,7 @@ public class SCBParser
         if (data.getHeader().getMinor() >= 2)
         {
             content.setCenter(raf.readVec3F());
-            content.setExtents(raf.readVec3F());
+            content.setPivot(raf.readVec3F());
         }
         
         for (int i = 0; i < content.getVertexCount(); i++)
