@@ -18,7 +18,7 @@ public final class FileTypeHandler
     public static String findFileType(byte[] data, Path file)
     {
         ByteArrayWrapper magic4 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
-        ByteArrayWrapper magic8 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
+        ByteArrayWrapper magic8 = new ByteArrayWrapper(Arrays.copyOf(data, 8));
         
         if (FileTypeHandler.isProbableBOM(magic4))
         {

@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.UtilHandler;
 import no.stelar7.cdragon.util.reader.RandomAccessReader;
 import no.stelar7.cdragon.util.reader.types.Vector2;
 

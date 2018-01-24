@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.anm.data.versioned;
 
 import lombok.Data;
 import no.stelar7.cdragon.types.anm.data.ANMEntry;
-import no.stelar7.cdragon.util.reader.types.Vector3;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -26,10 +26,10 @@ public class ANMDataVersion1
     private int unknown6;
     private int unknown7;
     
-    private Vector3<Float> minTranslation;
-    private Vector3<Float> maxTranslation;
-    private Vector3<Float> minScale;
-    private Vector3<Float> maxScale;
+    private Vector3f minTranslation;
+    private Vector3f maxTranslation;
+    private Vector3f minScale;
+    private Vector3f maxScale;
     
     private int entryOffset;
     private int indexOffset;

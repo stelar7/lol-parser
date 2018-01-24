@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.anm.data.versioned;
 
 import lombok.Data;
 import no.stelar7.cdragon.types.anm.data.ANMFrame;
-import no.stelar7.cdragon.util.reader.types.*;
+import org.joml.*;
 
 import java.util.*;
 
@@ -31,7 +31,7 @@ public class ANMDataVersion4
     private int unknown7;
     private int unknown8;
     
-    private List<Vector3<Float>>         positions = new ArrayList<>();
-    private List<Vector4<Float>>         rotations = new ArrayList<>();
+    private List<Vector3f>               positions = new ArrayList<>();
+    private List<Quaternionf>            rotations = new ArrayList<>();
     private Map<Integer, List<ANMFrame>> frames    = new HashMap<>();
 }

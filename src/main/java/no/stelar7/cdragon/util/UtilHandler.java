@@ -15,6 +15,11 @@ import java.util.stream.Collectors;
 public final class UtilHandler
 {
     
+    static
+    {
+        System.setProperty("joml.format", "false");
+    }
+    
     private UtilHandler()
     {
         // Hide public constructor
@@ -342,5 +347,10 @@ public final class UtilHandler
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public static boolean notInRange(int x, int min, int max)
+    {
+        return x < min || x >= max;
     }
 }

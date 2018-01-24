@@ -2,6 +2,7 @@ package no.stelar7.cdragon.util.reader;
 
 
 import no.stelar7.cdragon.util.reader.types.*;
+import org.joml.*;
 import sun.nio.ch.DirectBuffer;
 
 import java.io.*;
@@ -55,6 +56,11 @@ public class RandomAccessReader implements AutoCloseable
     public int pos()
     {
         return buffer.position();
+    }
+    
+    public int remaining()
+    {
+        return buffer.remaining();
     }
     
     
@@ -176,94 +182,113 @@ public class RandomAccessReader implements AutoCloseable
         buffer.position(pos);
     }
     
-    public Vector3 readVec3F()
+    public Vector3f readVec3F()
     {
-        Vector3<Float> vector = new Vector3<>();
-        vector.setX(buffer.getFloat());
-        vector.setY(buffer.getFloat());
-        vector.setZ(buffer.getFloat());
+        Vector3f vector = new Vector3f();
+        vector.x = buffer.getFloat();
+        vector.y = buffer.getFloat();
+        vector.z = buffer.getFloat();
         return vector;
     }
     
-    public Vector3 readVec3S()
+    public Vector3i readVec3I()
     {
-        Vector3<Short> vector = new Vector3<>();
-        vector.setX(buffer.getShort());
-        vector.setY(buffer.getShort());
-        vector.setZ(buffer.getShort());
+        Vector3i vector = new Vector3i();
+        vector.x = (buffer.getInt());
+        vector.y = (buffer.getInt());
+        vector.z = (buffer.getInt());
         return vector;
     }
     
-    public Vector4<Float> readQuaternion()
+    public Vector3s readVec3S()
     {
-        Vector4<Float> vector = new Vector4();
-        vector.setX(buffer.getFloat());
-        vector.setY(buffer.getFloat());
-        vector.setZ(buffer.getFloat());
-        vector.setW(buffer.getFloat());
+        Vector3s vector = new Vector3s();
+        vector.setX((buffer.getShort()));
+        vector.setY((buffer.getShort()));
+        vector.setZ((buffer.getShort()));
         return vector;
     }
     
-    public Vector2<Integer> readVec2I()
+    public Vector3b readVec3B()
     {
-        Vector2<Integer> vector = new Vector2<>();
-        vector.setX(buffer.getInt());
-        vector.setY(buffer.getInt());
+        Vector3b vector = new Vector3b();
+        vector.setX((buffer.get()));
+        vector.setY((buffer.get()));
+        vector.setZ((buffer.get()));
         return vector;
     }
     
-    public Vector2<Float> readVec2F()
+    public Quaternionf readQuaternion()
     {
-        Vector2<Float> vector = new Vector2<>();
-        vector.setX(buffer.getFloat());
-        vector.setY(buffer.getFloat());
+        Quaternionf vector = new Quaternionf();
+        vector.x = (buffer.getFloat());
+        vector.y = (buffer.getFloat());
+        vector.z = (buffer.getFloat());
+        vector.w = (buffer.getFloat());
         return vector;
     }
     
-    public Vector4<Byte> readVec4B()
+    public Vector2i readVec2I()
     {
-        Vector4<Byte> vector = new Vector4();
-        vector.setX(buffer.get());
-        vector.setY(buffer.get());
-        vector.setZ(buffer.get());
-        vector.setW(buffer.get());
+        Vector2i vector = new Vector2i();
+        vector.x = (buffer.getInt());
+        vector.y = (buffer.getInt());
         return vector;
     }
     
-    public Vector4<Float> readVec4F()
+    public Vector2f readVec2F()
     {
-        Vector4<Float> vector = new Vector4<>();
-        vector.setX(buffer.getFloat());
-        vector.setY(buffer.getFloat());
-        vector.setZ(buffer.getFloat());
-        vector.setW(buffer.getFloat());
+        Vector2f vector = new Vector2f();
+        vector.x = (buffer.getFloat());
+        vector.y = (buffer.getFloat());
         return vector;
     }
     
-    public Matrix4x4<Float> readMatrix4x4()
+    public Vector4b readVec4B()
     {
-        Matrix4x4<Float> vector = new Matrix4x4<>();
+        Vector4b vector = new Vector4b();
+        vector.setX((buffer.get()));
+        vector.setY((buffer.get()));
+        vector.setZ((buffer.get()));
+        vector.setW((buffer.get()));
+        return vector;
+    }
+    
+    public Vector4f readVec4F()
+    {
+        Vector4f vector = new Vector4f();
+        vector.x = (buffer.getFloat());
+        vector.y = (buffer.getFloat());
+        vector.z = (buffer.getFloat());
+        vector.w = (buffer.getFloat());
+        return vector;
+    }
+    
+    public Matrix4f readMatrix4x4()
+    {
+        Matrix4f vector = new Matrix4f();
         
-        vector.setM00(buffer.getFloat());
-        vector.setM01(buffer.getFloat());
-        vector.setM02(buffer.getFloat());
-        vector.setM03(buffer.getFloat());
+        vector.m00(buffer.getFloat());
+        vector.m01(buffer.getFloat());
+        vector.m02(buffer.getFloat());
+        vector.m03(buffer.getFloat());
         
-        vector.setM10(buffer.getFloat());
-        vector.setM11(buffer.getFloat());
-        vector.setM12(buffer.getFloat());
-        vector.setM13(buffer.getFloat());
+        vector.m10(buffer.getFloat());
+        vector.m11(buffer.getFloat());
+        vector.m12(buffer.getFloat());
+        vector.m13(buffer.getFloat());
         
-        vector.setM20(buffer.getFloat());
-        vector.setM21(buffer.getFloat());
-        vector.setM22(buffer.getFloat());
-        vector.setM23(buffer.getFloat());
+        vector.m20(buffer.getFloat());
+        vector.m21(buffer.getFloat());
+        vector.m22(buffer.getFloat());
+        vector.m23(buffer.getFloat());
         
-        vector.setM30(buffer.getFloat());
-        vector.setM31(buffer.getFloat());
-        vector.setM32(buffer.getFloat());
-        vector.setM33(buffer.getFloat());
+        vector.m30(buffer.getFloat());
+        vector.m31(buffer.getFloat());
+        vector.m32(buffer.getFloat());
+        vector.m33(buffer.getFloat());
         
         return vector;
     }
+    
 }

@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.reader.types;
 
-import lombok.*;
+import lombok.Data;
 
 @Data
 public class Vector2<T>
@@ -12,14 +12,9 @@ public class Vector2<T>
     {
     }
     
-    public Vector2(T o, T o1)
+    public Vector2(T x, T y)
     {
-        this.x = o;
-        this.y = o1;
-    }
-    
-    public String toString()
-    {
-        return String.format("{\"x\":%s,\"y\":%s}", x, y);
+        this.x = x;
+        this.y = y;
     }
 }
