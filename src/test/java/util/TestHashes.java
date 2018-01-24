@@ -1284,19 +1284,55 @@ public class TestHashes
     }
     
     @Test
-    public void testBINHash() throws IOException
+    public void testClientWADHash() throws IOException
     {
-        Path                     hashMe       = Paths.get(System.getProperty("user.home"), "Downloads", "fnvhashes2.txt");
-        Path                     newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "binHashes.json");
-        List<String>             values       = Files.readAllLines(hashMe);
-        List<Pair<Long, String>> hashs        = new ArrayList<>();
+        Path                       unknowns = Paths.get(System.getProperty("user.home"), "Downloads", "temp/Champions/unknown.json");
+        Path                       output   = Paths.get(System.getProperty("user.home"), "Downloads", "champions.json");
+        Path                       bins     = Paths.get(System.getProperty("user.home"), "Downloads", "bintemp");
+        List<String>               values   = Files.readAllLines(unknowns);
+        List<Pair<String, String>> hashs    = new ArrayList<>();
         
-        for (String val : values)
+        
+        Files.walkFileTree(bins, new SimpleFileVisitor<Path>()
         {
-            hashs.add(new Pair<>(UtilHandler.generateBINHash(val), val));
-        }
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                List<String> lines = Files.readAllLines(file);
+                
+                for (String line : lines)
+                {
+                    String asset = null;
+                    if (line.contains("ASSETS"))
+                    {
+                        asset = line.substring(line.indexOf("ASSETS"));
+                        asset = asset.substring(0, asset.indexOf("\"")).toLowerCase(Locale.ENGLISH);
+                    } else if (line.contains("DATA"))
+                    {
+                        asset = line.substring(line.indexOf("DATA"));
+                        asset = asset.substring(0, asset.indexOf("\"")).toLowerCase(Locale.ENGLISH);
+                    }
+                    
+                    if (asset != null)
+                    {
+                        String binHash = UtilHandler.generateXXHash64(asset);
+                        if (values.contains(String.valueOf(binHash)))
+                        {
+                            Pair<String, String> data = new Pair<>(binHash, asset);
+                            if (!hashs.contains(data))
+                            {
+                                hashs.add(data);
+                            }
+                        }
+                    }
+                }
+                
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
         
         hashs.sort(Comparator.comparing(Pair::getKey, new NaturalOrderComparator()));
-        UtilHandler.pairPrintout(newHashStore, hashs);
+        UtilHandler.pairPrintout(output, hashs);
     }
 }
