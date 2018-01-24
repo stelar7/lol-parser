@@ -88,17 +88,17 @@ public final class FileTypeHandler
             return "skn";
         }
         
+        String result = FileTypeHandler.getMagicNumbers().get(magic4);
+        if (result != null)
+        {
+            return result;
+        }
+        
         if (FileTypeHandler.isProbableTXT(magic4))
         {
             return "txt";
         }
         
-        String result = FileTypeHandler.getMagicNumbers().get(magic4);
-        
-        if (result != null)
-        {
-            return result;
-        }
         
         System.out.print("Unknown filetype: ");
         System.out.print(file.toString());
