@@ -1,8 +1,8 @@
 package no.stelar7.cdragon.types.inibin;
 
 import no.stelar7.cdragon.types.inibin.data.*;
-import no.stelar7.cdragon.util.*;
-import no.stelar7.cdragon.util.reader.RandomAccessReader;
+import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.io.IOException;
 import java.nio.ByteOrder;

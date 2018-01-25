@@ -8,6 +8,7 @@ import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
 import java.io.IOException;

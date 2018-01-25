@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.scb;
 
 import no.stelar7.cdragon.types.scb.data.*;
-import no.stelar7.cdragon.util.reader.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.nio.*;
 import java.nio.file.Path;

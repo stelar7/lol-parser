@@ -1,12 +1,12 @@
-package no.stelar7.cdragon.util;
+package no.stelar7.cdragon.util.readers.types;
 
 import java.util.Arrays;
 
-public final class ByteArrayWrapper
+public final class ByteArray
 {
     private final byte[] data;
     
-    public ByteArrayWrapper(byte[] data)
+    public ByteArray(byte[] data)
     {
         this.data = data;
     }
@@ -14,14 +14,14 @@ public final class ByteArrayWrapper
     @Override
     public boolean equals(Object other)
     {
-        if (!(other instanceof ByteArrayWrapper))
+        if (!(other instanceof ByteArray))
         {
             return false;
         }
         
-        int len = Math.min(((ByteArrayWrapper) other).data.length, data.length);
+        int len = Math.min(((ByteArray) other).data.length, data.length);
         
-        byte[] otherData = Arrays.copyOfRange(((ByteArrayWrapper) other).data, 0, len);
+        byte[] otherData = Arrays.copyOfRange(((ByteArray) other).data, 0, len);
         byte[] selfData  = Arrays.copyOfRange(data, 0, len);
         
         return Arrays.equals(otherData, selfData);

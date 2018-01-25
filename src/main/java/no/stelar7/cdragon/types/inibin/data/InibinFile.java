@@ -3,6 +3,7 @@ package no.stelar7.cdragon.types.inibin.data;
 import javafx.util.Pair;
 import lombok.*;
 import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

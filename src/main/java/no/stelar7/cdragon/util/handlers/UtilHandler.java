@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.util;
+package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;

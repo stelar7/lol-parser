@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.util.reader.types;
+package no.stelar7.cdragon.util.readers.types;
 
 import lombok.Data;
 

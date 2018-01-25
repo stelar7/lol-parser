@@ -1,6 +1,6 @@
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
 
 import java.io.IOException;

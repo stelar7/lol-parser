@@ -1,9 +1,9 @@
 package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.UtilHandler;
-import no.stelar7.cdragon.util.reader.RandomAccessReader;
-import no.stelar7.cdragon.util.reader.types.Vector2;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;

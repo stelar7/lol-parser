@@ -1,6 +1,6 @@
 package util;
 
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
 
 import java.io.IOException;

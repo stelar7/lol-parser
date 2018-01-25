@@ -1,7 +1,8 @@
-package no.stelar7.cdragon.util;
+package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
 import no.stelar7.api.l4j8.basic.utils.Utils;
+import no.stelar7.cdragon.util.readers.types.ByteArray;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -17,8 +18,8 @@ public final class FileTypeHandler
     
     public static String findFileType(byte[] data, Path file)
     {
-        ByteArrayWrapper magic4 = new ByteArrayWrapper(Arrays.copyOf(data, 4));
-        ByteArrayWrapper magic8 = new ByteArrayWrapper(Arrays.copyOf(data, 8));
+        ByteArray magic4 = new ByteArray(Arrays.copyOf(data, 4));
+        ByteArray magic8 = new ByteArray(Arrays.copyOf(data, 8));
         
         if (FileTypeHandler.isProbableBOM(magic4))
         {
@@ -115,37 +116,37 @@ public final class FileTypeHandler
         return pretty.getBytes(StandardCharsets.UTF_8);
     }
     
-    private static Map<ByteArrayWrapper, String> magicNumbers = new HashMap<>();
+    private static Map<ByteArray, String> magicNumbers = new HashMap<>();
     
-    public static Map<ByteArrayWrapper, String> getMagicNumbers()
+    public static Map<ByteArray, String> getMagicNumbers()
     {
         if (magicNumbers.isEmpty())
         {
             System.out.println("Loading magic numbers");
             
-            ByteArrayWrapper oggMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
-            ByteArrayWrapper webmMagic = new ByteArrayWrapper(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
-            ByteArrayWrapper ddsMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
-            ByteArrayWrapper pngMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47});
-            ByteArrayWrapper jpgMagic  = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
-            ByteArrayWrapper jpg2Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
-            ByteArrayWrapper jpg3Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
-            ByteArrayWrapper jpg4Magic = new ByteArrayWrapper(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
-            ByteArrayWrapper bnkMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
-            ByteArrayWrapper cgcMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});
-            ByteArrayWrapper binMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
-            ByteArrayWrapper lcovMagic = new ByteArrayWrapper(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
-            ByteArrayWrapper gifMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
-            ByteArrayWrapper zipMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04});
-            ByteArrayWrapper ttfMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00});
-            ByteArrayWrapper otfMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x4F, (byte) 0x54, (byte) 0x54, (byte) 0x4F});
-            ByteArrayWrapper sknMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x33, (byte) 0x22, (byte) 0x11, (byte) 0x00});
-            ByteArrayWrapper objMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x5B, (byte) 0x4F, (byte) 0x62, (byte) 0x6A});
-            ByteArrayWrapper unkMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x74, (byte) 0x22, (byte) 0x00, (byte) 0x00});
-            ByteArrayWrapper luaMagic  = new ByteArrayWrapper(new byte[]{(byte) 0x1B, (byte) 0x4C, (byte) 0x75, (byte) 0x61});
-            ByteArrayWrapper hlslMagic = new ByteArrayWrapper(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
-            ByteArrayWrapper oegmMagic = new ByteArrayWrapper(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
-            ByteArrayWrapper fcnfMagic = new ByteArrayWrapper(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
+            ByteArray oggMagic  = new ByteArray(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
+            ByteArray webmMagic = new ByteArray(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
+            ByteArray ddsMagic  = new ByteArray(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
+            ByteArray pngMagic  = new ByteArray(new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47});
+            ByteArray jpgMagic  = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
+            ByteArray jpg2Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
+            ByteArray jpg3Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
+            ByteArray jpg4Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
+            ByteArray bnkMagic  = new ByteArray(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
+            ByteArray cgcMagic  = new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});
+            ByteArray binMagic  = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
+            ByteArray lcovMagic = new ByteArray(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
+            ByteArray gifMagic  = new ByteArray(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
+            ByteArray zipMagic  = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04});
+            ByteArray ttfMagic  = new ByteArray(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00});
+            ByteArray otfMagic  = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x54, (byte) 0x54, (byte) 0x4F});
+            ByteArray sknMagic  = new ByteArray(new byte[]{(byte) 0x33, (byte) 0x22, (byte) 0x11, (byte) 0x00});
+            ByteArray objMagic  = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x4F, (byte) 0x62, (byte) 0x6A});
+            ByteArray unkMagic  = new ByteArray(new byte[]{(byte) 0x74, (byte) 0x22, (byte) 0x00, (byte) 0x00});
+            ByteArray luaMagic  = new ByteArray(new byte[]{(byte) 0x1B, (byte) 0x4C, (byte) 0x75, (byte) 0x61});
+            ByteArray hlslMagic = new ByteArray(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
+            ByteArray oegmMagic = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
+            ByteArray fcnfMagic = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
             
             
             magicNumbers = new HashMap<>();
@@ -214,7 +215,7 @@ public final class FileTypeHandler
         return isSame(data[0], (byte) 0x28) && isSame(data[1], (byte) 0xB5) && isSame(data[2], (byte) 0x2F) && isSame(data[3], (byte) 0xFD);
     }
     
-    public static boolean isProbableBOM(ByteArrayWrapper wrapper)
+    public static boolean isProbableBOM(ByteArray wrapper)
     {
         byte[]  data       = wrapper.getData();
         boolean isUTF8BOM  = isSame(data[0], (byte) 0xEF) && isSame(data[1], (byte) 0xBB) && isSame(data[2], (byte) 0xBF);
@@ -228,7 +229,7 @@ public final class FileTypeHandler
     
     //<editor-fold desc="Shitty byte-comparisons, need to fix..">
     
-    public static boolean isProbableJSON(ByteArrayWrapper wrapper)
+    public static boolean isProbableJSON(ByteArray wrapper)
     {
         byte[]  data   = wrapper.getData();
         boolean isJSON = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
@@ -246,7 +247,7 @@ public final class FileTypeHandler
         return isJSON;
     }
     
-    public static boolean isProbableCSS(ByteArrayWrapper wrapper)
+    public static boolean isProbableCSS(ByteArray wrapper)
     {
         byte[]  data  = wrapper.getData();
         boolean isCSS = isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x62) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6F);
@@ -269,7 +270,7 @@ public final class FileTypeHandler
         return isCSS;
     }
     
-    public static boolean isProbableJavascript(ByteArrayWrapper wrapper)
+    public static boolean isProbableJavascript(ByteArray wrapper)
     {
         byte[]  data = wrapper.getData();
         boolean isJS = isSame(data[0], (byte) 0x21) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x75) && isSame(data[3], (byte) 0x6E);
@@ -283,7 +284,7 @@ public final class FileTypeHandler
         return isJS;
     }
     
-    public static boolean isProbableHTML(ByteArrayWrapper wrapper)
+    public static boolean isProbableHTML(ByteArray wrapper)
     {
         byte[]  data   = wrapper.getData();
         boolean isHTML = isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x72);
@@ -304,20 +305,20 @@ public final class FileTypeHandler
         return isHTML;
     }
     
-    private static List<ByteArrayWrapper> possibleTextTargets = loadTextTargets();
+    private static List<ByteArray> possibleTextTargets = loadTextTargets();
     
-    public static boolean isProbableTXT(ByteArrayWrapper wrapper)
+    public static boolean isProbableTXT(ByteArray wrapper)
     {
-        byte[]           data        = wrapper.getData();
-        ByteArrayWrapper checkTarget = new ByteArrayWrapper(Arrays.copyOf(data, 3));
-        boolean          isTXT       = new String(data, StandardCharsets.UTF_8).isEmpty();
+        byte[]    data        = wrapper.getData();
+        ByteArray checkTarget = new ByteArray(Arrays.copyOf(data, 3));
+        boolean   isTXT       = new String(data, StandardCharsets.UTF_8).isEmpty();
         
         return isTXT || possibleTextTargets.contains(checkTarget);
     }
     
-    private static List<ByteArrayWrapper> loadTextTargets()
+    private static List<ByteArray> loadTextTargets()
     {
-        List<ByteArrayWrapper> list = new ArrayList<>();
+        List<ByteArray> list = new ArrayList<>();
         
         byte[] magicText3Wide = {
                 (byte) 0x63, (byte) 0x60, (byte) 0x63, (byte) 0x21, (byte) 0x30, (byte) 0x31,
@@ -370,59 +371,59 @@ public final class FileTypeHandler
         for (int i = 0; i < magicText3Wide.length; i += 3)
         {
             byte[] temp = Arrays.copyOfRange(magicText3Wide, i, i + 3);
-            list.add(new ByteArrayWrapper(temp));
+            list.add(new ByteArray(temp));
         }
         
         return list;
     }
     
-    public static boolean isProbableIDX(ByteArrayWrapper wrapper)
+    public static boolean isProbableIDX(ByteArray wrapper)
     {
         byte[] data = wrapper.getData();
         return !isSame(data[0], (byte) 0x00) && isSame(data[1], (byte) 0x00) && isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
-    public static boolean isProbable3DModelStuff(ByteArrayWrapper wrapper)
+    public static boolean isProbable3DModelStuff(ByteArray wrapper)
     {
         byte[] data = wrapper.getData();
         return isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
-    public static boolean isProbableSCB(ByteArrayWrapper wrapper)
+    public static boolean isProbableSCB(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArrayWrapper("r3d2Mesh".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("r3d2Mesh".getBytes(StandardCharsets.UTF_8)));
     }
     
-    public static boolean isProbableSKL(ByteArrayWrapper wrapper)
+    public static boolean isProbableSKL(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArrayWrapper("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
     }
     
-    public static boolean isProbableANM(ByteArrayWrapper wrapper)
+    public static boolean isProbableANM(ByteArray wrapper)
     {
-        boolean isEqual = wrapper.equals(new ByteArrayWrapper("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
-        isEqual |= wrapper.equals(new ByteArrayWrapper("r3d2canm".getBytes(StandardCharsets.UTF_8)));
+        boolean isEqual = wrapper.equals(new ByteArray("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
+        isEqual |= wrapper.equals(new ByteArray("r3d2canm".getBytes(StandardCharsets.UTF_8)));
         return isEqual;
     }
     
-    public static boolean isProbableBNK(ByteArrayWrapper wrapper)
+    public static boolean isProbableBNK(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArrayWrapper("BKHD".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("BKHD".getBytes(StandardCharsets.UTF_8)));
     }
     
-    public static boolean isProbableSCO(ByteArrayWrapper wrapper)
+    public static boolean isProbableSCO(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArrayWrapper("[Obj".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("[Obj".getBytes(StandardCharsets.UTF_8)));
     }
     
-    public static boolean isProbableLUAOBJ(ByteArrayWrapper wrapper)
+    public static boolean isProbableLUAOBJ(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArrayWrapper("LuaQ".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("LuaQ".getBytes(StandardCharsets.UTF_8)));
     }
     
-    public static boolean isProbablePRELOAD(ByteArrayWrapper wrapper)
+    public static boolean isProbablePRELOAD(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArrayWrapper("PreLoad".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("PreLoad".getBytes(StandardCharsets.UTF_8)));
     }
     
     //</editor-fold>

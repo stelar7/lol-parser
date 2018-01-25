@@ -1,8 +1,8 @@
 package no.stelar7.cdragon.types.releasemanifest;
 
 import no.stelar7.cdragon.types.releasemanifest.data.*;
-import no.stelar7.cdragon.util.*;
-import no.stelar7.cdragon.util.reader.RandomAccessReader;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;

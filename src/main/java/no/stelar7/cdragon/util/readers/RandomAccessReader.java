@@ -1,12 +1,9 @@
-package no.stelar7.cdragon.util.reader;
+package no.stelar7.cdragon.util.readers;
 
 
-import no.stelar7.cdragon.util.reader.types.Vector2f;
-import no.stelar7.cdragon.util.reader.types.Vector2i;
-import no.stelar7.cdragon.util.reader.types.*;
-import no.stelar7.cdragon.util.reader.types.Vector3f;
-import no.stelar7.cdragon.util.reader.types.Vector3i;
-import no.stelar7.cdragon.util.reader.types.Vector4f;
+import no.stelar7.cdragon.util.readers.types.Vector2f;
+import no.stelar7.cdragon.util.readers.types.*;
+import no.stelar7.cdragon.util.readers.types.Vector3i;
 import org.joml.*;
 import sun.nio.ch.DirectBuffer;
 
@@ -187,9 +184,9 @@ public class RandomAccessReader implements AutoCloseable
         buffer.position(pos);
     }
     
-    public Vector3f readVec3F()
+    public no.stelar7.cdragon.util.readers.types.Vector3f readVec3F()
     {
-        Vector3f vector = new Vector3f();
+        no.stelar7.cdragon.util.readers.types.Vector3f vector = new no.stelar7.cdragon.util.readers.types.Vector3f();
         vector.x = buffer.getFloat();
         vector.y = buffer.getFloat();
         vector.z = buffer.getFloat();
@@ -233,9 +230,9 @@ public class RandomAccessReader implements AutoCloseable
         return vector;
     }
     
-    public Vector2i readVec2I()
+    public no.stelar7.cdragon.util.readers.types.Vector2i readVec2I()
     {
-        Vector2i vector = new Vector2i();
+        no.stelar7.cdragon.util.readers.types.Vector2i vector = new no.stelar7.cdragon.util.readers.types.Vector2i();
         vector.x = (buffer.getInt());
         vector.y = (buffer.getInt());
         return vector;
@@ -259,9 +256,9 @@ public class RandomAccessReader implements AutoCloseable
         return vector;
     }
     
-    public Vector4f readVec4F()
+    public no.stelar7.cdragon.util.readers.types.Vector4f readVec4F()
     {
-        Vector4f vector = new Vector4f();
+        no.stelar7.cdragon.util.readers.types.Vector4f vector = new no.stelar7.cdragon.util.readers.types.Vector4f();
         vector.x = (buffer.getFloat());
         vector.y = (buffer.getFloat());
         vector.z = (buffer.getFloat());

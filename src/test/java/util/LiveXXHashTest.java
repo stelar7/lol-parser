@@ -1,6 +1,6 @@
 package util;
 
-import no.stelar7.cdragon.util.UtilHandler;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import javax.swing.*;
 import javax.swing.event.*;

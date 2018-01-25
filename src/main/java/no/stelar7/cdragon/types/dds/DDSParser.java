@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.dds;
 
 
-import no.stelar7.cdragon.util.CompressionHandler;
+import no.stelar7.cdragon.util.handlers.CompressionHandler;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

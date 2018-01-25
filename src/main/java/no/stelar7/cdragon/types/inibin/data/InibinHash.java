@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.inibin.data;
 
-import no.stelar7.cdragon.util.UtilHandler;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import java.util.*;
 import java.util.function.Function;
