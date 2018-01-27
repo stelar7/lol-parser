@@ -1,9 +1,9 @@
 package no.stelar7.cdragon.util.handlers;
 
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
 import net.jpountz.xxhash.*;
-import no.stelar7.api.l4j8.basic.utils.Utils;
 
 import java.io.*;
 import java.net.*;
@@ -27,13 +27,16 @@ public final class UtilHandler
     
     private static Map<Long, String> binHashNames;
     private static Map<Long, String> iniHashNames;
+    private static Map<String, Map<String, String>> wadHashNames = new HashMap<>();
     
-    private static       Map<String, Map<String, String>> wadHashNames   = new HashMap<>();
-    private static       XXHashFactory                    xxHashFactory  = XXHashFactory.fastestInstance();
-    private static final char[]                           hexArray       = "0123456789ABCDEF".toCharArray();
-    public static final  Path                             WAD_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
-    public static final  Path                             BIN_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\bin\\data\\binhash.json");
-    public static final  Path                             INI_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\inibin\\data\\inihash.json");
+    private static Gson gson;
+    
+    private static       XXHashFactory xxHashFactory = XXHashFactory.fastestInstance();
+    private static final char[]        hexArray      = "0123456789ABCDEF".toCharArray();
+    
+    public static final Path WAD_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\wad\\hashes");
+    public static final Path BIN_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\bin\\data\\binhash.json");
+    public static final Path INI_HASH_STORE = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types\\inibin\\data\\inihash.json");
     
     public static String getBINHash(int hash)
     {
@@ -48,7 +51,7 @@ public final class UtilHandler
         {
             binHashNames = new HashMap<>();
             String            sb         = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            Map<Long, String> pluginData = gson.fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             binHashNames.putAll(pluginData);
             
             System.out.println("Loaded known bin hashes");
@@ -74,7 +77,7 @@ public final class UtilHandler
         {
             iniHashNames = new HashMap<>();
             String            sb         = new String(Files.readAllBytes(INI_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            Map<Long, String> pluginData = gson.fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             iniHashNames.putAll(pluginData);
             
             System.out.println("Loaded known bin hashes");
@@ -98,7 +101,7 @@ public final class UtilHandler
         try
         {
             String              sb         = new String(Files.readAllBytes(WAD_HASH_STORE.resolve(pluginName + ".json")), StandardCharsets.UTF_8);
-            Map<String, String> pluginData = Utils.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+            Map<String, String> pluginData = gson.fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
             wadHashNames.put(pluginName, pluginData);
             
             System.out.println("Loaded known hashes for " + pluginName);
@@ -347,6 +350,16 @@ public final class UtilHandler
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public static Gson getGson()
+    {
+        if (gson == null)
+        {
+            gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        }
+        
+        return gson;
     }
     
     public static boolean notInRange(int x, int min, int max)

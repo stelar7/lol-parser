@@ -1,7 +1,6 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
-import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.util.readers.types.ByteArray;
 
 import java.nio.charset.StandardCharsets;
@@ -112,7 +111,7 @@ public final class FileTypeHandler
     {
         String      dataString = new String(jsonString, StandardCharsets.UTF_8);
         JsonElement obj        = new JsonParser().parse(dataString);
-        String      pretty     = Utils.getGson().toJson(obj);
+        String      pretty     = UtilHandler.getGson().toJson(obj);
         return pretty.getBytes(StandardCharsets.UTF_8);
     }
     

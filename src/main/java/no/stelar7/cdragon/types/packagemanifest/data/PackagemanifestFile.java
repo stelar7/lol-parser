@@ -1,7 +1,6 @@
-package no.stelar7.cdragon.types.packagemanifest;
+package no.stelar7.cdragon.types.packagemanifest.data;
 
 import lombok.Data;
-import no.stelar7.cdragon.types.packagemanifest.data.PackagemanifestLine;
 
 import java.util.List;
 

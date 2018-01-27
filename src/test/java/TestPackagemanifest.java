@@ -1,6 +1,6 @@
 import com.google.gson.*;
 import no.stelar7.cdragon.types.packagemanifest.*;
-import no.stelar7.cdragon.types.packagemanifest.data.PackagemanifestLine;
+import no.stelar7.cdragon.types.packagemanifest.data.*;
 import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;

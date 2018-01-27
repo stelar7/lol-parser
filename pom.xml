@@ -9,69 +9,74 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
+        <!-- used for tests -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
         </dependency>
+
+        <!-- used for json parsing -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.1</version>
         </dependency>
+
+        <!-- used to avoid creating getters and setters -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.16.18</version>
         </dependency>
 
+        <!-- used for XXHash64 -->
         <dependency>
             <groupId>org.lz4</groupId>
             <artifactId>lz4-java</artifactId>
             <version>1.4</version>
         </dependency>
 
+        <!-- used for zstd uncompression -->
         <dependency>
             <groupId>com.github.luben</groupId>
             <artifactId>zstd-jni</artifactId>
             <version>1.3.2-2</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>com.github.stelar7</groupId>
-            <artifactId>l4j8</artifactId>
-            <version>V1.3.0</version>
-        </dependency>
-
+        <!-- used to create powersets -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>23.4-jre</version>
+            <version>23.6-jre</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.11</version>
-        </dependency>
-
+        <!-- used to parse DDS image files -->
         <dependency>
             <groupId>net.nikr</groupId>
             <artifactId>dds</artifactId>
             <version>1.0.0</version>
         </dependency>
 
+        <!-- used for vec2, vec3, vec4 -->
         <dependency>
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
             <version>1.9.7</version>
         </dependency>
 
+        <!-- used for connecting to the lcu via websocket -->
         <dependency>
             <groupId>com.neovisionaries</groupId>
             <artifactId>nv-websocket-client</artifactId>
             <version>2.3</version>
+        </dependency>
+
+        <!-- used for creating .tar.gz files -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>1.15</version>
         </dependency>
     </dependencies>
 

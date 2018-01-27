@@ -4,10 +4,9 @@ import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import javafx.util.Pair;
-import no.stelar7.api.l4j8.basic.utils.Utils;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
@@ -305,7 +304,7 @@ public class TestHashes
             @SuppressWarnings(value = "unchecked")
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -367,7 +366,7 @@ public class TestHashes
         }
         
         Path possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "8e45023d7d142cbf.json");
-        Map<String, String> data = Utils.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>()
+        Map<String, String> data = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>()
         {
         }.getType());
         return transmute(data.keySet());
@@ -416,7 +415,7 @@ public class TestHashes
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -944,7 +943,7 @@ public class TestHashes
                 final List<String>               foundHashes = new ArrayList<>();
                 final List<Pair<String, String>> knownHashes = new ArrayList<>();
                 
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -954,7 +953,7 @@ public class TestHashes
                     }
                 });
                 
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     String insert = v.substring(("plugins/" + filename + "/").length());
@@ -1015,7 +1014,7 @@ public class TestHashes
                 System.out.println(file.toAbsolutePath().toString());
                 
                 final List<Pair<String, String>> foundHashes = new ArrayList<>();
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -1056,7 +1055,7 @@ public class TestHashes
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
             {
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(path), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(path), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -1069,7 +1068,7 @@ public class TestHashes
             }
         });
         
-        ((List<String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
+        ((List<String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
         {
         }.getType())).forEach((v) -> {
             Pair<String, String> data = new Pair<>(UtilHandler.generateXXHash64(v), v);
@@ -1125,7 +1124,7 @@ public class TestHashes
                 
                 System.out.println(file.toAbsolutePath().toString());
                 
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -1168,7 +1167,7 @@ public class TestHashes
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -1239,7 +1238,7 @@ public class TestHashes
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
                     Pair<String, String> data = new Pair<>(k, v);
@@ -1252,7 +1251,7 @@ public class TestHashes
             }
         });
         
-        ((Map<String, String>) Utils.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+        ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
         {
         }.getType())).forEach((k, v) -> {
             Pair<String, String> data = new Pair<>(k, v);
