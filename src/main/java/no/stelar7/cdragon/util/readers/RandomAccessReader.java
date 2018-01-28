@@ -293,4 +293,8 @@ public class RandomAccessReader implements AutoCloseable
         return vector;
     }
     
+    public boolean isEOF()
+    {
+        return !buffer.hasRemaining();
+    }
 }
