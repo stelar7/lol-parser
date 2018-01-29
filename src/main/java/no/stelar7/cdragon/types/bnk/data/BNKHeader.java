@@ -7,4 +7,5 @@ public class BNKHeader
 {
     private String section;
     private int    length;
+    private int    dataStart;
 }

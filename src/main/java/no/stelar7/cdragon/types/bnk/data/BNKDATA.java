@@ -10,6 +10,7 @@ public class BNKDATA extends BNKHeader
 {
     public BNKDATA(BNKHeader header)
     {
+        setDataStart(header.getDataStart());
         setSection(header.getSection());
         setLength(header.getLength());
     }

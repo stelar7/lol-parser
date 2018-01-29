@@ -8,6 +8,7 @@ public class BNKBKHD extends BNKHeader
 {
     public BNKBKHD(BNKHeader header)
     {
+        setDataStart(header.getDataStart());
         setSection(header.getSection());
         setLength(header.getLength());
     }

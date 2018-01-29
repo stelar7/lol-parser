@@ -10,6 +10,7 @@ public class BNKDIDX extends BNKHeader
 {
     public BNKDIDX(BNKHeader header)
     {
+        setDataStart(header.getDataStart());
         setSection(header.getSection());
         setLength(header.getLength());
     }
