@@ -146,6 +146,7 @@ public final class FileTypeHandler
             ByteArray hlslMagic = new ByteArray(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
             ByteArray oegmMagic = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
             ByteArray fcnfMagic = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
+            ByteArray r3d2Magic = new ByteArray(new byte[]{(byte) 0x72, (byte) 0x33, (byte) 0x64, (byte) 0x32});
             
             
             magicNumbers = new HashMap<>();
@@ -185,6 +186,7 @@ public final class FileTypeHandler
             magicNumbers.put(unkMagic, "unk");
             magicNumbers.put(oegmMagic, "oegm");
             magicNumbers.put(fcnfMagic, "fcnf");
+            magicNumbers.put(r3d2Magic, "r3d2");
         }
         
         return magicNumbers;

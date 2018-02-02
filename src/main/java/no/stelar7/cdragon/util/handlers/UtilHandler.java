@@ -51,7 +51,7 @@ public final class UtilHandler
         {
             binHashNames = new HashMap<>();
             String            sb         = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = gson.fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            Map<Long, String> pluginData = getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             binHashNames.putAll(pluginData);
             
             System.out.println("Loaded known bin hashes");
@@ -77,7 +77,7 @@ public final class UtilHandler
         {
             iniHashNames = new HashMap<>();
             String            sb         = new String(Files.readAllBytes(INI_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = gson.fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            Map<Long, String> pluginData = getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             iniHashNames.putAll(pluginData);
             
             System.out.println("Loaded known bin hashes");
@@ -101,7 +101,7 @@ public final class UtilHandler
         try
         {
             String              sb         = new String(Files.readAllBytes(WAD_HASH_STORE.resolve(pluginName + ".json")), StandardCharsets.UTF_8);
-            Map<String, String> pluginData = gson.fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+            Map<String, String> pluginData = getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
             wadHashNames.put(pluginName, pluginData);
             
             System.out.println("Loaded known hashes for " + pluginName);

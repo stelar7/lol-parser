@@ -80,6 +80,11 @@ public class TestBIN
             {
                 System.out.println("Parsing file: " + path);
                 BINFile parsed = parser.parse(path);
+                if (parsed == null)
+                {
+                    continue;
+                }
+                
                 Files.createDirectories(extractPath);
                 //Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json.bak"), parsed.toJSON().getBytes(StandardCharsets.UTF_8));
                 
