@@ -10,7 +10,7 @@ import sun.nio.ch.DirectBuffer;
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.FileChannel.MapMode;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.*;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -73,7 +73,41 @@ public class RandomAccessReader implements AutoCloseable
     
     public String readString(int length)
     {
-        return new String(readBytes(length), StandardCharsets.UTF_8).trim();
+        return new String(readBytes(length), StandardCharsets.UTF_8);
+    }
+    
+    public String readString(int length, Charset charset)
+    {
+        return new String(readBytes(length), charset).trim();
+    }
+    
+    
+    private int  bitsRemaining;
+    private byte bits;
+    
+    public byte readBit()
+    {
+        if (bitsRemaining == 0)
+        {
+            bits = readByte();
+            bitsRemaining = 8;
+        }
+        
+        bitsRemaining--;
+        return (((bits & 0xFF) & (0x80 >> bitsRemaining)) != 0) ? (byte) 1 : (byte) 0;
+    }
+    
+    public int readBits(int count)
+    {
+        int result = 0;
+        for (int i = 0; i < count; i++)
+        {
+            if (readBit() == 1)
+            {
+                result |= (1 << i);
+            }
+        }
+        return result;
     }
     
     
@@ -90,7 +124,7 @@ public class RandomAccessReader implements AutoCloseable
             temp[index++] = b;
         }
         
-        return new String(temp, StandardCharsets.UTF_8).trim();
+        return new String(temp, StandardCharsets.UTF_8);
     }
     
     /**
@@ -105,7 +139,7 @@ public class RandomAccessReader implements AutoCloseable
             temp[index++] = buffer.get();
         }
         
-        return new String(temp, StandardCharsets.UTF_8).trim();
+        return new String(temp, StandardCharsets.UTF_8);
     }
     
     public long readLong()
