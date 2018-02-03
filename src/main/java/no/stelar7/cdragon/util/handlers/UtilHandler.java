@@ -384,7 +384,7 @@ public final class UtilHandler
     
     public static String getHex(byte[] raw)
     {
-        final StringBuilder hex = new StringBuilder(2 * raw.length);
+        final StringBuilder hex = new StringBuilder();
         for (final byte b : raw)
         {
             hex.append("0x").append(HEXES.charAt((b & 0xF0) >> 4)).append(HEXES.charAt((b & 0x0F))).append(", ");
@@ -413,14 +413,11 @@ public final class UtilHandler
     {
         int crc   = 0xFFFFFFFF;
         int index = 0;
-        System.out.println(UtilHandler.getHex(buffer).substring(0, size * 2));
         
         while (size-- > 0)
         {
-            System.out.println(size);
             crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[((crc >> 24) & 0xFF) ^ buffer[index++]];
         }
-        
         
         return crc;
     }
