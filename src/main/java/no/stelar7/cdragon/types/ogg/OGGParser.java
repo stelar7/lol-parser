@@ -277,8 +277,8 @@ public class OGGParser
     
     private void generateCommentHeader(OGGStream ogg, WEMData wem)
     {
-        String vendor = "Converted from WEM to OGG by lol-parser";
-        
+//        String vendor = "Converted from WEM to OGG by lol-parser";
+        String vendor = "converted from Audiokinetic Wwise by ww2ogg 0.19";
         ogg.writeVorbisHeader(3);
         
         // vendor length - 32

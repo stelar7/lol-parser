@@ -4,7 +4,7 @@ import com.google.common.io.*;
 import lombok.Data;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 
-import java.nio.ByteBuffer;
+import java.nio.*;
 import java.util.Arrays;
 
 @Data
@@ -61,13 +61,13 @@ public class OGGStream
             pageBuffer[4] = 0;
             pageBuffer[5] = (byte) ((continued ? 1 : 0) | (first ? 2 : 0) | (last ? 4 : 0));
             
-            System.arraycopy(ByteBuffer.allocate(4).putInt(granule).array(), 0, pageBuffer, 6, 4);
+            System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(granule).array(), 0, pageBuffer, 6, 4);
             
             Arrays.fill(pageBuffer, 10, 13, (byte) ((granule == 0xFFFFFFFF) ? 0xFF : 0));
             
             pageBuffer[14] = 1;
             
-            System.arraycopy(ByteBuffer.allocate(4).putInt(sequenceNumber).array(), 0, pageBuffer, 18, 4);
+            System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(sequenceNumber).array(), 0, pageBuffer, 18, 4);
             
             Arrays.fill(pageBuffer, 22, 25, (byte) 0);
             
@@ -88,7 +88,7 @@ public class OGGStream
             // is this legit?
             // int crc = (int) UtilHandler.computeCRC32(pageBuffer, HEADER_SIZE + segments + payloadBytes);
             int crc = (int) UtilHandler.computeCRC32(pageBuffer);
-            System.arraycopy(ByteBuffer.allocate(4).putInt(crc).array(), 0, pageBuffer, 22, 4);
+            System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(crc).array(), 0, pageBuffer, 22, 4);
             
             for (int i = 0; i < HEADER_SIZE + segments + payloadBytes; i++)
             {
