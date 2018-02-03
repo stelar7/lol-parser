@@ -19,6 +19,11 @@ public class RandomAccessReader implements AutoCloseable
     private ByteBuffer buffer;
     private Path       path;
     
+    public RandomAccessReader(File file, ByteOrder order)
+    {
+        this(file.toPath(), order);
+    }
+    
     public RandomAccessReader(Path path, ByteOrder order)
     {
         try
@@ -41,6 +46,7 @@ public class RandomAccessReader implements AutoCloseable
         this.buffer = ByteBuffer.wrap(dataBytes);
         this.buffer.order(order);
     }
+    
     
     @Override
     public void close()
@@ -83,9 +89,18 @@ public class RandomAccessReader implements AutoCloseable
     
     
     private int  bitsRemaining;
+    private int  bitsRead;
     private byte bits;
     
-    public byte readBit()
+    /**
+     * Only counts bits read with the readBits(int) method!
+     */
+    public int getBitsRead()
+    {
+        return bitsRead;
+    }
+    
+    private byte readBit()
     {
         if (bitsRemaining == 0)
         {
@@ -94,6 +109,7 @@ public class RandomAccessReader implements AutoCloseable
         }
         
         bitsRemaining--;
+        bitsRead++;
         return (((bits & 0xFF) & (0x80 >> bitsRemaining)) != 0) ? (byte) 1 : (byte) 0;
     }
     

@@ -210,6 +210,9 @@ public class WEMData
             raf.seek(vorbChunkOffset + 0x18);
         }
         
+        // remove this?
+        modPackets = false;
+        
         setupPacketOffset = raf.readInt();
         firstAudioPacketOffset = raf.readInt();
         
