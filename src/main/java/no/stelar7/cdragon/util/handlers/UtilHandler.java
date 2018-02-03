@@ -416,7 +416,8 @@ public final class UtilHandler
         
         while (size-- > 0)
         {
-            crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[((crc >> 24) & 0xFF) ^ buffer[index++]];
+            int crcLookupIndex = ((crc >> 24) & 0xFF) ^ buffer[index++];
+            crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[crcLookupIndex];
         }
         
         return crc;
