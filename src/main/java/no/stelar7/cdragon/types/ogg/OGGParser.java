@@ -240,32 +240,55 @@ public class OGGParser
         {
             throw new IllegalArgumentException("Error generating vorbis packet");
         }
-        
     }
     
-    private Pair<Integer, Boolean[]> generateOGGHeader(OGGStream ogg, RandomAccessReader bitStream, WEMData wem, boolean inlineCodebook, boolean fullSetup)
+    private void generateIdentificationHeader(OGGStream ogg, WEMData wem)
     {
-        Boolean[] modeBlockFlag = null;
-        int       modeBits      = -1;
-        
         ogg.writeVorbisHeader(1);
+        
+        // version - 32
         ogg.bitWrite(0, Integer.SIZE);
+        
+        // audio channels - 8
         ogg.bitWrite(wem.getChannelCount(), Byte.SIZE);
+        
+        // sample rate - 32
         ogg.bitWrite(wem.getSampleRate(), Integer.SIZE);
+        
+        // bitrate max - 32
         ogg.bitWrite(0, Integer.SIZE);
+        
+        // bitrate nominal - 32
         ogg.bitWrite(wem.getBytesPerSecond() * 8, Integer.SIZE);
+        
+        // bitrate min - 32
         ogg.bitWrite(0, Integer.SIZE);
+        
+        // blocksize 0 - 4
         ogg.bitWrite(wem.getBlockSize0Pow(), 4);
+        
+        // blocksize 1 - 4
         ogg.bitWrite(wem.getBlockSize1Pow(), 4);
+        
+        // framing flag
         ogg.writeBit(1);
         ogg.flushPage(false, false);
-        
-        
+    }
+    
+    private void generateCommentHeader(OGGStream ogg, WEMData wem)
+    {
         String vendor = "Converted from WEM to OGG by lol-parser";
+        
         ogg.writeVorbisHeader(3);
+        
+        // vendor length - 32
         ogg.bitWrite(vendor.length(), Integer.SIZE);
+        
+        // vendor string - utf8 vector
         ogg.bitWriteChars(vendor);
         
+        
+        // user-comment-list
         if (wem.getLoopCount() == 0)
         {
             ogg.bitWrite(0, Integer.SIZE);
@@ -275,12 +298,21 @@ public class OGGParser
             String loopend   = "LoopEnd=" + wem.getLoopEnd();
             
             ogg.bitWrite(2, Integer.SIZE);
-            ogg.bitWriteStringAndLength(loopstart);
-            ogg.bitWriteStringAndLength(loopend);
+            ogg.bitWriteLengthAndString(loopstart);
+            ogg.bitWriteLengthAndString(loopend);
         }
         
+        // framing bit - 1
         ogg.writeBit(1);
+        
         ogg.flushPage(false, false);
+    }
+    
+    
+    private Pair<Integer, Boolean[]> generateSetupHeader(OGGStream ogg, WEMData wem, RandomAccessReader bitStream, boolean inlineCodebook, boolean fullSetup)
+    {
+        Boolean[] modeBlockFlag = null;
+        int       modeBits      = -1;
         
         
         ogg.writeVorbisHeader(5);
@@ -602,7 +634,6 @@ public class OGGParser
             
             ogg.writeBit(1);
         }
-        
         ogg.flushPage(false, false);
         
         if (((bitStream.getBitsRead() + 7) / 8) != setupPacket.getSize())
@@ -616,6 +647,13 @@ public class OGGParser
         }
         
         return new Pair<>(modeBits, modeBlockFlag);
+    }
+    
+    private Pair<Integer, Boolean[]> generateOGGHeader(OGGStream ogg, RandomAccessReader bitStream, WEMData wem, boolean inlineCodebook, boolean fullSetup)
+    {
+        generateIdentificationHeader(ogg, wem);
+        generateCommentHeader(ogg, wem);
+        return generateSetupHeader(ogg, wem, bitStream, inlineCodebook, fullSetup);
     }
     
 }

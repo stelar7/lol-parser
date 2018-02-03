@@ -129,16 +129,16 @@ public class OGGStream
     {
         for (int j = 0; j < value.length(); j++)
         {
-            bitWrite(value.charAt(j), Character.SIZE);
+            bitWrite(value.charAt(j), Byte.SIZE);
         }
     }
     
-    public void bitWriteStringAndLength(String value)
+    public void bitWriteLengthAndString(String value)
     {
         bitWrite(value.length(), Integer.SIZE);
         for (int j = 0; j < value.length(); j++)
         {
-            bitWrite(value.charAt(j), Character.SIZE);
+            bitWrite(value.charAt(j), Byte.SIZE);
         }
     }
     
