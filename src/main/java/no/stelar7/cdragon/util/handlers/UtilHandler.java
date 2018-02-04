@@ -395,21 +395,6 @@ public final class UtilHandler
         return hex.toString();
     }
     
-    public static long computeCRC32(byte[] buffer, int size)
-    {
-        return computeCCITT32(buffer, size);
-//        int hash = 0;
-//
-//        for (int i = 0; i < size; i++)
-//        {
-//            long lookup = ((hash >> 24) & 0xFF) ^ buffer[i];
-//            System.out.println(lookup);
-//            hash = (hash << 8) ^ CRC_LOOKUP[(int) lookup];
-//        }
-//
-//        return Integer.toUnsignedLong(hash);
-    }
-    
     public static long computeCCITT32(byte[] buffer, int size)
     {
         int crc = 0;
@@ -418,8 +403,8 @@ public final class UtilHandler
         
         while (size-- > 0)
         {
-            int value          = data.get();
-            int crcLookupIndex = ((crc >> 24) & 0xFF) ^ (value & 0xFF);
+            int value          = data.get() & 0xFF;
+            int crcLookupIndex = ((crc >> 24) & 0xFF) ^ value;
             crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[crcLookupIndex];
         }
         

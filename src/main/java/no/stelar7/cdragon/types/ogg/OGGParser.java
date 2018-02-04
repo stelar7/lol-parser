@@ -278,7 +278,7 @@ public class OGGParser
     private void generateCommentHeader(OGGStream ogg, WEMData wem)
     {
 //        String vendor = "Converted from WEM to OGG by lol-parser";
-        String vendor = "converted from Audiokinetic Wwise by ww2ogg 0.19";
+        String vendor = "converted from Audiokinetic Wwise by ww2ogg 0.24";
         ogg.writeVorbisHeader(3);
         
         // vendor length - 32
@@ -313,7 +313,6 @@ public class OGGParser
     {
         Boolean[] modeBlockFlag = null;
         int       modeBits      = -1;
-        
         
         ogg.writeVorbisHeader(5);
         OGGPacket setupPacket = new OGGPacket(bitStream, wem.getDataChunkOffset() + wem.getSetupPacketOffset(), wem.isNoGranule());

@@ -63,13 +63,13 @@ public class OGGStream
             
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(granule).array(), 0, pageBuffer, 6, 4);
             
-            Arrays.fill(pageBuffer, 10, 13, (byte) ((granule == 0xFFFFFFFF) ? 0xFF : 0));
+            Arrays.fill(pageBuffer, 10, 14, (byte) ((granule == 0xFFFFFFFF) ? 0xFF : 0));
             
             pageBuffer[14] = 1;
             
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(sequenceNumber).array(), 0, pageBuffer, 18, 4);
             
-            Arrays.fill(pageBuffer, 22, 25, (byte) 0);
+            Arrays.fill(pageBuffer, 22, 26, (byte) 0);
             
             pageBuffer[26] = (byte) segments;
             
@@ -85,7 +85,7 @@ public class OGGStream
                 }
             }
             
-            int crc = (int) UtilHandler.computeCRC32(pageBuffer, HEADER_SIZE + segments + payloadBytes);
+            int crc = (int) UtilHandler.computeCCITT32(pageBuffer, HEADER_SIZE + segments + payloadBytes);
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(crc).array(), 0, pageBuffer, 22, 4);
             
             for (int i = 0; i < HEADER_SIZE + segments + payloadBytes; i++)
