@@ -7,6 +7,7 @@ import net.jpountz.xxhash.*;
 
 import java.io.*;
 import java.net.*;
+import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -411,12 +412,14 @@ public final class UtilHandler
     
     public static long computeCCITT32(byte[] buffer, int size)
     {
-        int crc   = 0xFFFFFFFF;
-        int index = 0;
+        int crc = 0;
+        
+        ByteBuffer data = ByteBuffer.wrap(buffer);
         
         while (size-- > 0)
         {
-            int crcLookupIndex = ((crc >> 24) & 0xFF) ^ buffer[index++];
+            int value          = data.get();
+            int crcLookupIndex = ((crc >> 24) & 0xFF) ^ (value & 0xFF);
             crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[crcLookupIndex];
         }
         
