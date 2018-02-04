@@ -74,26 +74,27 @@ public class OGGParser
             offset = packetPayloadOffset;
             bitStream.seek(offset);
             
-            ogg.setGranule((granule == 0xFFFFFFFF) ? 1 : granule);
+            ogg.setGranule((granule == -1) ? 1 : granule);
             
             if (wem.isModPackets())
             {
                 if (modeBlockFlag == null)
                 {
-                    throw new IllegalArgumentException("Error generating vorbis packet");
+                    throw new IllegalArgumentException("Didnt load modeBlockFlag");
                 }
                 
-                byte packetType = 0;
-                ogg.writeBit(packetType);
+                BitField packetType = new BitField(1, 0);
+                packetType.write(ogg);
+                
+                BitField modeNumber = new BitField(modeBits);
+                modeNumber.read(bitStream);
+                modeNumber.write(ogg);
+                
+                BitField remainder = new BitField(8 - modeBits);
+                remainder.read(bitStream);
                 
                 
-                int modeNumber = bitStream.readBits(modeBits);
-                ogg.bitWrite(modeNumber, Byte.SIZE);
-                
-                int remainder = bitStream.readBits(8 - modeBits);
-                
-                
-                if (modeBlockFlag[modeNumber])
+                if (modeBlockFlag[modeNumber.getValue()])
                 {
                     bitStream.seek(nextOffset);
                     boolean nextBlockFlag = false;
@@ -103,44 +104,46 @@ public class OGGParser
                         OGGPacket audioPacket = new OGGPacket(bitStream, nextOffset, wem.isNoGranule());
                         int       nextSize    = audioPacket.getSize();
                         
-                        if (nextSize != 0xFFFFFFFF)
+                        if (nextSize > 0)
                         {
                             bitStream.seek(audioPacket.getOffset());
-                            int nextModeNumber = bitStream.readBits(modeBits);
+                            BitField nextModeNumber = new BitField(modeBits);
+                            nextModeNumber.read(bitStream);
                             
-                            nextBlockFlag = modeBlockFlag[nextModeNumber];
+                            nextBlockFlag = modeBlockFlag[nextModeNumber.getValue()];
                         }
                     }
                     
-                    byte previousWindowType = previousBlockFlag ? (byte) 1 : (byte) 0;
-                    ogg.writeBit(previousWindowType);
+                    BitField previousWindowType = new BitField(1, previousBlockFlag ? 1 : 0);
+                    previousWindowType.write(ogg);
                     
-                    byte nextWindowType = nextBlockFlag ? (byte) 1 : (byte) 0;
-                    ogg.writeBit(nextWindowType);
+                    BitField nextWindowType = new BitField(1, nextBlockFlag ? 1 : 0);
+                    nextWindowType.write(ogg);
                     
                     bitStream.seek(offset + 1);
                 }
                 
-                previousBlockFlag = modeBlockFlag[modeNumber];
-                ogg.bitWrite(remainder, 8 - modeBits);
+                previousBlockFlag = modeBlockFlag[modeNumber.getValue()];
+                remainder.write(ogg);
             } else
             {
-                int b = Byte.toUnsignedInt(bitStream.readByte());
-                if (b < 0)
+                BitField b = new BitField(8);
+                b.read(bitStream);
+                if (b.getValue() < 0)
                 {
-                    throw new IllegalArgumentException("Error generating vorbis packet");
+                    throw new IllegalArgumentException("file truncated");
                 }
-                ogg.bitWrite(b, Byte.SIZE);
+                b.write(ogg);
             }
-            
+            BitField b2 = new BitField(8);
             for (int i = 1; i < size; i++)
             {
-                int b = Byte.toUnsignedInt(bitStream.readByte());
-                if (b < 0)
+                b2.read(bitStream);
+                if (b2.getValue() < 0)
                 {
-                    throw new IllegalArgumentException("Error generating vorbis packet");
+                    throw new IllegalArgumentException("file truncated");
                 }
-                ogg.bitWrite(b, Byte.SIZE);
+                b2.write(ogg);
             }
             
             offset = nextOffset;
@@ -150,7 +153,7 @@ public class OGGParser
         
         if (offset > wem.getDataChunkOffset() + wem.getDataChunkSize())
         {
-            throw new IllegalArgumentException("Error generating vorbis packet");
+            throw new IllegalArgumentException("page truncated");
         }
     }
     

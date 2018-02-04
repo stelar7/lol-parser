@@ -401,14 +401,16 @@ public final class UtilHandler
         
         ByteBuffer data = ByteBuffer.wrap(buffer);
         
-        while (size-- > 0)
+        for (int i = 0; i < size; i++)
         {
-            int value          = data.get() & 0xFF;
+            int value          = data.get(i) & 0xFF;
             int crcLookupIndex = ((crc >> 24) & 0xFF) ^ value;
             crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[crcLookupIndex];
         }
         
-        return crc;
+        long returnValue = Integer.toUnsignedLong(crc);
+        
+        return returnValue;
     }
     
     private static final int[] CRC_LOOKUP = new int[]{
