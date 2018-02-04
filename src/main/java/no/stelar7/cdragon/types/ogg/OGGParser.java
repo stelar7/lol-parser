@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.ogg;
 
 import javafx.util.Pair;
 import no.stelar7.cdragon.types.ogg.data.*;
-import no.stelar7.cdragon.types.wem.data.*;
+import no.stelar7.cdragon.types.wem.data.WEMData;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
@@ -13,9 +13,18 @@ public class OGGParser
     
     public OGGStream parse(WEMData wem)
     {
+        wem.printInfo();
+        
         OGGStream          ogg       = new OGGStream();
         RandomAccessReader bitStream = new RandomAccessReader(wem.getDataBytes(), ByteOrder.LITTLE_ENDIAN);
         
+        generateOGGFile(bitStream, ogg, wem);
+        
+        return ogg;
+    }
+    
+    private void generateOGGFile(RandomAccessReader bitStream, OGGStream ogg, WEMData wem)
+    {
         Boolean[] modeBlockFlag     = null;
         int       modeBits          = 0;
         boolean   previousBlockFlag = false;
@@ -25,8 +34,7 @@ public class OGGParser
             generateOGGHeaderTriad(ogg, bitStream, wem);
         } else
         {
-            // should fullSetup be false?
-            Pair<Integer, Boolean[]> data = generateOGGHeader(ogg, bitStream, wem, false, true);
+            Pair<Integer, Boolean[]> data = generateOGGHeader(ogg, bitStream, wem, false, false);
             modeBits = data.getKey();
             modeBlockFlag = data.getValue();
         }
@@ -144,8 +152,6 @@ public class OGGParser
         {
             throw new IllegalArgumentException("Error generating vorbis packet");
         }
-        
-        return ogg;
     }
     
     private void generateOGGHeaderTriad(OGGStream ogg, RandomAccessReader bitStream, WEMData wem)
@@ -246,64 +252,67 @@ public class OGGParser
     {
         ogg.writeVorbisHeader(1);
         
-        // version - 32
-        ogg.bitWrite(0, Integer.SIZE);
+        BitField version = new BitField(32, 0);
+        version.write(ogg);
         
-        // audio channels - 8
-        ogg.bitWrite(wem.getChannelCount(), Byte.SIZE);
+        BitField ch = new BitField(8, wem.getChannelCount());
+        ch.write(ogg);
         
-        // sample rate - 32
-        ogg.bitWrite(wem.getSampleRate(), Integer.SIZE);
+        BitField srate = new BitField(32, wem.getSampleRate());
+        srate.write(ogg);
         
-        // bitrate max - 32
-        ogg.bitWrite(0, Integer.SIZE);
+        BitField bitrateMax = new BitField(32, 0);
+        bitrateMax.write(ogg);
         
-        // bitrate nominal - 32
-        ogg.bitWrite(wem.getBytesPerSecond() * 8, Integer.SIZE);
+        BitField bitrateNominal = new BitField(32, wem.getBytesPerSecond() * 8);
+        bitrateNominal.write(ogg);
         
-        // bitrate min - 32
-        ogg.bitWrite(0, Integer.SIZE);
+        BitField bitrateMin = new BitField(32, 0);
+        bitrateMin.write(ogg);
         
-        // blocksize 0 - 4
-        ogg.bitWrite(wem.getBlockSize0Pow(), 4);
+        BitField blocksize0 = new BitField(4, wem.getBlockSize0Pow());
+        blocksize0.write(ogg);
         
-        // blocksize 1 - 4
-        ogg.bitWrite(wem.getBlockSize1Pow(), 4);
+        BitField blocksize1 = new BitField(4, wem.getBlockSize1Pow());
+        blocksize1.write(ogg);
         
-        // framing flag
-        ogg.writeBit(1);
+        BitField framing = new BitField(1, 1);
+        framing.write(ogg);
+        
         ogg.flushPage(false, false);
     }
     
     private void generateCommentHeader(OGGStream ogg, WEMData wem)
     {
-//        String vendor = "Converted from WEM to OGG by lol-parser";
-        String vendor = "converted from Audiokinetic Wwise by ww2ogg 0.24";
         ogg.writeVorbisHeader(3);
         
-        // vendor length - 32
-        ogg.bitWrite(vendor.length(), Integer.SIZE);
+        String vendor = "converted from Audiokinetic Wwise by ww2ogg 0.24";
         
-        // vendor string - utf8 vector
+        BitField vendorSize = new BitField(32, vendor.length());
+        vendorSize.write(ogg);
+        
         ogg.bitWriteChars(vendor);
         
         
-        // user-comment-list
         if (wem.getLoopCount() == 0)
         {
-            ogg.bitWrite(0, Integer.SIZE);
+            // user comment count
+            BitField userCommentCount = new BitField(32, 0);
+            userCommentCount.write(ogg);
         } else
         {
+            BitField userCommentCount = new BitField(32, 2);
+            userCommentCount.write(ogg);
+            
             String loopstart = "LoopStart=" + wem.getLoopStart();
             String loopend   = "LoopEnd=" + wem.getLoopEnd();
             
-            ogg.bitWrite(2, Integer.SIZE);
             ogg.bitWriteLengthAndString(loopstart);
             ogg.bitWriteLengthAndString(loopend);
         }
         
-        // framing bit - 1
-        ogg.writeBit(1);
+        BitField framing = new BitField(1, 1);
+        framing.write(ogg);
         
         ogg.flushPage(false, false);
     }
@@ -320,16 +329,18 @@ public class OGGParser
         
         if (setupPacket.getGranule() != 0)
         {
-            throw new IllegalArgumentException("Error generating vorbis packet");
+            throw new IllegalArgumentException("Setup packet granule != 0");
         }
         
-        int codebookCount = bitStream.readBits(8);
-        ogg.bitWrite(codebookCount, Byte.SIZE);
-        codebookCount++;
+        BitField codebookCountLess1 = new BitField(8);
+        codebookCountLess1.read(bitStream);
+        int codebookCount = codebookCountLess1.getValue() + 1;
+        codebookCountLess1.write(ogg);
         
         if (inlineCodebook)
         {
             CodebookLibrary codebook = new CodebookLibrary();
+            
             for (int i = 0; i < codebookCount; i++)
             {
                 if (fullSetup)
@@ -343,157 +354,199 @@ public class OGGParser
         } else
         {
             CodebookLibrary codebook = new CodebookLibrary();
+            
             for (int i = 0; i < codebookCount; i++)
             {
-                int codeId = bitStream.readBits(10);
-                codebook.rebuild(codeId, ogg);
+                BitField codebookId = new BitField(10);
+                codebookId.read(bitStream);
+                try
+                {
+                    codebook.rebuild(codebookId.getValue(), ogg);
+                } catch (IllegalArgumentException e)
+                {
+                    if (codebookId.getValue() == 0x342)
+                    {
+                        BitField codebookIdentifier = new BitField(14);
+                        codebookIdentifier.read(bitStream);
+                        if (codebookIdentifier.getValue() == 0x1590)
+                        {
+                            throw new IllegalArgumentException("Invalid codebook 0x342, use fullSetup");
+                        }
+                    }
+                }
             }
         }
         
+        BitField timeCountLess1 = new BitField(6, 0);
+        timeCountLess1.write(ogg);
         
-        byte  timeCountLess1 = 0;
-        short dummyValue     = 0;
-        ogg.bitWrite(timeCountLess1, 6);
-        ogg.bitWrite(dummyValue, Short.SIZE);
+        BitField dummyTimeValue = new BitField(16, 0);
+        dummyTimeValue.write(ogg);
         
         if (fullSetup)
         {
+            BitField bitly = new BitField(1);
             while (bitStream.getBitsRead() < setupPacket.getSize() * 8)
             {
-                ogg.writeBit(bitStream.readBits(1));
+                bitly.read(bitStream);
+                bitly.write(ogg);
             }
         } else
         {
             
-            
-            byte floorCount = (byte) bitStream.readBits(6);
-            ogg.bitWrite(floorCount, 6);
-            floorCount++;
+            BitField floorCountLess1 = new BitField(6);
+            floorCountLess1.read(bitStream);
+            int floorCount = floorCountLess1.getValue() + 1;
+            floorCountLess1.write(ogg);
             
             for (int i = 0; i < floorCount; i++)
             {
-                short floorType = 1;
-                ogg.bitWrite(floorType, Short.SIZE);
+                BitField floorType = new BitField(16, 1);
+                floorType.write(ogg);
                 
-                byte floor1partitions = (byte) bitStream.readBits(5);
-                ogg.bitWrite(floor1partitions, 5);
+                BitField floor1Partitions = new BitField(5);
+                floor1Partitions.read(bitStream);
+                floor1Partitions.write(ogg);
                 
-                int[] floor1PartitionClassList = new int[floor1partitions];
-                int   maxClass                 = 0;
-                for (int j = 0; j < floor1partitions; j++)
+                int[] floor1PartitionClassList = new int[floor1Partitions.getValue()];
+                
+                int maxClass = 0;
+                for (int j = 0; j < floor1Partitions.getValue(); j++)
                 {
-                    byte floor1PartitionClass = (byte) bitStream.readBits(4);
-                    ogg.bitWrite(floor1PartitionClass, 4);
+                    BitField floor1PartitionClass = new BitField(4);
+                    floor1PartitionClass.read(bitStream);
+                    floor1PartitionClass.write(ogg);
                     
-                    floor1PartitionClassList[j] = floor1PartitionClass;
-                    if (floor1PartitionClass > maxClass)
+                    floor1PartitionClassList[j] = floor1PartitionClass.getValue();
+                    
+                    if (floor1PartitionClass.getValue() > maxClass)
                     {
-                        maxClass = floor1PartitionClass;
+                        maxClass = floor1PartitionClass.getValue();
                     }
                 }
                 
                 int[] floor1ClassDimentionList = new int[maxClass + 1];
-                for (int j = 0; j < maxClass; j++)
+                
+                for (int j = 0; j <= maxClass; j++)
                 {
-                    byte classDimension = (byte) bitStream.readBits(3);
-                    ogg.bitWrite(classDimension, 3);
+                    BitField classDimensionsLess1 = new BitField(3);
+                    classDimensionsLess1.read(bitStream);
+                    classDimensionsLess1.write(ogg);
                     
-                    floor1ClassDimentionList[j] = classDimension + 1;
+                    floor1ClassDimentionList[j] = classDimensionsLess1.getValue() + 1;
                     
-                    byte classSubclass = (byte) bitStream.readBits(2);
-                    ogg.bitWrite(classSubclass, 2);
+                    BitField classSubclasses = new BitField(2);
+                    classSubclasses.read(bitStream);
+                    classSubclasses.write(ogg);
                     
-                    if (classSubclass != 0)
+                    if (classSubclasses.getValue() != 0)
                     {
-                        byte masterbook = (byte) bitStream.readBits(8);
-                        ogg.bitWrite(masterbook, Byte.SIZE);
+                        BitField masterbook = new BitField(8);
+                        masterbook.read(bitStream);
+                        masterbook.write(ogg);
                         
-                        if (maxClass >= codebookCount)
+                        if (masterbook.getValue() >= codebookCount)
                         {
-                            throw new IllegalArgumentException("Failed to generate vorbis packet");
+                            throw new IllegalArgumentException("Invalid floor1 masterbook");
                         }
                     }
                     
-                    for (int k = 0; k < (1 << classSubclass); k++)
+                    for (int k = 0; k < (1 << classSubclasses.getValue()); k++)
                     {
-                        byte subclassBook = (byte) bitStream.readBits(8);
-                        ogg.bitWrite(subclassBook, Byte.SIZE);
+                        BitField subclassBookPlus1 = new BitField(8);
+                        subclassBookPlus1.read(bitStream);
+                        subclassBookPlus1.write(ogg);
+                        int subclassBook = subclassBookPlus1.getValue() - 1;
                         
-                        if ((subclassBook - 1) >= 0 && (subclassBook - 1) >= codebookCount)
+                        if (subclassBook >= 0 && subclassBook >= codebookCount)
                         {
-                            throw new IllegalArgumentException("Failed to generate vorbis packet");
+                            throw new IllegalArgumentException("Invalid floor1 subclass book");
                         }
                     }
                 }
                 
-                byte floor1Multiplier = (byte) bitStream.readBits(2);
-                ogg.bitWrite(floor1Multiplier, 2);
+                BitField floorMultiplierLess1 = new BitField(2);
+                floorMultiplierLess1.read(bitStream);
+                floorMultiplierLess1.write(ogg);
                 
-                byte rangeBits = (byte) bitStream.readBits(4);
-                ogg.bitWrite(rangeBits, 4);
+                BitField rangeBits = new BitField(4);
+                rangeBits.read(bitStream);
+                rangeBits.write(ogg);
                 
-                for (int j = 0; j < floor1partitions; j++)
+                BitField x = new BitField(rangeBits.getValue());
+                for (int j = 0; j < floor1Partitions.getValue(); j++)
                 {
                     int currentClass = floor1PartitionClassList[j];
                     for (int k = 0; k < floor1ClassDimentionList[currentClass]; k++)
                     {
-                        ogg.bitWrite(bitStream.readBits(rangeBits), rangeBits);
+                        x.read(bitStream);
+                        x.write(ogg);
                     }
                 }
             }
             
-            byte residueCount = (byte) bitStream.readBits(6);
-            ogg.bitWrite(residueCount, 6);
-            residueCount++;
-            
+            BitField residueCountLess1 = new BitField(6);
+            residueCountLess1.read(bitStream);
+            residueCountLess1.write(ogg);
+            int residueCount = residueCountLess1.getValue() + 1;
             
             for (int i = 0; i < residueCount; i++)
             {
-                byte residueType = (byte) bitStream.readBits(2);
-                ogg.bitWrite(residueCount, Short.SIZE);
+                BitField residueType = new BitField(2);
+                residueType.read(bitStream);
+                residueType.write(ogg, 16);
                 
-                if (residueType > 2)
+                if (residueType.getValue() > 2)
                 {
-                    throw new IllegalArgumentException("Failed to generate vorbis packet");
+                    throw new IllegalArgumentException("Invalid residue type");
                 }
                 
-                int residueBegin           = bitStream.readBits(24);
-                int residueEnd             = bitStream.readBits(24);
-                int residuePartitionSize   = bitStream.readBits(24);
-                int residueClassifications = bitStream.readBits(6);
-                int residueClassbook       = bitStream.readBits(8);
+                BitField residueBegin                = new BitField(24);
+                BitField residueEnd                  = new BitField(24);
+                BitField residuePartitionSizeLess1   = new BitField(24);
+                BitField residueClassificationsLess1 = new BitField(6);
+                BitField residueClassbook            = new BitField(8);
                 
-                ogg.bitWrite(residueBegin, 24);
-                ogg.bitWrite(residueEnd, 24);
-                ogg.bitWrite(residuePartitionSize, 24);
-                ogg.bitWrite(residueClassifications, 6);
-                ogg.bitWrite(residueClassbook, 8);
+                residueBegin.read(bitStream);
+                residueEnd.read(bitStream);
+                residuePartitionSizeLess1.read(bitStream);
+                residueClassificationsLess1.read(bitStream);
+                residueClassbook.read(bitStream);
                 
-                residueClassifications++;
+                int residueClassifications = residueClassificationsLess1.getValue() + 1;
+                
+                residueBegin.write(ogg);
+                residueEnd.write(ogg);
+                residuePartitionSizeLess1.write(ogg);
+                residueClassificationsLess1.write(ogg);
+                residueClassbook.write(ogg);
                 
                 if (residueClassifications >= codebookCount)
                 {
-                    throw new IllegalArgumentException("Failed to generate vorbis packet");
+                    throw new IllegalArgumentException("Invalid residue classbook");
                 }
                 
                 int[] residueCascade = new int[residueClassifications];
+                
+                BitField bitFlag  = new BitField(1);
+                BitField highBits = new BitField(5, 0);
+                BitField lowBits  = new BitField(3);
                 for (int j = 0; j < residueClassifications; j++)
                 {
-                    byte highBits = 0;
+                    lowBits.read(bitStream);
+                    lowBits.write(ogg);
                     
-                    byte lowBits = (byte) bitStream.readBits(3);
-                    ogg.bitWrite(lowBits, 3);
+                    bitFlag.read(bitStream);
+                    bitFlag.write(ogg);
                     
-                    byte bitFlag = (byte) bitStream.readBits(1);
-                    ogg.writeBit(bitFlag);
-                    
-                    if (bitFlag == 1)
+                    if (bitFlag.getValue() == 1)
                     {
-                        highBits = (byte) bitStream.readBits(5);
-                        ogg.bitWrite(highBits, 5);
+                        highBits = new BitField(5, 0);
+                        highBits.read(bitStream);
+                        highBits.write(ogg);
                     }
                     
-                    residueCascade[j] = (highBits * 8) + lowBits;
+                    residueCascade[j] = (highBits.getValue() * 8) + lowBits.getValue();
                 }
                 
                 for (int j = 0; j < residueClassifications; j++)
@@ -502,147 +555,172 @@ public class OGGParser
                     {
                         if ((residueCascade[j] & (1 << k)) != 0)
                         {
-                            byte residueBook = (byte) bitStream.readBits(8);
-                            ogg.bitWrite(residueBook, Byte.SIZE);
+                            BitField residueBook = new BitField(8);
+                            residueBook.read(bitStream);
+                            residueBook.write(ogg);
                             
-                            if (residueBook >= codebookCount)
+                            if (residueBook.getValue() >= codebookCount)
                             {
-                                throw new IllegalArgumentException("Failed to generate vorbis packet");
+                                throw new IllegalArgumentException("Invalid residue book");
                             }
                         }
                     }
                 }
             }
             
-            byte mappingCount = (byte) bitStream.readBits(6);
-            ogg.bitWrite(mappingCount, 6);
-            mappingCount++;
+            
+            BitField mappingCountLess1 = new BitField(6);
+            mappingCountLess1.read(bitStream);
+            mappingCountLess1.write(ogg);
+            
+            int mappingCount = mappingCountLess1.getValue() + 1;
             
             for (int i = 0; i < mappingCount; i++)
             {
-                short mappingType = 0;
-                ogg.bitWrite(mappingType, Short.SIZE);
+                BitField mappingType = new BitField(16, 0);
+                mappingType.write(ogg);
                 
-                byte submapFlag = (byte) bitStream.readBits(1);
-                ogg.writeBit(submapFlag);
+                BitField submapsFlag = new BitField(1);
+                submapsFlag.read(bitStream);
+                submapsFlag.write(ogg);
                 
                 int submaps = 1;
-                if (submapFlag == 1)
+                if (submapsFlag.getValue() == 1)
                 {
-                    byte submapLess = (byte) bitStream.readBits(4);
-                    submaps = submapLess + 1;
-                    ogg.bitWrite(submapLess, 4);
+                    BitField submapsLess1 = new BitField(4);
+                    submapsLess1.read(bitStream);
+                    submapsLess1.write(ogg);
+                    
+                    submaps = submapsLess1.getValue() + 1;
                 }
                 
-                byte squarePolarFlags = (byte) bitStream.readBits(1);
-                ogg.writeBit(squarePolarFlags);
-                if (squarePolarFlags == 1)
+                BitField squarePolarFlag = new BitField(1);
+                squarePolarFlag.read(bitStream);
+                squarePolarFlag.write(ogg);
+                
+                if (squarePolarFlag.getValue() == 1)
                 {
-                    byte couplingSteps = (byte) bitStream.readBits(8);
-                    ogg.bitWrite(couplingSteps, Byte.SIZE);
-                    couplingSteps++;
                     
+                    BitField couplingStepsLess1 = new BitField(8);
+                    couplingStepsLess1.read(bitStream);
+                    couplingStepsLess1.write(ogg);
+                    
+                    int couplingSteps = couplingStepsLess1.getValue() + 1;
+                    
+                    int      iLogChannels = UtilHandler.iLog(wem.getChannelCount() - 1);
+                    BitField magnitude    = new BitField(iLogChannels);
+                    BitField angle        = new BitField(iLogChannels);
                     for (int j = 0; j < couplingSteps; j++)
                     {
-                        int ilogChannels = UtilHandler.iLog(wem.getChannelCount() - 1);
-                        int magnitude    = bitStream.readBits(ilogChannels);
-                        int angle        = bitStream.readBits(ilogChannels);
+                        magnitude.read(bitStream);
+                        angle.read(bitStream);
                         
-                        ogg.bitWrite(magnitude, ilogChannels);
-                        ogg.bitWrite(angle, ilogChannels);
+                        magnitude.write(ogg);
+                        angle.write(ogg);
                         
-                        if (angle == magnitude || magnitude >= wem.getChannelCount() || angle >= wem.getChannelCount())
+                        if (angle.getValue() == magnitude.getValue() || magnitude.getValue() >= wem.getChannelCount() || angle.getValue() >= wem.getChannelCount())
                         {
-                            throw new IllegalArgumentException("Failed to generate vorbis packet");
+                            throw new IllegalArgumentException("Invalid coupling");
                         }
                     }
                 }
                 
-                byte mappingReserved = (byte) bitStream.readBits(2);
-                ogg.bitWrite(mappingReserved, 2);
+                BitField mappingReserved = new BitField(2);
+                mappingReserved.read(bitStream);
+                mappingReserved.write(ogg);
                 
-                if (mappingReserved != 0)
+                if (mappingReserved.getValue() != 0)
                 {
-                    throw new IllegalArgumentException("Failed to generate vorbis packet");
+                    throw new IllegalArgumentException("Mapping reserved fieldn nonzero");
                 }
                 
                 if (submaps > 1)
                 {
+                    BitField mappingMux = new BitField(4);
                     for (int j = 0; j < wem.getChannelCount(); j++)
                     {
-                        byte mappingMux = (byte) bitStream.readBits(4);
-                        ogg.bitWrite(mappingMux, 4);
+                        mappingMux.read(bitStream);
+                        mappingMux.write(ogg);
                         
-                        if (mappingMux >= submaps)
+                        if (mappingMux.getValue() >= submaps)
                         {
-                            throw new IllegalArgumentException("Failed to generate vorbis packet");
+                            throw new IllegalArgumentException("mapping_mux >= submaps");
                         }
                     }
                 }
                 
+                
+                BitField timeConfig    = new BitField(8);
+                BitField floorNumber   = new BitField(8);
+                BitField residueNumber = new BitField(8);
                 for (int j = 0; j < submaps; j++)
                 {
-                    byte timeConfig = (byte) bitStream.readBits(8);
-                    ogg.bitWrite(timeConfig, Byte.SIZE);
+                    timeConfig.read(bitStream);
+                    timeConfig.write(ogg);
                     
-                    byte floorNumber = (byte) bitStream.readBits(8);
-                    ogg.bitWrite(floorNumber, Byte.SIZE);
                     
-                    if (floorNumber >= floorCount)
+                    floorNumber.read(bitStream);
+                    floorNumber.write(ogg);
+                    if (floorNumber.getValue() >= floorCount)
                     {
-                        throw new IllegalArgumentException("Failed to generate vorbis packet");
+                        throw new IllegalArgumentException("Invalid floor mapping");
                     }
                     
-                    byte residueNumber = (byte) bitStream.readBits(8);
-                    ogg.bitWrite(residueNumber, Byte.SIZE);
-                    
-                    if (residueNumber >= residueCount)
+                    residueNumber.read(bitStream);
+                    residueNumber.write(ogg);
+                    if (residueNumber.getValue() >= residueCount)
                     {
-                        throw new IllegalArgumentException("Failed to generate vorbis packet");
+                        throw new IllegalArgumentException("Invalid residue mapping");
                     }
                 }
             }
             
-            byte modeCount = (byte) bitStream.readBits(6);
-            ogg.bitWrite(modeCount, 6);
-            modeCount++;
+            BitField modeCountLess1 = new BitField(6);
+            modeCountLess1.read(bitStream);
+            modeCountLess1.write(ogg);
+            int modeCount = modeCountLess1.getValue() + 1;
             
             modeBlockFlag = new Boolean[modeCount];
             modeBits = UtilHandler.iLog(modeCount - 1);
             
+            BitField blockFlag     = new BitField(1);
+            BitField windowType    = new BitField(16, 0);
+            BitField transformType = new BitField(16, 0);
+            BitField mapping       = new BitField(8);
             for (int i = 0; i < modeCount; i++)
             {
-                byte blockFlag = (byte) bitStream.readBits(1);
-                ogg.bitWrite(blockFlag, Byte.SIZE);
                 
-                modeBlockFlag[i] = (blockFlag == 1);
+                blockFlag.read(bitStream);
+                blockFlag.write(ogg);
                 
-                short windowType    = 0;
-                short transformType = 0;
-                ogg.bitWrite(windowType, Short.SIZE);
-                ogg.bitWrite(transformType, Short.SIZE);
+                modeBlockFlag[i] = (blockFlag.getValue() != 0);
                 
-                byte mapping = (byte) bitStream.readBits(8);
-                ogg.bitWrite(mapping, Byte.SIZE);
+                windowType.write(ogg);
+                transformType.write(ogg);
                 
-                if (mapping >= mappingCount)
+                mapping.read(bitStream);
+                mapping.write(ogg);
+                
+                if (mapping.getValue() >= mappingCount)
                 {
-                    throw new IllegalArgumentException("Failed to generate vorbis packet");
+                    throw new IllegalArgumentException("Invalid mode mapping");
                 }
             }
             
-            ogg.writeBit(1);
+            BitField framing = new BitField(1, 1);
+            framing.write(ogg);
         }
+        
         ogg.flushPage(false, false);
         
         if (((bitStream.getBitsRead() + 7) / 8) != setupPacket.getSize())
         {
-            throw new IllegalArgumentException("Failed to generate vorbis packet");
+            throw new IllegalArgumentException("Didnt read exact setup packet");
         }
         
         if (setupPacket.nextOffset() != wem.getDataChunkOffset() + wem.getFirstAudioPacketOffset())
         {
-            throw new IllegalArgumentException("Failed to generate vorbis packet");
+            throw new IllegalArgumentException("First audio packet doesnt follow setup packet");
         }
         
         return new Pair<>(modeBits, modeBlockFlag);

@@ -43,6 +43,8 @@ public class WEMData
     private int     blockSize0Pow;
     private int     blockSize1Pow;
     
+    private boolean littleEndian = true;
+    
     private byte[] dataBytes;
     
     
@@ -54,7 +56,13 @@ public class WEMData
         String magic = raf.readString(4);
         if (!"RIFF".equals(magic))
         {
-            throw new IllegalArgumentException("This is not a valid WEM file, or its an unsupported type");
+            if (!"RIFX".equals(magic))
+            {
+                throw new IllegalArgumentException("This is not a valid WEM file, or its an unsupported type");
+            } else
+            {
+                throw new IllegalArgumentException("This file is in big endian, and that is not supported...");
+            }
         }
         int riffSize = raf.readInt() + 8;
         
@@ -106,20 +114,20 @@ public class WEMData
             throw new IllegalArgumentException("There was an error reading the file");
         }
         
-        if (fmtChunkOffset == 0xFFFFFFFF && dataChunkOffset == 0xFFFFFFFF)
+        if (fmtChunkOffset == -1 && dataChunkOffset == -1)
         {
-            throw new IllegalArgumentException("There was an error reading the file");
+            throw new IllegalArgumentException("Expected ftm, data chunks");
         }
         
-        if ((vorbChunkOffset == 0xFFFFFFFF) && (fmtChunkSize != 0x42))
+        if ((vorbChunkOffset == -1) && (fmtChunkSize != 0x42))
         {
-            throw new IllegalArgumentException("There was an error reading the file");
+            throw new IllegalArgumentException("Expected 0x42 fmt if vorb is missing");
         }
-        if ((vorbChunkOffset != 0xFFFFFFFF) && (fmtChunkSize != 0x28) && (fmtChunkSize != 0x18) && (fmtChunkSize != 0x12))
+        if ((vorbChunkOffset != -1) && (fmtChunkSize != 0x28) && (fmtChunkSize != 0x18) && (fmtChunkSize != 0x12))
         {
-            throw new IllegalArgumentException("There was an error reading the file");
+            throw new IllegalArgumentException("bad fmt size");
         }
-        if ((vorbChunkOffset == 0xFFFFFFFF) && (fmtChunkSize == 0x42))
+        if ((vorbChunkOffset == -1) && (fmtChunkSize == 0x42))
         {
             vorbChunkOffset = fmtChunkOffset + 0x18;
         }
@@ -129,25 +137,40 @@ public class WEMData
         short codecId = raf.readShort();
         if (codecId != (short) 0xFFFF)
         {
-            throw new IllegalArgumentException("Invalid codec");
+            throw new IllegalArgumentException("bad codec id");
         }
         
         channelCount = raf.readShort();
         sampleRate = raf.readInt();
         bytesPerSecond = raf.readInt();
         
-        int bitsPerSample = raf.readInt();
-        if (bitsPerSample != 0)
+        if (raf.readShort() != 0)
         {
-            throw new IllegalArgumentException("Invalid BPS");
+            throw new IllegalArgumentException("bad block align");
         }
         
+        if (raf.readShort() != 0)
+        {
+            throw new IllegalArgumentException("expected 0 bps");
+        }
         
-        int extra = raf.readInt();
+        int extra = raf.readShort();
         if (extra != (fmtChunkSize - 0x12))
         {
             throw new IllegalArgumentException("Invalid extra size");
         }
+        
+        if ((fmtChunkSize - 0x12) >= 2)
+        {
+            // ext_unk
+            raf.readShort();
+            if ((fmtChunkSize - 0x12) >= 6)
+            {
+                // subtype
+                raf.readInt();
+            }
+        }
+        
         
         if (fmtChunkSize == 0x28)
         {
@@ -160,20 +183,20 @@ public class WEMData
             }
         }
         
-        if (cueChunkOffset != 0xFFFFFFFF)
+        if (cueChunkOffset != -1)
         {
             raf.seek(cueChunkOffset);
             cueCount = raf.readInt();
         }
         
-        if (smplChunkOffset != 0xFFFFFFFF)
+        if (smplChunkOffset != -1)
         {
-            raf.seek(smplChunkOffset);
+            raf.seek(smplChunkOffset + 0x1C);
             
             loopCount = raf.readInt();
             if (loopCount != 1)
             {
-                throw new IllegalArgumentException("Invalid loop count");
+                throw new IllegalArgumentException("expected 1 loop");
             }
             
             raf.seek(smplChunkOffset + 0x2C);
@@ -182,7 +205,7 @@ public class WEMData
             loopEnd = raf.readInt();
         }
         
-        List<Integer> validChunks = Arrays.asList(0xFFFFFFFF, 0x28, 0x2A, 0x2C, 0x32, 0x34);
+        List<Integer> validChunks = Arrays.asList(-1, 0x28, 0x2A, 0x2C, 0x32, 0x34);
         if (!validChunks.contains(vorbChunkSize))
         {
             throw new IllegalArgumentException("Invalid vorb chunk size");
@@ -191,11 +214,11 @@ public class WEMData
         raf.seek(vorbChunkOffset);
         sampleCount = raf.readInt();
         
-        if ((vorbChunkSize == 0xFFFFFFFF) || (vorbChunkSize == 0x2A))
+        if ((vorbChunkSize == -1) || (vorbChunkSize == 0x2A))
         {
             noGranule = true;
             
-            raf.seek(vorbChunkOffset + 4);
+            raf.seek(vorbChunkOffset + 0x4);
             int modSignal = raf.readInt();
             
             List<Integer> validSignals = Arrays.asList(0x4A, 0x4B, 0x69, 0x70);
@@ -210,13 +233,10 @@ public class WEMData
             raf.seek(vorbChunkOffset + 0x18);
         }
         
-        // remove this?
-        modPackets = false;
-        
         setupPacketOffset = raf.readInt();
         firstAudioPacketOffset = raf.readInt();
         
-        if ((vorbChunkSize == 0xFFFFFFFF) || (vorbChunkSize == 0x2A))
+        if ((vorbChunkSize == -1) || (vorbChunkSize == 0x2A))
         {
             raf.seek(vorbChunkOffset + 0x24);
         }
@@ -232,7 +252,7 @@ public class WEMData
             oldPacketHeaders = true;
         }
         
-        if ((vorbChunkSize == 0xFFFFFFFF) || (vorbChunkSize == 0x2A) || (vorbChunkSize == 0x32) || (vorbChunkSize == 0x34))
+        if ((vorbChunkSize == -1) || (vorbChunkSize == 0x2A) || (vorbChunkSize == 0x32) || (vorbChunkSize == 0x34))
         {
             uid = raf.readInt();
             blockSize0Pow = raf.readByte();
@@ -253,6 +273,71 @@ public class WEMData
             {
                 throw new IllegalArgumentException("Invalid loop range");
             }
+        }
+    }
+    
+    public void printInfo()
+    {
+        if (littleEndian)
+        {
+            System.out.print("RIFF WAVE");
+        } else
+        {
+            System.out.print("RIFX WAVE");
+        }
+        
+        System.out.print(" " + channelCount + " channel");
+        if (channelCount != 1)
+        {
+            System.out.print("s");
+        }
+        
+        System.out.println(" " + sampleRate + " Hz " + bytesPerSecond * 8 + " bps");
+        System.out.println(sampleCount + " samples");
+        
+        if (loopCount != 0)
+        {
+            System.out.println("loop from " + loopStart + " to " + loopEnd);
+        }
+        
+        if (oldPacketHeaders)
+        {
+            System.out.println("- 8 byte (old) packet headers");
+        } else if (noGranule)
+        {
+            System.out.println("- 2 byte packet headers, no granule");
+        } else
+        {
+            System.out.println("- 6 byte packet headers");
+        }
+        
+        if (headerTriadPresent)
+        {
+            System.out.println("- Vorbis header triad present");
+        }
+        
+        if (headerTriadPresent)
+        {
+            System.out.println("- full setup header");
+        } else
+        {
+            System.out.println("- stripped setup header");
+        }
+        
+        if (headerTriadPresent)
+        {
+            System.out.println("- inline codebooks");
+        } else
+        {
+            System.out.println("- external codebooks");
+        }
+        
+        if (modPackets)
+        {
+            System.out.println("- modified Vorbis packets");
+        } else
+        {
+            System.out.println("- standard Vorbis packets");
         }
     }
 }
