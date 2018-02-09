@@ -94,8 +94,8 @@ public class TestHashes
     private final Path outerFolder = Paths.get("tmp_hashes");
     
     private final List<String> filenames = Arrays.asList(
-            "v1/championperkstylemap.json",
             "v1/champion-summary.json",
+            "v1/championperkstylemap.json",
             "v1/hovertips.json",
             "v1/items.json",
             "v1/loot.json",
@@ -106,6 +106,8 @@ public class TestHashes
             "v1/profile-icons.json",
             "v1/queues.json",
             "v1/runes.json",
+            "v1/settingstopersist.json",
+            "v1/skinlines.json",
             "v1/skins.json",
             "v1/summoner-banners.json",
             "v1/summoner-emotes.json",
@@ -157,6 +159,7 @@ public class TestHashes
         
         StringBuilder filenameBuilder = new StringBuilder("{\n");
         StringBuilder hextechBuilder  = new StringBuilder("{\n");
+        StringBuilder lootBuilder     = new StringBuilder("{\n");
         List<String>  hextechValues   = parseHextechFile();
         
         for (String reg : preRegion)
@@ -184,6 +187,9 @@ public class TestHashes
                 System.out.println("Parsing hextech");
                 doHextechParse(hextechBuilder, hextechValues, pre);
                 
+                System.out.println("Parsing loot");
+                doLootParse(lootBuilder, hextechValues, pre);
+                
                 System.out.println("Parsing icons");
                 parseIcons(file);
                 
@@ -196,6 +202,7 @@ public class TestHashes
         
         finalizeFileReading("files.json", filenameBuilder);
         finalizeFileReading("hextech.json", hextechBuilder);
+        finalizeFileReading("hexloot.json", lootBuilder);
         
         
         folderData.put("perkstyles", new Integer[]{1});
@@ -210,6 +217,7 @@ public class TestHashes
         folderData.put("map-assets", new Integer[]{1});
         folderData.put("files", new Integer[]{1});
         folderData.put("hextech", new Integer[]{1});
+        folderData.put("hexloot", new Integer[]{1});
         
         
         for (int i = -1; i < championMax; i++)
@@ -230,11 +238,97 @@ public class TestHashes
         findIconPathInJsonArrayFile(file, "summoner-spells.json");
         findIconPathInJsonArrayFile(file, "profile-icons.json");
         
+        parseLootFile(file, "loot.json");
         parseWardSkins(file, "ward-skins.json");
         parseMasteries(file, "summoner-masteries.json");
         parseEmotes(file, "summoner-emotes.json");
         parseBanners(file, "summoner-banners.json");
         parseMapAssets(file, "map-assets/map-assets.json");
+    }
+    
+    private void parseLootFile(Path filepath, String filename)
+    {
+        Path path = filepath.resolve(filename);
+        if (!Files.exists(path))
+        {
+            return;
+        }
+        
+        String     jsonData = UtilHandler.readAsString(path);
+        JsonObject element  = new JsonParser().parse(jsonData).getAsJsonObject();
+        
+        JsonArray     elem  = element.getAsJsonArray("LootItems");
+        JsonArray     elem2 = element.getAsJsonArray("LootRecipes");
+        JsonArray     elem3 = element.getAsJsonArray("LootTables");
+        StringBuilder data  = new StringBuilder("{\n");
+        
+        for (JsonElement val : elem)
+        {
+            JsonObject el = val.getAsJsonObject();
+            getElementAndCheckHash(el, "image", data);
+        }
+        
+        for (JsonElement val : elem3)
+        {
+            JsonObject el = val.getAsJsonObject();
+            getElementAndCheckHash(el, "image", data);
+        }
+        
+        for (JsonElement val : elem2)
+        {
+            JsonObject el = val.getAsJsonObject();
+            getElementAndCheckHash(el, "imagePath", data);
+        }
+        
+        finalizeFileReading(filename, data);
+        
+    }
+    
+    private void doLootParse(StringBuilder data2, List<String> hextechValues, String pre)
+    {
+        for (String attempt : hextechValues)
+        {
+            hashAndAddToSB(data2, pre + "assets/loot/" + attempt + ".png");
+        }
+        
+        for (int i = -1; i < championMax; i++)
+        {
+            hashAndAddToSB(data2, pre + "assets/loot/chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/chest_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "assets/loot/lootbundle_" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/lootbundle_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "assets/loot/rarity-gem-icons/" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_generic_" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_generic_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_champion_mastery_" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_champion_mastery_" + i + "_open.png");
+            hashAndAddToSB(data2, pre + "assets/loot/lootbundle_icon_cosmetic_" + i + ".png");
+            hashAndAddToSB(data2, pre + "assets/loot/lootbundle_icon_cosmetic_" + i + "_open.png");
+            
+            for (int j = -1; j < skinMax; j++)
+            {
+                hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_" + i + "_" + j + ".png");
+                hashAndAddToSB(data2, pre + "assets/loot/loottable_chest_" + i + "_" + j + "_open.png");
+                
+                String skinid = String.format("%d%03d", i, j);
+                hashAndAddToSB(data2, pre + "assets/loot/champion_skin_" + skinid + ".png");
+                hashAndAddToSB(data2, pre + "assets/loot/champion_skin_rental_" + skinid + ".png");
+            }
+        }
+        
+        // constants..
+        hashAndAddToSB(data2, pre + "assets/loot/epic.png");
+        hashAndAddToSB(data2, pre + "assets/loot/legendary.png");
+        hashAndAddToSB(data2, pre + "assets/loot/mythic.png");
+        hashAndAddToSB(data2, pre + "assets/loot/ultimate.png");
+        
+        hashAndAddToSB(data2, pre + "assets/loot/hextech-images/chest.png");
+        hashAndAddToSB(data2, pre + "assets/loot/hextech-images/chest_champion_mastery.png");
+        hashAndAddToSB(data2, pre + "assets/loot/hextech-images/chest_key_bundle.png");
+        hashAndAddToSB(data2, pre + "assets/loot/hextech-images/chest_mystery_champion_shard.png");
+        hashAndAddToSB(data2, pre + "assets/loot/hextech-images/chest_promotion.png");
     }
     
     private void doHextechParse(StringBuilder data2, List<String> hextechValues, String pre)
@@ -653,6 +747,12 @@ public class TestHashes
         }
         
         String wip = el.get(path).getAsString().toLowerCase(Locale.ENGLISH);
+        
+        if (wip.isEmpty())
+        {
+            return;
+        }
+        
         if (wip.contains("/content/"))
         {
             wip = wip.substring(wip.lastIndexOf("content"));
@@ -868,7 +968,13 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash = UtilHandler.generateXXHash64(hashMe.trim());
+        String hash      = UtilHandler.generateXXHash64(hashMe.trim());
+        String knownHash = UtilHandler.getKnownWADFileHashes("rcp-be-lol-game-data").get(hash);
+        
+        if (knownHash != null)
+        {
+            return;
+        }
         
         if (hashes.contains(hash))
         {
