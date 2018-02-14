@@ -224,9 +224,9 @@ public class TestStoreAsRealName
         List<String> all = new ArrayList<>();
         for (String key : strings)
         {
-            String[]    keyArray = key.split("_");
-            Set<String> keySet = new HashSet<>(Arrays.asList(keyArray));
-            Set<Set<String>> powers = Sets.powerSet(keySet);
+            String[]         keyArray = key.split("_");
+            Set<String>      keySet   = new HashSet<>(Arrays.asList(keyArray));
+            Set<Set<String>> powers   = Sets.powerSet(keySet);
             
             for (Set<String> power : powers)
             {
@@ -758,32 +758,8 @@ public class TestStoreAsRealName
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
-            Path                filenames = Paths.get("filenames.json");
-            Map<String, String> known;
-            if (Files.exists(filenames))
-            {
-                known = UtilHandler.getGson().fromJson(UtilHandler.readAsString(filenames), new TypeToken<Map<String, String>>() {}.getType());
-            } else
-            {
-                known = new HashMap<>();
-            }
-            Map<String, String> thisPass = UtilHandler.getGson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
-            known.putAll(thisPass);
-            
-            if (Files.exists(filenames))
-            {
-                long oldSize = Files.size(filenames);
-                Files.write(filenames, UtilHandler.getGson().toJson(known).getBytes(StandardCharsets.UTF_8));
-                long newSize = Files.size(filenames);
-                
-                if (newSize > oldSize)
-                {
-                    System.out.println("Something has changed!");
-                }
-            } else
-            {
-                Files.write(filenames, UtilHandler.getGson().toJson(known).getBytes(StandardCharsets.UTF_8));
-            }
+            Path filenames = Paths.get("filenames.json");
+            Files.write(filenames, sb.toString().getBytes(StandardCharsets.UTF_8));
             
         } catch (IOException e)
         {
