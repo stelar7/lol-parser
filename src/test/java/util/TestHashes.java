@@ -1117,7 +1117,6 @@ public class TestHashes
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                System.out.println(file.toAbsolutePath().toString());
                 
                 final List<Pair<String, String>> foundHashes = new ArrayList<>();
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
