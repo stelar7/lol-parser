@@ -435,6 +435,16 @@ public final class FileTypeHandler
         return wrapper.equals(new ByteArray("r3d2".getBytes(StandardCharsets.UTF_8)));
     }
     
+    public static boolean isIgnoredType(String name)
+    {
+        return name.endsWith(".dll") || name.endsWith(".exe") || name.endsWith(".dat");
+    }
+    
+    public static boolean isContainerFormat(String name)
+    {
+        return name.endsWith(".wad") || name.endsWith(".raf") || name.endsWith(".bin") || name.endsWith(".wad.client") || name.endsWith(".bnk") || name.endsWith(".wpk");
+    }
+    
     //</editor-fold>
     
     
