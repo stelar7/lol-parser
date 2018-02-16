@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.cac.CACParser;
 import no.stelar7.cdragon.types.cac.data.CACFile;
 import org.junit.Test;

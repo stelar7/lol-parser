@@ -1,4 +1,4 @@
-package util;
+package types.util;
 
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;

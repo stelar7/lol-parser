@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.ogg.OGGParser;
 import no.stelar7.cdragon.types.ogg.data.OGGStream;
 import no.stelar7.cdragon.types.wem.WEMParser;

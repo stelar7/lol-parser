@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.lockfile.LockfileParser;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
 import no.stelar7.cdragon.util.readers.LCUSocketReader;

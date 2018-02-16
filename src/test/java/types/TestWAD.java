@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;

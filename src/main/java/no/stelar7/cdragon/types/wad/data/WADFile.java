@@ -98,7 +98,7 @@ public class WADFile
         self.getParent().toFile().mkdirs();
         String parentName = self.getParent().getFileName().toString();
         byte[] data       = readContentFromHeaderData(header);
-    
+        
         if (filename.endsWith("json"))
         {
             data = FileTypeHandler.makePrettyJson(data);
@@ -114,7 +114,7 @@ public class WADFile
         }
     }
     
-    private synchronized byte[] readContentFromHeaderData(WADContentHeaderV1 header) throws IOException
+    public synchronized byte[] readContentFromHeaderData(WADContentHeaderV1 header)
     {
         fileReader.seek(header.getOffset());
         if (header.isCompressed())
@@ -142,7 +142,14 @@ public class WADFile
                 return CompressionHandler.uncompressZSTD(fileBytes, header.getFileSize());
             }
             
-            Files.write(Paths.get("unknown.file"), fileBytes);
+            try
+            {
+                Files.write(Paths.get("unknown.file"), fileBytes);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            
             System.out.println("Found file with unknown compression!");
             return fileBytes;
         } else
@@ -157,12 +164,12 @@ public class WADFile
         String        fileType = FileTypeHandler.findFileType(data, self);
         StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
         Path          other    = parent.resolve(sb.toString());
-    
+        
         if ("json".equals(fileType))
         {
             data = FileTypeHandler.makePrettyJson(data);
         }
-    
+        
         Files.write(other, data);
     }
 }

@@ -1,3 +1,5 @@
+package types;
+
 import com.google.gson.*;
 import no.stelar7.cdragon.types.packagemanifest.*;
 import no.stelar7.cdragon.types.packagemanifest.data.*;

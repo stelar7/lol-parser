@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.RAFFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;

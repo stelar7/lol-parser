@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;

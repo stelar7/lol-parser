@@ -1,4 +1,4 @@
-package util;
+package types.util;
 
 import com.google.common.collect.Sets;
 import com.google.gson.*;

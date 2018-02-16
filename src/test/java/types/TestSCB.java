@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.scb.SCBParser;
 import no.stelar7.cdragon.types.scb.data.SCBFile;
 import org.junit.Test;

@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.bnk.BNKParser;
 import no.stelar7.cdragon.types.bnk.data.BNKFile;
 import org.junit.Test;

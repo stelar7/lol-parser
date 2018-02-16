@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.wpk.WPKParser;
 import no.stelar7.cdragon.types.wpk.data.WPKFile;
 import org.junit.Test;

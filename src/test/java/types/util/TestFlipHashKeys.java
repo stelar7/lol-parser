@@ -1,4 +1,4 @@
-package util;
+package types.util;
 
 import com.google.gson.*;
 import javafx.util.Pair;

@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.skl.SKLParser;
 import no.stelar7.cdragon.types.skl.data.SKLFile;
 import org.junit.Test;

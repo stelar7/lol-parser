@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.releasemanifest.ReleasemanifestParser;
 import no.stelar7.cdragon.types.releasemanifest.data.*;
 import org.junit.Test;

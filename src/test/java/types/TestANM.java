@@ -1,3 +1,5 @@
+package types;
+
 import no.stelar7.cdragon.types.anm.ANMParser;
 import no.stelar7.cdragon.types.anm.data.ANMFile;
 import org.junit.Test;
