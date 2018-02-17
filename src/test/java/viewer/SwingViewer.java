@@ -13,6 +13,7 @@ import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -43,8 +44,41 @@ public class SwingViewer
         top.add(top3);
         
         tree = new JTree(top);
-        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        tree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
         tree.addTreeSelectionListener(this::valueChangedListener);
+        tree.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                if (!SwingUtilities.isRightMouseButton(e))
+                {
+                    return;
+                }
+                
+                TreePath[] min = tree.getSelectionModel().getSelectionPaths();
+                
+                if (min == null || min.length == 0)
+                {
+                    return;
+                }
+                
+                List<DataPair<ByteArray>> data = new ArrayList<>();
+                
+                for (TreePath treePath : min)
+                {
+                    DefaultMutableTreeNode element = (DefaultMutableTreeNode) treePath.getLastPathComponent();
+                    DataPair               elem    = (DataPair) element.getUserObject();
+                    
+                    if (elem.getContent() instanceof ByteArray)
+                    {
+                        data.add(elem);
+                    }
+                }
+                
+                showSaveDialog(data, e.getComponent(), e.getX(), e.getY());
+            }
+        });
         
         
         addBaseNodes(top);
@@ -62,6 +96,45 @@ public class SwingViewer
         frame.getContentPane().add(view);
         frame.pack();
         frame.setVisible(true);
+    }
+    
+    private void showSaveDialog(List<DataPair<ByteArray>> data, Component invoker, int x, int y)
+    {
+        
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem  save = new JMenuItem("Save as...");
+        menu.add(save);
+        save.addActionListener(ev -> {
+            try
+            {
+                Map<File, ByteArray> files = new HashMap<>();
+                data.forEach(f -> {
+                    String filename = f.getName().substring(f.getName().lastIndexOf("/"));
+                    files.put(new File(filename), f.getContent());
+                });
+                
+                JFileChooser saveDialog = new JFileChooser();
+                saveDialog.setSelectedFiles(files.keySet().toArray(new File[files.size()]));
+                
+                int option = saveDialog.showSaveDialog(null);
+                if (option == JFileChooser.APPROVE_OPTION)
+                {
+                    String filePath  = saveDialog.getSelectedFile().toString();
+                    Path   parent    = Paths.get(filePath.substring(0, filePath.lastIndexOf("\\")));
+                    File[] fileSaves = saveDialog.getSelectedFiles();
+                    for (File file : fileSaves)
+                    {
+                        Files.write(parent.resolve(file.getName()), files.get(file).getData());
+                    }
+                }
+                
+            } catch (IOException e1)
+            {
+                e1.printStackTrace();
+            }
+        });
+        
+        menu.show(invoker, x, y);
     }
     
     
@@ -136,8 +209,15 @@ public class SwingViewer
         parent.add(node);
     }
     
+    Map<Path, List<DataPair>> parsed = new HashMap<>();
+    
     private List<DataPair> getContent(Path path)
     {
+        if (parsed.containsKey(path))
+        {
+            return parsed.get(path);
+        }
+        
         String         name    = path.getFileName().toString();
         List<DataPair> content = new ArrayList<>();
         
@@ -158,6 +238,7 @@ public class SwingViewer
         }
         
         Collections.sort(content);
+        parsed.put(path, content);
         return content;
     }
     
