@@ -55,7 +55,7 @@ public class RAFFile
         }
     }
     
-    private byte[] readContentFromData(RAFContentFile file)
+    public byte[] readContentFromData(RAFContentFile file)
     {
         boolean deflated = false;
         

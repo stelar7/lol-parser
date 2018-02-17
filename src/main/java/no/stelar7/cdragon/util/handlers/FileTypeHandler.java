@@ -437,12 +437,26 @@ public final class FileTypeHandler
     
     public static boolean isIgnoredType(String name)
     {
-        return name.endsWith(".dll") || name.endsWith(".exe") || name.endsWith(".dat");
+        List<String> types = Arrays.asList(".dll", ".exe", ".dat");
+        return types.stream().anyMatch(name.toLowerCase(Locale.ENGLISH)::endsWith);
     }
     
     public static boolean isContainerFormat(String name)
     {
-        return name.endsWith(".wad") || name.endsWith(".raf") || name.endsWith(".bin") || name.endsWith(".wad.client") || name.endsWith(".bnk") || name.endsWith(".wpk");
+        List<String> types = Arrays.asList(".wad", ".wad.client", ".raf", ".bin", ".bnk", ".wpk");
+        return types.stream().anyMatch(name.toLowerCase(Locale.ENGLISH)::endsWith);
+    }
+    
+    public static boolean isTextFormat(String name)
+    {
+        List<String> types = Arrays.asList(".js", ".json", ".txt", ".ini", ".cfg");
+        return types.stream().anyMatch(name.toLowerCase(Locale.ENGLISH)::endsWith);
+    }
+    
+    public static boolean isImageFormat(String name)
+    {
+        List<String> types = Arrays.asList(".png", ".jpg", ".jpeg", ".dds");
+        return types.stream().anyMatch(name.toLowerCase(Locale.ENGLISH)::endsWith);
     }
     
     //</editor-fold>

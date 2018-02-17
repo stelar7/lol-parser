@@ -35,7 +35,7 @@ public class RAFParser
         
         for (int i = 0; i < count; i++)
         {
-            strings.add(raf.readString());
+            strings.add(raf.readString().trim());
         }
         
         return strings;

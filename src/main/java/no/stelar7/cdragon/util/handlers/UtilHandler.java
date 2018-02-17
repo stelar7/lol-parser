@@ -408,9 +408,7 @@ public final class UtilHandler
             crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[crcLookupIndex];
         }
         
-        long returnValue = Integer.toUnsignedLong(crc);
-        
-        return returnValue;
+        return Integer.toUnsignedLong(crc);
     }
     
     private static final int[] CRC_LOOKUP = new int[]{
@@ -479,4 +477,15 @@ public final class UtilHandler
             0xAFB010B1, 0xAB710D06, 0xA6322BDF, 0xA2F33668,
             0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
     };
+    
+    public static String replaceEnding(String name, String original, String other)
+    {
+        if (!name.endsWith(original))
+        {
+            return name;
+        }
+        
+        String pre = name.substring(0, name.lastIndexOf('.') + 1);
+        return pre + other;
+    }
 }

@@ -1,6 +1,8 @@
 package viewer;
 
 import lombok.*;
+import no.stelar7.cdragon.types.raf.RAFParser;
+import no.stelar7.cdragon.types.raf.data.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
@@ -86,7 +88,7 @@ public class SwingViewer
         
         JScrollPane treePane = new JScrollPane(tree);
         JSplitPane  view     = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePane, contentPane);
-        view.setDividerLocation(0.6);
+        view.setResizeWeight(0.6);
         view.getLeftComponent().setMinimumSize(new Dimension(400, 600));
         
         JFrame frame = new JFrame("LoL-Parser");
@@ -110,7 +112,8 @@ public class SwingViewer
                 Map<File, ByteArray> files = new HashMap<>();
                 data.forEach(f -> {
                     String filename = f.getName().substring(f.getName().lastIndexOf("/"));
-                    files.put(new File(filename), f.getContent());
+                    String newName  = UtilHandler.replaceEnding(filename, "dds", "png");
+                    files.put(new File(newName), f.getContent());
                 });
                 
                 JFileChooser saveDialog = new JFileChooser();
@@ -124,7 +127,18 @@ public class SwingViewer
                     File[] fileSaves = saveDialog.getSelectedFiles();
                     for (File file : fileSaves)
                     {
-                        Files.write(parent.resolve(file.getName()), files.get(file).getData());
+                        if (FileTypeHandler.isImageFormat(file.getName()))
+                        {
+                            try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ByteArrayInputStream bis = new ByteArrayInputStream(files.get(file).getData()))
+                            {
+                                BufferedImage image = ImageIO.read(bis);
+                                ImageIO.write(image, "png", bos);
+                                Files.write(parent.resolve(file.getName()), bos.toByteArray());
+                            }
+                        } else
+                        {
+                            Files.write(parent.resolve(file.getName()), files.get(file).getData());
+                        }
                     }
                 }
                 
@@ -233,7 +247,22 @@ public class SwingViewer
             {
                 String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
                 String filename = UtilHandler.getKnownWADFileHashes(plugin).getOrDefault(hash, hash);
-                content.add(new DataPair(filename, new ByteArray(file.readContentFromHeaderData(header))));
+                
+                byte[] data = file.readContentFromHeaderData(header);
+                
+                content.add(new DataPair(filename, new ByteArray(data)));
+            }
+        } else if (name.endsWith(".raf"))
+        {
+            RAFParser parser = new RAFParser();
+            RAFFile   file   = parser.parse(path);
+            
+            for (RAFContentFile contentFile : file.getFiles())
+            {
+                String filename = file.getStrings().get(contentFile.getPathIndex());
+                byte[] data     = file.readContentFromData(contentFile);
+                
+                content.add(new DataPair(filename, new ByteArray(data)));
             }
         }
         
@@ -270,7 +299,7 @@ public class SwingViewer
                 DataPair<ByteArray> data     = (DataPair) node.getUserObject();
                 String              filename = data.getName();
                 
-                if (filename.endsWith(".jpg") || filename.endsWith(".png"))
+                if (FileTypeHandler.isImageFormat(filename))
                 {
                     try
                     {
@@ -283,7 +312,7 @@ public class SwingViewer
                     {
                         e1.printStackTrace();
                     }
-                } else if (filename.endsWith(".json") || filename.endsWith(".txt") || filename.endsWith("js"))
+                } else if (FileTypeHandler.isTextFormat(filename))
                 {
                     ByteArray bContent = data.getContent();
                     JTextArea label    = new JTextArea(new String(data.getContent().getData(), StandardCharsets.UTF_8));
