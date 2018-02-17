@@ -10,6 +10,7 @@ import no.stelar7.cdragon.util.readers.types.ByteArray;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
 import javax.swing.tree.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -28,9 +29,10 @@ public class SwingViewer
     }
     
     private JTree tree;
-    private List<Path>             singles    = new ArrayList<>();
-    private List<Path>             containers = new ArrayList<>();
-    private NaturalOrderComparator comparator = new NaturalOrderComparator();
+    private List<Path>             singles     = new ArrayList<>();
+    private List<Path>             containers  = new ArrayList<>();
+    private NaturalOrderComparator comparator  = new NaturalOrderComparator();
+    private JScrollPane            contentPane = new JScrollPane();
     
     public SwingViewer()
     {
@@ -42,79 +44,18 @@ public class SwingViewer
         
         tree = new JTree(top);
         tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-        tree.addTreeSelectionListener(e -> {
-            DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
-            if (node == null)
-            {
-                return;
-            }
-            
-            if (node.getUserObject() instanceof DataPair)
-            {
-                
-                if (((DataPair) node.getUserObject()).getContent() instanceof Path)
-                {
-                    DataPair<Path> path = (DataPair) node.getUserObject();
-                    
-                    if (FileTypeHandler.isContainerFormat(path.getContent().getFileName().toString()))
-                    {
-                        List<DataPair> content = getContent(path.getContent());
-                        content.forEach(s -> node.add(new DefaultMutableTreeNode(s)));
-                        tree.expandPath(e.getPath());
-                    }
-                }
-                
-                if (((DataPair) node.getUserObject()).getContent() instanceof ByteArray)
-                {
-                    DataPair<ByteArray> data     = (DataPair) node.getUserObject();
-                    String              filename = data.getName();
-                    
-                    if (filename.endsWith(".jpg") || filename.endsWith(".png"))
-                    {
-                        try
-                        {
-                            ByteArray            bContent = data.getContent();
-                            ByteArrayInputStream is       = new ByteArrayInputStream(bContent.getData());
-                            BufferedImage        image    = ImageIO.read(is);
-                            JLabel               label    = new JLabel(new ImageIcon(image));
-                            JScrollPane          pane     = new JScrollPane(label);
-                            JFrame               frame    = new JFrame(filename);
-                            frame.setMaximumSize(new Dimension(800, 600));
-                            frame.getContentPane().add(pane);
-                            frame.pack();
-                            frame.setLocationRelativeTo(null);
-                            frame.setVisible(true);
-                        } catch (IOException e1)
-                        {
-                            e1.printStackTrace();
-                        }
-                    } else if (filename.endsWith(".json") || filename.endsWith(".txt") || filename.endsWith("js"))
-                    {
-                        ByteArray bContent = data.getContent();
-                        JTextArea label    = new JTextArea(new String(data.getContent().getData(), StandardCharsets.UTF_8));
-                        label.setEditable(false);
-                        JScrollPane pane  = new JScrollPane(label);
-                        JFrame      frame = new JFrame(filename);
-                        frame.getContentPane().add(pane);
-                        frame.pack();
-                        frame.setMaximumSize(new Dimension(800, 600));
-                        frame.setMinimumSize(new Dimension(400, 600));
-                        frame.setSize(400, 600);
-                        frame.setLocationRelativeTo(null);
-                        frame.setVisible(true);
-                    } else
-                    {
-                        JOptionPane.showMessageDialog(null, "This filetype is not supported for opening yet..\n" + filename, "Sorry, im lazy", JOptionPane.INFORMATION_MESSAGE);
-                    }
-                }
-            }
-        });
+        tree.addTreeSelectionListener(this::valueChangedListener);
         
         
         addBaseNodes(top);
         
-        JScrollPane view  = new JScrollPane(tree);
-        JFrame      frame = new JFrame("LoL-Parser");
+        
+        JScrollPane treePane = new JScrollPane(tree);
+        JSplitPane  view     = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treePane, contentPane);
+        view.setDividerLocation(0.6);
+        view.getLeftComponent().setMinimumSize(new Dimension(400, 600));
+        
+        JFrame frame = new JFrame("LoL-Parser");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(800, 600));
         frame.setLocationRelativeTo(null);
@@ -218,6 +159,61 @@ public class SwingViewer
         
         Collections.sort(content);
         return content;
+    }
+    
+    private void valueChangedListener(TreeSelectionEvent e)
+    {
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
+        if (node == null)
+        {
+            return;
+        }
+        
+        if (node.getUserObject() instanceof DataPair)
+        {
+            
+            if (((DataPair) node.getUserObject()).getContent() instanceof Path)
+            {
+                DataPair<Path> path = (DataPair) node.getUserObject();
+                
+                if (FileTypeHandler.isContainerFormat(path.getContent().getFileName().toString()))
+                {
+                    List<DataPair> content = getContent(path.getContent());
+                    content.forEach(s -> node.add(new DefaultMutableTreeNode(s)));
+                    tree.expandPath(e.getPath());
+                }
+            }
+            
+            if (((DataPair) node.getUserObject()).getContent() instanceof ByteArray)
+            {
+                DataPair<ByteArray> data     = (DataPair) node.getUserObject();
+                String              filename = data.getName();
+                
+                if (filename.endsWith(".jpg") || filename.endsWith(".png"))
+                {
+                    try
+                    {
+                        ByteArray            bContent = data.getContent();
+                        ByteArrayInputStream is       = new ByteArrayInputStream(bContent.getData());
+                        BufferedImage        image    = ImageIO.read(is);
+                        JLabel               label    = new JLabel(new ImageIcon(image));
+                        contentPane.setViewportView(label);
+                    } catch (IOException e1)
+                    {
+                        e1.printStackTrace();
+                    }
+                } else if (filename.endsWith(".json") || filename.endsWith(".txt") || filename.endsWith("js"))
+                {
+                    ByteArray bContent = data.getContent();
+                    JTextArea label    = new JTextArea(new String(data.getContent().getData(), StandardCharsets.UTF_8));
+                    label.setEditable(false);
+                    contentPane.setViewportView(label);
+                } else
+                {
+                    JOptionPane.showMessageDialog(null, "This filetype is not supported for opening yet..\n" + filename, "Sorry, im lazy", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
     }
     
     @Getter
