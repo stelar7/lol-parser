@@ -272,22 +272,13 @@ public final class UtilHandler
     {
         try
         {
-            if (Files.exists(output))
-            {
-                System.err.println("This file already exists: " + output.toString());
-                return;
-            }
             Files.createDirectories(output.getParent());
             
             int          read;
             final byte[] buffer = new byte[4096];
             
-            // TODO Fake being a browser "better"
-            final URLConnection uc = new URL(url).openConnection();
-            //uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            //uc.setRequestProperty("Content-Language", "en-US");
-            //uc.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36");
-            //uc.setRequestProperty("Host", "l3cdn.riotgames.com");
+            final URLConnection uc       = new URL(url).openConnection();
+            long                fileSize = uc.getContentLengthLong();
             
             try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
             {
@@ -298,6 +289,14 @@ public final class UtilHandler
                 out.flush();
             } catch (SocketTimeoutException e)
             {
+                downloadFile(output, url);
+            }
+            
+            long localSize = Files.size(output);
+            
+            if (localSize < fileSize)
+            {
+                System.out.format("files are different size, trying again. %s != %s%n", fileSize, localSize);
                 downloadFile(output, url);
             }
         } catch (IOException e)

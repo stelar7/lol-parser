@@ -978,6 +978,11 @@ public class TestHashes
         
         if (hashes.contains(hash))
         {
+            if (sb.toString().contains(hash))
+            {
+                return;
+            }
+            
             sb.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
             hashes.remove(hash);
         }
