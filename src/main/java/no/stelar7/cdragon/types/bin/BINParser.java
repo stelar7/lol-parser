@@ -3,7 +3,7 @@ package no.stelar7.cdragon.types.bin;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.readers.types.Vector2;
+import no.stelar7.cdragon.util.readers.types.*;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -11,10 +11,9 @@ import java.nio.file.Path;
 public class BINParser
 {
     
-    public BINFile parse(Path path)
+    
+    public BINFile parse(RandomAccessReader raf)
     {
-        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        
         BINFile file = new BINFile();
         parseHeader(file, raf);
         if (file.getHeader() == null)
@@ -23,8 +22,19 @@ public class BINParser
         }
         
         parseEntries(file, raf);
-        
         return file;
+    }
+    
+    public BINFile parse(ByteArray bContent)
+    {
+        RandomAccessReader raf = new RandomAccessReader(bContent.getData(), ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
+    }
+    
+    public BINFile parse(Path path)
+    {
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     private void parseEntries(BINFile file, RandomAccessReader raf)
@@ -188,8 +198,8 @@ public class BINParser
             header.setLinkedFileCount(raf.readInt());
             for (int i = 0; i < header.getLinkedFileCount(); i++)
             {
-                short length = raf.readShort();
-                String link = raf.readString(length);
+                short  length = raf.readShort();
+                String link   = raf.readString(length);
                 header.getLinkedFiles().add(link);
             }
         }

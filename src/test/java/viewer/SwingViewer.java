@@ -1,6 +1,7 @@
 package viewer;
 
 import lombok.*;
+import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.*;
 import no.stelar7.cdragon.types.wad.WADParser;
@@ -179,7 +180,7 @@ public class SwingViewer
         
         try
         {
-            Files.walkFileTree(baseFolder, new SimpleFileVisitor<Path>()
+            Files.walkFileTree(baseFolder, new SimpleFileVisitor<>()
             {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -247,10 +248,18 @@ public class SwingViewer
             {
                 String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
                 String filename = UtilHandler.getKnownWADFileHashes(plugin).getOrDefault(hash, hash);
+                byte[] data     = file.readContentFromHeaderData(header);
                 
-                byte[] data = file.readContentFromHeaderData(header);
+                if (filename.equals(hash))
+                {
+                    String type = FileTypeHandler.findFileType(data);
+                    filename = filename + "." + type;
+                }
                 
-                content.add(new DataPair(filename, new ByteArray(data)));
+                if (header.getCompressed() != 2)
+                {
+                    content.add(new DataPair(filename, new ByteArray(data)));
+                }
             }
         } else if (name.endsWith(".raf"))
         {
@@ -316,6 +325,14 @@ public class SwingViewer
                 {
                     ByteArray bContent = data.getContent();
                     JTextArea label    = new JTextArea(new String(data.getContent().getData(), StandardCharsets.UTF_8));
+                    label.setEditable(false);
+                    contentPane.setViewportView(label);
+                } else if (filename.endsWith(".bin"))
+                {
+                    ByteArray bContent = data.getContent();
+                    String    datum    = new BINParser().parse(bContent).toJson();
+                    byte[]    datb     = FileTypeHandler.makePrettyJson(datum.getBytes(StandardCharsets.UTF_8));
+                    JTextArea label    = new JTextArea(new String(datb, StandardCharsets.UTF_8));
                     label.setEditable(false);
                     contentPane.setViewportView(label);
                 } else

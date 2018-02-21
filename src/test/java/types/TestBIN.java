@@ -22,14 +22,14 @@ public class TestBIN
         System.out.println("Parsing: " + file.toString());
         
         BINFile data = parser.parse(file);
-        System.out.println(data.toJSON());
+        System.out.println(data.toJson());
     }
     
     @Test
     public void testWEB() throws IOException
     {
         Path path = Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\Zoe");
-        Files.walkFileTree(path, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(path, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -37,7 +37,7 @@ public class TestBIN
                 if (file.toString().endsWith(".bin"))
                 {
                     BINFile bf = parser.parse(file);
-                    System.out.println(bf.toJSON());
+                    System.out.println(bf.toJson());
                     System.out.println();
                 }
                 
@@ -53,7 +53,7 @@ public class TestBIN
         Path       rito        = Paths.get(System.getProperty("user.home"), "Downloads\\bins");
         List<Path> paths       = new ArrayList<>();
         
-        Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -90,7 +90,7 @@ public class TestBIN
                 Files.createDirectories(extractPath);
                 //Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json.bak"), parsed.toJSON().getBytes(StandardCharsets.UTF_8));
                 
-                byte[]  data   = FileTypeHandler.makePrettyJson(parsed.toJSON().getBytes(StandardCharsets.UTF_8));
+                byte[] data = FileTypeHandler.makePrettyJson(parsed.toJson().getBytes(StandardCharsets.UTF_8));
                 Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
             } catch (RuntimeException ex)
             {

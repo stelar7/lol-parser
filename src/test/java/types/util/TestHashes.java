@@ -3,11 +3,11 @@ package types.util;
 import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import javafx.util.Pair;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -382,7 +382,7 @@ public class TestHashes
     
     private void combineAndDeleteNestedTemp() throws IOException
     {
-        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         if (!Files.exists(outerFolder))
         {
@@ -401,10 +401,10 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 return FileVisitResult.CONTINUE;
@@ -413,12 +413,12 @@ public class TestHashes
         
         try
         {
-            foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
             
             StringBuilder sb = new StringBuilder("{\n");
-            for (Pair<String, String> pair : foundHashes)
+            for (Vector2<String, String> pair : foundHashes)
             {
-                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
@@ -495,7 +495,7 @@ public class TestHashes
     
     private void combineAndDeleteTemp() throws IOException
     {
-        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         Files.walkFileTree(currentInnerFolder, new SimpleFileVisitor<Path>()
         {
@@ -512,10 +512,10 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 Files.deleteIfExists(file);
@@ -525,12 +525,12 @@ public class TestHashes
         
         try
         {
-            foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
             
             StringBuilder sb = new StringBuilder("{\n");
-            for (Pair<String, String> pair : foundHashes)
+            for (Vector2<String, String> pair : foundHashes)
             {
-                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
@@ -1051,13 +1051,13 @@ public class TestHashes
             {
                 String filename = file.getFileName().toString().substring(0, file.getFileName().toString().lastIndexOf('.'));
                 
-                final List<String>               foundHashes = new ArrayList<>();
-                final List<Pair<String, String>> knownHashes = new ArrayList<>();
+                final List<String>                  foundHashes = new ArrayList<>();
+                final List<Vector2<String, String>> knownHashes = new ArrayList<>();
                 
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!knownHashes.contains(data))
                     {
                         knownHashes.add(data);
@@ -1089,7 +1089,7 @@ public class TestHashes
                             String hashMe = pre + end;
                             String hash   = UtilHandler.generateXXHash64(hashMe.trim());
                             
-                            Pair<String, String> data = new Pair<>(hash, hashMe);
+                            Vector2<String, String> data = new Vector2<>(hash, hashMe);
                             if (!knownHashes.contains(data))
                             {
                                 knownHashes.add(data);
@@ -1098,11 +1098,11 @@ public class TestHashes
                     }
                 }
                 
-                knownHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+                knownHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
                 StringBuilder sb = new StringBuilder("{\n");
-                for (Pair<String, String> pair : knownHashes)
+                for (Vector2<String, String> pair : knownHashes)
                 {
-                    sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                    sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
                 }
                 sb.reverse().delete(0, 2).reverse().append("\n}");
                 
@@ -1123,23 +1123,23 @@ public class TestHashes
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
                 
-                final List<Pair<String, String>> foundHashes = new ArrayList<>();
+                final List<Vector2<String, String>> foundHashes = new ArrayList<>();
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 
-                foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+                foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
                 
                 StringBuilder sb = new StringBuilder("{\n");
-                for (Pair<String, String> pair : foundHashes)
+                for (Vector2<String, String> pair : foundHashes)
                 {
-                    sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                    sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
                 }
                 sb.reverse().delete(0, 2).reverse().append("\n}");
                 
@@ -1156,7 +1156,7 @@ public class TestHashes
         Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
         Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
         
-        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
@@ -1168,7 +1168,7 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(path), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
                         foundHashes.add(data);
@@ -1181,26 +1181,26 @@ public class TestHashes
         ((List<String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
         {
         }.getType())).forEach((v) -> {
-            Pair<String, String> data = new Pair<>(UtilHandler.generateXXHash64(v), v);
+            Vector2<String, String> data = new Vector2<>(UtilHandler.generateXXHash64(v), v);
             if (!foundHashes.contains(data))
             {
                 foundHashes.add(data);
             }
         });
         
-        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-        for (Pair<String, String> pair : foundHashes)
+        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+        for (Vector2<String, String> pair : foundHashes)
         {
-            String builder = pair.getValue().substring("plugins/".length());
+            String builder = pair.getY().substring("plugins/".length());
             if (builder.indexOf('/') < 0)
             {
-                System.out.println(pair.getValue());
+                System.out.println(pair.getY());
             }
             
             builder = builder.substring(0, builder.indexOf('/'));
             
             StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         pluginData.forEach((k, sb) -> {
             sb.reverse().delete(0, 2).reverse().append("\n}");
@@ -1221,7 +1221,7 @@ public class TestHashes
         Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
         Path pupix        = Paths.get(System.getProperty("user.home"), "Downloads", "league_client");
         
-        final List<Pair<String, String>> foundHashes = new ArrayList<>();
+        final List<Vector2<String, String>> foundHashes = new ArrayList<>();
         FileVisitor<Path> findHashes = new SimpleFileVisitor<Path>()
         {
             @Override
@@ -1237,10 +1237,10 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 return FileVisitResult.CONTINUE;
@@ -1250,13 +1250,13 @@ public class TestHashes
         Files.walkFileTree(UtilHandler.WAD_HASH_STORE, findHashes);
         Files.walkFileTree(pupix, findHashes);
         
-        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
         
         
         StringBuilder sb = new StringBuilder("{\n");
-        for (Pair<String, String> pair : foundHashes)
+        for (Vector2<String, String> pair : foundHashes)
         {
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
         
@@ -1267,10 +1267,10 @@ public class TestHashes
     @Test
     public void testMakePure() throws IOException
     {
-        Path                       newHashStore = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\newFixed");
-        Path                       hashStore    = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\fixed");
-        List<Pair<String, String>> foundHashes  = new ArrayList<>();
-        Map<String, StringBuilder> pluginData   = new HashMap<>();
+        Path                          newHashStore = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\newFixed");
+        Path                          hashStore    = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\fixed");
+        List<Vector2<String, String>> foundHashes  = new ArrayList<>();
+        Map<String, StringBuilder>    pluginData   = new HashMap<>();
         
         Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
         {
@@ -1280,26 +1280,26 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 return FileVisitResult.CONTINUE;
             }
         });
         
-        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-        for (Pair<String, String> pair : foundHashes)
+        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+        for (Vector2<String, String> pair : foundHashes)
         {
-            String[] temp    = pair.getValue().substring("plugins/".length()).split("/");
+            String[] temp    = pair.getY().substring("plugins/".length()).split("/");
             String   builder = temp[0];
             
             if (temp.length == 2)
             {
                 StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
                 continue;
             }
             
@@ -1317,7 +1317,7 @@ public class TestHashes
             }
             
             StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         pluginData.forEach((k, sb) -> {
             sb.reverse().delete(0, 2).reverse().append("\n}");
@@ -1339,7 +1339,7 @@ public class TestHashes
         Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
         Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
         
-        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
@@ -1351,10 +1351,10 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 return FileVisitResult.CONTINUE;
@@ -1364,21 +1364,21 @@ public class TestHashes
         ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
         {
         }.getType())).forEach((k, v) -> {
-            Pair<String, String> data = new Pair<>(k, v);
+            Vector2<String, String> data = new Vector2<>(k, v);
             if (!foundHashes.contains(data))
             {
-                foundHashes.add(new Pair<>(k, v));
+                foundHashes.add(new Vector2<>(k, v));
             }
         });
         
-        foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
-        for (Pair<String, String> pair : foundHashes)
+        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+        for (Vector2<String, String> pair : foundHashes)
         {
-            String builder = pair.getValue().substring("plugins/".length());
+            String builder = pair.getY().substring("plugins/".length());
             builder = builder.substring(0, builder.indexOf('/'));
             
             StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         pluginData.forEach((k, sb) -> {
             sb.reverse().delete(0, 2).reverse().append("\n}");
@@ -1396,11 +1396,11 @@ public class TestHashes
     @Test
     public void testClientWADHash() throws IOException
     {
-        Path                       unknowns = Paths.get(System.getProperty("user.home"), "Downloads", "temp/Champions/unknown.json");
-        Path                       output   = Paths.get(System.getProperty("user.home"), "Downloads", "champions.json");
-        Path                       bins     = Paths.get(System.getProperty("user.home"), "Downloads", "bintemp");
-        List<String>               values   = Files.readAllLines(unknowns);
-        List<Pair<String, String>> hashs    = new ArrayList<>();
+        Path                          unknowns = Paths.get(System.getProperty("user.home"), "Downloads", "temp/Champions/unknown.json");
+        Path                          output   = Paths.get(System.getProperty("user.home"), "Downloads", "champions.json");
+        Path                          bins     = Paths.get(System.getProperty("user.home"), "Downloads", "bintemp");
+        List<String>                  values   = Files.readAllLines(unknowns);
+        List<Vector2<String, String>> hashs    = new ArrayList<>();
         
         
         Files.walkFileTree(bins, new SimpleFileVisitor<Path>()
@@ -1428,7 +1428,7 @@ public class TestHashes
                         String binHash = UtilHandler.generateXXHash64(asset);
                         if (values.contains(String.valueOf(binHash)))
                         {
-                            Pair<String, String> data = new Pair<>(binHash, asset);
+                            Vector2<String, String> data = new Vector2<>(binHash, asset);
                             if (!hashs.contains(data))
                             {
                                 hashs.add(data);
@@ -1442,7 +1442,7 @@ public class TestHashes
         });
         
         
-        hashs.sort(Comparator.comparing(Pair::getKey, new NaturalOrderComparator()));
+        hashs.sort(Comparator.comparing(Vector2::getX, new NaturalOrderComparator()));
         UtilHandler.pairPrintout(output, hashs);
     }
 }

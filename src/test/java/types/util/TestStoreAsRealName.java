@@ -3,11 +3,11 @@ package types.util;
 import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import javafx.util.Pair;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;
@@ -721,7 +721,7 @@ public class TestStoreAsRealName
     
     private void combineAndDeleteTemp() throws IOException
     {
-        List<Pair<String, String>> foundHashes = new ArrayList<>();
+        List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         Files.walkFileTree(folder, new SimpleFileVisitor<Path>()
         {
@@ -736,10 +736,10 @@ public class TestStoreAsRealName
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {
-                    Pair<String, String> data = new Pair<>(k, v);
+                    Vector2<String, String> data = new Vector2<>(k, v);
                     if (!foundHashes.contains(data))
                     {
-                        foundHashes.add(new Pair<>(k, v));
+                        foundHashes.add(new Vector2<>(k, v));
                     }
                 });
                 Files.deleteIfExists(file);
@@ -749,12 +749,12 @@ public class TestStoreAsRealName
         
         try
         {
-            foundHashes.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
             
             StringBuilder sb = new StringBuilder("{\n");
-            for (Pair<String, String> pair : foundHashes)
+            for (Vector2<String, String> pair : foundHashes)
             {
-                sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             

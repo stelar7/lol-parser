@@ -11,18 +11,24 @@ public class BINFile
     private BINHeader header;
     private List<BINEntry> entries = new ArrayList<>();
     
-    public String toJSON()
+    private String json;
+    
+    public String toJson()
     {
-        StringBuilder sb = new StringBuilder("{");
-        for (BINEntry entry : entries)
+        if (json == null)
         {
-            printEntry(entry, sb);
-            sb.append(",");
+            StringBuilder sb = new StringBuilder("{");
+            for (BINEntry entry : entries)
+            {
+                printEntry(entry, sb);
+                sb.append(",");
+            }
+            removeTrailingComma(sb);
+            sb.append("}");
+            json = sb.toString().replace("\\\"", "\"");
         }
-        removeTrailingComma(sb);
-        sb.append("}");
         
-        return sb.toString().replace("\\\"", "\"");
+        return json;
     }
     
     private void printEntry(BINEntry entry, StringBuilder sb)
@@ -89,7 +95,7 @@ public class BINFile
         sb.append("{");
         for (Object o : value.getData())
         {
-            Vector2<?> obj = (Vector2<?>) o;
+            Vector2<?, ?> obj = (Vector2<?, ?>) o;
             
             StringBuilder temp = new StringBuilder();
             printType("", value.getType1(), obj.getX(), temp);

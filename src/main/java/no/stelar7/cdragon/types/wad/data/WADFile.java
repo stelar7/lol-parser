@@ -161,9 +161,15 @@ public class WADFile
     
     private void findFileTypeAndRename(Path self, byte[] data, String filename, Path parent) throws IOException
     {
-        String        fileType = FileTypeHandler.findFileType(data, self);
-        StringBuilder sb       = new StringBuilder(filename).append(".").append(fileType);
-        Path          other    = parent.resolve(sb.toString());
+        String fileType = FileTypeHandler.findFileType(data);
+        
+        if ("unknown".equals(fileType))
+        {
+            System.err.println("Unknown filetype; " + filename + parent);
+        }
+        
+        StringBuilder sb    = new StringBuilder(filename).append(".").append(fileType);
+        Path          other = parent.resolve(sb.toString());
         
         if ("json".equals(fileType))
         {

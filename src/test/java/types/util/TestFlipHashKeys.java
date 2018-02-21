@@ -1,8 +1,8 @@
 package types.util;
 
 import com.google.gson.*;
-import javafx.util.Pair;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,8 +12,8 @@ import java.util.*;
 
 public class TestFlipHashKeys
 {
-    Path                     toHash = Paths.get("src\\main\\java\\no\\stelar7\\cdragon").resolve("hashes.json");
-    List<Pair<Long, String>> values = new ArrayList<>();
+    Path                        toHash = Paths.get("src\\main\\java\\no\\stelar7\\cdragon").resolve("hashes.json");
+    List<Vector2<Long, String>> values = new ArrayList<>();
     
     @Test
     public void testFlips() throws IOException
@@ -23,12 +23,12 @@ public class TestFlipHashKeys
         
         printKeys(elem, "");
         
-        values.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+        values.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
         
         StringBuilder sb = new StringBuilder("{\n");
-        for (Pair<Long, String> pair : values)
+        for (Vector2<Long, String> pair : values)
         {
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
         Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "binhash.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
@@ -49,7 +49,7 @@ public class TestFlipHashKeys
             } else
             {
                 //String data = String.format("\"%s\":\"%s\",%n", elem.get(s1), next);
-                values.add(new Pair<>(elem.get(s1).getAsLong(), next));
+                values.add(new Vector2<>(elem.get(s1).getAsLong(), next));
             }
         }
     }
@@ -159,16 +159,16 @@ public class TestFlipHashKeys
         hashes.put(Integer.toUnsignedString(-797683884), "ability.scale2");
         
         
-        List<Pair<String, String>> vals = new ArrayList<>();
+        List<Vector2<String, String>> vals = new ArrayList<>();
         
-        hashes.forEach((k, v) -> vals.add(new Pair<>(k, v)));
+        hashes.forEach((k, v) -> vals.add(new Vector2<>(k, v)));
         
-        vals.sort(Comparator.comparing(Pair::getValue, new NaturalOrderComparator()));
+        vals.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
         
         StringBuilder sb = new StringBuilder("{\n");
-        for (Pair<String, String> pair : vals)
+        for (Vector2<String, String> pair : vals)
         {
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
         Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "binhash2.json"), sb.toString().getBytes(StandardCharsets.UTF_8));

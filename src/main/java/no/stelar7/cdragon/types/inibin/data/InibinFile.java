@@ -1,9 +1,9 @@
 package no.stelar7.cdragon.types.inibin.data;
 
-import javafx.util.Pair;
 import lombok.*;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,13 +29,13 @@ public class InibinFile
     {
         try
         {
-            List<Pair<String, String>> values = new ArrayList<>();
+            List<Vector2<String, String>> values = new ArrayList<>();
             
-            keys.forEach((k, v) -> values.add(new Pair<>(InibinHash.getHash(k), InibinHash.getTransformed(k, v))));
+            keys.forEach((k, v) -> values.add(new Vector2<>(InibinHash.getHash(k), InibinHash.getTransformed(k, v))));
             values.sort(new NaturalOrderComparator());
             
             StringBuilder sb = new StringBuilder();
-            values.forEach(p -> sb.append(String.format("%s = %s%n", p.getKey(), p.getValue())));
+            values.forEach(p -> sb.append(String.format("%s = %s%n", p.getX(), p.getY())));
             
             Files.createDirectories(extractPath);
             Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".ini"), sb.toString().getBytes(StandardCharsets.UTF_8));

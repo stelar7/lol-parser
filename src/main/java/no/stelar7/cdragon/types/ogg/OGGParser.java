@@ -1,10 +1,10 @@
 package no.stelar7.cdragon.types.ogg;
 
-import javafx.util.Pair;
 import no.stelar7.cdragon.types.ogg.data.*;
 import no.stelar7.cdragon.types.wem.data.WEMData;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 
 import java.nio.ByteOrder;
 
@@ -34,9 +34,9 @@ public class OGGParser
             generateOGGHeaderTriad(ogg, bitStream, wem);
         } else
         {
-            Pair<Integer, Boolean[]> data = generateOGGHeader(ogg, bitStream, wem, false, false);
-            modeBits = data.getKey();
-            modeBlockFlag = data.getValue();
+            Vector2<Integer, Boolean[]> data = generateOGGHeader(ogg, bitStream, wem, false, false);
+            modeBits = data.getX();
+            modeBlockFlag = data.getY();
         }
         
         int offset = wem.getDataChunkOffset() + wem.getFirstAudioPacketOffset();
@@ -321,7 +321,7 @@ public class OGGParser
     }
     
     
-    private Pair<Integer, Boolean[]> generateSetupHeader(OGGStream ogg, WEMData wem, RandomAccessReader bitStream, boolean inlineCodebook, boolean fullSetup)
+    private Vector2<Integer, Boolean[]> generateSetupHeader(OGGStream ogg, WEMData wem, RandomAccessReader bitStream, boolean inlineCodebook, boolean fullSetup)
     {
         Boolean[] modeBlockFlag = null;
         int       modeBits      = -1;
@@ -726,10 +726,10 @@ public class OGGParser
             throw new IllegalArgumentException("First audio packet doesnt follow setup packet");
         }
         
-        return new Pair<>(modeBits, modeBlockFlag);
+        return new Vector2<>(modeBits, modeBlockFlag);
     }
     
-    private Pair<Integer, Boolean[]> generateOGGHeader(OGGStream ogg, RandomAccessReader bitStream, WEMData wem, boolean inlineCodebook, boolean fullSetup)
+    private Vector2<Integer, Boolean[]> generateOGGHeader(OGGStream ogg, RandomAccessReader bitStream, WEMData wem, boolean inlineCodebook, boolean fullSetup)
     {
         generateIdentificationHeader(ogg, wem);
         generateCommentHeader(ogg, wem);

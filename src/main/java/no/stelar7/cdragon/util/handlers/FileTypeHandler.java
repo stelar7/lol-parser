@@ -4,7 +4,6 @@ import com.google.gson.*;
 import no.stelar7.cdragon.util.readers.types.ByteArray;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.*;
 
 public final class FileTypeHandler
@@ -15,14 +14,14 @@ public final class FileTypeHandler
         // Hide public constructor
     }
     
-    public static String findFileType(byte[] data, Path file)
+    public static String findFileType(byte[] data)
     {
         ByteArray magic4 = new ByteArray(Arrays.copyOf(data, 4));
         ByteArray magic8 = new ByteArray(Arrays.copyOf(data, 8));
         
         if (FileTypeHandler.isProbableBOM(magic4))
         {
-            return findFileType(Arrays.copyOfRange(data, 3, 7), file);
+            return findFileType(Arrays.copyOfRange(data, 3, 7));
         }
         
         if (FileTypeHandler.isProbableJSON(magic4))
@@ -106,9 +105,8 @@ public final class FileTypeHandler
         
         
         System.out.print("Unknown filetype: ");
-        System.out.print(file.toString());
         System.out.println(magic4.toString());
-        return "txt";
+        return "unknown";
     }
     
     
@@ -443,7 +441,7 @@ public final class FileTypeHandler
     
     public static boolean isContainerFormat(String name)
     {
-        List<String> types = Arrays.asList(".wad", ".wad.client", ".raf", ".bin", ".bnk", ".wpk");
+        List<String> types = Arrays.asList(".wad", ".wad.client", ".raf", ".bnk", ".wpk");
         return types.stream().anyMatch(name.toLowerCase(Locale.ENGLISH)::endsWith);
     }
     

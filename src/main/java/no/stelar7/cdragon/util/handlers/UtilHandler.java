@@ -2,12 +2,12 @@ package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import javafx.util.Pair;
 import net.jpountz.xxhash.*;
+import no.stelar7.cdragon.util.readers.types.Vector2;
 
 import java.io.*;
 import java.net.*;
-import java.nio.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -209,12 +209,12 @@ public final class UtilHandler
         return Integer.toUnsignedLong(hash);
     }
     
-    public static <T, Y> void pairPrintout(Path outputFile, List<Pair<T, Y>> data)
+    public static <X, Y> void pairPrintout(Path outputFile, List<Vector2<X, Y>> data)
     {
         StringBuilder sb = new StringBuilder("{\n");
-        for (Pair<?, ?> pair : data)
+        for (Vector2<X, Y> pair : data)
         {
-            sb.append("\t\"").append(pair.getKey()).append("\": \"").append(pair.getValue()).append("\",\n");
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
         
