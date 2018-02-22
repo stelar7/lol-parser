@@ -87,6 +87,7 @@ public class TestStoreAsRealName
         combineAndDeleteTemp();
         System.out.println("Copying files");
         copyFilesToFolders();
+        System.out.println("Creating zip");
         createTARGZ();
     }
     
@@ -185,6 +186,15 @@ public class TestStoreAsRealName
             try
             {
                 Files.createDirectories(to.getParent());
+                
+                if (Files.exists(to))
+                {
+                    if (Files.size(from) != Files.size(to))
+                    {
+                        Files.delete(to);
+                    }
+                }
+                
                 Files.copy(from, to);
             } catch (FileAlreadyExistsException | NoSuchFileException ex)
             {
