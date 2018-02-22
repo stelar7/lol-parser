@@ -7,7 +7,6 @@ import no.stelar7.cdragon.util.readers.types.Vector3i;
 import org.joml.*;
 
 import java.io.*;
-import java.lang.reflect.*;
 import java.nio.*;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.*;
@@ -52,24 +51,11 @@ public class RandomAccessReader implements AutoCloseable
     public void close()
     {
         /*
-         This is really hacky, but its a workaround to http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4715154
-          */
+         This is not ideal, but its a workaround to http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4469299
+         and Java9 made it even worse...
+         */
         
-        if (buffer.isDirect())
-        {
-            try
-            {
-                Method cleanerMethod = buffer.getClass().getMethod("cleaner");
-                cleanerMethod.setAccessible(true);
-                Object cleaner     = cleanerMethod.invoke(buffer);
-                Method cleanMethod = cleaner.getClass().getMethod("clean");
-                cleanMethod.setAccessible(true);
-                cleanMethod.invoke(cleaner);
-            } catch (ReflectiveOperationException e)
-            {
-                e.printStackTrace();
-            }
-        }
+        buffer = null;
     }
     
     public int pos()
