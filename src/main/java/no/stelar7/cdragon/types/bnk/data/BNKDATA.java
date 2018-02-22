@@ -6,6 +6,7 @@ import java.util.*;
 
 @Data
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class BNKDATA extends BNKHeader
 {
     public BNKDATA(BNKHeader header)

@@ -69,7 +69,7 @@ public class TestWAD
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         //Path rito        = Paths.get("C:\\Riot Games\\League of Legends\\RADS\\projects\\lol_game_client\\releases\\0.0.1.141\\deploy\\DATA\\FINAL\\Champions");
         
-        Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

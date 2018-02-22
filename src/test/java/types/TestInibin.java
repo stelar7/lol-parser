@@ -23,7 +23,7 @@ public class TestInibin
         
         List<Path> paths = new ArrayList<>();
         
-        Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -51,7 +51,7 @@ public class TestInibin
     {
         InibinParser parser = new InibinParser();
         Path         file   = Paths.get(System.getProperty("user.home"), "Downloads", "pman_inibin");
-        Files.walkFileTree(file, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

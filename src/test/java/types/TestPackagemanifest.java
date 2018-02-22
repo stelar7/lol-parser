@@ -46,7 +46,7 @@ public class TestPackagemanifest
         Path extractPath  = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
         Path extractPath2 = Paths.get(System.getProperty("user.home"), "Downloads", "pman_out");
         
-        Files.walkFileTree(extractPath, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(extractPath, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

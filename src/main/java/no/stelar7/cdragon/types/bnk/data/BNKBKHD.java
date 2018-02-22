@@ -4,6 +4,7 @@ import lombok.*;
 
 @Data
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class BNKBKHD extends BNKHeader
 {
     public BNKBKHD(BNKHeader header)

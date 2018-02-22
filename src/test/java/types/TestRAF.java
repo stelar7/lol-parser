@@ -21,7 +21,7 @@ public class TestRAF
         
         List<Path> paths = new ArrayList<>();
         
-        Files.walkFileTree(rito, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

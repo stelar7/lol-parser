@@ -1,5 +1,2 @@
 target/
-javadoc/
 \.*/
-*.iml
-combined.json

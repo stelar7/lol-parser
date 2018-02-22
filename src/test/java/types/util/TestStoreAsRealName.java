@@ -32,7 +32,7 @@ public class TestStoreAsRealName
     final int championMax = 700;
     final int iconMax     = 2000;
     
-    private final Map<String, Integer> folderData = new HashMap<String, Integer>()
+    private final Map<String, Integer> folderData = new HashMap<>()
     {{
         put("champion-sfx-audios", championMax);
         put("champion-icons", championMax);
@@ -41,7 +41,7 @@ public class TestStoreAsRealName
         put("summoner-backdrops", iconMax);
     }};
     
-    private final Map<String, Integer[]> folderData2 = new HashMap<String, Integer[]>()
+    private final Map<String, Integer[]> folderData2 = new HashMap<>()
     {{
         put("champion-tiles", new Integer[]{championMax, skinMax});
     }};
@@ -97,7 +97,7 @@ public class TestStoreAsRealName
         Path outputFolder = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty\\zipped-folders");
         Files.createDirectories(outputFolder);
         
-        Files.walkFileTree(base, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(base, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
@@ -733,7 +733,7 @@ public class TestStoreAsRealName
     {
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
-        Files.walkFileTree(folder, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(folder, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException

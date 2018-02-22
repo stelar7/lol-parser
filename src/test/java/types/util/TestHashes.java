@@ -122,7 +122,7 @@ public class TestHashes
     final int championMax = 750;
     final int iconMax     = 10000;
     
-    private final Map<String, Integer[]> folderData = new HashMap<String, Integer[]>()
+    private final Map<String, Integer[]> folderData = new HashMap<>()
     {{
         put("profile-icons", new Integer[]{iconMax});
         
@@ -391,7 +391,7 @@ public class TestHashes
         
         System.out.println("Combining hashes");
         
-        Files.walkFileTree(outerFolder, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(outerFolder, new SimpleFileVisitor<>()
         {
             
             @Override
@@ -497,7 +497,7 @@ public class TestHashes
     {
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
-        Files.walkFileTree(currentInnerFolder, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(currentInnerFolder, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
@@ -1015,7 +1015,7 @@ public class TestHashes
     @Test
     public void testAllHashes() throws IOException
     {
-        Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<Path>()
+        Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<>()
         {
             
             @Override
@@ -1044,7 +1044,7 @@ public class TestHashes
     @Test
     public void testAllLangKnownPaths() throws IOException
     {
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1117,7 +1117,7 @@ public class TestHashes
     @Test
     public void testSortAllHashes() throws IOException
     {
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1160,7 +1160,7 @@ public class TestHashes
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
@@ -1222,7 +1222,7 @@ public class TestHashes
         Path pupix        = Paths.get(System.getProperty("user.home"), "Downloads", "league_client");
         
         final List<Vector2<String, String>> foundHashes = new ArrayList<>();
-        FileVisitor<Path> findHashes = new SimpleFileVisitor<Path>()
+        FileVisitor<Path> findHashes = new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -1272,7 +1272,7 @@ public class TestHashes
         List<Vector2<String, String>> foundHashes  = new ArrayList<>();
         Map<String, StringBuilder>    pluginData   = new HashMap<>();
         
-        Files.walkFileTree(hashStore, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(hashStore, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -1343,7 +1343,7 @@ public class TestHashes
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -1403,7 +1403,7 @@ public class TestHashes
         List<Vector2<String, String>> hashs    = new ArrayList<>();
         
         
-        Files.walkFileTree(bins, new SimpleFileVisitor<Path>()
+        Files.walkFileTree(bins, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException

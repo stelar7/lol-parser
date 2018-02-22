@@ -36,30 +36,34 @@ public class BNKParser
     
     private void parseSection(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        if ("BKHD".equals(header.getSection()))
+        switch (header.getSection())
         {
-            parseBKDH(header, raf, file);
-        } else if ("DIDX".equals(header.getSection()))
-        {
-            parseDIDX(header, raf, file);
-        } else if ("DATA".equals(header.getSection()))
-        {
-            parseDATA(header, raf, file);
-        } else if ("ENVS".equals(header.getSection()))
-        {
-            parseENVS(header, raf, file);
-        } else if ("FXPR".equals(header.getSection()))
-        {
-            parseFXPR(header, raf, file);
-        } else if ("HIRC".equals(header.getSection()))
-        {
-            parseHIRC(header, raf, file);
-        } else if ("STID".equals(header.getSection()))
-        {
-            parseSTID(header, raf, file);
-        } else if ("STMG".equals(header.getSection()))
-        {
-            parseSTMG(header, raf, file);
+            case "BKHD":
+                parseBKDH(header, raf, file);
+                break;
+            case "DIDX":
+                parseDIDX(header, raf, file);
+                break;
+            case "DATA":
+                parseDATA(header, raf, file);
+                break;
+            case "ENVS":
+                parseENVS(header, raf, file);
+                break;
+            case "FXPR":
+                parseFXPR(header, raf, file);
+                break;
+            case "HIRC":
+                parseHIRC(header, raf, file);
+                break;
+            case "STID":
+                parseSTID(header, raf, file);
+                break;
+            case "STMG":
+                parseSTMG(header, raf, file);
+                break;
+            default:
+                throw new RuntimeException("Invalid header section");
         }
     }
     

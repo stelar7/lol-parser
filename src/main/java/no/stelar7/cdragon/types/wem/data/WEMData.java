@@ -80,30 +80,34 @@ public class WEMData
             String chunkName = raf.readString(4);
             int    chunkSize = raf.readInt();
             
-            if ("fmt ".equals(chunkName))
+            switch (chunkName)
             {
-                fmtChunkOffset = chunkOffset + 8;
-                fmtChunkSize = chunkSize;
-            } else if ("cue ".equals(chunkName))
-            {
-                cueChunkOffset = chunkOffset + 8;
-                cueChunkSize = chunkSize;
-            } else if ("LIST".equals(chunkName))
-            {
-                listChunkOffset = chunkOffset + 8;
-                listChunkSize = chunkSize;
-            } else if ("smpl".equals(chunkName))
-            {
-                smplChunkOffset = chunkOffset + 8;
-                smplChunkSize = chunkSize;
-            } else if ("vorb".equals(chunkName))
-            {
-                vorbChunkOffset = chunkOffset + 8;
-                vorbChunkSize = chunkSize;
-            } else if ("data".equals(chunkName))
-            {
-                dataChunkOffset = chunkOffset + 8;
-                dataChunkSize = chunkSize;
+                case "fmt ":
+                    fmtChunkOffset = chunkOffset + 8;
+                    fmtChunkSize = chunkSize;
+                    break;
+                case "cue ":
+                    cueChunkOffset = chunkOffset + 8;
+                    cueChunkSize = chunkSize;
+                    break;
+                case "LIST":
+                    listChunkOffset = chunkOffset + 8;
+                    listChunkSize = chunkSize;
+                    break;
+                case "smpl":
+                    smplChunkOffset = chunkOffset + 8;
+                    smplChunkSize = chunkSize;
+                    break;
+                case "vorb":
+                    vorbChunkOffset = chunkOffset + 8;
+                    vorbChunkSize = chunkSize;
+                    break;
+                case "data":
+                    dataChunkOffset = chunkOffset + 8;
+                    dataChunkSize = chunkSize;
+                    break;
+                default:
+                    throw new RuntimeException("Invalid chunk name");
             }
             
             chunkOffset += chunkSize + 8;
