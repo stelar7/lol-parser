@@ -38,12 +38,12 @@ public class ROFLParser
         
         int currentEntry    = 0;
         int maxEntries      = file.getPayloadHeader().getChunkCount() + file.getPayloadHeader().getKeyframeCount();
-        int entryDataOffset = file.getHeader().getPayloadOffset() + (17 * maxEntries);
+        int entryDataOffset = file.getHeader().getPayloadOffset() + (ROFLPayloadEntry.HEADER_SIZE * maxEntries);
         
         while (currentEntry < maxEntries)
         {
-            raf.seek(file.getHeader().getPayloadOffset() + (17 * currentEntry));
-            ROFLPayloadEntry entry = parsePayloadEntry(raf, entryDataOffset);
+            raf.seek(file.getHeader().getPayloadOffset() + (ROFLPayloadEntry.HEADER_SIZE * currentEntry));
+            ROFLPayloadEntry entry = parsePayloadEntry(raf, entryDataOffset, file);
             entries.add(entry);
             currentEntry++;
         }
@@ -52,7 +52,7 @@ public class ROFLParser
         return entries;
     }
     
-    private ROFLPayloadEntry parsePayloadEntry(RandomAccessReader raf, int entryDataOffset)
+    private ROFLPayloadEntry parsePayloadEntry(RandomAccessReader raf, int entryDataOffset, ROFLFile file)
     {
         ROFLPayloadEntry entry = new ROFLPayloadEntry();
         
@@ -63,7 +63,7 @@ public class ROFLParser
         entry.setOffset(raf.readInt());
         
         raf.seek(entryDataOffset + entry.getOffset());
-        entry.setData(raf.readBytes(entry.getLength()));
+        entry.setData(raf.readBytes(entry.getLength()), file);
         return entry;
     }
     

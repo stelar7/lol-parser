@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 @Data
 public class ROFLPayloadEntry
 {
+    public static final int HEADER_SIZE = 17;
+    
     private int    id;
     private int    length;
     private int    nextChunkId;
