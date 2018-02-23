@@ -83,6 +83,13 @@
             <artifactId>commons-compress</artifactId>
             <version>1.15</version>
         </dependency>
+
+        <!-- used for decryption of the ROFL entries -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.59</version>
+        </dependency>
     </dependencies>
 
     <repositories>
