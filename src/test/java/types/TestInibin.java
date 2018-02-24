@@ -42,7 +42,7 @@ public class TestInibin
         {
             System.out.println("Parsing: " + file.toString());
             InibinFile parsed = parser.parse(file);
-            parsed.extractFile(extractPath);
+            parsed.extract(extractPath);
         }
     }
     
@@ -62,7 +62,7 @@ public class TestInibin
                 }
                 
                 InibinFile parsed = parser.parseCompressed(file);
-                parsed.extractFile(file.getParent());
+                parsed.extract(file.getParent());
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -77,6 +77,6 @@ public class TestInibin
         
         System.out.println("Parsing: " + file.toString());
         InibinFile parsed = parser.parse(file);
-        parsed.extractFile(file.getParent());
+        parsed.extract(file.getParent());
     }
 }
