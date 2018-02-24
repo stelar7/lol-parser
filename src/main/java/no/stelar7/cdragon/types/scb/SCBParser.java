@@ -1,17 +1,30 @@
 package no.stelar7.cdragon.types.scb;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.scb.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.nio.*;
 import java.nio.file.Path;
 
-public class SCBParser
+public class SCBParser implements Parseable<SCBFile>
 {
+    @Override
     public SCBFile parse(Path path)
     {
-        RandomAccessReader raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        SCBFile            data = new SCBFile();
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public SCBFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public SCBFile parse(RandomAccessReader raf)
+    {
+        SCBFile data = new SCBFile();
         
         readHeader(data, raf);
         readContent(data, raf);

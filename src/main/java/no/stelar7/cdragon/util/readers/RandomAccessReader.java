@@ -2,8 +2,11 @@ package no.stelar7.cdragon.util.readers;
 
 
 import no.stelar7.cdragon.util.readers.types.Vector2f;
+import no.stelar7.cdragon.util.readers.types.Vector2i;
 import no.stelar7.cdragon.util.readers.types.*;
+import no.stelar7.cdragon.util.readers.types.Vector3f;
 import no.stelar7.cdragon.util.readers.types.Vector3i;
+import no.stelar7.cdragon.util.readers.types.Vector4f;
 import org.joml.*;
 
 import java.io.*;
@@ -145,14 +148,19 @@ public class RandomAccessReader implements AutoCloseable
      */
     public String readAsString()
     {
+        return new String(readRemaining(), StandardCharsets.UTF_8);
+    }
+    
+    
+    public byte[] readRemaining()
+    {
         byte[] temp  = new byte[buffer.remaining()];
         int    index = 0;
         while (buffer.hasRemaining())
         {
             temp[index++] = buffer.get();
         }
-        
-        return new String(temp, StandardCharsets.UTF_8);
+        return temp;
     }
     
     public long readLong()
@@ -231,9 +239,9 @@ public class RandomAccessReader implements AutoCloseable
         buffer.position(pos);
     }
     
-    public no.stelar7.cdragon.util.readers.types.Vector3f readVec3F()
+    public Vector3f readVec3F()
     {
-        no.stelar7.cdragon.util.readers.types.Vector3f vector = new no.stelar7.cdragon.util.readers.types.Vector3f();
+        Vector3f vector = new Vector3f();
         vector.x = buffer.getFloat();
         vector.y = buffer.getFloat();
         vector.z = buffer.getFloat();
@@ -277,9 +285,9 @@ public class RandomAccessReader implements AutoCloseable
         return vector;
     }
     
-    public no.stelar7.cdragon.util.readers.types.Vector2i readVec2I()
+    public Vector2i readVec2I()
     {
-        no.stelar7.cdragon.util.readers.types.Vector2i vector = new no.stelar7.cdragon.util.readers.types.Vector2i();
+        Vector2i vector = new Vector2i();
         vector.x = (buffer.getInt());
         vector.y = (buffer.getInt());
         return vector;
@@ -303,9 +311,9 @@ public class RandomAccessReader implements AutoCloseable
         return vector;
     }
     
-    public no.stelar7.cdragon.util.readers.types.Vector4f readVec4F()
+    public Vector4f readVec4F()
     {
-        no.stelar7.cdragon.util.readers.types.Vector4f vector = new no.stelar7.cdragon.util.readers.types.Vector4f();
+        Vector4f vector = new Vector4f();
         vector.x = (buffer.getFloat());
         vector.y = (buffer.getFloat());
         vector.z = (buffer.getFloat());

@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.wpk;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.wem.data.*;
 import no.stelar7.cdragon.types.wpk.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -8,17 +9,28 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
-public class WPKParser
+public class WPKParser implements Parseable<WPKFile>
 {
+    @Override
     public WPKFile parse(Path path)
     {
-        RandomAccessReader raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        WPKFile            file = new WPKFile();
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public WPKFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public WPKFile parse(RandomAccessReader raf)
+    {
+        WPKFile file = new WPKFile();
         
         parseHeader(raf, file);
         parseOffsets(raf, file);
         parseData(raf, file);
-        
         
         return file;
     }

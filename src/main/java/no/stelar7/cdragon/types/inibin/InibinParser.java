@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.inibin;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.inibin.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -10,7 +11,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.function.BiFunction;
 
-public final class InibinParser
+public final class InibinParser implements Parseable<InibinFile>
 {
     private static Map<BitSet, BiFunction<RandomAccessReader, Integer, Object>> maskBytes = new HashMap<>();
     
@@ -71,10 +72,23 @@ public final class InibinParser
     private int index       = 0;
     private int data        = 0;
     
+    @Override
     public InibinFile parse(Path path)
     {
-        raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        file = new InibinFile(path);
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public InibinFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public InibinFile parse(RandomAccessReader raf)
+    {
+        this.raf = raf;
+        file = new InibinFile();
         
         stringStart = -1;
         index = 0;
@@ -91,17 +105,7 @@ public final class InibinParser
         try
         {
             byte[] dataBytes = CompressionHandler.uncompressDEFLATE(Files.readAllBytes(path));
-            raf = new RandomAccessReader(dataBytes, ByteOrder.LITTLE_ENDIAN);
-            
-            file = new InibinFile(path);
-            
-            stringStart = -1;
-            index = 0;
-            data = 0;
-            
-            file.setHeader(parseHeader());
-            file.setKeys(parseKeys());
-            return file;
+            return parse(new RandomAccessReader(dataBytes, ByteOrder.LITTLE_ENDIAN));
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -163,5 +167,4 @@ public final class InibinParser
         
         return header;
     }
-    
 }

@@ -2,6 +2,7 @@ package no.stelar7.cdragon.types.rofl;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.rofl.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -14,16 +15,22 @@ import java.util.*;
 
 
 //https://github.com/robertabcd/lol-ob/wiki/ROFL-Container-Notes
-public class ROFLParser
+public class ROFLParser implements Parseable<ROFLFile>
 {
+    @Override
     public ROFLFile parse(Path path)
     {
-        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        
-        return parse(raf);
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
     }
     
-    private ROFLFile parse(RandomAccessReader raf)
+    @Override
+    public ROFLFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public ROFLFile parse(RandomAccessReader raf)
     {
         ROFLFile file = new ROFLFile();
         file.setHeader(parseHeader(raf));

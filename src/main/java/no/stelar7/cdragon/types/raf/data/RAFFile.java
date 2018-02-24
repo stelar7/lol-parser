@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.types.raf.data;
 
 import lombok.*;
+import no.stelar7.cdragon.interfaces.Extractable;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
@@ -10,7 +11,7 @@ import java.nio.file.*;
 import java.util.List;
 
 @Data
-public class RAFFile
+public class RAFFile implements Extractable
 {
     @Setter(value = AccessLevel.NONE)
     @Getter(value = AccessLevel.NONE)
@@ -31,7 +32,7 @@ public class RAFFile
     }
     
     
-    public void extractFiles(Path path)
+    public void extract(Path path)
     {
         try
         {

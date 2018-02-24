@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.types.wpk.data;
 
 import lombok.Data;
+import no.stelar7.cdragon.interfaces.Extractable;
 import no.stelar7.cdragon.types.wem.data.WEMFile;
 
 import java.io.IOException;
@@ -8,13 +9,13 @@ import java.nio.file.*;
 import java.util.*;
 
 @Data
-public class WPKFile
+public class WPKFile implements Extractable
 {
     private WPKHeader header;
     private List<Integer> offsets  = new ArrayList<>();
     private List<WEMFile> WEMFiles = new ArrayList<>();
     
-    public void extractFiles(Path output)
+    public void extract(Path output)
     {
         for (WEMFile file : WEMFiles)
         {

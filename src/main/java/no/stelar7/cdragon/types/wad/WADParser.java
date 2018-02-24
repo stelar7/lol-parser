@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.wad;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.*;
@@ -12,7 +13,7 @@ import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
 
-public class WADParser
+public class WADParser implements Parseable<WADFile>
 {
     public WADParser()
     {
@@ -132,10 +133,22 @@ public class WADParser
      * @param path path to the file
      * @return WADFile
      */
+    @Override
     public WADFile parse(Path path)
     {
-        RandomAccessReader raf     = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        WADFile            wadFile = new WADFile(raf);
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public WADFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public WADFile parse(RandomAccessReader raf)
+    {
+        WADFile wadFile = new WADFile(raf);
         
         wadFile.setHeader(parseHeader(raf));
         wadFile.setContentHeaders(parseContent(raf, wadFile.getHeader()));

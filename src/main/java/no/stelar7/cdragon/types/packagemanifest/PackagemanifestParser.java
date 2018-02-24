@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.packagemanifest;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
@@ -8,11 +9,23 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 
-public class PackagemanifestParser
+public class PackagemanifestParser implements Parseable<PackagemanifestFile>
 {
+    @Override
     public PackagemanifestFile parse(Path path)
     {
-        RandomAccessReader  raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public PackagemanifestFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public PackagemanifestFile parse(RandomAccessReader raf)
+    {
         PackagemanifestFile file = new PackagemanifestFile();
         
         file.setHeader(parseHeader(raf));

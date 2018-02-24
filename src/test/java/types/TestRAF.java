@@ -40,7 +40,7 @@ public class TestRAF
         {
             System.out.println("Parsing: " + file.toString());
             RAFFile parsed = parser.parse(file);
-            parsed.extractFiles(extractPath);
+            parsed.extract(extractPath);
         }
     }
 }

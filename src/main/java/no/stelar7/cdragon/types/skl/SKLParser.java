@@ -1,18 +1,32 @@
 package no.stelar7.cdragon.types.skl;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.skl.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 
-public class SKLParser
+// TODO
+public class SKLParser implements Parseable<SKLFile>
 {
     
+    @Override
     public SKLFile parse(Path path)
     {
-        RandomAccessReader raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        SKLFile            file = new SKLFile();
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public SKLFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public SKLFile parse(RandomAccessReader raf)
+    {
+        SKLFile file = new SKLFile();
         
         file.setHeader(parseHeader(raf));
         

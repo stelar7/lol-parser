@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.bnk;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bnk.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
@@ -7,14 +8,26 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.*;
 
-public class BNKParser
+public class BNKParser implements Parseable<BNKFile>
 {
     private final List<String> order = Arrays.asList("BKHD", "DIDX", "DATA", "ENVS", "FXPR", "HIRC", "STID", "STMG");
     
+    @Override
     public BNKFile parse(Path path)
     {
-        RandomAccessReader raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        BNKFile            file = new BNKFile();
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public BNKFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public BNKFile parse(RandomAccessReader raf)
+    {
+        BNKFile file = new BNKFile();
         
         List<BNKHeader> headers = new ArrayList<>();
         while (!raf.isEOF())
@@ -69,27 +82,27 @@ public class BNKParser
     
     private void parseSTMG(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("STMG PARSING NOT IMPLEMENTED");
+        throw new UnsupportedOperationException("STMG PARSING NOT IMPLEMENTED" + header + raf + file);
     }
     
     private void parseSTID(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("STID PARSING NOT IMPLEMENTED");
+        throw new UnsupportedOperationException("STID PARSING NOT IMPLEMENTED" + header + raf + file);
     }
     
     private void parseHIRC(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("HIRC PARSING NOT IMPLEMENTED");
+        throw new UnsupportedOperationException("HIRC PARSING NOT IMPLEMENTED" + header + raf + file);
     }
     
     private void parseFXPR(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("FXPR PARSING NOT IMPLEMENTED");
+        throw new UnsupportedOperationException("FXPR PARSING NOT IMPLEMENTED" + header + raf + file);
     }
     
     private void parseENVS(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("ENVS PARSING NOT IMPLEMENTED");
+        throw new UnsupportedOperationException("ENVS PARSING NOT IMPLEMENTED" + header + raf + file);
     }
     
     

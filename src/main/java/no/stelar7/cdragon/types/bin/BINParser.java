@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.bin;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -8,7 +9,7 @@ import no.stelar7.cdragon.util.readers.types.*;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 
-public class BINParser
+public class BINParser implements Parseable<BINFile>
 {
     
     
@@ -25,16 +26,16 @@ public class BINParser
         return file;
     }
     
-    public BINFile parse(ByteArray bContent)
+    @Override
+    public BINFile parse(byte[] data)
     {
-        RandomAccessReader raf = new RandomAccessReader(bContent.getData(), ByteOrder.LITTLE_ENDIAN);
-        return parse(raf);
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
     }
     
+    @Override
     public BINFile parse(Path path)
     {
-        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        return parse(raf);
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
     }
     
     private void parseEntries(BINFile file, RandomAccessReader raf)

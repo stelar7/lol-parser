@@ -17,7 +17,7 @@ public class TestWPK
         System.out.println("Parsing: " + file.toString());
         
         WPKFile data = parser.parse(file);
-        data.extractFiles(file.getParent());
+        data.extract(file.getParent());
         System.out.println();
     }
 }

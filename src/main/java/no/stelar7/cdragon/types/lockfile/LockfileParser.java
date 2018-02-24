@@ -1,18 +1,30 @@
 package no.stelar7.cdragon.types.lockfile;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 
-public class LockfileParser
+public class LockfileParser implements Parseable<Lockfile>
 {
-    
+    @Override
     public Lockfile parse(Path path)
     {
-        RandomAccessReader raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        Lockfile           file = new Lockfile();
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public Lockfile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public Lockfile parse(RandomAccessReader raf)
+    {
+        Lockfile file = new Lockfile();
         
         String[] data = raf.readAsString().split(":");
         file.setProcess(data[0]);

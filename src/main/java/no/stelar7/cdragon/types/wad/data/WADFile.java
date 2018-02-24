@@ -29,6 +29,7 @@ public class WADFile
         this.fileReader = raf;
     }
     
+    
     public void extractFiles(String pluginName, String wadName, Path path)
     {
         if (wadName == null)
@@ -107,7 +108,7 @@ public class WADFile
         if ("unknown".equals(parentName))
         {
             Files.write(savePath.resolve(unknownHashContainer), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-            findFileTypeAndRename(self, data, filename, savePath);
+            findFileTypeAndRename(data, filename, savePath);
         } else
         {
             Files.write(self, data);
@@ -159,7 +160,7 @@ public class WADFile
     }
     
     
-    private void findFileTypeAndRename(Path self, byte[] data, String filename, Path parent) throws IOException
+    private void findFileTypeAndRename(byte[] data, String filename, Path parent) throws IOException
     {
         String fileType = FileTypeHandler.findFileType(data);
         

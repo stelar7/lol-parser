@@ -26,7 +26,7 @@ public class TestOGG
         Path file    = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "24635440.wem");
         
         WPKFile wpk = wpkParser.parse(wpkfile);
-        wpk.extractFiles(wpkfile.getParent());
+        wpk.extract(wpkfile.getParent());
         
         WEMFile   wem  = wemparser.parse(file);
         OGGStream data = parser.parse(wem.getData());

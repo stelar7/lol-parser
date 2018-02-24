@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.anm;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.anm.data.*;
 import no.stelar7.cdragon.types.anm.data.versioned.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -8,32 +9,42 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.*;
 
-public class ANMParser
+public class ANMParser implements Parseable<ANMFile>
 {
+    @Override
     public ANMFile parse(Path path)
     {
-        RandomAccessReader raf     = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        ANMFile            anmFile = new ANMFile();
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public ANMFile parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public ANMFile parse(RandomAccessReader raf)
+    {
+        ANMFile anmFile = new ANMFile();
         anmFile.setHeader(parseHeader(raf));
         
-        if (anmFile.getHeader().getVersion() == 1)
+        switch (anmFile.getHeader().getVersion())
         {
-            anmFile.setVersion1(parseVersion1(raf));
-        }
-        
-        if (anmFile.getHeader().getVersion() == 3)
-        {
-            anmFile.setVersion3(parseVersion3(raf));
-        }
-        
-        if (anmFile.getHeader().getVersion() == 4)
-        {
-            anmFile.setVersion4(parseVersion4(raf));
-        }
-        
-        if (anmFile.getHeader().getVersion() == 5)
-        {
-            anmFile.setVersion5(parseVersion5(raf));
+            case 1:
+                anmFile.setVersion1(parseVersion1(raf));
+                break;
+            case 3:
+                anmFile.setVersion3(parseVersion3(raf));
+                break;
+            case 4:
+                anmFile.setVersion4(parseVersion4(raf));
+                break;
+            case 5:
+                anmFile.setVersion5(parseVersion5(raf));
+                break;
+            default:
+                throw new RuntimeException("Invalid ANM version");
         }
         
         return anmFile;
