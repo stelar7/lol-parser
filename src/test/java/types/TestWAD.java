@@ -15,7 +15,8 @@ public class TestWAD
     {
         WADParser parser = new WADParser();
         
-        String pluginName  = "rcp-be-lol-game-data";
+        //String pluginName  = "rcp-be-lol-game-data";
+        String pluginName  = "rcp-fe-lol-profiles";
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath);
