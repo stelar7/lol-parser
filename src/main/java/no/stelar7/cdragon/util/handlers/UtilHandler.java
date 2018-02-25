@@ -311,7 +311,7 @@ public final class UtilHandler
         try
         {
             List<String> lines = Files.readAllLines(path);
-            lines.forEach(sb::append);
+            lines.forEach(l -> sb.append(l).append("\n"));
         } catch (IOException e)
         {
             e.printStackTrace();

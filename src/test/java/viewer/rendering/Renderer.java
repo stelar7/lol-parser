@@ -1,9 +1,11 @@
-package viewer.util;
+package viewer.rendering;
 
-import org.joml.*;
+import org.joml.Vector2f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
+import viewer.rendering.models.Model;
+import viewer.rendering.shaders.*;
 
 import java.nio.IntBuffer;
 import java.util.concurrent.locks.ReentrantLock;
@@ -11,12 +13,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public abstract class Renderer
 {
     public volatile int width;
     public volatile int height;
+    
+    private volatile boolean needsRefresh = true;
     
     private long window;
     
@@ -33,7 +38,20 @@ public abstract class Renderer
             @Override
             public void initPostGL()
             {
-            
+                float vertices[] = {0.0f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f};
+                int   indecies[] = {2, 1, 0};
+                
+                model = new Model(vertices, indecies);
+                
+                Shader vert = new Shader("shaders/basic.vert");
+                Shader frag = new Shader("shaders/basic.frag");
+                
+                prog = new Program();
+                prog.attach(vert);
+                prog.attach(frag);
+                prog.bindVertLocation("position", 0);
+                prog.bindFragLocation("color", 0);
+                prog.link();
             }
             
             @Override
@@ -44,33 +62,21 @@ public abstract class Renderer
             
             float last = 0;
             
+            Model model;
+            Program prog;
+            
             @Override
             public void render()
             {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 
-                Vector2f center = new Vector2f(width / 2, height / 2);
-                int      size   = 50;
+                prog.bind();
+                model.bind();
                 
-                // create frame to avoid overriding state
-                glPushMatrix();
+                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
                 
-                // center object
-                glTranslatef(width / 2f, height / 2f, 0);
-                glRotatef(last = (last + 1f) % 360, 0, 0, 1);
-                glTranslatef(-width / 2f, -height / 2f, 0);
-                
-                // make it red
-                glColor3f(1, 0, 0);
-                
-                // draw it
-                glBegin(GL_TRIANGLES);
-                glVertex2f(center.x + size, center.y + size);
-                glVertex2f(center.x, center.y - size);
-                glVertex2f(center.x - size, center.y + size);
-                glEnd();
-                
-                glPopMatrix();
+                model.unbind();
+                prog.unbind();
             }
         }.start();
     }
@@ -92,7 +98,6 @@ public abstract class Renderer
             while (!shouldClose)
             {
                 glfwWaitEvents();
-                
             }
             
             lock.lock();
@@ -116,8 +121,11 @@ public abstract class Renderer
         }
         
         glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_SAMPLES, 8);
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_AUTO_ICONIFY, GLFW_FALSE);
+        
         
         window = glfwCreateWindow(width, height, "Basic Renderer!", NULL, NULL);
         if (window == NULL)
@@ -132,6 +140,7 @@ public abstract class Renderer
                                            {
                                                width = w;
                                                height = h;
+                                               needsRefresh = true;
                                            }
                                        }
                                       );
@@ -172,12 +181,24 @@ public abstract class Renderer
         double timer    = System.currentTimeMillis();
         long   fpstimer = System.currentTimeMillis();
         
-        glOrtho(0, width, 0, height, 1, -1);
-        glViewport(0, 0, width, height);
+        glEnable(GL_BLEND);
+        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_MULTISAMPLE);
+        
+        glCullFace(GL_BACK);
+        glDepthFunc(GL_LEQUAL);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         while (!shouldClose)
         {
+            if (needsRefresh)
+            {
+                needsRefresh = false;
+                glViewport(0, 0, width, height);
+            }
+            
+            
             if (System.currentTimeMillis() > fpstimer + 1000)
             {
                 System.out.format("fps: %d  ups: %d%n", fps, ups);
