@@ -1,12 +1,13 @@
-package viewer.rendering;
+package no.stelar7.cdragon.viewer.rendering;
 
-import org.joml.Vector2f;
+import no.stelar7.cdragon.viewer.rendering.models.Model;
+import no.stelar7.cdragon.viewer.rendering.shaders.*;
+import org.joml.*;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
-import viewer.rendering.models.Model;
-import viewer.rendering.shaders.*;
 
+import java.lang.Math;
 import java.nio.IntBuffer;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,10 +39,37 @@ public abstract class Renderer
             @Override
             public void initPostGL()
             {
-                float vertices[] = {0.0f, 0.5f, 0.5f, -0.5f, -0.5f, -0.5f};
+                float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
                 int   indecies[] = {2, 1, 0};
                 
-                model = new Model(vertices, indecies);
+                float[] v2 = {
+                        1.0f, -1.0f, 1.0f,
+                        1.0f, -1.0f, 1.0f,
+                        1.0f, 1.0f, 1.0f,
+                        -1.0f, 1.0f, 1.0f,
+                        -1.0f, -1.0f, -1.0f,
+                        1.0f, -1.0f, -1.0f,
+                        1.0f, 1.0f, -1.0f,
+                        -1.0f, 1.0f, -1.0f,
+                        };
+                
+                int i2[] = {
+                        0, 1, 2,
+                        2, 3, 0,
+                        1, 5, 6,
+                        6, 2, 1,
+                        7, 6, 5,
+                        5, 4, 7,
+                        4, 0, 3,
+                        3, 7, 4,
+                        4, 5, 1,
+                        1, 0, 4,
+                        3, 2, 6,
+                        6, 7, 3
+                };
+
+//                model = new Model(vertices, indecies);
+                model = new Model(v2, i2);
                 
                 Shader vert = new Shader("shaders/basic.vert");
                 Shader frag = new Shader("shaders/basic.frag");
@@ -52,12 +80,35 @@ public abstract class Renderer
                 prog.bindVertLocation("position", 0);
                 prog.bindFragLocation("color", 0);
                 prog.link();
+                
+                pushMVP();
+                
+            }
+            
+            private void pushMVP()
+            {
+                Matrix4f projection = new Matrix4f().setPerspective((float) Math.toRadians(45.0f), (float) width / (float) height, 0.1f, 100f);
+//                Matrix4f projection = new Matrix4f().identity().setOrtho(-10, 10, -10, 10, 0, 100);
+                
+                
+                Matrix4f view = new Matrix4f().setLookAt(
+                        new Vector3f(4f, 3f, 3f),
+                        new Vector3f(0, 0, 0),
+                        new Vector3f(0, 1f, 0));
+                
+                
+                Matrix4f model = new Matrix4f();//.scaling(1f / 5f);
+                
+                prog.bind();
+                prog.setMatrix4f("model", model);
+                prog.setMatrix4f("view", view);
+                prog.setMatrix4f("projection", projection);
             }
             
             @Override
             public void update()
             {
-            
+                pushMVP();
             }
             
             float last = 0;
@@ -73,7 +124,7 @@ public abstract class Renderer
                 prog.bind();
                 model.bind();
                 
-                glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
                 
                 model.unbind();
                 prog.unbind();
@@ -182,7 +233,7 @@ public abstract class Renderer
         long   fpstimer = System.currentTimeMillis();
         
         glEnable(GL_BLEND);
-        glEnable(GL_CULL_FACE);
+//        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
         

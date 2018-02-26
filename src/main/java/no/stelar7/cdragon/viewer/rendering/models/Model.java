@@ -1,4 +1,4 @@
-package viewer.rendering.models;
+package no.stelar7.cdragon.viewer.rendering.models;
 
 
 public class Model
@@ -8,6 +8,7 @@ public class Model
     public Model(float[] vertices, int[] indecies)
     {
         mesh = new Mesh(vertices, indecies);
+//        mesh = Mesh.loadSKN();
     }
     
     public void bind()
@@ -18,5 +19,10 @@ public class Model
     public void unbind()
     {
         mesh.unbind();
+    }
+    
+    public Mesh getMesh()
+    {
+        return mesh;
     }
 }

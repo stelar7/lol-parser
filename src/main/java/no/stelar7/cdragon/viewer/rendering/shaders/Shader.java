@@ -1,8 +1,6 @@
-package viewer.rendering.shaders;
+package no.stelar7.cdragon.viewer.rendering.shaders;
 
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-
-import java.io.File;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -13,8 +11,7 @@ public class Shader implements AutoCloseable
     
     public Shader(String filename)
     {
-        File   shaderFile = new File(getClass().getClassLoader().getResource(filename).getFile());
-        String source     = UtilHandler.readAsString(shaderFile.toPath());
+        String source = UtilHandler.readInternalAsString(filename);
         
         if (filename.endsWith(".vert"))
         {

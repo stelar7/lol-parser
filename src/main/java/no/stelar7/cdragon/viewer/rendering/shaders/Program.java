@@ -1,5 +1,9 @@
-package viewer.rendering.shaders;
+package no.stelar7.cdragon.viewer.rendering.shaders;
 
+
+import org.joml.Matrix4f;
+
+import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
@@ -60,5 +64,19 @@ public class Program implements AutoCloseable
     public int getId()
     {
         return id;
+    }
+    
+    Map<String, Integer> uniformLocations = new HashMap<>();
+    
+    private int getUniformLocation(String name)
+    {
+        return uniformLocations.computeIfAbsent(name, __ -> glGetUniformLocation(id, name));
+    }
+    
+    public void setMatrix4f(String name, Matrix4f mat)
+    {
+        float[] data = mat.get(new float[16]);
+        int     loc  = getUniformLocation(name);
+        glUniformMatrix4fv(loc, false, data);
     }
 }

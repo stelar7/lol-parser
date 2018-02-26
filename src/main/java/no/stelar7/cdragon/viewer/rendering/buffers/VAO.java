@@ -1,4 +1,4 @@
-package viewer.rendering.buffers;
+package no.stelar7.cdragon.viewer.rendering.buffers;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;

@@ -2,7 +2,7 @@ package viewer;
 
 import no.stelar7.cdragon.types.skl.SKLParser;
 import no.stelar7.cdragon.types.skl.data.SKLFile;
-import viewer.rendering.Renderer;
+import no.stelar7.cdragon.viewer.rendering.Renderer;
 
 import java.nio.file.*;
 
