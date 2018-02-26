@@ -40,32 +40,24 @@ public abstract class Renderer
             public void initPostGL()
             {
                 float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
-                int   indecies[] = {2, 1, 0};
+                int   indecies[] = {0, 1, 2};
                 
                 float[] v2 = {
-                        1.0f, -1.0f, 1.0f,
-                        1.0f, -1.0f, 1.0f,
-                        1.0f, 1.0f, 1.0f,
-                        -1.0f, 1.0f, 1.0f,
-                        -1.0f, -1.0f, -1.0f,
-                        1.0f, -1.0f, -1.0f,
-                        1.0f, 1.0f, -1.0f,
-                        -1.0f, 1.0f, -1.0f,
-                        };
+                        1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1,
+                        1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1,
+                        1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1,
+                        -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1,
+                        -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
+                        1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
+                };
                 
                 int i2[] = {
-                        0, 1, 2,
-                        2, 3, 0,
-                        1, 5, 6,
-                        6, 2, 1,
-                        7, 6, 5,
-                        5, 4, 7,
-                        4, 0, 3,
-                        3, 7, 4,
-                        4, 5, 1,
-                        1, 0, 4,
-                        3, 2, 6,
-                        6, 7, 3
+                        0, 1, 2, 2, 3, 0,
+                        4, 5, 6, 6, 7, 4,
+                        8, 9, 10, 10, 11, 8,
+                        12, 13, 14, 14, 15, 12,
+                        16, 17, 18, 18, 19, 16,
+                        20, 21, 22, 22, 23, 20
                 };
 
 //                model = new Model(vertices, indecies);
@@ -85,6 +77,10 @@ public abstract class Renderer
                 
             }
             
+            float x;
+            float z;
+            float time = 0;
+            
             private void pushMVP()
             {
                 float perspective = (float) width / (float) height;
@@ -92,13 +88,16 @@ public abstract class Renderer
                 
                 Matrix4f projection = new Matrix4f().setPerspective(fov, perspective, 0.1f, 100f);
                 
+                x = (float) Math.sin(time) * 20;
+                z = (float) Math.cos(time) * 20;
+                
                 Matrix4f view = new Matrix4f().setLookAt(
-                        new Vector3f(-3f, 3f, -4f),
+                        new Vector3f(x, 15f, z),
                         new Vector3f(0, 0, 0),
                         new Vector3f(0, 1f, 0));
                 
                 
-                Matrix4f model = new Matrix4f();
+                Matrix4f model = new Matrix4f().scaling(2);
                 
                 Matrix4f mvp = projection.mul(view, new Matrix4f()).mul(model, new Matrix4f());
                 
@@ -109,6 +108,8 @@ public abstract class Renderer
             @Override
             public void update()
             {
+                time += .01f;
+                
                 pushMVP();
             }
             

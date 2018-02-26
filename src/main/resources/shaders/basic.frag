@@ -5,5 +5,5 @@ in vec3 pos;
 
 void main()
 {
-    outColor = vec4(pos, 1.0);
+    outColor = max(vec4(pos, 1.0), vec4(0.1));
 }
