@@ -87,22 +87,23 @@ public abstract class Renderer
             
             private void pushMVP()
             {
-                Matrix4f projection = new Matrix4f().setPerspective((float) Math.toRadians(45.0f), (float) width / (float) height, 0.1f, 100f);
-//                Matrix4f projection = new Matrix4f().identity().setOrtho(-10, 10, -10, 10, 0, 100);
+                float perspective = (float) width / (float) height;
+                float fov         = (float) Math.toRadians(45);
                 
+                Matrix4f projection = new Matrix4f().setPerspective(fov, perspective, 0.1f, 100f);
                 
                 Matrix4f view = new Matrix4f().setLookAt(
-                        new Vector3f(4f, 3f, 3f),
+                        new Vector3f(-3f, 3f, -4f),
                         new Vector3f(0, 0, 0),
                         new Vector3f(0, 1f, 0));
                 
                 
-                Matrix4f model = new Matrix4f();//.scaling(1f / 5f);
+                Matrix4f model = new Matrix4f();
+                
+                Matrix4f mvp = projection.mul(view, new Matrix4f()).mul(model, new Matrix4f());
                 
                 prog.bind();
-                prog.setMatrix4f("model", model);
-                prog.setMatrix4f("view", view);
-                prog.setMatrix4f("projection", projection);
+                prog.setMatrix4f("mvp", mvp);
             }
             
             @Override
@@ -233,7 +234,7 @@ public abstract class Renderer
         long   fpstimer = System.currentTimeMillis();
         
         glEnable(GL_BLEND);
-//        glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_MULTISAMPLE);
         
