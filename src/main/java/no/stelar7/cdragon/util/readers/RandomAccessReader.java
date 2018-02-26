@@ -14,7 +14,7 @@ import java.nio.*;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.*;
 import java.nio.file.Path;
-import java.util.Arrays;
+import java.util.*;
 
 public class RandomAccessReader implements AutoCloseable
 {
@@ -176,6 +176,16 @@ public class RandomAccessReader implements AutoCloseable
     public short readShort()
     {
         return buffer.getShort();
+    }
+    
+    public List<Short> readShorts(int count)
+    {
+        List<Short> values = new ArrayList<>();
+        for (int j = 0; j < count; j++)
+        {
+            values.add(readShort());
+        }
+        return values;
     }
     
     public byte readByte()
@@ -352,4 +362,5 @@ public class RandomAccessReader implements AutoCloseable
     {
         return !buffer.hasRemaining();
     }
+    
 }

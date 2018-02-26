@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.releasemanifest;
 
+import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.releasemanifest.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -8,12 +9,31 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.*;
 
-public class ReleasemanifestParser
+public class ReleasemanifestParser implements Parseable<ReleasemanifestDirectory>
 {
+    @Override
     public ReleasemanifestDirectory parse(Path path)
     {
-        ReleasemanifestDataFile data = parseToData(path);
-        return solveDirectory(data, data.getDirectories().get(0));
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public ReleasemanifestDirectory parse(byte[] data)
+    {
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public ReleasemanifestDirectory parse(RandomAccessReader raf)
+    {
+        ReleasemanifestDataFile file = new ReleasemanifestDataFile();
+        
+        file.setHeader(parseHeader(raf));
+        file.setDirectories(parseDirectories(raf));
+        file.setFiles(parseFiles(raf));
+        file.setStrings(parseStrings(raf));
+        
+        return solveDirectory(file, file.getDirectories().get(0));
     }
     
     private ReleasemanifestDirectory solveDirectory(ReleasemanifestDataFile data, ReleasemanifestDataDirectory dir)
@@ -40,19 +60,6 @@ public class ReleasemanifestParser
         }
         
         return result;
-    }
-    
-    public ReleasemanifestDataFile parseToData(Path path)
-    {
-        RandomAccessReader      raf  = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        ReleasemanifestDataFile file = new ReleasemanifestDataFile();
-        
-        file.setHeader(parseHeader(raf));
-        file.setDirectories(parseDirectories(raf));
-        file.setFiles(parseFiles(raf));
-        file.setStrings(parseStrings(raf));
-        
-        return file;
     }
     
     private ReleasemanifestHeader parseHeader(RandomAccessReader raf)

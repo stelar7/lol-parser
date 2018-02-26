@@ -43,4 +43,15 @@ public class TestRAF
             parsed.extract(extractPath);
         }
     }
+    
+    @Test
+    public void testRAF()
+    {
+        Path extractPath = Paths.get(System.getProperty("user.home"), "downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48");
+        
+        RAFParser parser = new RAFParser();
+        RAFFile   parsed = parser.parse(extractPath.resolve("Archive_114251952.raf"));
+        
+        parsed.extract(extractPath);
+    }
 }

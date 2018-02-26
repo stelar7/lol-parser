@@ -1,5 +1,6 @@
 package viewer.rendering.models;
 
+import no.stelar7.cdragon.types.skn.data.SKNFile;
 import viewer.rendering.buffers.*;
 
 import static org.lwjgl.opengl.GL15.*;
@@ -51,5 +52,10 @@ public class Mesh
     {
         ibo.unbind();
         vao.unbind();
+    }
+    
+    public static Mesh loadSKN(SKNFile skn)
+    {
+        return null;
     }
 }
