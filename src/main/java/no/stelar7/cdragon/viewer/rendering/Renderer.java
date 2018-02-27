@@ -217,6 +217,11 @@ public abstract class Renderer
     {
         glfwMakeContextCurrent(window);
         glfwShowWindow(window);
+        
+        // disable vsync
+        glfwSwapInterval(0);
+        
+        
         GL.createCapabilities();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         
