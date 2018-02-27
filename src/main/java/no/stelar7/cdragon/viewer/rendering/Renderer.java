@@ -88,12 +88,12 @@ public abstract class Renderer
                 
                 Matrix4f projection = new Matrix4f().setPerspective(fov, perspective, 0.1f, 10000f);
                 
-                x = (float) Math.sin(time) * 500;
-                z = (float) Math.cos(time) * 500;
+                x = (float) Math.sin(time) * 10;
+                z = (float) Math.cos(time) * 10;
                 
                 Matrix4f view = new Matrix4f().setLookAt(
-                        new Vector3f(x, 150f, z),
-                        new Vector3f(0, 125, 0),
+                        new Vector3f(x, 0.5f, z),
+                        new Vector3f(0, 0, 0),
                         new Vector3f(0, 1f, 0));
                 
                 

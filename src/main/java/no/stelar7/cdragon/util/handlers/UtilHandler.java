@@ -504,4 +504,9 @@ public final class UtilHandler
         String pre = name.substring(0, name.lastIndexOf('.') + 1);
         return pre + other;
     }
+    
+    public static float scale(final float valueIn, final float baseMin, final float baseMax, final float limitMin, final float limitMax)
+    {
+        return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
+    }
 }
