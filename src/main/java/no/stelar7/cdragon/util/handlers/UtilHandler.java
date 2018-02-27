@@ -379,7 +379,7 @@ public final class UtilHandler
         return gson;
     }
     
-    public static boolean notInRange(int x, int min, int max)
+    public static boolean isOutsideRange(int x, int min, int max)
     {
         return x < min || x >= max;
     }
