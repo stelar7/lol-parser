@@ -7,8 +7,8 @@ public class Model
     
     public Model(float[] vertices, int[] indecies)
     {
-        mesh = new Mesh(vertices, indecies);
-//        mesh = Mesh.loadSKN();
+//        mesh = new Mesh(vertices, indecies);
+        mesh = Mesh.loadSKN();
     }
     
     public void bind()

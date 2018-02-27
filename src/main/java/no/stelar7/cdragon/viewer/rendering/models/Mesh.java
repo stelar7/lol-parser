@@ -62,7 +62,7 @@ public class Mesh
     public static Mesh loadSKN()
     {
         SKNParser parser = new SKNParser();
-        Path      path   = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\TeemoMushroom\\SuperTrap.skn");
+        Path      path   = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\Brand\\Brand_frostfire.skn");
         SKNFile   data   = parser.parse(path);
         
         float[] verts = new float[data.getVertexCount() * 3];
