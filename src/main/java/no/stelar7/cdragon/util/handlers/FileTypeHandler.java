@@ -112,9 +112,21 @@ public final class FileTypeHandler
     
     public static byte[] makePrettyJson(byte[] jsonString)
     {
-        String      dataString = new String(jsonString, StandardCharsets.UTF_8);
-        JsonElement obj        = new JsonParser().parse(dataString);
-        String      pretty     = UtilHandler.getGson().toJson(obj);
+        StringBuilder sb = new StringBuilder(new String(jsonString, StandardCharsets.UTF_8));
+        String        dataString;
+        
+        String rev = sb.reverse().toString().replaceAll("\n", "");
+        if (rev.charAt(1) == ',')
+        {
+            dataString = new StringBuilder(rev).replace(1, 2, "").reverse().toString();
+        } else
+        {
+            sb.reverse();
+            dataString = sb.toString();
+        }
+        
+        JsonElement obj    = new JsonParser().parse(dataString);
+        String      pretty = UtilHandler.getGson().toJson(obj);
         return pretty.getBytes(StandardCharsets.UTF_8);
     }
     

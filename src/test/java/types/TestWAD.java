@@ -15,8 +15,7 @@ public class TestWAD
     {
         WADParser parser = new WADParser();
         
-        //String pluginName  = "rcp-be-lol-game-data";
-        String pluginName  = "rcp-fe-lol-profiles";
+        String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath);
@@ -68,7 +67,6 @@ public class TestWAD
         
         Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
-        //Path rito        = Paths.get("C:\\Riot Games\\League of Legends\\RADS\\projects\\lol_game_client\\releases\\0.0.1.141\\deploy\\DATA\\FINAL\\Champions");
         
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
