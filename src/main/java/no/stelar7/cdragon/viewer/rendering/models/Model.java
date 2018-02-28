@@ -22,13 +22,19 @@ public class Model implements AutoCloseable
     
     public Model(float[] vertices, int[] indecies)
     {
-//        mesh = new Mesh(vertices, indecies);
+        vao = new VAO();
+        vao.bind();
         
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\Brand");
-        
-        SKNParser     parser = new SKNParser();
-        SKNFile       data   = parser.parse(path.resolve("Brand_frostfire.skn"));
-        BufferedImage timg   = new DDSParser().parse(path.resolve("brand_frostfire_TX_CM.dds"));
+        mesh = new Mesh();
+        mesh.setVertices(vertices);
+        mesh.setIndecies(indecies);
+    }
+    
+    public Model(Path path)
+    {
+        SKNParser     parser       = new SKNParser();
+        SKNFile       data         = parser.parse(path.resolve("Brand_frostfire.skn"));
+        BufferedImage textureImage = new DDSParser().parse(path.resolve("brand_frostfire_TX_CM.dds"));
         
         vao = new VAO();
         vao.bind();
@@ -38,7 +44,7 @@ public class Model implements AutoCloseable
         mesh = Mesh.loadSKN(data);
         
         texture = Texture.loadForSKN(data);
-        texture.setData(timg);
+        texture.setData(textureImage);
     }
     
     

@@ -6,6 +6,7 @@ import no.stelar7.cdragon.viewer.rendering.shaders.*;
 import org.joml.*;
 
 import java.lang.Math;
+import java.nio.file.*;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -26,27 +27,30 @@ public class SKLViewer extends Renderer
     {
         float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
         int   indecies[] = {0, 1, 2};
-        
-        float[] v2 = {
-                1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1,
-                1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1,
-                1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1,
-                -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1,
-                -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
-                1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
-        };
-        
-        int i2[] = {
-                0, 1, 2, 2, 3, 0,
-                4, 5, 6, 6, 7, 4,
-                8, 9, 10, 10, 11, 8,
-                12, 13, 14, 14, 15, 12,
-                16, 17, 18, 18, 19, 16,
-                20, 21, 22, 22, 23, 20
-        };
 
-//                model = new Model(vertices, indecies);
-        model = new Model(v2, i2);
+//        float[] v2 = {
+//                1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1,
+//                1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1,
+//                1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1,
+//                -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1,
+//                -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
+//                1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
+//        };
+//
+//        int i2[] = {
+//                0, 1, 2, 2, 3, 0,
+//                4, 5, 6, 6, 7, 4,
+//                8, 9, 10, 10, 11, 8,
+//                12, 13, 14, 14, 15, 12,
+//                16, 17, 18, 18, 19, 16,
+//                20, 21, 22, 22, 23, 20
+//        };
+
+//        model = new Model(vertices, indecies);
+//        model = new Model(v2, i2);
+        
+        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\Brand");
+        model = new Model(path);
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
