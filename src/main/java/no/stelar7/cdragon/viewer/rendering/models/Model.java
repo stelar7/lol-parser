@@ -20,24 +20,29 @@ public class Model implements AutoCloseable
     private Mesh    mesh;
     private Texture texture;
     
-    public Model(float[] vertices, int[] indecies)
+    private Model()
     {
         vao = new VAO();
         vao.bind();
+    }
+    
+    public Model(float[] vertices, int[] indecies)
+    {
+        this();
         
         mesh = new Mesh();
         mesh.setVertices(vertices);
         mesh.setIndecies(indecies);
     }
     
-    public Model(Path path)
+    public Model(Path base, String skn, String tex)
     {
-        SKNParser     parser       = new SKNParser();
-        SKNFile       data         = parser.parse(path.resolve("Brand_frostfire.skn"));
-        BufferedImage textureImage = new DDSParser().parse(path.resolve("brand_frostfire_TX_CM.dds"));
+        this();
         
-        vao = new VAO();
-        vao.bind();
+        SKNParser     parser       = new SKNParser();
+        SKNFile       data         = parser.parse(base.resolve(skn));
+        BufferedImage textureImage = new DDSParser().parse(base.resolve(tex));
+        
         vao.setPointer(0, VERTEX_SIZE);
         vao.setPointer(1, TEXTURE_SIZE);
         

@@ -48,8 +48,8 @@ public class SKLViewer extends Renderer
 //        };
 //        model = new Model(v2, i2);
         
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\Brand");
-        model = new Model(path);
+        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test\\Brand");
+        model = new Model(path, "Brand_frostfire.skn", "brand_frostfire_TX_CM.dds");
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
