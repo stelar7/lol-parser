@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Program implements AutoCloseable
 {
-    int id;
+    private int id;
     
     public Program()
     {
@@ -78,5 +78,11 @@ public class Program implements AutoCloseable
         float[] data = mat.get(new float[16]);
         int     loc  = getUniformLocation(name);
         glUniformMatrix4fv(loc, false, data);
+    }
+    
+    public void setInt(String name, int data)
+    {
+        int loc = getUniformLocation(name);
+        glUniform1i(loc, data);
     }
 }

@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL30.*;
 public class VAO implements AutoCloseable
 {
     
-    int id;
+    private int id;
     
     public VAO()
     {
@@ -30,13 +30,9 @@ public class VAO implements AutoCloseable
         glDeleteVertexArrays(id);
     }
     
-    public void enableAttribIndex(int index)
-    {
-        glEnableVertexAttribArray(index);
-    }
-    
     public void setPointer(int index, int size)
     {
+        glEnableVertexAttribArray(index);
         glVertexAttribPointer(index, size, GL_FLOAT, false, 0, 0);
     }
 }

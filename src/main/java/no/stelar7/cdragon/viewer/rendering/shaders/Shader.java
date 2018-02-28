@@ -7,7 +7,7 @@ import static org.lwjgl.opengl.GL20.*;
 
 public class Shader implements AutoCloseable
 {
-    int id;
+    private int id;
     
     public Shader(String filename)
     {

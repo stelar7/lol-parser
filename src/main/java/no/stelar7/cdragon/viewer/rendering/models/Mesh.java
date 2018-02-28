@@ -1,43 +1,29 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
-import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.types.Vector3f;
-import no.stelar7.cdragon.viewer.rendering.buffers.*;
-
-import java.nio.file.*;
+import no.stelar7.cdragon.viewer.rendering.buffers.VBO;
 
 import static org.lwjgl.opengl.GL15.*;
 
-public class Mesh
+public class Mesh implements AutoCloseable
 {
-    private static final int VERTEX_SIZE = 3;
-    
-    VAO vao;
-    VBO vbo;
-    VBO ibo;
+    private VBO vbo;
+    private VBO ibo;
     
     public int indexCount;
     
-    public Mesh(float[] vertices, int[] indecies)
+    public Mesh()
     {
-        vao = new VAO();
         vbo = new VBO(GL_ARRAY_BUFFER);
         ibo = new VBO(GL_ELEMENT_ARRAY_BUFFER);
-        
-        setVertices(vertices);
-        setIndecies(indecies);
     }
     
     public void setVertices(float[] vertices)
     {
-        vao.bind();
         vbo.bind();
         vbo.setData(vertices);
-        vao.enableAttribIndex(0);
-        vao.setPointer(0, VERTEX_SIZE);
-        vao.unbind();
         vbo.unbind();
     }
     
@@ -51,23 +37,17 @@ public class Mesh
     
     public void bind()
     {
-        vao.bind();
         ibo.bind();
     }
     
     public void unbind()
     {
         ibo.unbind();
-        vao.unbind();
     }
     
-    public static Mesh loadSKN()
+    public static Mesh loadSKN(SKNFile data)
     {
-        SKNParser parser = new SKNParser();
-        Path      path   = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\Brand\\Brand_frostfire.skn");
-        SKNFile   data   = parser.parse(path);
-        
-        float[] verts = new float[data.getVertexCount() * 3];
+        Mesh mesh = new Mesh();
         
         float minx = Integer.MAX_VALUE;
         float maxx = Integer.MIN_VALUE;
@@ -89,6 +69,7 @@ public class Mesh
             minz = Math.min(minz, pos.z);
         }
         
+        float[] verts = new float[data.getVertexCount() * 3];
         for (int i = 0; i < data.getVertexCount(); i++)
         {
             SKNData  v   = data.getVertices().get(i);
@@ -107,11 +88,21 @@ public class Mesh
             inds[i] = Integer.valueOf(in);
         }
         
-        return new Mesh(verts, inds);
+        mesh.setVertices(verts);
+        mesh.setIndecies(inds);
+        
+        return mesh;
     }
     
     public int getIndexCount()
     {
         return indexCount;
+    }
+    
+    @Override
+    public void close()
+    {
+        ibo.close();
+        vbo.close();
     }
 }
