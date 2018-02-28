@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
 
+import lombok.ToString;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.SKNFile;
@@ -9,6 +10,7 @@ import no.stelar7.cdragon.viewer.rendering.buffers.VAO;
 import java.awt.image.BufferedImage;
 import java.nio.file.*;
 
+@ToString
 public class Model implements AutoCloseable
 {
     private static final int VERTEX_SIZE  = 3;

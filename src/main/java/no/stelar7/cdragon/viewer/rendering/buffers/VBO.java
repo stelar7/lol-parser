@@ -1,36 +1,39 @@
 package no.stelar7.cdragon.viewer.rendering.buffers;
 
+import lombok.ToString;
+
 import static org.lwjgl.opengl.GL15.*;
 
+@ToString
 public class VBO implements AutoCloseable
 {
     private int id;
-    private int buffer;
+    private int type;
     
-    public VBO(int buffer)
+    public VBO(int type)
     {
         this.id = glGenBuffers();
-        this.buffer = buffer;
+        this.type = type;
     }
     
     public void bind()
     {
-        glBindBuffer(buffer, id);
+        glBindBuffer(type, id);
     }
     
     public void unbind()
     {
-        glBindBuffer(buffer, 0);
+        glBindBuffer(type, 0);
     }
     
     public void setData(float[] data)
     {
-        glBufferData(buffer, data, GL_STATIC_DRAW);
+        glBufferData(type, data, GL_STATIC_DRAW);
     }
     
     public void setData(int[] indecies)
     {
-        glBufferData(buffer, indecies, GL_STATIC_DRAW);
+        glBufferData(type, indecies, GL_STATIC_DRAW);
     }
     
     @Override

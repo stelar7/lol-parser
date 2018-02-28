@@ -1,9 +1,12 @@
 package no.stelar7.cdragon.viewer.rendering.buffers;
 
+import lombok.ToString;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+@ToString
 public class VAO implements AutoCloseable
 {
     

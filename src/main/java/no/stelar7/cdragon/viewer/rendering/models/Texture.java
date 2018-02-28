@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
+import lombok.ToString;
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.readers.types.Vector2f;
 import no.stelar7.cdragon.viewer.rendering.buffers.VBO;
@@ -12,6 +13,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 
+@ToString
 public class Texture implements AutoCloseable
 {
     private int id;

@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.viewer.rendering.shaders;
 
 
+import lombok.ToString;
 import org.joml.Matrix4f;
 
 import java.util.*;
@@ -9,6 +10,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 
+@ToString
 public class Program implements AutoCloseable
 {
     private int id;

@@ -1,10 +1,12 @@
 package no.stelar7.cdragon.viewer.rendering.shaders;
 
+import lombok.ToString;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 
+@ToString
 public class Shader implements AutoCloseable
 {
     private int id;
