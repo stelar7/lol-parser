@@ -25,9 +25,10 @@ public class SKLViewer extends Renderer
     @Override
     public void initPostGL()
     {
-        float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
-        int   indecies[] = {0, 1, 2};
-
+//        float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
+//        int   indecies[] = {0, 1, 2};
+//        model = new Model(vertices, indecies);
+//
 //        float[] v2 = {
 //                1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1,
 //                1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1,
@@ -45,8 +46,6 @@ public class SKLViewer extends Renderer
 //                16, 17, 18, 18, 19, 16,
 //                20, 21, 22, 22, 23, 20
 //        };
-
-//        model = new Model(vertices, indecies);
 //        model = new Model(v2, i2);
         
         Path path = Paths.get(System.getProperty("user.home"), "Downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\Brand");
@@ -62,19 +61,18 @@ public class SKLViewer extends Renderer
         prog.bindVertLocation("position", 0);
         prog.bindVertLocation("uv", 1);
         
-        
         prog.bindFragLocation("color", 0);
+        
         prog.link();
         
-        pushMVP();
-        
+        updateMVP();
     }
     
     float x;
     float z;
     float time = 0;
     
-    private void pushMVP()
+    private void updateMVP()
     {
         float perspective = (float) width / (float) height;
         float fov         = (float) Math.toRadians(45);
@@ -104,7 +102,7 @@ public class SKLViewer extends Renderer
     {
         time += .01f;
         
-        pushMVP();
+        updateMVP();
     }
     
     float last = 0;
@@ -121,8 +119,5 @@ public class SKLViewer extends Renderer
         model.bind();
         
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
-        
-        model.unbind();
-        prog.unbind();
     }
 }

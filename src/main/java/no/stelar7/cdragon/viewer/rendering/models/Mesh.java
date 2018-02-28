@@ -24,7 +24,6 @@ public class Mesh implements AutoCloseable
     {
         vbo.bind();
         vbo.setData(vertices);
-        vbo.unbind();
     }
     
     public void setIndecies(int[] indecies)
@@ -32,7 +31,6 @@ public class Mesh implements AutoCloseable
         ibo.bind();
         ibo.setData(indecies);
         indexCount = indecies.length;
-        ibo.unbind();
     }
     
     public void bind()

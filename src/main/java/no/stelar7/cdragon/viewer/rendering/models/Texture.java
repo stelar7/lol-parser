@@ -76,7 +76,6 @@ public class Texture implements AutoCloseable
         Texture texture = new Texture();
         texture.getTBO().bind();
         texture.getTBO().setData(uvs);
-        texture.getTBO().unbind();
         return texture;
     }
     
