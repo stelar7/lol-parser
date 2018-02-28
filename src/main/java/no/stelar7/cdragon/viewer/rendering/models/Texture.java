@@ -2,14 +2,16 @@ package no.stelar7.cdragon.viewer.rendering.models;
 
 import lombok.ToString;
 import no.stelar7.cdragon.types.skn.data.*;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.types.Vector2f;
 import no.stelar7.cdragon.viewer.rendering.buffers.VBO;
-import org.lwjgl.system.*;
+import org.lwjgl.*;
 
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL30.*;
 
@@ -22,18 +24,21 @@ public class Texture implements AutoCloseable
     public Texture()
     {
         this.id = glGenTextures();
+        UtilHandler.logToFile("gl.log", String.format("glGenTextures() = %s)", id));
         this.tbo = new VBO(GL_ARRAY_BUFFER);
     }
     
     public void bind()
     {
         tbo.bind();
-        glBindTexture(GL_TEXTURE_2D, id);
+        glActiveTexture(0);
+        UtilHandler.logToFile("gl.log", String.format("glBindTexture(GL_TEXTURE_2D, %s)", id));
     }
     
     public void unbind()
     {
         glBindTexture(GL_TEXTURE_2D, 0);
+        UtilHandler.logToFile("gl.log", String.format("glBindTexture(GL_TEXTURE_2D, %s)", 0));
         tbo.unbind();
     }
     
@@ -50,9 +55,22 @@ public class Texture implements AutoCloseable
         
          */
         
-        byte[]     pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-        ByteBuffer data   = MemoryUtil.memAlloc(image.getWidth() * image.getHeight() * 4);
-        data.put(pixels).flip();
+        int[] pixelData = new int[image.getWidth() * image.getHeight()];
+        image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixelData, 0, image.getWidth());
+        ByteBuffer data = BufferUtils.createByteBuffer(image.getHeight() * image.getWidth() * 4);
+        
+        for (int y = 0; y < image.getHeight(); y++)
+        {
+            for (int x = 0; x < image.getWidth(); x++)
+            {
+                int pixel = pixelData[y * image.getWidth() + x];
+                data.put((byte) ((pixel >> 16) & 0xFF));
+                data.put((byte) ((pixel >> 8) & 0xFF));
+                data.put((byte) ((pixel) & 0xFF));
+                data.put((byte) ((pixel >> 24) & 0xFF));
+            }
+        }
+        data.flip();
         
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         
@@ -61,6 +79,14 @@ public class Texture implements AutoCloseable
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glGenerateMipmap(GL_TEXTURE_2D);
+        
+        
+        UtilHandler.logToFile("gl.log", String.format("glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, %s, %s, 0, GL_RGBA, GL_UNSIGNED_BYTE, %s)", image.getWidth(), image.getHeight(), data.remaining() > 0 ? "{data}" : null));
+        UtilHandler.logToFile("gl.log", "glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)");
+        UtilHandler.logToFile("gl.log", "glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT)");
+        UtilHandler.logToFile("gl.log", "glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)");
+        UtilHandler.logToFile("gl.log", "glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)");
+        UtilHandler.logToFile("gl.log", "glGenerateMipmap(GL_TEXTURE_2D)");
     }
     
     public static Texture loadForSKN(SKNFile data)
@@ -85,6 +111,7 @@ public class Texture implements AutoCloseable
     public void close()
     {
         glDeleteTextures(id);
+        UtilHandler.logToFile("gl.log", String.format("glDeleteTextures(%s)", id));
     }
     
     public VBO getTBO()

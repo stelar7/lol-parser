@@ -509,4 +509,34 @@ public final class UtilHandler
     {
         return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
     }
+    
+    public static void logToFile(String file, String text)
+    {
+        Path out = Paths.get("C:\\Users\\Steffen\\Downloads").resolve(file);
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(out.toFile(), true)))
+        {
+            bw.append(text);
+            bw.newLine();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public static String bufferToString(ByteBuffer data)
+    {
+        StringBuilder result = new StringBuilder("(");
+        
+        data.mark();
+        
+        while (data.remaining() > 0)
+        {
+            result.append(data.get()).append(", ");
+        }
+        
+        result.reverse().deleteCharAt(0).deleteCharAt(0).reverse().append(")");
+        data.reset();
+        
+        return result.toString();
+    }
 }

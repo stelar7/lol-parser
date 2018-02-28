@@ -1,10 +1,12 @@
 package no.stelar7.cdragon.viewer;
 
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.viewer.rendering.Renderer;
 import no.stelar7.cdragon.viewer.rendering.models.Model;
 import no.stelar7.cdragon.viewer.rendering.shaders.*;
 import org.joml.*;
 
+import java.io.IOException;
 import java.lang.Math;
 import java.nio.file.*;
 
@@ -25,6 +27,14 @@ public class SKLViewer extends Renderer
     @Override
     public void initPostGL()
     {
+        try
+        {
+            Files.delete(Paths.get("C:\\Users\\Steffen\\Downloads").resolve("gl.log"));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
 //        float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
 //        int   indecies[] = {0, 1, 2};
 //        model = new Model(vertices, indecies);
@@ -114,10 +124,12 @@ public class SKLViewer extends Renderer
     public void render()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        UtilHandler.logToFile("gl.log", "glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)");
         
         prog.bind();
         model.bind();
         
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
+        UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", model.getMesh().getIndexCount()));
     }
 }
