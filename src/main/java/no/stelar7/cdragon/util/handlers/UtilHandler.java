@@ -510,16 +510,21 @@ public final class UtilHandler
         return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
     }
     
+    private static final boolean debug = false;
+    
     public static void logToFile(String file, String text)
     {
-        Path out = Paths.get("C:\\Users\\Steffen\\Downloads").resolve(file);
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(out.toFile(), true)))
+        if (debug)
         {
-            bw.append(text);
-            bw.newLine();
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+            Path out = Paths.get("C:\\Users\\Steffen\\Downloads").resolve(file);
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(out.toFile(), true)))
+            {
+                bw.append(text);
+                bw.newLine();
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
     

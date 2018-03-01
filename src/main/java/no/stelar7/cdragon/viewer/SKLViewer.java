@@ -29,7 +29,7 @@ public class SKLViewer extends Renderer
     {
         try
         {
-            Files.delete(Paths.get("C:\\Users\\Steffen\\Downloads").resolve("gl.log"));
+            Files.deleteIfExists(Paths.get("C:\\Users\\Steffen\\Downloads").resolve("gl.log"));
         } catch (IOException e)
         {
             e.printStackTrace();

@@ -45,13 +45,12 @@ public class Model implements AutoCloseable
         SKNFile       data         = parser.parse(base.resolve(skn));
         BufferedImage textureImage = new DDSParser().parse(base.resolve(tex));
         
-        vao.setPointer(0, VERTEX_SIZE);
-        vao.setPointer(1, TEXTURE_SIZE);
-        
         mesh = Mesh.loadSKN(data);
+        vao.setPointer(0, VERTEX_SIZE);
         
         texture = Texture.loadForSKN(data);
         texture.setData(textureImage);
+        vao.setPointer(1, TEXTURE_SIZE);
     }
     
     
