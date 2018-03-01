@@ -58,14 +58,12 @@ public class Model implements AutoCloseable
     {
         vao.bind();
         mesh.bind();
-        texture.bind();
     }
     
     public void unbind()
     {
         vao.unbind();
         mesh.unbind();
-        texture.unbind();
     }
     
     public Mesh getMesh()

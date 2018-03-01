@@ -65,18 +65,14 @@ public class SKLViewer extends Renderer
     private void updateMVP()
     {
         float perspective = (float) width / (float) height;
-        float fov         = (float) Math.toRadians(45);
+        float fov         = (float) Math.toRadians(65);
         
         Matrix4f projection = new Matrix4f().setPerspective(fov, perspective, 0.1f, 10000f);
-        
-        x = (float) Math.sin(time) * 10;
-        z = (float) Math.cos(time) * 10;
         
         Matrix4f view = new Matrix4f().setLookAt(
                 new Vector3f(x, 0.5f, z),
                 new Vector3f(0, 0, 0),
                 new Vector3f(0, 1f, 0));
-        
         
         Matrix4f model = new Matrix4f().scaling(2);
         
@@ -91,6 +87,9 @@ public class SKLViewer extends Renderer
     public void update()
     {
         time += .01f;
+        
+        x = (float) Math.sin(time) * 10;
+        z = (float) Math.cos(time) * 10;
         
         updateMVP();
     }
