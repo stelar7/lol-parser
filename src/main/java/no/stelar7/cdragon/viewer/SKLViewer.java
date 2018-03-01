@@ -35,31 +35,11 @@ public class SKLViewer extends Renderer
             e.printStackTrace();
         }
 
-//        float vertices[] = {0.0f, 0.5f, 0f, 0.5f, -0.5f, 0f, -0.5f, -0.5f, 0f};
-//        int   indecies[] = {0, 1, 2};
-//        model = new Model(vertices, indecies);
-//
-//        float[] v2 = {
-//                1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1,
-//                1, 1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1,
-//                1, 1, 1, 1, 1, -1, -1, 1, -1, -1, 1, 1,
-//                -1, 1, 1, -1, 1, -1, -1, -1, -1, -1, -1, 1,
-//                -1, -1, -1, 1, -1, -1, 1, -1, 1, -1, -1, 1,
-//                1, -1, -1, -1, -1, -1, -1, 1, -1, 1, 1, -1
-//        };
-//
-//        int i2[] = {
-//                0, 1, 2, 2, 3, 0,
-//                4, 5, 6, 6, 7, 4,
-//                8, 9, 10, 10, 11, 8,
-//                12, 13, 14, 14, 15, 12,
-//                16, 17, 18, 18, 19, 16,
-//                20, 21, 22, 22, 23, 20
-//        };
-//        model = new Model(v2, i2);
+//        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test\\Brand");
+//        model = new Model(path, "Brand_frostfire.skn", "brand_frostfire_TX_CM.dds");
         
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test\\Brand");
-        model = new Model(path, "Brand_frostfire.skn", "brand_frostfire_TX_CM.dds");
+        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test\\Caitlyn");
+        model = new Model(path, "Caitlyn_cop.skn", "caitlyn_cop_TX_CM.dds");
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
