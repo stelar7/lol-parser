@@ -5,11 +5,12 @@ import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestBIN
 {
@@ -45,6 +46,73 @@ public class TestBIN
             }
         });
     }
+    
+    @Test
+    public void testGenerateBINHash() throws IOException
+    {
+        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\grep.log");
+        list = Files.readAllLines(path, StandardCharsets.UTF_8).stream().map(Long::valueOf).collect(Collectors.toSet());
+        buildStrings(pool, 50);
+    }
+    
+    char[]    pool = new char[]{' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+    Set<Long> list = new HashSet<>();
+    
+    
+    public void buildStrings(char[] root, int length) throws IOException
+    {
+        // allocate an array to hold our counts:
+        int[]  pos   = new int[length];
+        char[] combo = new char[length];
+        for (int i = 0; i < length; i++)
+        {
+            combo[i] = root[0];
+        }
+        
+        while (true)
+        {
+            // output the current combinations:
+            String prefix = String.valueOf(combo).replace(" ", "");
+            checkResult(prefix);
+            
+            // move on to the next combination:
+            int place = length - 1;
+            while (place >= 0)
+            {
+                if (++pos[place] == root.length)
+                {
+                    pos[place] = 0;
+                    combo[place] = root[0];
+                    place--;
+                } else
+                {
+                    combo[place] = root[pos[place]];
+                    break;
+                }
+            }
+            if (place < 0)
+            {
+                break;
+            }
+        }
+    }
+    
+    
+    public void checkResult(String prefix) throws IOException
+    {
+        if (UtilHandler.hasBINHash(prefix))
+        {
+            return;
+        }
+        
+        long hash = UtilHandler.generateBINHash(prefix);
+        if (list.contains(hash))
+        {
+            String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
+            Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\grep.res"), out.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        }
+    }
+    
     
     @Test
     public void testClientBIN() throws IOException

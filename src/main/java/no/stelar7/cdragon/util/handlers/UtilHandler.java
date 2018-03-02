@@ -65,6 +65,30 @@ public final class UtilHandler
         return getBINHash(hash);
     }
     
+    public static boolean hasBINHash(String hash)
+    {
+        if (binHashNames != null)
+        {
+            return binHashNames.containsValue(hash);
+        }
+        
+        try
+        {
+            binHashNames = new HashMap<>();
+            String            sb         = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
+            Map<Long, String> pluginData = getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            binHashNames.putAll(pluginData);
+            
+            System.out.println("Loaded known bin hashes");
+        } catch (IOException e)
+        {
+            binHashNames = Collections.emptyMap();
+            System.err.println("File not found: " + e.getMessage());
+        }
+        
+        return hasBINHash(hash);
+    }
+    
     public static String getINIHash(int hash)
     {
         Long val = Integer.toUnsignedLong(hash);
