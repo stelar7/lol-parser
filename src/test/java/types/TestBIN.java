@@ -60,7 +60,6 @@ public class TestBIN
     
     public void buildStrings(char[] root, int length) throws IOException
     {
-        // allocate an array to hold our counts:
         int[]  pos   = new int[length];
         char[] combo = new char[length];
         for (int i = 0; i < length; i++)
@@ -70,11 +69,9 @@ public class TestBIN
         
         while (true)
         {
-            // output the current combinations:
             String prefix = String.valueOf(combo).replace(" ", "");
             checkResult(prefix);
             
-            // move on to the next combination:
             int place = length - 1;
             while (place >= 0)
             {
