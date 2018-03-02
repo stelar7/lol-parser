@@ -30,7 +30,8 @@ public final class UtilHandler
     private static Map<Long, String> iniHashNames;
     private static Map<String, Map<String, String>> wadHashNames = new HashMap<>();
     
-    private static Gson gson;
+    private static Gson       gson;
+    private static JsonParser parser;
     
     private static       XXHashFactory xxHashFactory = XXHashFactory.fastestInstance();
     private static final char[]        hexArray      = "0123456789ABCDEF".toCharArray();
@@ -393,6 +394,17 @@ public final class UtilHandler
         }
     }
     
+    public static JsonParser getJsonParser()
+    {
+        if (parser == null)
+        {
+            parser = new JsonParser();
+        }
+        
+        return parser;
+    }
+    
+    
     public static Gson getGson()
     {
         if (gson == null)
@@ -567,5 +579,49 @@ public final class UtilHandler
         data.reset();
         
         return result.toString();
+    }
+    
+    public static String mergeTopKeysToArray(String json)
+    {
+        Map<String, List<JsonElement>> data = new HashMap<>();
+        
+        
+        for (int i = 2; i < json.length(); i++)
+        {
+            String key = json.substring(i);
+            key = key.substring(0, key.indexOf('"'));
+            
+            i += (key.length() + 2);
+            
+            int           count = 0;
+            StringBuilder sb    = new StringBuilder();
+            
+            while (true)
+            {
+                char at = json.charAt(i++);
+                if (at == '{')
+                {
+                    count++;
+                }
+                
+                if (at == '}')
+                {
+                    count--;
+                }
+                
+                sb.append(at);
+                
+                if (count == 0)
+                {
+                    List<JsonElement> list = data.getOrDefault(key, new ArrayList<>());
+                    list.add(getJsonParser().parse(sb.toString()));
+                    data.put(key, list);
+                    i++;
+                    break;
+                }
+            }
+        }
+        
+        return getGson().toJson(data);
     }
 }

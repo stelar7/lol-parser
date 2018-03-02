@@ -30,7 +30,7 @@ public class BINFile
             }
             removeTrailingComma(sb);
             sb.append("}");
-            json = sb.toString().replace("\\\"", "\"");
+            json = UtilHandler.mergeTopKeysToArray(sb.toString().replace("\\\"", "\""));
         }
         
         return json;
