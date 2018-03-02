@@ -18,7 +18,7 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "Aatrox.bin");
+        Path file = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "611d601b17222a88.bin");
         System.out.println("Parsing: " + file.toString());
         
         BINFile data = parser.parse(file);
@@ -70,7 +70,13 @@ public class TestBIN
         while (true)
         {
             String prefix = String.valueOf(combo).replace(" ", "");
-            checkResult(prefix);
+            if (prefix.length() > 7)
+            {
+                if (prefix.contains("a") || prefix.contains("e") || prefix.contains("i") || prefix.contains("o") || prefix.contains("u"))
+                {
+                    checkResult(prefix);
+                }
+            }
             
             int place = length - 1;
             while (place >= 0)

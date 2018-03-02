@@ -19,9 +19,13 @@ public class BINFile
         if (json == null)
         {
             StringBuilder sb = new StringBuilder("{");
-            for (BINEntry entry : entries)
+            for (int i = 0; i < entries.size(); i++)
             {
+                BINEntry entry  = entries.get(i);
+                String   prefix = UtilHandler.getBINHash(header.getEntryTypes().get(i));
+                sb.append("\"").append(prefix).append("\":{");
                 printEntry(entry, sb);
+                sb.append("}");
                 sb.append(",");
             }
             removeTrailingComma(sb);
