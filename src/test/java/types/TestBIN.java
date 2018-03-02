@@ -5,12 +5,11 @@ import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TestBIN
 {
@@ -51,12 +50,12 @@ public class TestBIN
     public void testGenerateBINHash() throws IOException
     {
         Path path = Paths.get(System.getProperty("user.home"), "Downloads\\grep.log");
-        list = Files.readAllLines(path, StandardCharsets.UTF_8).stream().map(Long::valueOf).collect(Collectors.toSet());
+        list = new HashSet<>(Files.readAllLines(path, StandardCharsets.UTF_8));
         buildStrings(pool, 50);
     }
     
-    char[]    pool = new char[]{' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
-    Set<Long> list = new HashSet<>();
+    char[]      pool = new char[]{' ', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
+    Set<String> list = new HashSet<>();
     
     
     public void buildStrings(char[] root, int length) throws IOException
@@ -105,7 +104,7 @@ public class TestBIN
             return;
         }
         
-        long hash = UtilHandler.generateBINHash(prefix);
+        String hash = String.valueOf(UtilHandler.generateBINHash(prefix));
         if (list.contains(hash))
         {
             String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
@@ -117,8 +116,8 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path       extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "bintemp");
-        Path       rito        = Paths.get(System.getProperty("user.home"), "Downloads\\bins");
+        Path       extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "binfiles");
+        Path       rito        = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
         List<Path> paths       = new ArrayList<>();
         
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -156,8 +155,6 @@ public class TestBIN
                 }
                 
                 Files.createDirectories(extractPath);
-                //Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json.bak"), parsed.toJSON().getBytes(StandardCharsets.UTF_8));
-                
                 byte[] data = FileTypeHandler.makePrettyJson(parsed.toJson().getBytes(StandardCharsets.UTF_8));
                 Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
             } catch (RuntimeException ex)
