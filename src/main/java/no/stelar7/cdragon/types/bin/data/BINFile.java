@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.types.bin.data;
 
 import lombok.Data;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.types.Vector2;
 
 import java.util.*;
@@ -162,9 +163,12 @@ public class BINFile
             } else if (value.getType() == 16)
             {
                 sb.append("\"").append(o.toString()).append("\"");
+            } else if (o instanceof Integer)
+            {
+                sb.append(UtilHandler.getBINHash((Integer) o));
             } else
             {
-                sb.append(o.toString());
+                sb.append(o);
             }
             sb.append(",");
         }
