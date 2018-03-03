@@ -624,4 +624,40 @@ public final class UtilHandler
         
         return getGson().toJson(data);
     }
+    
+    
+    public static List<List<String>> searchDictionary(String input)
+    {
+        String      dict       = readInternalAsString("dictionary/english.txt");
+        Set<String> dictionary = new HashSet<>(Arrays.asList(dict.split("\n")));
+        
+        
+        List<List<String>> results = new ArrayList<>();
+        search(input, dictionary, new Stack<>(), results);
+        return results;
+    }
+    
+    
+    private static void search(String input, Set<String> dictionary, Stack<String> words, List<List<String>> results)
+    {
+        for (int i = 0; i < input.length(); i++)
+        {
+            String substring = input.substring(0, i + 1);
+            
+            if (dictionary.contains(substring))
+            {
+                words.push(substring);
+                
+                if (i == input.length() - 1)
+                {
+                    results.add(new ArrayList<>(words));
+                } else
+                {
+                    search(input.substring(i + 1), dictionary, words, results);
+                }
+                
+                words.pop();
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package types;
 
+import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
@@ -113,6 +114,47 @@ public class TestBIN
             String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
             Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\grep.res"), out.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         }
+    }
+    
+    @Test
+    public void testForWords() throws IOException
+    {
+        Path          newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "grep - kopi.res");
+        List<String>  lines        = Files.readAllLines(newHashStore);
+        StringBuilder sb           = new StringBuilder("{");
+        
+        for (int i = 1; i < lines.size() - 1; i++)
+        {
+            String line = lines.get(i);
+            String key  = line.substring(line.indexOf('"') + 1);
+            key = key.substring(0, key.indexOf('"'));
+            
+            String value = line.substring(line.indexOf('"') + key.length() + 4);
+            value = value.substring(value.indexOf('"') + 1);
+            value = value.substring(0, value.indexOf('"'));
+            
+            sb.append('"').append(value).append('"').append(": ").append('"').append(key).append('"').append(',');
+        }
+        sb.reverse().deleteCharAt(0).reverse();
+        sb.append("}");
+        
+        Map<String, String> hashes = UtilHandler.getGson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+        
+        
+        hashes.forEach((k, v) -> {
+            List<List<String>> result = UtilHandler.searchDictionary(k);
+            if (!result.isEmpty())
+            {
+                try
+                {
+                    Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\words.log"), (k + ": " + result+"\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+        
     }
     
     
