@@ -110,7 +110,7 @@ public class TestBIN
             return;
         }
         
-        String hash = String.valueOf(HashHandler.generateBINHash(prefix));
+        String hash = String.valueOf(HashHandler.computeBINHash(prefix));
         if (list.contains(hash))
         {
             String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
@@ -188,18 +188,10 @@ public class TestBIN
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             
-            List<String> names = Arrays.asList("089fb0226ba325ac", "c8e191846017e4d2");
-            
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                for (String name : names)
-                {
-                    if (file.toString().contains(name))
-                    {
-                        paths.add(file);
-                    }
-                }
+                paths.add(file);
                 return FileVisitResult.CONTINUE;
             }
         });

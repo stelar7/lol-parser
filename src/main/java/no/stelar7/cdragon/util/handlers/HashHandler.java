@@ -42,7 +42,7 @@ public class HashHandler
         return toHex(str.getBytes(StandardCharsets.UTF_8));
     }
     
-    public static String generateXXHash64(String text)
+    public static String computeXXHash64(String text)
     {
         try
         {
@@ -66,7 +66,7 @@ public class HashHandler
     
     
     // FNV-1a
-    public static long generateBINHash(String input)
+    public static long computeBINHash(String input)
     {
         String toHash = input.toLowerCase(Locale.ENGLISH);
         int    hash   = Integer.parseUnsignedInt("2166136261");
@@ -164,12 +164,6 @@ public class HashHandler
             0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
     };
     
-    private static <K, V> Map<K, V> loadMap(Path storage) throws IOException
-    {
-        String sb = new String(Files.readAllBytes(storage), StandardCharsets.UTF_8);
-        return UtilHandler.getGson().fromJson(sb, new TypeToken<Map<K, V>>() {}.getType());
-    }
-    
     
     public static String getBINHash(int hash)
     {
@@ -198,7 +192,8 @@ public class HashHandler
         
         try
         {
-            binHashNames = loadMap(BIN_HASH_STORE);
+            String sb = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
+            binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
         {
@@ -218,7 +213,8 @@ public class HashHandler
         
         try
         {
-            iniHashNames = loadMap(INI_HASH_STORE);
+            String sb = new String(Files.readAllBytes(INI_HASH_STORE), StandardCharsets.UTF_8);
+            iniHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
         {
@@ -238,7 +234,9 @@ public class HashHandler
         
         try
         {
-            wadHashNames.put(plugin, loadMap(WAD_HASH_STORE.resolve(plugin + ".json")));
+            String              sb  = new String(Files.readAllBytes(WAD_HASH_STORE.resolve(plugin + ".json")), StandardCharsets.UTF_8);
+            Map<String, String> val = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+            wadHashNames.put(plugin, val);
             System.out.println("Loaded known hashes for " + plugin);
         } catch (IOException e)
         {

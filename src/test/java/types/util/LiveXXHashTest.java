@@ -160,7 +160,7 @@ public class LiveXXHashTest
             @Override
             public void keyReleased(KeyEvent e)
             {
-                output.setText(HashHandler.generateXXHash64(input.getText()));
+                output.setText(HashHandler.computeXXHash64(input.getText()));
                 output.setDisabledTextColor(uk.contains(output.getText()) ? Color.GREEN : Color.RED);
             }
         });

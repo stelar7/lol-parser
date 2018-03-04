@@ -968,7 +968,7 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash      = HashHandler.generateXXHash64(hashMe.trim());
+        String hash      = HashHandler.computeXXHash64(hashMe.trim());
         String knownHash = HashHandler.getWadHashes("rcp-be-lol-game-data").get(hash);
         
         if (knownHash != null)
@@ -1087,7 +1087,7 @@ public class TestHashes
                         for (String end : foundHashes)
                         {
                             String hashMe = pre + end;
-                            String hash   = HashHandler.generateXXHash64(hashMe.trim());
+                            String hash   = HashHandler.computeXXHash64(hashMe.trim());
                             
                             Vector2<String, String> data = new Vector2<>(hash, hashMe);
                             if (!knownHashes.contains(data))
@@ -1181,7 +1181,7 @@ public class TestHashes
         ((List<String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
         {
         }.getType())).forEach((v) -> {
-            Vector2<String, String> data = new Vector2<>(HashHandler.generateXXHash64(v), v);
+            Vector2<String, String> data = new Vector2<>(HashHandler.computeXXHash64(v), v);
             if (!foundHashes.contains(data))
             {
                 foundHashes.add(data);
@@ -1425,7 +1425,7 @@ public class TestHashes
                     
                     if (asset != null)
                     {
-                        String binHash = HashHandler.generateXXHash64(asset);
+                        String binHash = HashHandler.computeXXHash64(asset);
                         if (values.contains(String.valueOf(binHash)))
                         {
                             Vector2<String, String> data = new Vector2<>(binHash, asset);
