@@ -377,7 +377,7 @@ public final class UtilHandler
     public static List<List<String>> searchDictionary(String input)
     {
         List<List<String>> results = new ArrayList<>();
-        search(input, new HashSet<>(dictionary), new Stack<>(), results);
+        search(input, dictionary, new Stack<>(), results);
         return results;
     }
     

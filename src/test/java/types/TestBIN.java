@@ -146,54 +146,35 @@ public class TestBIN
     }
     
     @Test
-    public void testForWords() throws IOException, InterruptedException
+    public void testForWords() throws IOException
     {
         String              text   = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
         Type                type   = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
         Map<String, String> hashes = UtilHandler.getGson().fromJson(text, type);
         
-        Queue<Entry<String, String>> toRead  = new ConcurrentLinkedDeque<>(hashes.entrySet());
-        Queue<String>                toWrite = new ConcurrentLinkedDeque<>();
-        
-        int            threadCount = 4;
-        CountDownLatch latch       = new CountDownLatch(threadCount);
+        Queue<Entry<String, String>> toRead = new ConcurrentLinkedDeque<>(hashes.entrySet());
         
         BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve("output.log").toFile(), true));
         
-        Runnable searcher = () -> {
-            while (true)
+        while (true)
+        {
+            Entry<String, String> value = toRead.poll();
+            
+            if (value == null)
             {
-                Entry<String, String> value = toRead.poll();
-                
-                if (value == null)
-                {
-                    latch.countDown();
-                    break;
-                }
-                
-                String k = value.getKey();
-                String v = value.getValue();
-                
-                List<List<String>> result = UtilHandler.searchDictionary(k);
-                if (!result.isEmpty())
-                {
-                    toWrite.add(String.format("%s: %s: %s%n", v, k, result));
-                }
+                break;
             }
-        };
-        
-        for (int i = 0; i < threadCount; i++)
-        {
-            new Thread(searcher).start();
+            
+            String k = value.getKey();
+            String v = value.getValue();
+            
+            List<List<String>> result = UtilHandler.searchDictionary(k);
+            if (!result.isEmpty())
+            {
+                bw.write(String.format("%s: %s: %s%n", v, k, result));
+            }
         }
         
-        
-        latch.await();
-        while (!toWrite.isEmpty())
-        {
-            String result = toWrite.poll();
-            bw.write(result);
-        }
         bw.flush();
     }
     
