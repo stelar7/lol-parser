@@ -181,10 +181,10 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path       extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("binfiles");
-        Path       rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
-        List<Path> paths       = new ArrayList<>();
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("binfiles");
+        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         
+        List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             @Override
@@ -198,7 +198,7 @@ public class TestBIN
         Comparator<Path> c = (cA, cB) -> {
             try
             {
-                return Files.size(cA) < Files.size(cB) ? 1 : -1;
+                return Files.size(cA) > Files.size(cB) ? 1 : -1;
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -212,13 +212,13 @@ public class TestBIN
         {
             try
             {
-                System.out.println("Parsing file: " + path);
                 BINFile parsed = parser.parse(path);
                 if (parsed == null)
                 {
                     continue;
                 }
                 
+                System.out.println("Parsing file: " + path);
                 Files.createDirectories(extractPath);
                 byte[] data = FileTypeHandler.makePrettyJson(parsed.toJson().getBytes(StandardCharsets.UTF_8));
                 Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
