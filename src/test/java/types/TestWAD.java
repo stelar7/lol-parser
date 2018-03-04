@@ -16,7 +16,7 @@ public class TestWAD
         WADParser parser = new WADParser();
         
         String pluginName  = "rcp-be-lol-game-data";
-        Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
+        Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath);
         parsed.extractFiles(pluginName, null, extractPath);
@@ -27,8 +27,8 @@ public class TestWAD
     {
         WADParser parser = new WADParser();
         
-        WADFile parsed = parser.parse(Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\Zoe.wad.client"));
-        parsed.extractFiles("Champions", "Zoe.client", Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\Zoe"));
+        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\Zoe.wad.client"));
+        parsed.extractFiles("Champions", "Zoe.client", UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\Zoe"));
     }
     
     @Test
@@ -37,7 +37,7 @@ public class TestWAD
         WADParser parser = new WADParser();
         
         String pluginName  = "rcp-be-lol-game-data";
-        Path   extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
+        Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
         for (int i = UtilHandler.getLongFromIP("0.0.0.25"); i > 0; i--)
         {
@@ -65,7 +65,7 @@ public class TestWAD
     {
         WADParser parser = new WADParser();
         
-        Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
         Files.walkFileTree(rito, new SimpleFileVisitor<>()

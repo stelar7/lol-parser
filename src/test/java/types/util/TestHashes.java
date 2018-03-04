@@ -6,11 +6,11 @@ import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.types.Vector2;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -459,7 +459,7 @@ public class TestHashes
             }
         }
         
-        Path possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "8e45023d7d142cbf.json");
+        Path possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\8e45023d7d142cbf.json");
         Map<String, String> data = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>()
         {
         }.getType());
@@ -968,8 +968,8 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash      = UtilHandler.generateXXHash64(hashMe.trim());
-        String knownHash = UtilHandler.getKnownWADFileHashes("rcp-be-lol-game-data").get(hash);
+        String hash      = HashHandler.generateXXHash64(hashMe.trim());
+        String knownHash = HashHandler.getKnownWADFileHashes("rcp-be-lol-game-data").get(hash);
         
         if (knownHash != null)
         {
@@ -1044,7 +1044,7 @@ public class TestHashes
     @Test
     public void testAllLangKnownPaths() throws IOException
     {
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1087,7 +1087,7 @@ public class TestHashes
                         for (String end : foundHashes)
                         {
                             String hashMe = pre + end;
-                            String hash   = UtilHandler.generateXXHash64(hashMe.trim());
+                            String hash   = HashHandler.generateXXHash64(hashMe.trim());
                             
                             Vector2<String, String> data = new Vector2<>(hash, hashMe);
                             if (!knownHashes.contains(data))
@@ -1117,7 +1117,7 @@ public class TestHashes
     @Test
     public void testSortAllHashes() throws IOException
     {
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -1153,14 +1153,14 @@ public class TestHashes
     @Test
     public void testJoinSplitClientHashes() throws IOException
     {
-        Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
-        Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        Path file         = UtilHandler.DOWNLOADS_FOLDER.resolve("morehash.json");
+        Path newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("newhash");
         
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
@@ -1181,7 +1181,7 @@ public class TestHashes
         ((List<String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
         {
         }.getType())).forEach((v) -> {
-            Vector2<String, String> data = new Vector2<>(UtilHandler.generateXXHash64(v), v);
+            Vector2<String, String> data = new Vector2<>(HashHandler.generateXXHash64(v), v);
             if (!foundHashes.contains(data))
             {
                 foundHashes.add(data);
@@ -1218,8 +1218,8 @@ public class TestHashes
     @Test
     public void testDiffPupix() throws IOException
     {
-        Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
-        Path pupix        = Paths.get(System.getProperty("user.home"), "Downloads", "league_client");
+        Path newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("morehash.json");
+        Path pupix        = UtilHandler.DOWNLOADS_FOLDER.resolve("league_client");
         
         final List<Vector2<String, String>> foundHashes = new ArrayList<>();
         FileVisitor<Path> findHashes = new SimpleFileVisitor<>()
@@ -1247,7 +1247,7 @@ public class TestHashes
             }
         };
         
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, findHashes);
+        Files.walkFileTree(HashHandler.WAD_HASH_STORE, findHashes);
         Files.walkFileTree(pupix, findHashes);
         
         foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
@@ -1336,14 +1336,14 @@ public class TestHashes
     @Test
     public void testJoinSplitHashes() throws IOException
     {
-        Path file         = Paths.get(System.getProperty("user.home"), "Downloads", "morehash.json");
-        Path newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "newhash");
+        Path file         = UtilHandler.DOWNLOADS_FOLDER.resolve("morehash.json");
+        Path newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("newhash");
         
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
         Map<String, StringBuilder> pluginData = new HashMap<>();
         
-        Files.walkFileTree(UtilHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -1396,9 +1396,9 @@ public class TestHashes
     @Test
     public void testClientWADHash() throws IOException
     {
-        Path                          unknowns = Paths.get(System.getProperty("user.home"), "Downloads", "temp/Champions/unknown.json");
-        Path                          output   = Paths.get(System.getProperty("user.home"), "Downloads", "champions.json");
-        Path                          bins     = Paths.get(System.getProperty("user.home"), "Downloads", "bintemp");
+        Path                          unknowns = UtilHandler.DOWNLOADS_FOLDER.resolve("temp/Champions/unknown.json");
+        Path                          output   = UtilHandler.DOWNLOADS_FOLDER.resolve("champions.json");
+        Path                          bins     = UtilHandler.DOWNLOADS_FOLDER.resolve("bintemp");
         List<String>                  values   = Files.readAllLines(unknowns);
         List<Vector2<String, String>> hashs    = new ArrayList<>();
         
@@ -1425,7 +1425,7 @@ public class TestHashes
                     
                     if (asset != null)
                     {
-                        String binHash = UtilHandler.generateXXHash64(asset);
+                        String binHash = HashHandler.generateXXHash64(asset);
                         if (values.contains(String.valueOf(binHash)))
                         {
                             Vector2<String, String> data = new Vector2<>(binHash, asset);

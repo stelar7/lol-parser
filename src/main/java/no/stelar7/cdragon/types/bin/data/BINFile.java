@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.bin.data;
 
 import lombok.Data;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.types.Vector2;
 
 import java.util.*;
@@ -22,7 +22,7 @@ public class BINFile
             for (int i = 0; i < entries.size(); i++)
             {
                 BINEntry entry  = entries.get(i);
-                String   prefix = UtilHandler.getBINHash(header.getEntryTypes().get(i));
+                String   prefix = HashHandler.getBINHash(header.getEntryTypes().get(i));
                 sb.append("\"").append(prefix).append("\":{");
                 printEntry(entry, sb);
                 sb.append("}");
@@ -169,7 +169,7 @@ public class BINFile
                 sb.append("\"").append(o.toString()).append("\"");
             } else if (o instanceof Integer)
             {
-                sb.append(UtilHandler.getBINHash((Integer) o));
+                sb.append(HashHandler.getBINHash((Integer) o));
             } else
             {
                 sb.append(o);

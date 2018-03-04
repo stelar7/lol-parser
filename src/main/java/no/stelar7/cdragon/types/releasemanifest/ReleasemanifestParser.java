@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.releasemanifest;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.releasemanifest.data.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.nio.ByteOrder;
@@ -109,7 +109,7 @@ public class ReleasemanifestParser implements Parseable<ReleasemanifestDirectory
             
             cFile.setNameIndex(raf.readInt());
             cFile.setVersion(raf.readInt());
-            cFile.setHash(UtilHandler.toHex(raf.readBytes(16)));
+            cFile.setHash(HashHandler.toHex(raf.readBytes(16)));
             cFile.setFlags(raf.readInt());
             cFile.setSize(raf.readInt());
             cFile.setCompressedSize(raf.readInt());

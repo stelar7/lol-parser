@@ -1,4 +1,4 @@
-package viewer;
+package no.stelar7.cdragon.viewer;
 
 import lombok.*;
 import no.stelar7.cdragon.types.bin.BINParser;
@@ -247,7 +247,7 @@ public class SwingViewer
             for (WADContentHeaderV1 header : file.getContentHeaders())
             {
                 String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-                String filename = UtilHandler.getKnownWADFileHashes(plugin).getOrDefault(hash, hash);
+                String filename = HashHandler.getKnownWADFileHashes(plugin).getOrDefault(hash, hash);
                 byte[] data     = file.readContentFromHeaderData(header);
                 
                 if (filename.equals(hash))

@@ -2,7 +2,8 @@ package types;
 
 import no.stelar7.cdragon.types.inibin.InibinParser;
 import no.stelar7.cdragon.types.inibin.data.InibinFile;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -18,8 +19,8 @@ public class TestInibin
     {
         InibinParser parser = new InibinParser();
         
-        Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "inibin");
-        Path rito        = Paths.get(System.getProperty("user.home"), "Downloads", "raf");
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("inibin");
+        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("raf");
         
         List<Path> paths = new ArrayList<>();
         
@@ -50,7 +51,7 @@ public class TestInibin
     public void testDownloadedInibin() throws IOException
     {
         InibinParser parser = new InibinParser();
-        Path         file   = Paths.get(System.getProperty("user.home"), "Downloads", "pman_inibin");
+        Path         file   = UtilHandler.DOWNLOADS_FOLDER.resolve("pman_inibin");
         Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
             @Override
@@ -73,7 +74,7 @@ public class TestInibin
     {
         InibinParser parser = new InibinParser();
         
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads", "JannaUpgradeActive.inibin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("JannaUpgradeActive.inibin");
         
         System.out.println("Parsing: " + file.toString());
         InibinFile parsed = parser.parse(file);

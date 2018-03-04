@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.ogg.data;
 
 import com.google.common.io.*;
 import lombok.Data;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.HashHandler;
 
 import java.nio.*;
 import java.util.Arrays;
@@ -85,7 +85,7 @@ public class OGGStream
                 }
             }
             
-            int crc = (int) UtilHandler.computeCCITT32(pageBuffer, HEADER_SIZE + segments + payloadBytes);
+            int crc = (int) HashHandler.computeCCITT32(pageBuffer, HEADER_SIZE + segments + payloadBytes);
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(crc).array(), 0, pageBuffer, 22, 4);
             
             for (int i = 0; i < HEADER_SIZE + segments + payloadBytes; i++)

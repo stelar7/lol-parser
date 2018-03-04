@@ -93,8 +93,8 @@ public class TestStoreAsRealName
     
     private void createTARGZ() throws IOException
     {
-        Path base         = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty");
-        Path outputFolder = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty\\zipped-folders");
+        Path base         = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
+        Path outputFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
         Files.createDirectories(outputFolder);
         
         Files.walkFileTree(base, new SimpleFileVisitor<>()
@@ -102,11 +102,11 @@ public class TestStoreAsRealName
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
             {
-                if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads", "rcp-be-lol-game-data", "pretty")))
+                if (dir.equals(UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty")))
                 {
                     return FileVisitResult.CONTINUE;
                 }
-                if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads", "rcp-be-lol-game-data", "pretty", "zipped-folders")))
+                if (dir.equals(UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders")))
                 {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
@@ -168,7 +168,7 @@ public class TestStoreAsRealName
     {
         Path                inputFile = Paths.get("filenames.json");
         Map<String, String> files     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
-        Path                baseTo    = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-be-lol-game-data\\pretty");
+        Path                baseTo    = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
         
         try
         {
@@ -224,7 +224,7 @@ public class TestStoreAsRealName
             e.printStackTrace();
         }
         
-        Path                possibleTech = Paths.get(System.getProperty("user.home"), "Downloads\\rcp-fe-lol-loot\\unknown", "4c0ce4a49dbc214c.json");
+        Path                possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
         Map<String, String> data         = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
         return transmute(data.keySet());
     }

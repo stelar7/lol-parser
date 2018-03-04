@@ -2,9 +2,10 @@ package types;
 
 import no.stelar7.cdragon.types.skl.SKLParser;
 import no.stelar7.cdragon.types.skl.data.SKLFile;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
-import java.nio.file.*;
+import java.nio.file.Path;
 
 public class TestSKL
 {
@@ -14,7 +15,7 @@ public class TestSKL
     {
         SKLParser parser = new SKLParser();
         
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "cc1796644bc53b73.skl");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\cc1796644bc53b73.skl");
         System.out.println("Parsing: " + file.toString());
     
         SKLFile data = parser.parse(file);

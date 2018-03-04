@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.inibin.data;
 
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.HashHandler;
 
 import java.util.*;
 import java.util.function.Function;
@@ -16,7 +16,7 @@ public final class InibinHash
     
     public static String getHash(String hash)
     {
-        return UtilHandler.getINIHash(Integer.parseUnsignedInt(hash));
+        return HashHandler.getINIHash(Integer.parseUnsignedInt(hash));
     }
     
     public static String getTransformed(String key, Object hash)

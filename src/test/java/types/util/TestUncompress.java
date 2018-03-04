@@ -19,7 +19,7 @@ public class TestUncompress
             {
                 if (file.toString().endsWith(".compressed"))
                 {
-                    CompressionHandler.uncompressDEFLATE(file, Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\" + UtilHandler.pathToFilename(file)));
+                    CompressionHandler.uncompressDEFLATE(file, UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\" + UtilHandler.pathToFilename(file)));
                 }
                 return FileVisitResult.CONTINUE;
             }

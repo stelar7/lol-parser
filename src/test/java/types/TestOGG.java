@@ -6,6 +6,7 @@ import no.stelar7.cdragon.types.wem.WEMParser;
 import no.stelar7.cdragon.types.wem.data.WEMFile;
 import no.stelar7.cdragon.types.wpk.WPKParser;
 import no.stelar7.cdragon.types.wpk.data.WPKFile;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -22,8 +23,8 @@ public class TestOGG
         WEMParser wemparser = new WEMParser();
         
         
-        Path wpkfile = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "15646bae0aecf5be.wpk");
-        Path file    = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "24635440.wem");
+        Path wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\15646bae0aecf5be.wpk");
+        Path file    = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\24635440.wem");
         
         WPKFile wpk = wpkParser.parse(wpkfile);
         wpk.extract(wpkfile.getParent());

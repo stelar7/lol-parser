@@ -7,6 +7,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -19,7 +20,7 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "611d601b17222a88.bin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
         System.out.println("Parsing: " + file.toString());
         
         BINFile data = parser.parse(file);
@@ -29,7 +30,7 @@ public class TestBIN
     @Test
     public void testWEB() throws IOException
     {
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\decompressed\\Zoe");
+        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\Zoe");
         Files.walkFileTree(path, new SimpleFileVisitor<>()
         {
             @Override
@@ -50,7 +51,7 @@ public class TestBIN
     @Test
     public void testGenerateBINHash() throws IOException
     {
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\grep.log");
+        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("grep.log");
         list = new HashSet<>(Files.readAllLines(path, StandardCharsets.UTF_8));
         buildStrings(pool, 50);
     }
@@ -103,25 +104,25 @@ public class TestBIN
     
     public void checkResult(String prefix) throws IOException
     {
-        if (UtilHandler.hasBINHash(prefix))
+        if (HashHandler.hasBINHash(prefix))
         {
             return;
         }
         
-        String hash = String.valueOf(UtilHandler.generateBINHash(prefix));
+        String hash = String.valueOf(HashHandler.generateBINHash(prefix));
         if (list.contains(hash))
         {
             String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
-            Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\grep.res"), out.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("grep.res"), out.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         }
     }
     
-    @Test
-    public void testForWords() throws IOException
+    private void splitResultToFile() throws IOException
     {
-        Path          newHashStore = Paths.get(System.getProperty("user.home"), "Downloads", "grep - kopi.res");
+        
+        Path          newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("grep - kopi.res");
         List<String>  lines        = Files.readAllLines(newHashStore);
-        StringBuilder sb           = new StringBuilder("{");
+        StringBuilder sb           = new StringBuilder("{\n");
         
         for (int i = 1; i < lines.size() - 1; i++)
         {
@@ -133,13 +134,25 @@ public class TestBIN
             value = value.substring(value.indexOf('"') + 1);
             value = value.substring(0, value.indexOf('"'));
             
-            sb.append('"').append(value).append('"').append(": ").append('"').append(key).append('"').append(',');
+            sb.append('"').append(value).append('"').append(": ").append('"').append(key).append('"').append(',').append("\n");
         }
-        sb.reverse().deleteCharAt(0).reverse();
+        sb.reverse().deleteCharAt(1).reverse();
         sb.append("}");
         
-        Map<String, String> hashes = UtilHandler.getGson().fromJson(sb.toString(), new TypeToken<Map<String, String>>() {}.getType());
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"), sb.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    @Test
+    public void testForWords() throws IOException
+    {
+        splitResultToFile();
         
+        String text = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
+        Type   type = new TypeToken<Map<String, String>>() {}.getType();
+        
+        Map<String, String> hashes = UtilHandler.getGson().fromJson(text, type);
+        
+        StandardOpenOption[] opens = new StandardOpenOption[]{StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE};
         
         hashes.forEach((k, v) -> {
             List<List<String>> result = UtilHandler.searchDictionary(k);
@@ -147,7 +160,7 @@ public class TestBIN
             {
                 try
                 {
-                    Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\words.log"), (k + ": " + result+"\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                    Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("words.log"), (k + ": " + result + "\n").getBytes(StandardCharsets.UTF_8), opens);
                 } catch (IOException e)
                 {
                     e.printStackTrace();
@@ -161,8 +174,8 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path       extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "binfiles");
-        Path       rito        = Paths.get(System.getProperty("user.home"), "Downloads", "temp");
+        Path       extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("binfiles");
+        Path       rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         List<Path> paths       = new ArrayList<>();
         
         Files.walkFileTree(rito, new SimpleFileVisitor<>()

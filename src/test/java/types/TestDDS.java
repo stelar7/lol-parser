@@ -19,7 +19,7 @@ public class TestDDS
         {
             DDSParser parser = new DDSParser();
             
-            Path file   = Paths.get(System.getProperty("user.home"), "Downloads", "MordekaiserLoadScreen_5.dds.compressed");
+            Path file   = UtilHandler.DOWNLOADS_FOLDER.resolve("MordekaiserLoadScreen_5.dds.compressed");
             Path output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
             System.out.println("Parsing: " + file.toString());
             

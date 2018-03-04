@@ -2,6 +2,7 @@ package types;
 
 import no.stelar7.cdragon.types.scb.SCBParser;
 import no.stelar7.cdragon.types.scb.data.SCBFile;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
 import java.nio.file.*;
@@ -12,7 +13,7 @@ public class TestSCB
     public void testSCB() {
         SCBParser parser = new SCBParser();
     
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "00a356da16b6715f.scb");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\00a356da16b6715f.scb");
         System.out.println("Parsing: " + file.toString());
     
         SCBFile data = parser.parse(file);

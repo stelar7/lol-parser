@@ -2,6 +2,7 @@ package types.util;
 
 import com.google.gson.*;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.types.Vector2;
 import org.junit.Test;
 
@@ -31,7 +32,7 @@ public class TestFlipHashKeys
             sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
-        Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "binhash.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\binhash.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     private void printKeys(JsonObject elem, String s)
@@ -171,7 +172,7 @@ public class TestFlipHashKeys
             sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
-        Files.write(Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "binhash2.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\binhash2.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
         
     }
 }

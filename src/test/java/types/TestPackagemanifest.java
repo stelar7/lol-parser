@@ -21,7 +21,7 @@ public class TestPackagemanifest
     {
         String       data        = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
         List<String> files       = UtilHandler.readWeb(data);
-        Path         extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
+        Path         extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pman");
         
         files.removeAll(Arrays.asList(extractPath.toFile().list()));
         String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest";
@@ -40,11 +40,11 @@ public class TestPackagemanifest
         List<Path>            filelist    = new ArrayList<>();
         List<String>          finalList   = new ArrayList<>();
         List<String>          unknown     = new ArrayList<>();
-        Path                  summaryPath = Paths.get(System.getProperty("user.home"), "Downloads\\temp\\rcp-be-lol-game-data\\rcp-be-lol-game-data\\plugins\\rcp-be-lol-game-data\\global\\default\\v1\\champion-summary.json");
+        Path                  summaryPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\rcp-be-lol-game-data\\rcp-be-lol-game-data\\plugins\\rcp-be-lol-game-data\\global\\default\\v1\\champion-summary.json");
         JsonElement           summaryData = new JsonParser().parse(new String(Files.readAllBytes(summaryPath), StandardCharsets.UTF_8));
         
-        Path extractPath  = Paths.get(System.getProperty("user.home"), "Downloads", "pman");
-        Path extractPath2 = Paths.get(System.getProperty("user.home"), "Downloads", "pman_out");
+        Path extractPath  = UtilHandler.DOWNLOADS_FOLDER.resolve("pman");
+        Path extractPath2 = UtilHandler.DOWNLOADS_FOLDER.resolve("pman_out");
         
         Files.walkFileTree(extractPath, new SimpleFileVisitor<>()
         {

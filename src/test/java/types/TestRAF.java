@@ -3,6 +3,7 @@ package types;
 import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.RAFFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
 import java.nio.file.*;
@@ -16,7 +17,7 @@ public class TestRAF
     {
         RAFParser parser = new RAFParser();
         
-        Path extractPath = Paths.get(System.getProperty("user.home"), "Downloads", "raf2");
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("raf2");
         Path rito        = Paths.get("C:\\Riot Games");
         
         List<Path> paths = new ArrayList<>();
@@ -47,7 +48,7 @@ public class TestRAF
     @Test
     public void testRAF()
     {
-        Path extractPath = Paths.get(System.getProperty("user.home"), "downloads\\lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48");
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48");
         
         RAFParser parser = new RAFParser();
         RAFFile   parsed = parser.parse(extractPath.resolve("Archive_114251952.raf"));

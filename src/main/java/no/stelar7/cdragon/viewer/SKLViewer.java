@@ -35,10 +35,10 @@ public class SKLViewer extends Renderer
             e.printStackTrace();
         }
 
-//        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test\\Brand");
+//        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Brand");
 //        model = new Model(path, "Brand_frostfire.skn", "brand_frostfire_TX_CM.dds");
         
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test\\Caitlyn");
+        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Caitlyn");
         model = new Model(path, "Caitlyn_cop.skn", "caitlyn_cop_TX_CM.dds");
         
         Shader vert = new Shader("shaders/basic.vert");

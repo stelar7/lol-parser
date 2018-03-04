@@ -93,7 +93,7 @@ public class WADFile
     private void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName) throws IOException
     {
         String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-        String filename = UtilHandler.getKnownWADFileHashes(pluginName).getOrDefault(hash, "unknown\\" + hash);
+        String filename = HashHandler.getKnownWADFileHashes(pluginName).getOrDefault(hash, "unknown\\" + hash);
         Path   self     = savePath.resolve(filename);
         
         self.getParent().toFile().mkdirs();

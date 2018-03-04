@@ -1,6 +1,6 @@
 package types.util;
 
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.HashHandler;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -160,7 +160,7 @@ public class LiveXXHashTest
             @Override
             public void keyReleased(KeyEvent e)
             {
-                output.setText(UtilHandler.generateXXHash64(input.getText()));
+                output.setText(HashHandler.generateXXHash64(input.getText()));
                 output.setDisabledTextColor(uk.contains(output.getText()) ? Color.GREEN : Color.RED);
             }
         });

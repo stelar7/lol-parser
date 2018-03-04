@@ -2,9 +2,10 @@ package types;
 
 import no.stelar7.cdragon.types.anm.ANMParser;
 import no.stelar7.cdragon.types.anm.data.ANMFile;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
-import java.nio.file.*;
+import java.nio.file.Path;
 
 public class TestANM
 {
@@ -14,7 +15,7 @@ public class TestANM
     {
         ANMParser parser = new ANMParser();
         
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads\\parser_test", "Aatrox_Attack1.anm");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Aatrox_Attack1.anm");
         System.out.println("Parsing: " + file.toString());
     
         ANMFile data = parser.parse(file);

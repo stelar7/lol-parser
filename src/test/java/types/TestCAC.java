@@ -2,9 +2,10 @@ package types;
 
 import no.stelar7.cdragon.types.cac.CACParser;
 import no.stelar7.cdragon.types.cac.data.CACFile;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
-import java.nio.file.*;
+import java.nio.file.Path;
 
 public class TestCAC
 {
@@ -15,7 +16,7 @@ public class TestCAC
     {
         CACParser parser = new CACParser();
         
-        Path file = Paths.get(System.getProperty("user.home"), "Downloads", "Yasuo_Base.cac");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("Yasuo_Base.cac");
         System.out.println("Parsing: " + file.toString());
         
         CACFile data = parser.parse(file);

@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.readers.types.*;
 
@@ -46,7 +46,7 @@ public class BINParser implements Parseable<BINFile>
             
             int lengthCheck = raf.pos() + Integer.BYTES;
             entry.setLenght(raf.readInt());
-            entry.setHash(UtilHandler.getBINHash(raf.readInt()));
+            entry.setHash(HashHandler.getBINHash(raf.readInt()));
             entry.setValueCount(raf.readShort());
             
             for (int j = 0; j < entry.getValueCount(); j++)
@@ -68,7 +68,7 @@ public class BINParser implements Parseable<BINFile>
     {
         BINValue value = new BINValue();
         
-        value.setHash(UtilHandler.getBINHash(raf.readInt()));
+        value.setHash(HashHandler.getBINHash(raf.readInt()));
         value.setType(raf.readByte());
         value.setValue(readByType(value.getType(), raf));
         
@@ -134,7 +134,7 @@ public class BINParser implements Parseable<BINFile>
             {
                 BINStruct bs = new BINStruct();
                 
-                bs.setHash(UtilHandler.getBINHash(raf.readInt()));
+                bs.setHash(HashHandler.getBINHash(raf.readInt()));
                 bs.setEntry(raf.readInt());
                 bs.setCount(raf.readShort());
                 for (int i = 0; i < bs.getCount(); i++)
