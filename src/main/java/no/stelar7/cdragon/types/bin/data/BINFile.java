@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.bin.data;
 
-import lombok.Data;
+import lombok.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Vector2;
 
@@ -30,7 +30,7 @@ public class BINFile
             }
             removeTrailingComma(sb);
             sb.append("}");
-            json = UtilHandler.mergeTopKeysToArray(sb.toString().replace("\\\"", "\""));
+            json = UtilHandler.mergeTopKeysToArray(sb.toString());
         }
         
         return json;
@@ -61,15 +61,11 @@ public class BINFile
     @SuppressWarnings("unused")
     private void printType(String hash, byte type, Object data, StringBuilder sb)
     {
-        if (hash.equals("3786248987"))
-        {
-            System.out.println();
-        }
         switch (type)
         {
             case 16:
             {
-                sb.append("\"").append(data.toString()).append("\"");
+                printString(data.toString(), sb);
                 break;
             }
             case 18:
@@ -97,6 +93,19 @@ public class BINFile
             default:
                 sb.append(data.toString());
         }
+    }
+    
+    private void printString(String o, StringBuilder sb)
+    {
+        String val = o;
+        
+        // JSON does not allow \ in the files, so we need to escape it to \\
+        val = val.replace("\\", "\\\\");
+        
+        // JSON does not allow strings to start with ", so we escape them
+        val = val.replace("\"", "\\\"");
+        
+        sb.append("\"").append(val).append("\"");
     }
     
     private void printMap(BINMap value, StringBuilder sb)
@@ -135,7 +144,7 @@ public class BINFile
         {
             if (value.getType() == 16)
             {
-                sb.append("\"").append(o.toString()).append("\"").append(",");
+                printString(o.toString(), sb);
             } else
             {
                 sb.append(o.toString()).append(",");
@@ -170,7 +179,7 @@ public class BINFile
                 printStruct((BINStruct) o, sb);
             } else if (value.getType() == 16)
             {
-                sb.append("\"").append(o.toString()).append("\"");
+                printString(o.toString(), sb);
             } else if (o instanceof Integer)
             {
                 sb.append(HashHandler.getBINHash((Integer) o));
