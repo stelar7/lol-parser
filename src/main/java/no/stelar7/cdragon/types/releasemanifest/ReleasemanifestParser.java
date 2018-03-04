@@ -125,15 +125,14 @@ public class ReleasemanifestParser implements Parseable<ReleasemanifestDirectory
     
     private List<String> parseStrings(RandomAccessReader raf)
     {
-        int count = raf.readInt();
-        // ignored stringSize property
-        raf.readInt();
+        int count      = raf.readInt();
+        int stringSize = raf.readInt();
         
         List<String> files = new ArrayList<>();
         
         for (int i = 0; i < count; i++)
         {
-            files.add(raf.readString());
+            files.add(raf.readString().trim());
         }
         
         return files;

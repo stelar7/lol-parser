@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.bin.data;
 
 import lombok.Data;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.types.Vector2;
+import no.stelar7.cdragon.util.types.Vector2;
 
 import java.util.*;
 
@@ -61,6 +61,10 @@ public class BINFile
     @SuppressWarnings("unused")
     private void printType(String hash, byte type, Object data, StringBuilder sb)
     {
+        if (hash.equals("3786248987"))
+        {
+            System.out.println();
+        }
         switch (type)
         {
             case 16:

@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
-import no.stelar7.cdragon.util.readers.types.Vector2;
+import no.stelar7.cdragon.util.types.Vector2;
 
 import java.io.*;
 import java.net.*;

@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.wem.data;
 
 import lombok.Data;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.readers.types.ByteArray;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.util.*;

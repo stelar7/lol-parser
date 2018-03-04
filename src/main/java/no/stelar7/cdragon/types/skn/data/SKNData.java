@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.skn.data;
 
 import lombok.Data;
-import no.stelar7.cdragon.util.readers.types.*;
+import no.stelar7.cdragon.util.types.*;
 
 @Data
 public class SKNData

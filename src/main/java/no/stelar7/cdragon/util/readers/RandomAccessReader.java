@@ -1,13 +1,8 @@
 package no.stelar7.cdragon.util.readers;
 
 
-import no.stelar7.cdragon.util.readers.types.Vector2f;
-import no.stelar7.cdragon.util.readers.types.Vector2i;
-import no.stelar7.cdragon.util.readers.types.*;
-import no.stelar7.cdragon.util.readers.types.Vector3f;
-import no.stelar7.cdragon.util.readers.types.Vector3i;
-import no.stelar7.cdragon.util.readers.types.Vector4f;
-import org.joml.*;
+import no.stelar7.cdragon.util.types.*;
+import org.joml.Quaternionf;
 
 import java.io.*;
 import java.nio.*;
@@ -335,25 +330,25 @@ public class RandomAccessReader implements AutoCloseable
     {
         Matrix4f vector = new Matrix4f();
         
-        vector.m00(buffer.getFloat());
-        vector.m01(buffer.getFloat());
-        vector.m02(buffer.getFloat());
-        vector.m03(buffer.getFloat());
+        vector.m00 = (buffer.getFloat());
+        vector.m01 = (buffer.getFloat());
+        vector.m02 = (buffer.getFloat());
+        vector.m03 = (buffer.getFloat());
         
-        vector.m10(buffer.getFloat());
-        vector.m11(buffer.getFloat());
-        vector.m12(buffer.getFloat());
-        vector.m13(buffer.getFloat());
+        vector.m10 = (buffer.getFloat());
+        vector.m11 = (buffer.getFloat());
+        vector.m12 = (buffer.getFloat());
+        vector.m13 = (buffer.getFloat());
         
-        vector.m20(buffer.getFloat());
-        vector.m21(buffer.getFloat());
-        vector.m22(buffer.getFloat());
-        vector.m23(buffer.getFloat());
+        vector.m20 = (buffer.getFloat());
+        vector.m21 = (buffer.getFloat());
+        vector.m22 = (buffer.getFloat());
+        vector.m23 = (buffer.getFloat());
         
-        vector.m30(buffer.getFloat());
-        vector.m31(buffer.getFloat());
-        vector.m32(buffer.getFloat());
-        vector.m33(buffer.getFloat());
+        vector.m30 = (buffer.getFloat());
+        vector.m31 = (buffer.getFloat());
+        vector.m32 = (buffer.getFloat());
+        vector.m33 = (buffer.getFloat());
         
         return vector;
     }

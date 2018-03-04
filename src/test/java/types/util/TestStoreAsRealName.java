@@ -7,7 +7,7 @@ import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import no.stelar7.cdragon.util.readers.types.Vector2;
+import no.stelar7.cdragon.util.types.Vector2;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.utils.IOUtils;
 import org.junit.Test;

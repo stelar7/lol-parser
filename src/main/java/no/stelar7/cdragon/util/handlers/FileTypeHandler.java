@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
-import no.stelar7.cdragon.util.readers.types.ByteArray;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;

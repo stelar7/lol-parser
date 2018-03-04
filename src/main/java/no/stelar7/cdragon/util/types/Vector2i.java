@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.util.readers.types;
+package no.stelar7.cdragon.util.types;
 
 public class Vector2i extends org.joml.Vector2i
 {

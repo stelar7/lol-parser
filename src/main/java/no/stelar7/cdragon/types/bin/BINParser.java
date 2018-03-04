@@ -4,7 +4,7 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.readers.types.*;
+import no.stelar7.cdragon.util.types.*;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;

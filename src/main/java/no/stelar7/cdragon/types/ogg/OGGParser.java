@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.ogg.data.*;
 import no.stelar7.cdragon.types.wem.data.WEMData;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.readers.types.Vector2;
+import no.stelar7.cdragon.util.types.Vector2;
 
 import java.nio.ByteOrder;
 

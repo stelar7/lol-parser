@@ -3,7 +3,7 @@ package no.stelar7.cdragon.types.inibin.data;
 import lombok.Data;
 import no.stelar7.cdragon.interfaces.Extractable;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
-import no.stelar7.cdragon.util.readers.types.Vector2;
+import no.stelar7.cdragon.util.types.Vector2;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -9,7 +9,7 @@ import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.types.ByteArray;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;

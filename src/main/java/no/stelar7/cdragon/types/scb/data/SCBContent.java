@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.scb.data;
 
 import lombok.Data;
-import no.stelar7.cdragon.util.readers.types.Vector3b;
+import no.stelar7.cdragon.util.types.Vector3b;
 import org.joml.*;
 
 import java.util.*;

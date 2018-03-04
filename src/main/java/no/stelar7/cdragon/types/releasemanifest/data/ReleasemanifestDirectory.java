@@ -11,23 +11,27 @@ public class ReleasemanifestDirectory
     private List<ReleasemanifestContentFile> files          = new ArrayList<>();
     private List<ReleasemanifestDirectory>   subDirectories = new ArrayList<>();
     
-    public void printLines(String pre, String post)
+    public List<String> printLines(String pre, String post)
     {
-        printFolder(this, pre, post);
+        System.out.format("prefix: %s%nsuffix: %s", pre, post);
+        
+        List<String> output = new ArrayList<>();
+        printFolder(this, "", output);
+        return output;
     }
     
-    private void printFolder(ReleasemanifestDirectory dir, String current, String ending)
+    private void printFolder(ReleasemanifestDirectory dir, String current, List<String> output)
     {
         String inner = (current + dir.name + "/").replace(" ", "%20");
         for (ReleasemanifestContentFile file : dir.files)
         {
-            String filename = inner + file.getName().replace(" ", "%20") + ending;
-            System.out.println(filename);
+            String filename = inner + file.getName().replace(" ", "%20");
+            output.add(filename);
         }
         
         for (ReleasemanifestDirectory sub : dir.subDirectories)
         {
-            printFolder(sub, inner, ending);
+            printFolder(sub, inner, output);
         }
     }
 }

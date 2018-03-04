@@ -187,10 +187,21 @@ public class TestBIN
         List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
+            
+            List<String> names = Arrays.asList("0e7ee5a18bb8e381", "5532d301bad4eef8", "3e7305420ebfac53",
+                                               "0b28e56310f016aa", "9ed630ba5c5e368c", "e827e60be1345575", "089fb0226ba325ac",
+                                               "929042894b990d88", "c8e191846017e4d2", "a7a69bc146f256b7");
+            
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                paths.add(file);
+                for (String name : names)
+                {
+                    if (file.toString().contains(name))
+                    {
+                        paths.add(file);
+                    }
+                }
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -218,14 +229,17 @@ public class TestBIN
                     continue;
                 }
                 
-                System.out.println("Parsing file: " + path);
                 Files.createDirectories(extractPath);
                 byte[] data = FileTypeHandler.makePrettyJson(parsed.toJson().getBytes(StandardCharsets.UTF_8));
                 Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
             } catch (RuntimeException ex)
             {
                 // ignore it
-                System.out.println(ex.getMessage());
+                if (path.toString().endsWith(".bin"))
+                {
+                    System.out.println("Failed to parse file: " + path);
+                    System.out.println(ex.getMessage());
+                }
             }
         }
     }
