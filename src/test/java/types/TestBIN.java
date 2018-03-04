@@ -13,7 +13,6 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
 
 public class TestBIN
 {
@@ -148,11 +147,11 @@ public class TestBIN
     @Test
     public void testForWords() throws IOException
     {
-        String              text   = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
-        Type                type   = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
-        Map<String, String> hashes = UtilHandler.getGson().fromJson(text, type);
+        String text = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
+        Type   type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
         
-        Queue<Entry<String, String>> toRead = new ConcurrentLinkedDeque<>(hashes.entrySet());
+        Map<String, String>          hashes = UtilHandler.getGson().fromJson(text, type);
+        Queue<Entry<String, String>> toRead = new ArrayDeque<>(hashes.entrySet());
         
         BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve("output.log").toFile(), true));
         

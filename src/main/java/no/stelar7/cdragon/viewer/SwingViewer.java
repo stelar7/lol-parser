@@ -247,7 +247,7 @@ public class SwingViewer
             for (WADContentHeaderV1 header : file.getContentHeaders())
             {
                 String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-                String filename = HashHandler.getKnownWADFileHashes(plugin).getOrDefault(hash, hash);
+                String filename = HashHandler.getWadHashes(plugin).getOrDefault(hash, hash);
                 byte[] data     = file.readContentFromHeaderData(header);
                 
                 if (filename.equals(hash))

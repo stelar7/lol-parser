@@ -159,73 +159,61 @@ public class HashHandler
             0xBCB4666D, 0xB8757BDA, 0xB5365D03, 0xB1F740B4
     };
     
+    private static <K, V> Map<K, V> loadMap(Path storage) throws IOException
+    {
+        String sb = new String(Files.readAllBytes(storage), StandardCharsets.UTF_8);
+        return UtilHandler.getGson().fromJson(sb, new TypeToken<Map<K, V>>() {}.getType());
+    }
+    
     
     public static String getBINHash(int hash)
     {
         long val = Integer.toUnsignedLong(hash);
-        
-        if (binHashNames != null)
-        {
-            return binHashNames.getOrDefault(val, String.valueOf(val));
-        }
-        
-        try
-        {
-            binHashNames = new HashMap<>();
-            String            sb         = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
-            binHashNames.putAll(pluginData);
-            
-            System.out.println("Loaded known bin hashes");
-        } catch (IOException e)
-        {
-            binHashNames = Collections.emptyMap();
-            System.err.println("File not found: " + e.getMessage());
-        }
-        
-        return getBINHash(hash);
+        return getBinHashes().getOrDefault(val, String.valueOf(val));
     }
     
     public static boolean hasBINHash(String hash)
     {
-        if (binHashNames != null)
-        {
-            return binHashNames.containsValue(hash);
-        }
-        
-        try
-        {
-            binHashNames = new HashMap<>();
-            String            sb         = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
-            binHashNames.putAll(pluginData);
-            
-            System.out.println("Loaded known bin hashes");
-        } catch (IOException e)
-        {
-            binHashNames = Collections.emptyMap();
-            System.err.println("File not found: " + e.getMessage());
-        }
-        
-        return hasBINHash(hash);
+        return getBinHashes().containsValue(hash);
     }
     
     public static String getINIHash(int hash)
     {
         Long val = Integer.toUnsignedLong(hash);
-        
-        if (iniHashNames != null)
+        return getIniHashes().getOrDefault(val, String.valueOf(val));
+    }
+    
+    
+    public static Map<Long, String> getBinHashes()
+    {
+        if (binHashNames != null)
         {
-            return iniHashNames.getOrDefault(val, String.valueOf(val));
+            return binHashNames;
         }
         
         try
         {
-            iniHashNames = new HashMap<>();
-            String            sb         = new String(Files.readAllBytes(INI_HASH_STORE), StandardCharsets.UTF_8);
-            Map<Long, String> pluginData = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
-            iniHashNames.putAll(pluginData);
-            
+            binHashNames = loadMap(BIN_HASH_STORE);
+            System.out.println("Loaded known bin hashes");
+        } catch (IOException e)
+        {
+            binHashNames = Collections.emptyMap();
+            System.err.println("File not found: " + e.getMessage());
+        }
+        
+        return getBinHashes();
+    }
+    
+    public static Map<Long, String> getIniHashes()
+    {
+        if (iniHashNames != null)
+        {
+            return iniHashNames;
+        }
+        
+        try
+        {
+            iniHashNames = loadMap(INI_HASH_STORE);
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
         {
@@ -233,31 +221,26 @@ public class HashHandler
             System.err.println("File not found: " + e.getMessage());
         }
         
-        return getINIHash(hash);
+        return getIniHashes();
     }
     
-    
-    public static Map<String, String> getKnownWADFileHashes(String pluginName)
+    public static Map<String, String> getWadHashes(String plugin)
     {
-        if (wadHashNames.get(pluginName) != null)
+        if (wadHashNames.get(plugin) != null)
         {
-            return wadHashNames.get(pluginName);
+            return wadHashNames.get(plugin);
         }
         
         try
         {
-            String              sb         = new String(Files.readAllBytes(WAD_HASH_STORE.resolve(pluginName + ".json")), StandardCharsets.UTF_8);
-            Map<String, String> pluginData = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
-            wadHashNames.put(pluginName, pluginData);
-            
-            System.out.println("Loaded known hashes for " + pluginName);
+            wadHashNames.put(plugin, loadMap(WAD_HASH_STORE.resolve(plugin + ".json")));
+            System.out.println("Loaded known hashes for " + plugin);
         } catch (IOException e)
         {
-            wadHashNames.put(pluginName, Collections.emptyMap());
+            wadHashNames.put(plugin, Collections.emptyMap());
             System.err.println("File not found: " + e.getMessage());
         }
         
-        return getKnownWADFileHashes(pluginName);
+        return getWadHashes(plugin);
     }
-    
 }

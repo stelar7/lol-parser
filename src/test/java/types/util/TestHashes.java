@@ -969,7 +969,7 @@ public class TestHashes
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
         String hash      = HashHandler.generateXXHash64(hashMe.trim());
-        String knownHash = HashHandler.getKnownWADFileHashes("rcp-be-lol-game-data").get(hash);
+        String knownHash = HashHandler.getWadHashes("rcp-be-lol-game-data").get(hash);
         
         if (knownHash != null)
         {
