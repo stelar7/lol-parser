@@ -122,6 +122,7 @@ public class BINParser implements Parseable<BINFile>
                 bc.setType(raf.readByte());
                 bc.setSize(raf.readInt());
                 bc.setCount(raf.readInt());
+                
                 for (int i = 0; i < bc.getCount(); i++)
                 {
                     bc.getData().add(readByType(bc.getType(), raf));
@@ -135,6 +136,12 @@ public class BINParser implements Parseable<BINFile>
                 BINStruct bs = new BINStruct();
                 
                 bs.setHash(HashHandler.getBINHash(raf.readInt()));
+                
+                if (bs.getHash().equalsIgnoreCase("0"))
+                {
+                    return bs;
+                }
+                
                 bs.setEntry(raf.readInt());
                 bs.setCount(raf.readShort());
                 for (int i = 0; i < bs.getCount(); i++)
@@ -162,22 +169,26 @@ public class BINParser implements Parseable<BINFile>
             case 23:
             {
                 BINMap bm = new BINMap();
+                
                 bm.setType1(raf.readByte());
                 bm.setType2(raf.readByte());
                 bm.setSize(raf.readInt());
                 bm.setCount(raf.readInt());
+                
                 for (int i = 0; i < bm.getCount(); i++)
                 {
                     bm.getData().add(new Vector2<>(readByType(bm.getType1(), raf), readByType(bm.getType2(), raf)));
                 }
+                
                 return bm;
             }
             case 24:
             {
                 return raf.readByte();
             }
+            
             default:
-                throw new RuntimeException("Unknown type: " + type);
+                throw new RuntimeException("Unknown type: " + type + " at location: " + (raf.pos() - 1));
         }
     }
     

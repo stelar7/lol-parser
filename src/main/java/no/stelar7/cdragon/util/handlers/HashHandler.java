@@ -37,6 +37,11 @@ public class HashHandler
         return new String(hexChars);
     }
     
+    public static String toHex(String str)
+    {
+        return toHex(str.getBytes(StandardCharsets.UTF_8));
+    }
+    
     public static String generateXXHash64(String text)
     {
         try
