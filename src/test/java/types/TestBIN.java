@@ -6,12 +6,14 @@ import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.*;
 
 public class TestBIN
 {
@@ -117,7 +119,8 @@ public class TestBIN
         }
     }
     
-    private void splitResultToFile() throws IOException
+    @Test
+    public void splitResultToFile() throws IOException
     {
         
         Path          newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("grep - kopi.res");
@@ -143,31 +146,55 @@ public class TestBIN
     }
     
     @Test
-    public void testForWords() throws IOException
+    public void testForWords() throws IOException, InterruptedException
     {
-        splitResultToFile();
-        
-        String text = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
-        Type   type = new TypeToken<Map<String, String>>() {}.getType();
-        
+        String              text   = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
+        Type                type   = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
         Map<String, String> hashes = UtilHandler.getGson().fromJson(text, type);
         
-        StandardOpenOption[] opens = new StandardOpenOption[]{StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE};
+        Queue<Entry<String, String>> toRead  = new ConcurrentLinkedDeque<>(hashes.entrySet());
+        Queue<String>                toWrite = new ConcurrentLinkedDeque<>();
         
-        hashes.forEach((k, v) -> {
-            List<List<String>> result = UtilHandler.searchDictionary(k);
-            if (!result.isEmpty())
+        int            threadCount = 4;
+        CountDownLatch latch       = new CountDownLatch(threadCount);
+        
+        BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve("output.log").toFile(), true));
+        
+        Runnable searcher = () -> {
+            while (true)
             {
-                try
+                Entry<String, String> value = toRead.poll();
+                
+                if (value == null)
                 {
-                    Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("words.log"), (k + ": " + result + "\n").getBytes(StandardCharsets.UTF_8), opens);
-                } catch (IOException e)
+                    latch.countDown();
+                    break;
+                }
+                
+                String k = value.getKey();
+                String v = value.getValue();
+                
+                List<List<String>> result = UtilHandler.searchDictionary(k);
+                if (!result.isEmpty())
                 {
-                    e.printStackTrace();
+                    toWrite.add(String.format("%s: %s: %s%n", v, k, result));
                 }
             }
-        });
+        };
         
+        for (int i = 0; i < threadCount; i++)
+        {
+            new Thread(searcher).start();
+        }
+        
+        
+        latch.await();
+        while (!toWrite.isEmpty())
+        {
+            String result = toWrite.poll();
+            bw.write(result);
+        }
+        bw.flush();
     }
     
     

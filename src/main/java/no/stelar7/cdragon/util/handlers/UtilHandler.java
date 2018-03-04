@@ -29,7 +29,7 @@ public final class UtilHandler
     
     public static final Path DOWNLOADS_FOLDER = Paths.get(System.getProperty("user.home"), "Downloads");
     public static final Path TYPES_FOLDER     = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types");
- 
+    
     public static String pathToFilename(Path path)
     {
         return path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf('.'));
@@ -85,8 +85,6 @@ public final class UtilHandler
     {
         return String.format("%d.%d.%d.%d", (ip >> 24) & 0xFF, (ip >> 16) & 0xFF, (ip >> 8) & 0xFF, ip & 0xFF);
     }
-    
-    
     
     
     public static <X, Y> void pairPrintout(Path outputFile, List<Vector2<X, Y>> data)
@@ -373,14 +371,13 @@ public final class UtilHandler
     }
     
     
+    private static final String      english    = readInternalAsString("dictionary/english.txt");
+    private static final Set<String> dictionary = new HashSet<>(Arrays.asList(english.split("\n")));
+    
     public static List<List<String>> searchDictionary(String input)
     {
-        String      dict       = readInternalAsString("dictionary/english.txt");
-        Set<String> dictionary = new HashSet<>(Arrays.asList(dict.split("\n")));
-        
-        
         List<List<String>> results = new ArrayList<>();
-        search(input, dictionary, new Stack<>(), results);
+        search(input, new HashSet<>(dictionary), new Stack<>(), results);
         return results;
     }
     
