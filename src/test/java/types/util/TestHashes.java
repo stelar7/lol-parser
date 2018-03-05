@@ -401,10 +401,13 @@ public class TestHashes
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
                 {
                 }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!foundHashes.contains(data))
+                    if (!HashHandler.getWadHashes("rcp-be-lol-game-data").containsKey(k))
                     {
-                        foundHashes.add(new Vector2<>(k, v));
+                        Vector2<String, String> data = new Vector2<>(k, v);
+                        if (!foundHashes.contains(data))
+                        {
+                            foundHashes.add(new Vector2<>(k, v));
+                        }
                     }
                 });
                 return FileVisitResult.CONTINUE;
