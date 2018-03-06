@@ -22,6 +22,9 @@ public class TestWebSocket
             reader.subscribe("OnJsonApiEvent", System.out::println);
         });
         th.start();
-        Thread.sleep(20000);
+        while (true)
+        {
+            Thread.sleep(Long.MAX_VALUE);
+        }
     }
 }

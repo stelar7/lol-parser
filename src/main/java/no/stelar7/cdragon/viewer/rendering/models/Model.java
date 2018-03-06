@@ -2,19 +2,15 @@ package no.stelar7.cdragon.viewer.rendering.models;
 
 
 import lombok.ToString;
-import no.stelar7.cdragon.types.dds.DDSParser;
-import no.stelar7.cdragon.types.skn.SKNParser;
-import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.viewer.rendering.buffers.VAO;
-
-import java.awt.image.BufferedImage;
-import java.nio.file.*;
 
 @ToString
 public class Model implements AutoCloseable
 {
     private static final int VERTEX_SIZE  = 3;
     private static final int TEXTURE_SIZE = 2;
+    
+    public static Model current;
     
     
     private VAO vao;
@@ -28,42 +24,34 @@ public class Model implements AutoCloseable
         vao.bind();
     }
     
-    public Model(float[] vertices, int[] indecies)
+    public Model(Mesh mesh)
     {
         this();
         
-        mesh = new Mesh();
-        mesh.setVertices(vertices);
-        mesh.setIndecies(indecies);
+        this.mesh = mesh;
+        mesh.bindForVAO();
+        vao.setPointer(0, VERTEX_SIZE);
     }
     
-    public Model(Path base, String skn, String tex)
+    public Model(Mesh mesh, Texture texture)
     {
-        this();
+        this(mesh);
         
-        SKNParser     parser       = new SKNParser();
-        SKNFile       data         = parser.parse(base.resolve(skn));
-        BufferedImage textureImage = new DDSParser().parse(base.resolve(tex));
-        
-        mesh = Mesh.loadSKN(data);
-        vao.setPointer(0, VERTEX_SIZE);
-        
-        texture = Texture.loadForSKN(data);
-        texture.setData(textureImage);
+        this.texture = texture;
+        texture.bind();
         vao.setPointer(1, TEXTURE_SIZE);
     }
-    
     
     public void bind()
     {
         vao.bind();
-        mesh.bind();
+        mesh.bindForDraw();
     }
     
     public void unbind()
     {
         vao.unbind();
-        mesh.unbind();
+        mesh.unbindForDraw();
     }
     
     public Mesh getMesh()

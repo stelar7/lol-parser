@@ -1,11 +1,15 @@
 package no.stelar7.cdragon.viewer;
 
+import no.stelar7.cdragon.types.dds.DDSParser;
+import no.stelar7.cdragon.types.skn.SKNParser;
+import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.viewer.rendering.Renderer;
-import no.stelar7.cdragon.viewer.rendering.models.Model;
+import no.stelar7.cdragon.viewer.rendering.models.*;
 import no.stelar7.cdragon.viewer.rendering.shaders.*;
 import org.joml.*;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Math;
 import java.nio.file.*;
@@ -38,8 +42,15 @@ public class SKLViewer extends Renderer
 //        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Brand");
 //        model = new Model(path, "Brand_frostfire.skn", "brand_frostfire_TX_CM.dds");
         
-        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Caitlyn");
-        model = new Model(path, "Caitlyn_cop.skn", "caitlyn_cop_TX_CM.dds");
+        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Caitlyn");
+        SKNFile skn  = new SKNParser().parse(path.resolve("Caitlyn_cop.skn"));
+        
+        Mesh mesh = new Mesh(skn);
+        
+        BufferedImage texImg = new DDSParser().parse(path.resolve("caitlyn_cop_TX_CM.dds"));
+        Texture       tex    = new Texture(skn, texImg);
+        
+        model = new Model(mesh, tex);
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
@@ -54,16 +65,21 @@ public class SKLViewer extends Renderer
         prog.bindFragLocation("color", 0);
         
         prog.link();
-        
-        updateMVP();
     }
     
     float x;
     float z;
-    float time = 0;
+    float   time  = 0;
+    boolean dirty = true;
     
     private void updateMVP()
     {
+        if (!dirty)
+        {
+            return;
+        }
+        
+        
         float perspective = (float) width / (float) height;
         float fov         = (float) Math.toRadians(65);
         
@@ -81,6 +97,7 @@ public class SKLViewer extends Renderer
         prog.bind();
         prog.setMatrix4f("mvp", mvp);
         prog.setInt("texImg", 0);
+        dirty = false;
     }
     
     @Override
@@ -105,8 +122,18 @@ public class SKLViewer extends Renderer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         UtilHandler.logToFile("gl.log", "glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)");
         
-        prog.bind();
-        model.bind();
+        if (prog != Program.current)
+        {
+            Program.current = prog;
+            prog.bind();
+        }
+        
+        
+        if (model != Model.current)
+        {
+            Model.current = model;
+            model.bind();
+        }
         
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
         UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", model.getMesh().getIndexCount()));

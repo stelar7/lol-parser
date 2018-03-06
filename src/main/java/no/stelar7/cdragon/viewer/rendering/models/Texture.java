@@ -24,8 +24,27 @@ public class Texture implements AutoCloseable
     public Texture()
     {
         this.id = glGenTextures();
-        UtilHandler.logToFile("gl.log", String.format("glGenTextures() = %s)", id));
+        UtilHandler.logToFile("gl.log", String.format("glGenTextures() = %s", id));
         this.tbo = new VBO(GL_ARRAY_BUFFER);
+    }
+    
+    public Texture(SKNFile data, BufferedImage textureImage)
+    {
+        this();
+        
+        float[] uvs = new float[data.getVertexCount() * 2];
+        for (int i = 0; i < data.getVertexCount(); i++)
+        {
+            SKNData  v   = data.getVertices().get(i);
+            Vector2f pos = v.getUv();
+            
+            uvs[(i * 2) + 0] = pos.x;
+            uvs[(i * 2) + 1] = pos.y;
+        }
+        
+        tbo.bind();
+        tbo.setData(uvs);
+        setData(textureImage);
     }
     
     public void bind()
@@ -89,23 +108,6 @@ public class Texture implements AutoCloseable
         UtilHandler.logToFile("gl.log", "glGenerateMipmap(GL_TEXTURE_2D)");
     }
     
-    public static Texture loadForSKN(SKNFile data)
-    {
-        float[] uvs = new float[data.getVertexCount() * 2];
-        for (int i = 0; i < data.getVertexCount(); i++)
-        {
-            SKNData  v   = data.getVertices().get(i);
-            Vector2f pos = v.getUv();
-            
-            uvs[(i * 2) + 0] = pos.x;
-            uvs[(i * 2) + 1] = pos.y;
-        }
-        
-        Texture texture = new Texture();
-        texture.getTBO().bind();
-        texture.getTBO().setData(uvs);
-        return texture;
-    }
     
     @Override
     public void close()

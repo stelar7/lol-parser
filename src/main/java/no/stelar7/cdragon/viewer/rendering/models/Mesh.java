@@ -22,32 +22,9 @@ public class Mesh implements AutoCloseable
         ibo = new VBO(GL_ELEMENT_ARRAY_BUFFER);
     }
     
-    public void setVertices(float[] vertices)
+    public Mesh(SKNFile data)
     {
-        vbo.bind();
-        vbo.setData(vertices);
-    }
-    
-    public void setIndecies(int[] indecies)
-    {
-        ibo.bind();
-        ibo.setData(indecies);
-        indexCount = indecies.length;
-    }
-    
-    public void bind()
-    {
-        ibo.bind();
-    }
-    
-    public void unbind()
-    {
-        ibo.unbind();
-    }
-    
-    public static Mesh loadSKN(SKNFile data)
-    {
-        Mesh mesh = new Mesh();
+        this();
         
         float minx = Integer.MAX_VALUE;
         float maxx = Integer.MIN_VALUE;
@@ -88,11 +65,38 @@ public class Mesh implements AutoCloseable
             inds[i] = Integer.valueOf(in);
         }
         
-        mesh.setVertices(verts);
-        mesh.setIndecies(inds);
-        
-        return mesh;
+        setVertices(verts);
+        setIndecies(inds);
     }
+    
+    public void setVertices(float[] vertices)
+    {
+        vbo.bind();
+        vbo.setData(vertices);
+    }
+    
+    public void setIndecies(int[] indecies)
+    {
+        ibo.bind();
+        ibo.setData(indecies);
+        indexCount = indecies.length;
+    }
+    
+    public void bindForDraw()
+    {
+        ibo.bind();
+    }
+    
+    public void unbindForDraw()
+    {
+        ibo.unbind();
+    }
+    
+    public void unbindForVAO()
+    {
+        vbo.unbind();
+    }
+    
     
     public int getIndexCount()
     {
@@ -104,5 +108,10 @@ public class Mesh implements AutoCloseable
     {
         ibo.close();
         vbo.close();
+    }
+    
+    public void bindForVAO()
+    {
+        vbo.bind();
     }
 }
