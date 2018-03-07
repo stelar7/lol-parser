@@ -27,15 +27,18 @@ public class WADParser implements Parseable<WADFile>
      * @param path path to store the file
      * @return WADFile
      */
-    public WADFile parseLatest(String pluginName, Path path)
+    public WADFile parseLatest(String pluginName, Path path, boolean assetDefault)
     {
-        String url     = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        int    version = UtilHandler.getPreferences().getInt("lastGoodVersion", 397);
-        int    next    = UtilHandler.getMaxVersion(url, "/default-assets.wad.compressed", version);
-        int    use     = (next > version) ? next : version;
+        String url  = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
+        
+        int version = UtilHandler.getPreferences().getInt("lastGoodVersion-" + pluginName, 397);
+        int next    = UtilHandler.getMaxVersion(url, type, version);
+        int use     = (next > version) ? next : version;
         UtilHandler.getPreferences().putInt("lastGoodVersion", use);
         
-        return handleAll(pluginName, String.format(url + "%s", "%s", "/default-assets.wad.compressed"), UtilHandler.getIPFromLong(use), path);
+        
+        return handleAll(pluginName, String.format(url + "%s", "%s", type), UtilHandler.getIPFromLong(use), path);
     }
     
     
@@ -86,7 +89,7 @@ public class WADParser implements Parseable<WADFile>
     
     private void download(String pluginName, Path save, String url, String version)
     {
-        System.out.println("Downloading " + pluginName);
+        System.out.printf("Downloading %s-%s%n", pluginName, version);
         String finalUrl = String.format(url, version);
         UtilHandler.downloadFile(save, finalUrl);
     }

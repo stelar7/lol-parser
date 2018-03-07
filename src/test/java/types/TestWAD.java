@@ -18,7 +18,7 @@ public class TestWAD
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
-        WADFile parsed = parser.parseLatest(pluginName, extractPath);
+        WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
         parsed.extractFiles(pluginName, null, extractPath);
     }
     

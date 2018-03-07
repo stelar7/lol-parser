@@ -217,7 +217,7 @@ public class TestStoreAsRealName
         
         try
         {
-            WADFile parsed = parser.parseLatest(pluginName, extractPath);
+            WADFile parsed = parser.parseLatest(pluginName, extractPath, false);
             parsed.extractFiles(pluginName, null, extractPath);
         } catch (Exception e)
         {
