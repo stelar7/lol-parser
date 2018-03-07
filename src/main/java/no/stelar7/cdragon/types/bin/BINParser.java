@@ -2,9 +2,9 @@ package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.Vector2;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -70,53 +70,52 @@ public class BINParser implements Parseable<BINFile>
         
         value.setHash(HashHandler.getBINHash(raf.readInt()));
         value.setType(raf.readByte());
-        value.setValue(readByType(value.getType(), raf));
+        value.setValue(readByType(BINValueType.valueOf(value.getType()), raf));
         
         return value;
     }
     
-    private Object readByType(byte type, RandomAccessReader raf)
+    private Object readByType(BINValueType type, RandomAccessReader raf)
     {
         switch (type)
         {
-            case 0:
+            case V3_SHORT:
                 return raf.readVec3S();
-            case 1:
+            case BOOLEAN:
                 return raf.readBoolean();
-            case 2:
+            case SIGNED_BYTE:
                 return raf.readByte();
-            case 3:
+            case BYTE:
                 return raf.readByte();
-            case 4:
+            case SIGNED_SHORT:
                 return raf.readShort();
-            case 5:
+            case SHORT:
                 return raf.readShort();
-            case 6:
+            case SIGNED_INT:
                 return raf.readInt();
-            case 7:
+            case INT:
                 return raf.readInt();
-            case 8:
+            case SIGNED_LONG:
                 return raf.readLong();
-            case 9:
+            case LONG:
                 return raf.readLong();
-            case 10:
+            case FLOAT:
                 return raf.readFloat();
-            case 11:
+            case V2_FLOAT:
                 return raf.readVec2F();
-            case 12:
+            case V3_FLOAT:
                 return raf.readVec3F();
-            case 13:
+            case V4_FLOAT:
                 return raf.readVec4F();
-            case 14:
+            case M4X4_FLOAT:
                 return raf.readMatrix4x4();
-            case 15:
+            case RGBA_BYTE:
                 return raf.readVec4B();
-            case 16:
+            case STRING:
                 return raf.readString(raf.readShort());
-            case 17:
+            case STRING_HASH:
                 return raf.readInt();
-            case 18:
-            {
+            case CONTAINER:
                 BINContainer bc = new BINContainer();
                 
                 bc.setType(raf.readByte());
@@ -125,14 +124,12 @@ public class BINParser implements Parseable<BINFile>
                 
                 for (int i = 0; i < bc.getCount(); i++)
                 {
-                    bc.getData().add(readByType(bc.getType(), raf));
+                    bc.getData().add(readByType(BINValueType.valueOf(bc.getType()), raf));
                 }
                 
                 return bc;
-            }
-            case 19:
-            case 20:
-            {
+            case STRUCTURE:
+            case EMBEDDED:
                 BINStruct bs = new BINStruct();
                 
                 bs.setHash(HashHandler.getBINHash(raf.readInt()));
@@ -150,24 +147,20 @@ public class BINParser implements Parseable<BINFile>
                 }
                 
                 return bs;
-            }
-            case 21:
+            case LINK_OFFSET:
                 return raf.readInt();
-            case 22:
-            {
+            case OPTIONAL_DATA:
                 BINData bd = new BINData();
                 
                 bd.setType(raf.readByte());
                 bd.setCount(raf.readByte());
                 for (int i = 0; i < bd.getCount(); i++)
                 {
-                    bd.getData().add(readByType(bd.getType(), raf));
+                    bd.getData().add(readByType(BINValueType.valueOf(bd.getType()), raf));
                 }
                 
                 return bd;
-            }
-            case 23:
-            {
+            case PAIR:
                 BINMap bm = new BINMap();
                 
                 bm.setType1(raf.readByte());
@@ -177,16 +170,12 @@ public class BINParser implements Parseable<BINFile>
                 
                 for (int i = 0; i < bm.getCount(); i++)
                 {
-                    bm.getData().add(new Vector2<>(readByType(bm.getType1(), raf), readByType(bm.getType2(), raf)));
+                    bm.getData().add(new Vector2<>(readByType(BINValueType.valueOf(bm.getType1()), raf), readByType(BINValueType.valueOf(bm.getType2()), raf)));
                 }
                 
                 return bm;
-            }
-            case 24:
-            {
+            case UNKNOWN_BYTE:
                 return raf.readByte();
-            }
-            
             default:
                 throw new RuntimeException("Unknown type: " + type + " at location: " + (raf.pos() - 1));
         }

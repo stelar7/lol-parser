@@ -7,7 +7,6 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.io.IOException;
-import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -115,47 +114,24 @@ public class WADFile
         }
     }
     
+    
     public synchronized byte[] readContentFromHeaderData(WADContentHeaderV1 header)
     {
         fileReader.seek(header.getOffset());
-        if (header.isCompressed())
+        WADCompressionType type = WADCompressionType.valueOf(header.getCompressed());
+        
+        switch (type)
         {
-            byte[] fileBytes = fileReader.readBytes(header.getCompressedFileSize());
-            if (header.getCompressed() == 1)
-            {
-                return CompressionHandler.uncompressGZIP(fileBytes);
-            }
-            
-            if (header.getCompressed() == 2)
-            {
-                ByteBuffer wrap   = ByteBuffer.wrap(fileBytes).order(ByteOrder.LITTLE_ENDIAN);
-                int        lenght = wrap.getInt();
-                byte[]     data   = new byte[lenght];
-                wrap.get(data, 0, lenght);
-                String reference = new String(data, StandardCharsets.UTF_8).trim();
-                
-                System.out.println("Content is file reference: " + reference);
-                return fileBytes;
-            }
-            
-            if (header.getCompressed() == 3)
-            {
-                return CompressionHandler.uncompressZSTD(fileBytes, header.getFileSize());
-            }
-            
-            try
-            {
-                Files.write(Paths.get("unknown.file"), fileBytes);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            
-            System.out.println("Found file with unknown compression!");
-            return fileBytes;
-        } else
-        {
-            return fileReader.readBytes(header.getFileSize());
+            case NONE:
+                return fileReader.readBytes(header.getFileSize());
+            case GZIP:
+                return CompressionHandler.uncompressGZIP(fileReader.readBytes(header.getCompressedFileSize()));
+            case REFERENCE:
+                return fileReader.readString(fileReader.readInt()).getBytes(StandardCharsets.UTF_8);
+            case ZSTD:
+                return CompressionHandler.uncompressZSTD(fileReader.readBytes(header.getCompressedFileSize()), header.getFileSize());
+            default:
+                return null;
         }
     }
     

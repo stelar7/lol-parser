@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.bin.data;
 
-import lombok.*;
+import lombok.Data;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Vector2;
 
@@ -52,40 +52,40 @@ public class BINFile
     {
         sb.append("\"").append(value.getHash()).append("\":");
         
-        printType(value.getHash(), value.getType(), value.getValue(), sb);
+        printType(value.getHash(), BINValueType.valueOf(value.getType()), value.getValue(), sb);
         
         sb.append(",");
     }
     
     // hash is here for debugging purposes
     @SuppressWarnings("unused")
-    private void printType(String hash, byte type, Object data, StringBuilder sb)
+    private void printType(String hash, BINValueType type, Object data, StringBuilder sb)
     {
         switch (type)
         {
-            case 16:
+            case STRING:
             {
                 printString(data.toString(), sb);
                 break;
             }
-            case 18:
+            case CONTAINER:
             {
                 printContainer((BINContainer) data, sb);
                 break;
             }
-            case 19:
-            case 20:
+            case STRUCTURE:
+            case EMBEDDED:
             {
                 printStruct((BINStruct) data, sb);
                 break;
             }
             
-            case 22:
+            case OPTIONAL_DATA:
             {
                 printData((BINData) data, sb);
                 break;
             }
-            case 23:
+            case PAIR:
             {
                 printMap((BINMap) data, sb);
                 break;
@@ -116,11 +116,11 @@ public class BINFile
             Vector2<?, ?> obj = (Vector2<?, ?>) o;
             
             StringBuilder temp = new StringBuilder();
-            printType("", value.getType1(), obj.getX(), temp);
+            printType("", BINValueType.valueOf(value.getType1()), obj.getX(), temp);
             String val1 = temp.toString();
             
             temp = new StringBuilder();
-            printType("", value.getType2(), obj.getY(), temp);
+            printType("", BINValueType.valueOf(value.getType2()), obj.getY(), temp);
             String val2 = temp.toString();
             
             if (val1.startsWith("\""))
@@ -142,7 +142,7 @@ public class BINFile
         sb.append("[");
         for (Object o : value.getData())
         {
-            if (value.getType() == 16)
+            if (value.getType() == BINValueType.STRING.value)
             {
                 printString(o.toString(), sb);
             } else
@@ -173,11 +173,11 @@ public class BINFile
         {
             if (o instanceof BINValue)
             {
-                printType(((BINValue) o).getHash(), ((BINValue) o).getType(), ((BINValue) o).getValue(), sb);
+                printType(((BINValue) o).getHash(), BINValueType.valueOf(((BINValue) o).getType()), ((BINValue) o).getValue(), sb);
             } else if (o instanceof BINStruct)
             {
                 printStruct((BINStruct) o, sb);
-            } else if (value.getType() == 16)
+            } else if (value.getType() == BINValueType.STRING.value)
             {
                 printString(o.toString(), sb);
             } else if (o instanceof Integer)
