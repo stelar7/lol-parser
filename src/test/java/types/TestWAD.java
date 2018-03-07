@@ -32,35 +32,6 @@ public class TestWAD
     }
     
     @Test
-    public void testWADAll()
-    {
-        WADParser parser = new WADParser();
-        
-        String pluginName  = "rcp-be-lol-game-data";
-        Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
-        
-        for (int i = UtilHandler.getLongFromIP("0.0.0.25"); i > 0; i--)
-        {
-            try
-            {
-                WADFile parsed   = parser.parseVersion(pluginName, i, extractPath);
-                String  realName = pluginName + "_" + UtilHandler.getIPFromLong(i);
-                
-                if (parsed != null)
-                {
-                    parsed.extractFiles(realName, null, extractPath);
-                } else
-                {
-                    System.out.println("File not found; " + realName);
-                }
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    @Test
     public void testClientWAD() throws Exception
     {
         WADParser parser = new WADParser();

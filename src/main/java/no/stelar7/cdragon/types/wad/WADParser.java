@@ -32,44 +32,12 @@ public class WADParser implements Parseable<WADFile>
         String url     = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
         int    version = UtilHandler.getPreferences().getInt("lastGoodVersion", 397);
         int    next    = UtilHandler.getMaxVersion(url, "/default-assets.wad.compressed", version);
-        UtilHandler.getPreferences().putInt("lastGoodVersion", next);
+        int    use     = (next > version) ? next : version;
+        UtilHandler.getPreferences().putInt("lastGoodVersion", use);
         
-        return parseVersion(pluginName, next, path);
+        return handleAll(pluginName, String.format(url + "%s", "%s", "/default-assets.wad.compressed"), UtilHandler.getIPFromLong(use), path);
     }
     
-    /**
-     * Downloads and parses the version entered;
-     * if the file already exists, it parses that file
-     *
-     * @param path path to store the file
-     * @return WADFile
-     */
-    public WADFile parseVersion(String pluginName, int versionAsNumber, Path path)
-    {
-        String   urlNoWAD = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        String[] data     = UtilHandler.getMaxVersion(urlNoWAD, versionAsNumber, versionAsNumber);
-        if (data == null)
-        {
-            return null;
-        }
-        
-        String url     = data[0];
-        String version = data[1];
-        
-        return handleAll(pluginName, url, version, path);
-    }
-    
-    /**
-     * Downloads and parses the latest WAD file;
-     * if the file already exists, it parses that file
-     *
-     * @param path path to store the file
-     * @return WADFile
-     */
-    public WADFile parseVersion(String pluginName, String versionString, Path path)
-    {
-        return parseVersion(pluginName, UtilHandler.getLongFromIP(versionString), path);
-    }
     
     private WADFile handleAll(String pluginName, String urlWithFormatTokens, String version, Path path)
     {

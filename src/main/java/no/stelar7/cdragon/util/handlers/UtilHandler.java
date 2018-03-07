@@ -111,16 +111,25 @@ public final class UtilHandler
     
     public static int getMaxVersion(String url, String file, int min)
     {
-        int    i           = min;
-        String versionAsIP = getIPFromLong(i);
-        String finalUrl    = String.format(url, versionAsIP) + file;
-        System.out.println("Looking for " + finalUrl);
-        while (canConnect(finalUrl))
+        int i         = min;
+        int failCount = 0;
+        int lastGood  = -1;
+        
+        while (failCount < 5)
         {
-            versionAsIP = getIPFromLong(++i);
-            finalUrl = String.format(url, versionAsIP) + file;
+            String versionAsIP = getIPFromLong(++i);
+            String finalUrl = String.format(url, versionAsIP) + file;
+            System.out.println("Looking for " + finalUrl);
+            if (!canConnect(finalUrl))
+            {
+                failCount++;
+            } else
+            {
+                lastGood = i;
+            }
         }
-        return i - 1;
+        
+        return lastGood;
     }
     
     public static String[] getMaxVersion(String url, int min, int max)
