@@ -9,6 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 public final class UtilHandler
@@ -19,13 +20,15 @@ public final class UtilHandler
         System.setProperty("joml.format", "false");
     }
     
+    
     private UtilHandler()
     {
         // Hide public constructor
     }
     
-    private static Gson       gson;
-    private static JsonParser parser;
+    private static Gson        gson;
+    private static JsonParser  parser;
+    private static Preferences preferences;
     
     public static final Path DOWNLOADS_FOLDER = Paths.get(System.getProperty("user.home"), "Downloads");
     public static final Path TYPES_FOLDER     = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types");
@@ -104,6 +107,20 @@ public final class UtilHandler
         {
             e.printStackTrace();
         }
+    }
+    
+    public static int getMaxVersion(String url, String file, int min)
+    {
+        int    i           = min;
+        String versionAsIP = getIPFromLong(i);
+        String finalUrl    = String.format(url, versionAsIP) + file;
+        System.out.println("Looking for " + finalUrl);
+        while (canConnect(finalUrl))
+        {
+            versionAsIP = getIPFromLong(++i);
+            finalUrl = String.format(url, versionAsIP) + file;
+        }
+        return i - 1;
     }
     
     public static String[] getMaxVersion(String url, int min, int max)
@@ -214,6 +231,19 @@ public final class UtilHandler
         return result.toString();
     }
     
+    public static boolean canConnect(String urlString)
+    {
+        try
+        {
+            URL               url  = new URL(urlString);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            return (conn.getResponseCode() == 200);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+    }
     
     public static List<String> readWeb(String url)
     {
@@ -403,5 +433,15 @@ public final class UtilHandler
                 words.pop();
             }
         }
+    }
+    
+    public static Preferences getPreferences()
+    {
+        if (preferences == null)
+        {
+            preferences = Preferences.userNodeForPackage(UtilHandler.class);
+        }
+        
+        return preferences;
     }
 }

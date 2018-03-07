@@ -29,19 +29,16 @@ public class WADParser implements Parseable<WADFile>
      */
     public WADFile parseLatest(String pluginName, Path path)
     {
-        for (int i = 400; i > 0; i--)
-        {
-            WADFile parsed;
-            if ((parsed = parseVersion(pluginName, i, path)) != null)
-            {
-                return parsed;
-            }
-        }
-        return null;
+        String url     = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        int    version = UtilHandler.getPreferences().getInt("lastGoodVersion", 397);
+        int    next    = UtilHandler.getMaxVersion(url, "/default-assets.wad.compressed", version);
+        UtilHandler.getPreferences().putInt("lastGoodVersion", next);
+        
+        return parseVersion(pluginName, next, path);
     }
     
     /**
-     * Downloads and parses the latest WAD file;
+     * Downloads and parses the version entered;
      * if the file already exists, it parses that file
      *
      * @param path path to store the file
