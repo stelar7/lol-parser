@@ -48,7 +48,7 @@ public class DDSParser implements Parseable<BufferedImage>
     {
         try
         {
-            byte[] dataBytes = CompressionHandler.uncompressDEFLATE(Files.readAllBytes(path));
+            byte[] dataBytes = CompressionHandler.uncompress(Files.readAllBytes(path));
             return parse(dataBytes);
         } catch (IOException e)
         {

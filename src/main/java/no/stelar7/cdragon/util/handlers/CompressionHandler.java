@@ -79,4 +79,29 @@ public final class CompressionHandler
     {
         return Zstd.decompress(fileBytes, originalSize);
     }
+    
+    public static byte[] uncompressZSTD(byte[] fileBytes)
+    {
+        return Zstd.decompress(fileBytes, Integer.MAX_VALUE);
+    }
+    
+    public static byte[] uncompress(byte[] bytes)
+    {
+        if (FileTypeHandler.isProbableGZIP(bytes))
+        {
+            return uncompressGZIP(bytes);
+        }
+        
+        if (FileTypeHandler.isProbableZSTD(bytes))
+        {
+            return uncompressZSTD(bytes);
+        }
+        
+        if (FileTypeHandler.isProbableDEFLATE(bytes))
+        {
+            return uncompressDEFLATE(bytes);
+        }
+        
+        return null;
+    }
 }
