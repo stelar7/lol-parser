@@ -1,14 +1,12 @@
 package types;
 
-import com.google.gson.*;
-import no.stelar7.cdragon.types.packagemanifest.*;
+import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
-import no.stelar7.cdragon.util.*;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -41,7 +39,6 @@ public class TestPackagemanifest
         List<String>          finalList   = new ArrayList<>();
         List<String>          unknown     = new ArrayList<>();
         Path                  summaryPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\rcp-be-lol-game-data\\rcp-be-lol-game-data\\plugins\\rcp-be-lol-game-data\\global\\default\\v1\\champion-summary.json");
-        JsonElement           summaryData = new JsonParser().parse(new String(Files.readAllBytes(summaryPath), StandardCharsets.UTF_8));
         
         Path extractPath  = UtilHandler.DOWNLOADS_FOLDER.resolve("pman");
         Path extractPath2 = UtilHandler.DOWNLOADS_FOLDER.resolve("pman_out");
@@ -72,29 +69,6 @@ public class TestPackagemanifest
         String inibinPath = "files/DATA/Characters/%s/%s.inibin.compressed";
         String binPath    = "files/DATA/Characters/%s/%s.bin.compressed";
         String url        = "http://l3cdn.riotgames.com/releases/live%s";
-        for (JsonElement element : summaryData.getAsJsonArray())
-        {
-            JsonObject datum = element.getAsJsonObject();
-            String     alias = datum.get("alias").getAsString();
-            String     furl  = String.format(url, data.get(String.format(inibinPath, alias, alias)));
-            String     furl2 = String.format(url, data.get(String.format(binPath, alias, alias)));
-            
-            if (furl.toLowerCase().contains("null"))
-            {
-                unknown.add("INIBIN: " + alias);
-            } else
-            {
-                UtilHandler.downloadFile(extractPath2.resolve(alias + ".inibin.compressed"), furl);
-            }
-            
-            if (furl2.toLowerCase().contains("null"))
-            {
-                unknown.add("BIN: " + alias);
-            } else
-            {
-                UtilHandler.downloadFile(extractPath2.resolve(alias + ".bin.compressed"), furl2);
-            }
-        }
         
         System.out.println();
         unknown.sort(new NaturalOrderComparator());

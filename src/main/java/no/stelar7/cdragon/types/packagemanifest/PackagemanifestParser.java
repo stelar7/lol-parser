@@ -41,6 +41,10 @@ public class PackagemanifestParser implements Parseable<PackagemanifestFile>
         String data = raf.readAsString();
         for (String line : data.split("\n"))
         {
+            if(line.trim().isEmpty()) {
+                continue;
+            }
+            
             String[] lineContent = line.split(",");
             
             PackagemanifestLine dataLine = new PackagemanifestLine();
