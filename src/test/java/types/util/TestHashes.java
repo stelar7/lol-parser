@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class TestHashes
@@ -1127,15 +1128,28 @@ public class TestHashes
             {
                 
                 final List<Vector2<String, String>> foundHashes = new ArrayList<>();
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
+                
+                List<String> lines  = Files.readAllLines(file);
+                List<String> unique = lines.stream().distinct().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
+                
+                for (String u : unique)
                 {
-                }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!foundHashes.contains(data))
+                    try
                     {
-                        foundHashes.add(new Vector2<>(k, v));
+                        String[] parts  = u.split("\": \"");
+                        String   first  = parts[0].replaceAll("[\"]", "").trim();
+                        String   second = parts[1].replaceAll("[\",]", "").trim();
+                        
+                        Vector2<String, String> data = new Vector2<>(first, second);
+                        if (!foundHashes.contains(data))
+                        {
+                            foundHashes.add(data);
+                        }
+                    } catch (ArrayIndexOutOfBoundsException e)
+                    {
+                        System.out.println(u);
                     }
-                });
+                }
                 
                 foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
                 
