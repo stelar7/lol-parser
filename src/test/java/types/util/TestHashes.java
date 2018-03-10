@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 @SuppressWarnings("unchecked")
 public class TestHashes
@@ -25,7 +25,7 @@ public class TestHashes
     private final String       prePre = "plugins/rcp-be-lol-game-data/";
     
     private final List<String> preRegion = Arrays.asList(
-            "global"/*,
+            "global",
             "br",
             "cn",
             "eune",
@@ -56,11 +56,11 @@ public class TestHashes
             "tr",
             "th",
             "tw",
-            "vn"*/
+            "vn"
                                                         );
     
     private final List<String> preLang = Arrays.asList(
-            "default"/*,
+            "default",
             "cs_cz",
             "de_de",
             "el_gr",
@@ -88,7 +88,7 @@ public class TestHashes
             "vn_vn",
             "zh_cn",
             "zh_my",
-            "zh_tw"*/
+            "zh_tw"
                                                       );
     
     
@@ -1016,6 +1016,27 @@ public class TestHashes
         }
     }
     
+    private Map<String, String> loadAllHashes() throws IOException
+    {
+        final Map<String, String> knownHashes = new HashMap<>();
+        
+        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                String filename = file.getFileName().toString().substring(0, file.getFileName().toString().lastIndexOf('.'));
+                
+                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType()))
+                        .forEach(knownHashes::putIfAbsent);
+                
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+        return knownHashes;
+    }
+    
     @Test
     public void testAllHashes() throws IOException
     {
@@ -1046,77 +1067,41 @@ public class TestHashes
     }
     
     @Test
-    public void testAllLangKnownPaths() throws IOException
+    public void testCompareUnknown() throws IOException
     {
-        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        final Map<String, String> knownHashes = loadAllHashes();
+        
+        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.5.unknown.txt");
+        for (String key : unknown)
         {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            if (knownHashes.containsKey(key))
             {
-                String filename = file.getFileName().toString().substring(0, file.getFileName().toString().lastIndexOf('.'));
-                
-                final List<String>                  foundHashes = new ArrayList<>();
-                final List<Vector2<String, String>> knownHashes = new ArrayList<>();
-                
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
-                {
-                }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!knownHashes.contains(data))
-                    {
-                        knownHashes.add(data);
-                    }
-                });
-                
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
-                {
-                }.getType())).forEach((k, v) -> {
-                    String insert = v.substring(("plugins/" + filename + "/").length());
-                    insert = insert.substring(insert.indexOf('/') + 1);
-                    insert = insert.substring(insert.indexOf('/') + 1);
-                    if (!foundHashes.contains(insert))
-                    {
-                        foundHashes.add(insert);
-                    }
-                });
-                
-                for (String reg : preRegion)
-                {
-                    System.out.println(reg);
-                    for (String lan : preLang)
-                    {
-                        System.out.println(lan);
-                        
-                        String pre = "plugins/" + filename + "/" + reg + "/" + lan + "/";
-                        for (String end : foundHashes)
-                        {
-                            String hashMe = pre + end;
-                            String hash   = HashHandler.computeXXHash64(hashMe.trim());
-                            
-                            Vector2<String, String> data = new Vector2<>(hash, hashMe);
-                            if (!knownHashes.contains(data))
-                            {
-                                knownHashes.add(data);
-                            }
-                        }
-                    }
-                }
-                
-                knownHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
-                StringBuilder sb = new StringBuilder("{\n");
-                for (Vector2<String, String> pair : knownHashes)
-                {
-                    sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-                }
-                sb.reverse().delete(0, 2).reverse().append("\n}");
-                
-                Files.createDirectories(Paths.get("hashes", "fixed"));
-                Files.write(Paths.get("hashes", "fixed", file.getFileName().toString()), sb.toString().getBytes(StandardCharsets.UTF_8));
-                
-                return FileVisitResult.CONTINUE;
+                System.out.println(key + " : " + knownHashes.get(key));
             }
-        });
+        }
     }
+    
+    
+    @Test
+    public void testCompareCDTB() throws IOException
+    {
+        final Map<String, String> knownHashes = loadAllHashes();
+        
+        List<String> unknown = UtilHandler.readWeb("https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.txt");
+        
+        for (String line : unknown)
+        {
+            String[] parts = line.split(" ");
+            String   key   = parts[0];
+            String   value = Stream.of(parts).skip(1).collect(Collectors.joining(" "));
+            
+            if (!knownHashes.containsKey(key))
+            {
+                System.out.println("\"" + key + "\": \"" + value + "\",");
+            }
+        }
+    }
+    
     
     @Test
     public void testSortAllHashes() throws IOException
@@ -1165,301 +1150,5 @@ public class TestHashes
                 return FileVisitResult.CONTINUE;
             }
         });
-    }
-    
-    @Test
-    public void testJoinSplitClientHashes() throws IOException
-    {
-        Path file         = UtilHandler.DOWNLOADS_FOLDER.resolve("morehash.json");
-        Path newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("newhash");
-        
-        List<Vector2<String, String>> foundHashes = new ArrayList<>();
-        
-        Map<String, StringBuilder> pluginData = new HashMap<>();
-        
-        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
-            {
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(path), new TypeToken<Map<String, String>>()
-                {
-                }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!foundHashes.contains(data))
-                    {
-                        foundHashes.add(data);
-                    }
-                });
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        
-        ((List<String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<List<String>>()
-        {
-        }.getType())).forEach((v) -> {
-            Vector2<String, String> data = new Vector2<>(HashHandler.computeXXHash64(v), v);
-            if (!foundHashes.contains(data))
-            {
-                foundHashes.add(data);
-            }
-        });
-        
-        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
-        for (Vector2<String, String> pair : foundHashes)
-        {
-            String builder = pair.getY().substring("plugins/".length());
-            if (builder.indexOf('/') < 0)
-            {
-                System.out.println(pair.getY());
-            }
-            
-            builder = builder.substring(0, builder.indexOf('/'));
-            
-            StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-        }
-        pluginData.forEach((k, sb) -> {
-            sb.reverse().delete(0, 2).reverse().append("\n}");
-            try
-            {
-                Files.createDirectories(newHashStore);
-                Files.write(newHashStore.resolve(k + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
-    }
-    
-    @Test
-    public void testDiffPupix() throws IOException
-    {
-        Path newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("morehash.json");
-        Path pupix        = UtilHandler.DOWNLOADS_FOLDER.resolve("league_client");
-        
-        final List<Vector2<String, String>> foundHashes = new ArrayList<>();
-        FileVisitor<Path> findHashes = new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-            {
-                if (!file.getFileName().toString().endsWith(".json"))
-                {
-                    return FileVisitResult.CONTINUE;
-                }
-                
-                System.out.println(file.toAbsolutePath().toString());
-                
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
-                {
-                }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!foundHashes.contains(data))
-                    {
-                        foundHashes.add(new Vector2<>(k, v));
-                    }
-                });
-                return FileVisitResult.CONTINUE;
-            }
-        };
-        
-        Files.walkFileTree(HashHandler.WAD_HASH_STORE, findHashes);
-        Files.walkFileTree(pupix, findHashes);
-        
-        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
-        
-        
-        StringBuilder sb = new StringBuilder("{\n");
-        for (Vector2<String, String> pair : foundHashes)
-        {
-            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-        }
-        sb.reverse().delete(0, 2).reverse().append("\n}");
-        
-        Files.write(newHashStore, sb.toString().getBytes(StandardCharsets.UTF_8));
-        
-    }
-    
-    @Test
-    public void testMakePure() throws IOException
-    {
-        Path                          newHashStore = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\newFixed");
-        Path                          hashStore    = Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\hashes\\fixed");
-        List<Vector2<String, String>> foundHashes  = new ArrayList<>();
-        Map<String, StringBuilder>    pluginData   = new HashMap<>();
-        
-        Files.walkFileTree(hashStore, new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-            {
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
-                {
-                }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!foundHashes.contains(data))
-                    {
-                        foundHashes.add(new Vector2<>(k, v));
-                    }
-                });
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        
-        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
-        for (Vector2<String, String> pair : foundHashes)
-        {
-            String[] temp    = pair.getY().substring("plugins/".length()).split("/");
-            String   builder = temp[0];
-            
-            if (temp.length == 2)
-            {
-                StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-                continue;
-            }
-            
-            String region = temp[1];
-            String lang   = temp[2];
-            
-            if (!region.equalsIgnoreCase("global"))
-            {
-                continue;
-            }
-            
-            if (!lang.equalsIgnoreCase("default"))
-            {
-                continue;
-            }
-            
-            StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-        }
-        pluginData.forEach((k, sb) -> {
-            sb.reverse().delete(0, 2).reverse().append("\n}");
-            try
-            {
-                Files.createDirectories(newHashStore);
-                Files.write(newHashStore.resolve(k + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
-        
-    }
-    
-    @Test
-    public void testJoinSplitHashes() throws IOException
-    {
-        Path file         = UtilHandler.DOWNLOADS_FOLDER.resolve("morehash.json");
-        Path newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("newhash");
-        
-        List<Vector2<String, String>> foundHashes = new ArrayList<>();
-        
-        Map<String, StringBuilder> pluginData = new HashMap<>();
-        
-        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-            {
-                ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
-                {
-                }.getType())).forEach((k, v) -> {
-                    Vector2<String, String> data = new Vector2<>(k, v);
-                    if (!foundHashes.contains(data))
-                    {
-                        foundHashes.add(new Vector2<>(k, v));
-                    }
-                });
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        
-        ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>()
-        {
-        }.getType())).forEach((k, v) -> {
-            Vector2<String, String> data = new Vector2<>(k, v);
-            if (!foundHashes.contains(data))
-            {
-                foundHashes.add(new Vector2<>(k, v));
-            }
-        });
-        
-        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
-        for (Vector2<String, String> pair : foundHashes)
-        {
-            String builder = pair.getY().substring("plugins/".length());
-            builder = builder.substring(0, builder.indexOf('/'));
-            
-            StringBuilder sb = pluginData.computeIfAbsent(builder, (k) -> new StringBuilder("{\n"));
-            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-        }
-        pluginData.forEach((k, sb) -> {
-            sb.reverse().delete(0, 2).reverse().append("\n}");
-            try
-            {
-                Files.createDirectories(newHashStore);
-                Files.write(newHashStore.resolve(k + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
-    }
-    
-    @Test
-    public void testClientWADHash() throws IOException
-    {
-        Path                          unknowns = UtilHandler.DOWNLOADS_FOLDER.resolve("temp/Champions/unknown.json");
-        Path                          output   = UtilHandler.DOWNLOADS_FOLDER.resolve("champions.json");
-        Path                          bins     = UtilHandler.DOWNLOADS_FOLDER.resolve("bintemp");
-        List<String>                  values   = Files.readAllLines(unknowns);
-        List<Vector2<String, String>> hashs    = new ArrayList<>();
-        
-        
-        Files.walkFileTree(bins, new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-            {
-                List<String> lines = Files.readAllLines(file);
-                
-                for (String line : lines)
-                {
-                    String asset = null;
-                    if (line.contains("ASSETS"))
-                    {
-                        asset = line.substring(line.indexOf("ASSETS"));
-                        asset = asset.substring(0, asset.indexOf("\"")).toLowerCase(Locale.ENGLISH);
-                    } else if (line.contains("DATA"))
-                    {
-                        asset = line.substring(line.indexOf("DATA"));
-                        asset = asset.substring(0, asset.indexOf("\"")).toLowerCase(Locale.ENGLISH);
-                    }
-                    
-                    if (asset != null)
-                    {
-                        String binHash = HashHandler.computeXXHash64(asset);
-                        if (values.contains(String.valueOf(binHash)))
-                        {
-                            Vector2<String, String> data = new Vector2<>(binHash, asset);
-                            if (!hashs.contains(data))
-                            {
-                                hashs.add(data);
-                            }
-                        }
-                    }
-                }
-                
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        
-        
-        hashs.sort(Comparator.comparing(Vector2::getX, new NaturalOrderComparator()));
-        UtilHandler.pairPrintout(output, hashs);
     }
 }
