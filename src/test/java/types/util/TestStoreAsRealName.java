@@ -85,8 +85,10 @@ public class TestStoreAsRealName
         }
         
         combineAndDeleteTemp();
+        
         System.out.println("Copying files");
         copyFilesToFolders();
+        
         System.out.println("Creating zip");
         createTARGZ();
     }
