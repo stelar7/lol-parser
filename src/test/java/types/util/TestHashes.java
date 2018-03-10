@@ -25,7 +25,7 @@ public class TestHashes
     private final String       prePre = "plugins/rcp-be-lol-game-data/";
     
     private final List<String> preRegion = Arrays.asList(
-            "global",
+            "global"/*,
             "br",
             "cn",
             "eune",
@@ -56,11 +56,11 @@ public class TestHashes
             "tr",
             "th",
             "tw",
-            "vn"
+            "vn"*/
                                                         );
     
     private final List<String> preLang = Arrays.asList(
-            "default",
+            "default"/*,
             "cs_cz",
             "de_de",
             "el_gr",
@@ -88,7 +88,7 @@ public class TestHashes
             "vn_vn",
             "zh_cn",
             "zh_my",
-            "zh_tw"
+            "zh_tw"*/
                                                       );
     
     
@@ -1064,6 +1064,7 @@ public class TestHashes
         });
         
         combineAndDeleteNestedTemp();
+        testUnsplit();
     }
     
     @Test
@@ -1083,7 +1084,7 @@ public class TestHashes
     
     
     @Test
-    public void testCompareCDTB() throws IOException
+    public void testPullCDTB() throws IOException
     {
         final Map<String, String> knownHashes = loadAllHashes();
         
@@ -1129,6 +1130,7 @@ public class TestHashes
         
         for (String plugin : changedPlugins)
         {
+            System.out.println("Found new hashes for: " + plugin);
             List<Vector2<String, String>> foundHashes = new ArrayList<>();
             
             HashHandler.getWadHashes(plugin).forEach((k, v) -> {

@@ -32,11 +32,13 @@ public class WADParser implements Parseable<WADFile>
         String url  = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
         String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
         
-        int version = UtilHandler.getPreferences().getInt("lastGoodVersion-" + pluginName, 397);
-        int next    = UtilHandler.getMaxVersion(url, type, version);
-        int use     = (next > version) ? next : version;
-        UtilHandler.getPreferences().putInt("lastGoodVersion", use);
+        String cacheKey = "lastGoodVersion-" + pluginName;
+        int    version  = UtilHandler.getPreferences().getInt(cacheKey, 397);
         
+        int next = UtilHandler.getMaxVersion(url, type, version);
+        int use  = (next > version) ? next : version;
+        
+        UtilHandler.getPreferences().putInt(cacheKey, use);
         
         return handleAll(pluginName, String.format(url + "%s", "%s", type), UtilHandler.getIPFromLong(use), path);
     }

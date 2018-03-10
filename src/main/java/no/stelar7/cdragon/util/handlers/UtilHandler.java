@@ -118,17 +118,19 @@ public final class UtilHandler
         while (failCount < 5)
         {
             String versionAsIP = getIPFromLong(++i);
-            String finalUrl = String.format(url, versionAsIP) + file;
-            System.out.println("Looking for " + finalUrl);
+            String finalUrl    = String.format(url, versionAsIP) + file;
             if (!canConnect(finalUrl))
             {
                 failCount++;
+                System.out.println("Found bad version: " + i + " (" + failCount + "/5)");
             } else
             {
                 lastGood = i;
+                System.out.println("Found good version: " + lastGood);
             }
         }
         
+        System.out.println("Returning version: " + lastGood + " (" + getIPFromLong(lastGood) + ")");
         return lastGood;
     }
     
