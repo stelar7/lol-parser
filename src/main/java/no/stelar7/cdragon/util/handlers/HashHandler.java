@@ -197,7 +197,7 @@ public class HashHandler
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
         {
-            binHashNames = Collections.emptyMap();
+            binHashNames = new HashMap<>();
             System.err.println("File not found: " + e.getMessage());
         }
         
@@ -218,7 +218,7 @@ public class HashHandler
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
         {
-            iniHashNames = Collections.emptyMap();
+            iniHashNames = new HashMap<>();
             System.err.println("File not found: " + e.getMessage());
         }
         
@@ -240,7 +240,7 @@ public class HashHandler
             System.out.println("Loaded known hashes for " + plugin);
         } catch (IOException e)
         {
-            wadHashNames.put(plugin, Collections.emptyMap());
+            wadHashNames.put(plugin, new HashMap<>());
             System.err.println("File not found: " + e.getMessage());
         }
         

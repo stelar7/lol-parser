@@ -1,4 +1,5 @@
 {
+	"25b0ca58b631d253": "plugins/rcp-fe-lol-mastery-panel/description.json",
 	"0bc88ac70725f11d": "plugins/rcp-fe-lol-mastery-panel/global/default/0a27380b4c58e22bd9f7818ab0957a45.png",
 	"ad5a49ecb77e28e8": "plugins/rcp-fe-lol-mastery-panel/global/default/0c5f061188c0a2c10294d82f3ddc7de6.png",
 	"1e73cc9153d9f008": "plugins/rcp-fe-lol-mastery-panel/global/default/0e9052e714c629da8c96f0e2ab5ce7ff.png",
@@ -94,8 +95,10 @@
 	"0507debbb7a59a51": "plugins/rcp-fe-lol-mastery-panel/global/default/f33df2f935d4c2f1cdfcb5a2f21451af.png",
 	"c7cca3553bdb1f2f": "plugins/rcp-fe-lol-mastery-panel/global/default/f04754046ed1198b5d8e89221dcbd11d.png",
 	"d4f2742858628afa": "plugins/rcp-fe-lol-mastery-panel/global/default/index.html",
+	"7a67a1875c45b9aa": "plugins/rcp-fe-lol-mastery-panel/global/default/license.json",
 	"4cc410257df4d4d9": "plugins/rcp-fe-lol-mastery-panel/global/default/rcp-fe-lol-mastery-panel.js",
 	"fb380adbc420fa27": "plugins/rcp-fe-lol-mastery-panel/global/default/sounds/sfx-masteries-button-generic-click.ogg",
+	"5b2c0771df604f56": "plugins/rcp-fe-lol-mastery-panel/global/default/sounds/sfx-masteries-button-generic-hover.ogg",
 	"d2b2ed97c775046f": "plugins/rcp-fe-lol-mastery-panel/global/default/sounds/sfx-masteries-points-add.ogg'",
 	"884281ccb4e1e5b2": "plugins/rcp-fe-lol-mastery-panel/global/default/sounds/sfx-masteries-points-refund.ogg'",
 	"8458674189b921ec": "plugins/rcp-fe-lol-mastery-panel/global/default/sounds/sfx-masteries-points-subtract-all.ogg",

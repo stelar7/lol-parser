@@ -1,10 +1,22 @@
 {
 	"50ec9fafe912276a": "plugins/rcp-fe-lol-kr-legal/description.json",
+	"c3e41b9b815cf17d": "plugins/rcp-fe-lol-kr-legal/euw/default/css/main.css",
+	"c0c8f15807dd5074": "plugins/rcp-fe-lol-kr-legal/euw/default/index.html",
+	"8ffa1067a01da76d": "plugins/rcp-fe-lol-kr-legal/euw/default/init.js",
+	"00d1c0ba3b4a9f7f": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/css/main.css",
+	"e03b73dfb9b19aaa": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/index.html",
+	"9a162e4be3fa7fe0": "plugins/rcp-fe-lol-kr-legal/euw/en_gb/init.js",
 	"07bcaee6c1c57ac7": "plugins/rcp-fe-lol-kr-legal/global/default/css/main.css",
+	"833fc09552201dfc": "plugins/rcp-fe-lol-kr-legal/global/default/css/main.css",
 	"dd8cd9f4c5d0dccb": "plugins/rcp-fe-lol-kr-legal/global/default/description.json",
 	"96ac48febc7008f8": "plugins/rcp-fe-lol-kr-legal/global/default/images/kr-rating-screen.png",
 	"9b8a5abce6291d3d": "plugins/rcp-fe-lol-kr-legal/global/default/index.html",
+	"33f88cee03cea6ac": "plugins/rcp-fe-lol-kr-legal/global/default/index.html",
 	"5c49f93c342f7072": "plugins/rcp-fe-lol-kr-legal/global/default/init.js",
+	"463626d0af993677": "plugins/rcp-fe-lol-kr-legal/global/default/init.js",
 	"9c44f219de5ed24e": "plugins/rcp-fe-lol-kr-legal/global/default/init.js.map",
-	"52d2b8b2b71c9bf4": "plugins/rcp-fe-lol-kr-legal/global/default/license.json"
+	"52d2b8b2b71c9bf4": "plugins/rcp-fe-lol-kr-legal/global/default/license.json",
+	"dcca56e9f8e22b42": "plugins/rcp-fe-lol-kr-legal/global/en_gb/css/main.css",
+	"3d466c023b604cdf": "plugins/rcp-fe-lol-kr-legal/global/en_gb/index.html",
+	"82a964192f3e62d1": "plugins/rcp-fe-lol-kr-legal/global/en_gb/init.js"
 }

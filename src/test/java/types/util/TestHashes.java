@@ -1102,53 +1102,78 @@ public class TestHashes
         }
     }
     
+    @Test
+    public void testUnsplit() throws IOException
+    {
+        Path         loadPath = Paths.get("combined.json");
+        List<String> lines    = Files.readAllLines(loadPath).stream().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
+        
+        Set<String> changedPlugins = new HashSet<>();
+        for (String u : lines)
+        {
+            String[] parts  = u.split("\": \"");
+            String   first  = parts[0].replaceAll("[\"]", "").trim();
+            String   second = parts[1].replaceAll("[\",]", "").trim();
+            
+            String       pluginPre = second.substring("plugins/".length());
+            final String plugin    = pluginPre.substring(0, pluginPre.indexOf('/'));
+            
+            
+            Map<String, String> hashes = HashHandler.getWadHashes(plugin);
+            hashes.computeIfAbsent(first, (key) -> {
+                changedPlugins.add(plugin);
+                return second;
+            });
+        }
+        
+        
+        for (String plugin : changedPlugins)
+        {
+            List<Vector2<String, String>> foundHashes = new ArrayList<>();
+            
+            HashHandler.getWadHashes(plugin).forEach((k, v) -> {
+                Vector2<String, String> data = new Vector2<>(k, v);
+                if (!foundHashes.contains(data))
+                {
+                    foundHashes.add(data);
+                }
+            });
+            
+            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+            
+            StringBuilder sb = new StringBuilder("{\n");
+            for (Vector2<String, String> pair : foundHashes)
+            {
+                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
+            }
+            sb.reverse().delete(0, 2).reverse().append("\n}");
+            Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        }
+        
+        Files.deleteIfExists(loadPath);
+    }
+    
     
     @Test
-    public void testSortAllHashes() throws IOException
+    public void testClientHashes() throws IOException
     {
-        Files.walkFileTree(HashHandler.WAD_HASH_STORE, new SimpleFileVisitor<>()
+        Path         loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt");
+        List<String> lines    = Files.readAllLines(loadPath).stream().filter(x -> x.startsWith("hash:")).collect(Collectors.toList());
+        
+        StringBuilder sb = new StringBuilder("{\n");
+        for (String line : lines)
         {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-            {
-                
-                final List<Vector2<String, String>> foundHashes = new ArrayList<>();
-                
-                List<String> lines  = Files.readAllLines(file);
-                List<String> unique = lines.stream().distinct().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
-                
-                for (String u : unique)
-                {
-                    try
-                    {
-                        String[] parts  = u.split("\": \"");
-                        String   first  = parts[0].replaceAll("[\"]", "").trim();
-                        String   second = parts[1].replaceAll("[\",]", "").trim();
-                        
-                        Vector2<String, String> data = new Vector2<>(first, second);
-                        if (!foundHashes.contains(data))
-                        {
-                            foundHashes.add(data);
-                        }
-                    } catch (ArrayIndexOutOfBoundsException e)
-                    {
-                        System.out.println(u);
-                    }
-                }
-                
-                foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
-                
-                StringBuilder sb = new StringBuilder("{\n");
-                for (Vector2<String, String> pair : foundHashes)
-                {
-                    sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
-                }
-                sb.reverse().delete(0, 2).reverse().append("\n}");
-                
-                Files.createDirectories(Paths.get("hashes", "fixed"));
-                Files.write(Paths.get("hashes", "fixed", file.getFileName().toString()), sb.toString().getBytes(StandardCharsets.UTF_8));
-                return FileVisitResult.CONTINUE;
-            }
-        });
+            String text = line.substring(line.indexOf('"'));
+            text = text.substring(0, text.lastIndexOf('"'));
+            
+            String hash = HashHandler.computeXXHash64(text);
+            
+            sb.append("\t\"").append(hash).append("\": \"").append(text).append("\",\n");
+        }
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        
+        Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        
+        testUnsplit();
     }
 }

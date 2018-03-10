@@ -1,7 +1,15 @@
 {
 	"b96c9b971426e68c": "plugins/rcp-fe-lol-simple-dialog-messages/description.json",
+	"4a964a9694fbaa97": "plugins/rcp-fe-lol-simple-dialog-messages/euw/default/index.html",
+	"3e14eafefaaa153c": "plugins/rcp-fe-lol-simple-dialog-messages/euw/default/init.js",
+	"1aaa88df8437698a": "plugins/rcp-fe-lol-simple-dialog-messages/euw/en_gb/index.html",
+	"9932f00915a52474": "plugins/rcp-fe-lol-simple-dialog-messages/euw/en_gb/init.js",
 	"7dfc9802706a099f": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/description.json",
 	"dd33d138cf26e01f": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/index.html",
+	"ee4acf12d9b1fe84": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/index.html",
 	"9effe1793430633c": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/init.js",
-	"54499c11e2a8a213": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/license.json"
+	"f394a502756aee39": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/init.js",
+	"54499c11e2a8a213": "plugins/rcp-fe-lol-simple-dialog-messages/global/default/license.json",
+	"bee2be702c7fbbbe": "plugins/rcp-fe-lol-simple-dialog-messages/global/en_gb/index.html",
+	"887bbdbfb439d108": "plugins/rcp-fe-lol-simple-dialog-messages/global/en_gb/init.js"
 }

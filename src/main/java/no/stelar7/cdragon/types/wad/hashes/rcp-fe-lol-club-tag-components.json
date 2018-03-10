@@ -1,9 +1,18 @@
 {
 	"95776b59147976eb": "plugins/rcp-fe-lol-club-tag-components/description.json",
+	"e66bfebec04c854c": "plugins/rcp-fe-lol-club-tag-components/euw/default/index.html",
+	"2b453781ec71d126": "plugins/rcp-fe-lol-club-tag-components/euw/default/input.js",
+	"c7a0902d862399ae": "plugins/rcp-fe-lol-club-tag-components/euw/en_gb/index.html",
+	"ef181a3c3c01fd7d": "plugins/rcp-fe-lol-club-tag-components/euw/en_gb/input.js",
 	"898435eaa9c4eb87": "plugins/rcp-fe-lol-club-tag-components/global/default/css/main.css",
 	"d6fb61493a60aa96": "plugins/rcp-fe-lol-club-tag-components/global/default/description.json",
 	"72a8ec4437cfeb8b": "plugins/rcp-fe-lol-club-tag-components/global/default/index.html",
+	"a6f73515394b1f65": "plugins/rcp-fe-lol-club-tag-components/global/default/index.html",
 	"ae5f508b6720b28f": "plugins/rcp-fe-lol-club-tag-components/global/default/input.js",
+	"4ebad75e976380a7": "plugins/rcp-fe-lol-club-tag-components/global/default/input.js",
 	"7aacce9a86d787ad": "plugins/rcp-fe-lol-club-tag-components/global/default/license.json",
-	"431aaad4a802010f": "plugins/rcp-fe-lol-club-tag-components/global/default/trans.json"
+	"431aaad4a802010f": "plugins/rcp-fe-lol-club-tag-components/global/default/trans.json",
+	"549019dd38fa965f": "plugins/rcp-fe-lol-club-tag-components/global/en_gb/index.html",
+	"477204646336789f": "plugins/rcp-fe-lol-club-tag-components/global/en_gb/input.js",
+	"8b5b9bab6cadae5f": "plugins/rcp-fe-lol-club-tag-components/global/en_us/trans.json"
 }

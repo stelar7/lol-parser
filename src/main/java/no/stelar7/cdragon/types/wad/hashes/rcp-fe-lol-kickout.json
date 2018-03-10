@@ -1,7 +1,15 @@
 {
 	"813c11e70be27dae": "plugins/rcp-fe-lol-kickout/description.json",
+	"ca6069d14c9d07d2": "plugins/rcp-fe-lol-kickout/euw/default/index.html",
+	"2c884f7c19dc0ea1": "plugins/rcp-fe-lol-kickout/euw/default/init.js",
+	"8233956727e8e64a": "plugins/rcp-fe-lol-kickout/euw/en_gb/index.html",
+	"756ee5d76bf9b39f": "plugins/rcp-fe-lol-kickout/euw/en_gb/init.js",
 	"55cc21c475254654": "plugins/rcp-fe-lol-kickout/global/default/description.json",
 	"fb9700d9d50dd6cc": "plugins/rcp-fe-lol-kickout/global/default/index.html",
+	"b2778de2ed3e39ff": "plugins/rcp-fe-lol-kickout/global/default/index.html",
 	"9f4c2c72bfc2d167": "plugins/rcp-fe-lol-kickout/global/default/init.js",
-	"9fa71f79a56bbde6": "plugins/rcp-fe-lol-kickout/global/default/license.json"
+	"1b0357aedae40b68": "plugins/rcp-fe-lol-kickout/global/default/init.js",
+	"9fa71f79a56bbde6": "plugins/rcp-fe-lol-kickout/global/default/license.json",
+	"84ceb14fcf0c3201": "plugins/rcp-fe-lol-kickout/global/en_gb/index.html",
+	"aff5f02d2af4c3b6": "plugins/rcp-fe-lol-kickout/global/en_gb/init.js"
 }
