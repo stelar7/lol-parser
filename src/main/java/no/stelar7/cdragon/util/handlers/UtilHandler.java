@@ -111,7 +111,7 @@ public final class UtilHandler
     
     public static int getMaxVersion(String url, String file, int min)
     {
-        int i         = min;
+        int i         = min - 1;
         int failCount = 0;
         int lastGood  = -1;
         
