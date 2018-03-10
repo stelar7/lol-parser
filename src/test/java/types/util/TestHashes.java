@@ -1174,6 +1174,7 @@ public class TestHashes
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
         
+        Files.deleteIfExists(loadPath);
         Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
         
         testUnsplit();
