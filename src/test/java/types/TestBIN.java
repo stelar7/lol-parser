@@ -1,5 +1,6 @@
 package types;
 
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
@@ -237,4 +238,65 @@ public class TestBIN
             }
         }
     }
+    
+    @Test
+    public void testBinForARType() throws IOException
+    {
+        Path folder = UtilHandler.DOWNLOADS_FOLDER.resolve("binfiles");
+        
+        Map<String, List<String>> typeMap = new HashMap<>();
+        
+        Files.walkFileTree(folder, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                JsonObject elem = UtilHandler.getJsonParser().parse(UtilHandler.readAsString(file)).getAsJsonObject();
+                
+                if (!elem.has("CharacterRecord"))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                
+                JsonArray recFull = elem.getAsJsonArray("CharacterRecord");
+                for (JsonElement reco : recFull)
+                {
+                    JsonObject rec  = reco.getAsJsonObject();
+                    JsonObject unki = rec.getAsJsonObject(rec.keySet().toArray(new String[rec.keySet().size()])[0]);
+                    
+                    if (!unki.has("PrimaryAbilityResource"))
+                    {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    
+                    JsonObject  par          = unki.getAsJsonObject("PrimaryAbilityResource");
+                    JsonObject  unk          = par.getAsJsonObject(par.keySet().toArray(new String[par.keySet().size()])[0]);
+                    JsonElement keyContainer = unk.get("arType");
+                    
+                    String key;
+                    
+                    if (keyContainer == null)
+                    {
+                        key = "null";
+                    } else
+                    {
+                        key = keyContainer.getAsString();
+                    }
+                    
+                    
+                    String val = unki.get("mCharacterName").getAsString();
+                    
+                    List<String> values = typeMap.getOrDefault(key, new ArrayList<>());
+                    values.add(val);
+                    typeMap.put(key, values);
+                    
+                }
+                
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+        System.out.println(UtilHandler.getGson().toJson(typeMap));
+    }
+    
 }

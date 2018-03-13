@@ -92,7 +92,7 @@ public class TestHashes
                                                       );
     
     
-    private final Path outerFolder = Paths.get("tmp_hashes");
+    private final Path tmp_hashes = Paths.get("tmp_hashes");
     
     private final List<String> filenames = Arrays.asList(
             "v1/champion-summary.json",
@@ -144,7 +144,7 @@ public class TestHashes
     
     private void runDirectory(Path dir) throws IOException
     {
-        Path innerFolder = outerFolder.resolve(dir.getFileName());
+        Path innerFolder = tmp_hashes.resolve(dir.getFileName());
         currentInnerFolder = innerFolder;
         hashes = getUnknownHashes(dir);
         
@@ -385,14 +385,14 @@ public class TestHashes
     {
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
-        if (!Files.exists(outerFolder))
+        if (!Files.exists(tmp_hashes))
         {
             return;
         }
         
         System.out.println("Combining hashes");
         
-        Files.walkFileTree(outerFolder, new SimpleFileVisitor<>()
+        Files.walkFileTree(tmp_hashes, new SimpleFileVisitor<>()
         {
             
             @Override
@@ -440,6 +440,28 @@ public class TestHashes
         {
             e.printStackTrace();
         }
+        
+        
+        Files.walkFileTree(tmp_hashes, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+            
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
+            {
+                if (exc != null)
+                {
+                    throw exc;
+                }
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
     
     private List<String> parseHextechFile()
@@ -463,7 +485,7 @@ public class TestHashes
             }
         }
         
-        Path possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\8e45023d7d142cbf.json");
+        Path possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\plugins\\rcp-fe-lol-loot\\global\\default\\trans.json");
         Map<String, String> data = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>()
         {
         }.getType());
@@ -1040,29 +1062,7 @@ public class TestHashes
     @Test
     public void testAllHashes() throws IOException
     {
-        Files.walkFileTree(Paths.get(System.getProperty("user.home"), "Downloads"), new SimpleFileVisitor<>()
-        {
-            
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
-            {
-                if (dir.equals(Paths.get(System.getProperty("user.home"), "Downloads")))
-                {
-                    return FileVisitResult.CONTINUE;
-                }
-                
-                if (dir.toAbsolutePath().toString().contains("lol-loot"))
-                {
-                    return FileVisitResult.SKIP_SUBTREE;
-                }
-                
-                System.out.println(dir.toAbsolutePath().toString());
-                runDirectory(dir);
-                
-                return FileVisitResult.SKIP_SUBTREE;
-            }
-        });
-        
+        runDirectory(UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data"));
         combineAndDeleteNestedTemp();
         testUnsplit();
     }
@@ -1106,8 +1106,14 @@ public class TestHashes
     @Test
     public void testUnsplit() throws IOException
     {
-        Path         loadPath = Paths.get("combined.json");
-        List<String> lines    = Files.readAllLines(loadPath).stream().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
+        Path loadPath = Paths.get("combined.json");
+        
+        if (!Files.exists(loadPath))
+        {
+            return;
+        }
+        
+        List<String> lines = Files.readAllLines(loadPath).stream().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
         
         Set<String> changedPlugins = new HashSet<>();
         for (String u : lines)
