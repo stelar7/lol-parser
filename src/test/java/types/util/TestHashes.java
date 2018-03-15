@@ -1097,6 +1097,7 @@ public class TestHashes
         final Map<String, String> knownHashes = loadAllHashes();
         
         List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.5.unknown.txt");
+        System.out.println("Checking if I have hashes that cdragon needs...");
         for (String key : unknown)
         {
             if (knownHashes.containsKey(key))
@@ -1113,7 +1114,7 @@ public class TestHashes
         final Map<String, String> knownHashes = loadAllHashes();
         
         List<String> unknown = UtilHandler.readWeb("https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.txt");
-        
+        System.out.println("Checking if cdragon has hashes that I'm missing...");
         for (String line : unknown)
         {
             String[] parts = line.split(" ");
