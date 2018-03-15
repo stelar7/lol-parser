@@ -473,16 +473,13 @@ public class TestHashes
         String    pluginName  = "rcp-fe-lol-loot";
         Path      extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
         
-        if (!Files.exists(extractPath.resolve(pluginName)))
+        try
         {
-            try
-            {
-                WADFile parsed = parser.parseLatest(pluginName, extractPath, false);
-                parsed.extractFiles(pluginName, null, extractPath);
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-            }
+            WADFile parsed = parser.parseLatest(pluginName, extractPath, false);
+            parsed.extractFiles(pluginName, null, extractPath);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
         }
         
         Path possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\plugins\\rcp-fe-lol-loot\\global\\default\\trans.json");

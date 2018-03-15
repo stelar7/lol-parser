@@ -126,6 +126,7 @@ public final class UtilHandler
             } else
             {
                 lastGood = i;
+                failCount = 0;
                 System.out.println("Found good version: " + lastGood);
             }
         }
