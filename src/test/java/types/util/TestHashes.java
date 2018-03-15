@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.*;
 
 @SuppressWarnings("unchecked")
@@ -161,6 +162,7 @@ public class TestHashes
         StringBuilder filenameBuilder = new StringBuilder("{\n");
         StringBuilder hextechBuilder  = new StringBuilder("{\n");
         StringBuilder lootBuilder     = new StringBuilder("{\n");
+        StringBuilder clashBuilder    = new StringBuilder("{\n");
         List<String>  hextechValues   = parseHextechFile();
         
         for (String reg : preRegion)
@@ -194,6 +196,10 @@ public class TestHashes
                 System.out.println("Parsing icons");
                 parseIcons(file);
                 
+                System.out.println("Parsing clash voices");
+                parseClash(pre, clashBuilder);
+                
+                
                 for (final String exten : exts)
                 {
                     folderData.forEach((folderName, depths) -> generateHashList(pre, folderName, depths, exten));
@@ -204,6 +210,7 @@ public class TestHashes
         finalizeFileReading("files.json", filenameBuilder);
         finalizeFileReading("hextech.json", hextechBuilder);
         finalizeFileReading("hexloot.json", lootBuilder);
+        finalizeFileReading("clash.json", clashBuilder);
         
         
         folderData.put("perkstyles", new Integer[]{1});
@@ -229,6 +236,19 @@ public class TestHashes
         System.out.println("Merging files");
         
         combineAndDeleteTemp();
+    }
+    
+    private void parseClash(String pre, StringBuilder sb)
+    {
+        Path                loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\unknown\\9d3e847588265a68.json");
+        Map<String, String> data     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(loadPath), new TypeToken<Map<String, String>>() {}.getType());
+        
+        for (Entry<String, String> en : data.entrySet())
+        {
+            String line = en.getValue();
+            String wip  = line.substring(line.lastIndexOf("content"));
+            hashAndAddToSB(sb, pre + wip);
+        }
     }
     
     private void parseIcons(Path file)
@@ -991,23 +1011,30 @@ public class TestHashes
     
     private void hashAndAddToSB(StringBuilder sb, String hashMe)
     {
-        String hash      = HashHandler.computeXXHash64(hashMe.trim());
-        String knownHash = HashHandler.getWadHashes("rcp-be-lol-game-data").get(hash);
+        String[] cases = new String[]{
+                hashMe.trim(), hashMe.toLowerCase(Locale.ENGLISH).trim()
+        };
         
-        if (knownHash != null)
+        for (String hVal : cases)
         {
-            return;
-        }
-        
-        if (hashes.contains(hash))
-        {
-            if (sb.toString().contains(hash))
+            String hash      = HashHandler.computeXXHash64(hVal);
+            String knownHash = HashHandler.getWadHashes("rcp-be-lol-game-data").get(hash);
+            
+            if (knownHash != null)
             {
-                return;
+                continue;
             }
             
-            sb.append("\t\"").append(hash).append("\": \"").append(hashMe).append("\",\n");
-            hashes.remove(hash);
+            if (hashes.contains(hash))
+            {
+                if (sb.toString().contains(hash))
+                {
+                    continue;
+                }
+                
+                sb.append("\t\"").append(hash).append("\": \"").append(hVal).append("\",\n");
+                hashes.remove(hash);
+            }
         }
     }
     
