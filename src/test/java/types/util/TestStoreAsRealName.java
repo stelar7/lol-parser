@@ -23,27 +23,27 @@ import java.util.zip.GZIPOutputStream;
 public class TestStoreAsRealName
 {
     
-    private final List<String> exts   = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
-    private final String       pre    = "plugins/rcp-be-lol-game-data/global/default/";
-    private final Path         folder = Paths.get("tmp_gzip");
+    private final List<String> img_exts   = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
+    private final String       img_pre    = "plugins/rcp-be-lol-game-data/global/default/";
+    private final Path         img_folder = Paths.get("tmp_gzip");
     
     
-    final int skinMax     = 50;
-    final int championMax = 700;
-    final int iconMax     = 2000;
+    final int img_skinMax     = 50;
+    final int img_championMax = 700;
+    final int img_iconMax     = 2000;
     
-    private final Map<String, Integer> folderData = new HashMap<>()
+    private final Map<String, Integer> img_folderData = new HashMap<>()
     {{
-        put("champion-sfx-audios", championMax);
-        put("champion-icons", championMax);
-        put("champion-choose-vo", championMax);
-        put("champion-ban-vo", championMax);
-        put("summoner-backdrops", iconMax);
+        put("champion-sfx-audios", img_championMax);
+        put("champion-icons", img_championMax);
+        put("champion-choose-vo", img_championMax);
+        put("champion-ban-vo", img_championMax);
+        put("summoner-backdrops", img_iconMax);
     }};
     
-    private final Map<String, Integer[]> folderData2 = new HashMap<>()
+    private final Map<String, Integer[]> img_folderData2 = new HashMap<>()
     {{
-        put("champion-tiles", new Integer[]{championMax, skinMax});
+        put("champion-tiles", new Integer[]{img_championMax, img_skinMax});
     }};
     
     @Test
@@ -52,48 +52,48 @@ public class TestStoreAsRealName
         Path file  = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/");
         Path file2 = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
-        if (!Files.exists(folder))
+        if (!Files.exists(img_folder))
         {
-            Files.createDirectories(folder);
+            Files.createDirectories(img_folder);
         }
         
         
         System.out.println("Parsing icon files");
-        findIconPathInJsonArrayFile(file, "perkstyles.json");
-        findIconPathInJsonArrayFile(file, "perks.json");
-        findIconPathInJsonArrayFile(file, "items.json");
-        findIconPathInJsonArrayFile(file, "summoner-spells.json");
-        findIconPathInJsonArrayFile(file, "profile-icons.json");
-        
-        parseWardSkins(file, "ward-skins.json");
-        parseMasteries(file, "summoner-masteries.json");
-        parseEmotes(file, "summoner-emotes.json");
-        parseBanners(file, "summoner-banners.json");
-        parseMapAssets(file, "map-assets/map-assets.json");
+        img_findIconPathInJsonArrayFile(file, "perkstyles.json");
+        img_findIconPathInJsonArrayFile(file, "perks.json");
+        img_findIconPathInJsonArrayFile(file, "items.json");
+        img_findIconPathInJsonArrayFile(file, "summoner-spells.json");
+        img_findIconPathInJsonArrayFile(file, "profile-icons.json");
+    
+        img_parseWardSkins(file, "ward-skins.json");
+        img_parseMasteries(file, "summoner-masteries.json");
+        img_parseEmotes(file, "summoner-emotes.json");
+        img_parseBanners(file, "summoner-banners.json");
+        img_parseMapAssets(file, "map-assets/map-assets.json");
         
         System.out.println("Parsing champion files");
-        for (int i = -1; i < championMax; i++)
+        for (int i = -1; i < img_championMax; i++)
         {
-            findInChampionFile(file2, i + ".json");
+            img_findInChampionFile(file2, i + ".json");
         }
         
         System.out.println("Parsing data from unknown files");
-        for (String ext : exts)
+        for (String ext : img_exts)
         {
-            folderData.forEach((k, v) -> generateHashList(k, v, ext));
-            folderData2.forEach((k, v) -> generateHashListNested(k, v, ext));
+            img_folderData.forEach((k, v) -> img_generateHashList(k, v, ext));
+            img_folderData2.forEach((k, v) -> img_generateHashListNested(k, v, ext));
         }
-        
-        combineAndDeleteTemp();
+    
+        img_combineAndDeleteTemp();
         
         System.out.println("Copying files");
-        copyFilesToFolders();
+        img_copyFilesToFolders();
         
         System.out.println("Creating zip");
-        createTARGZ();
+        img_createTARGZ();
     }
     
-    private void createTARGZ() throws IOException
+    private void img_createTARGZ() throws IOException
     {
         Path base         = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
         Path outputFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
@@ -112,16 +112,16 @@ public class TestStoreAsRealName
                 {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
-                
-                
-                compressFiles(Files.list(dir).collect(Collectors.toList()), outputFolder.resolve(dir.getFileName() + ".tar.gz"));
+    
+    
+                img_compressFiles(Files.list(dir).collect(Collectors.toList()), outputFolder.resolve(dir.getFileName() + ".tar.gz"));
                 
                 return FileVisitResult.SKIP_SUBTREE;
             }
         });
     }
     
-    private void compressFiles(List<Path> files, Path output)
+    private void img_compressFiles(List<Path> files, Path output)
     {
         try (FileOutputStream fos = new FileOutputStream(output.toFile());
              BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -133,7 +133,7 @@ public class TestStoreAsRealName
             
             for (Path file : files)
             {
-                addToTar(tos, file, ".");
+                img_addToTar(tos, file, ".");
             }
             
         } catch (IOException e)
@@ -142,7 +142,7 @@ public class TestStoreAsRealName
         }
     }
     
-    private void addToTar(TarArchiveOutputStream tos, Path file, String dir) throws IOException
+    private void img_addToTar(TarArchiveOutputStream tos, Path file, String dir) throws IOException
     {
         tos.putArchiveEntry(new TarArchiveEntry(file.toFile(), dir + "/" + file.getFileName().toString()));
         if (Files.isDirectory(file))
@@ -150,7 +150,7 @@ public class TestStoreAsRealName
             tos.closeArchiveEntry();
             for (Path child : Files.list(file).collect(Collectors.toList()))
             {
-                addToTar(tos, child, dir + "/" + file.getFileName().toString());
+                img_addToTar(tos, child, dir + "/" + file.getFileName().toString());
             }
         } else
         {
@@ -166,7 +166,7 @@ public class TestStoreAsRealName
         }
     }
     
-    private void copyFilesToFolders()
+    private void img_copyFilesToFolders()
     {
         Path                inputFile = Paths.get("filenames.json");
         Map<String, String> files     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
@@ -209,7 +209,7 @@ public class TestStoreAsRealName
         
     }
     
-    private List<String> parseHextechFile()
+    private List<String> img_parseHextechFile()
     {
         
         // check the lol-loot plugin for more... (4c0ce4a49dbc214c)
@@ -228,10 +228,10 @@ public class TestStoreAsRealName
         
         Path                possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
         Map<String, String> data         = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
-        return transmute(data.keySet());
+        return img_transmute(data.keySet());
     }
     
-    private List<String> transmute(Set<String> strings)
+    private List<String> img_transmute(Set<String> strings)
     {
         List<String> all = new ArrayList<>();
         for (String key : strings)
@@ -258,9 +258,9 @@ public class TestStoreAsRealName
         return all;
     }
     
-    private void extractData(StringBuilder data, JsonObject extMe, String path, String outFormat)
+    private void img_extractData(StringBuilder data, JsonObject extMe, String path, String outFormat)
     {
-        String[] elemen = getElement(extMe, path);
+        String[] elemen = img_getElement(extMe, path);
         if (elemen == null)
         {
             return;
@@ -268,10 +268,10 @@ public class TestStoreAsRealName
         
         String preHash  = elemen[0];
         String postHash = String.format(outFormat, path, elemen[1]);
-        addToSB(data, preHash, postHash);
+        img_addToSB(data, preHash, postHash);
     }
     
-    private void parseMapAssets(Path filepath, String filename)
+    private void img_parseMapAssets(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -298,44 +298,44 @@ public class TestStoreAsRealName
                 }
                 
                 String outFormat = "map-assets/" + key + "/" + mode + "/%s%s";
-                
-                extractData(data, assets, "champ-select-flyout-background", outFormat);
-                extractData(data, assets, "champ-select-planning-intro", outFormat);
-                extractData(data, assets, "game-select-icon-default", outFormat);
-                extractData(data, assets, "game-select-icon-disabled", outFormat);
-                extractData(data, assets, "game-select-icon-hover", outFormat);
-                extractData(data, assets, "icon-defeat", outFormat);
-                extractData(data, assets, "icon-empty", outFormat);
-                extractData(data, assets, "icon-hover", outFormat);
-                extractData(data, assets, "icon-leaver", outFormat);
-                extractData(data, assets, "icon-victory", outFormat);
-                extractData(data, assets, "parties-background", outFormat);
-                extractData(data, assets, "social-icon-leaver", outFormat);
-                extractData(data, assets, "social-icon-victory", outFormat);
-                extractData(data, assets, "game-select-icon-active", outFormat);
-                extractData(data, assets, "ready-check-background", outFormat);
-                extractData(data, assets, "map-north", outFormat);
-                extractData(data, assets, "map-south", outFormat);
-                extractData(data, assets, "gameflow-background", outFormat);
-                extractData(data, assets, "notification-background", outFormat);
-                extractData(data, assets, "notification-icon", outFormat);
-                extractData(data, assets, "champ-select-background-sound", outFormat);
-                extractData(data, assets, "gameselect-button-hover-sound", outFormat);
-                extractData(data, assets, "music-inqueue-loop-sound", outFormat);
-                extractData(data, assets, "postgame-ambience-loop-sound", outFormat);
-                extractData(data, assets, "sfx-ambience-pregame-loop-sound", outFormat);
-                extractData(data, assets, "ready-check-background-sound", outFormat);
-                extractData(data, assets, "game-select-icon-active-video", outFormat);
-                extractData(data, assets, "game-select-icon-intro-video", outFormat);
-                extractData(data, assets, "icon-defeat-video", outFormat);
-                extractData(data, assets, "icon-victory-video", outFormat);
+    
+                img_extractData(data, assets, "champ-select-flyout-background", outFormat);
+                img_extractData(data, assets, "champ-select-planning-intro", outFormat);
+                img_extractData(data, assets, "game-select-icon-default", outFormat);
+                img_extractData(data, assets, "game-select-icon-disabled", outFormat);
+                img_extractData(data, assets, "game-select-icon-hover", outFormat);
+                img_extractData(data, assets, "icon-defeat", outFormat);
+                img_extractData(data, assets, "icon-empty", outFormat);
+                img_extractData(data, assets, "icon-hover", outFormat);
+                img_extractData(data, assets, "icon-leaver", outFormat);
+                img_extractData(data, assets, "icon-victory", outFormat);
+                img_extractData(data, assets, "parties-background", outFormat);
+                img_extractData(data, assets, "social-icon-leaver", outFormat);
+                img_extractData(data, assets, "social-icon-victory", outFormat);
+                img_extractData(data, assets, "game-select-icon-active", outFormat);
+                img_extractData(data, assets, "ready-check-background", outFormat);
+                img_extractData(data, assets, "map-north", outFormat);
+                img_extractData(data, assets, "map-south", outFormat);
+                img_extractData(data, assets, "gameflow-background", outFormat);
+                img_extractData(data, assets, "notification-background", outFormat);
+                img_extractData(data, assets, "notification-icon", outFormat);
+                img_extractData(data, assets, "champ-select-background-sound", outFormat);
+                img_extractData(data, assets, "gameselect-button-hover-sound", outFormat);
+                img_extractData(data, assets, "music-inqueue-loop-sound", outFormat);
+                img_extractData(data, assets, "postgame-ambience-loop-sound", outFormat);
+                img_extractData(data, assets, "sfx-ambience-pregame-loop-sound", outFormat);
+                img_extractData(data, assets, "ready-check-background-sound", outFormat);
+                img_extractData(data, assets, "game-select-icon-active-video", outFormat);
+                img_extractData(data, assets, "game-select-icon-intro-video", outFormat);
+                img_extractData(data, assets, "icon-defeat-video", outFormat);
+                img_extractData(data, assets, "icon-victory-video", outFormat);
             }
         }
-        
-        finalizeFileReading("map-assets.json", data);
+    
+        img_finalizeFileReading("map-assets.json", data);
     }
     
-    private void parseBanners(Path filepath, String filename)
+    private void img_parseBanners(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -352,13 +352,13 @@ public class TestStoreAsRealName
             JsonObject el = element.getAsJsonObject();
             int        id = el.get("level").getAsInt();
             
-            String preHash  = getElement(el, "inventoryIcon")[0];
+            String preHash  = img_getElement(el, "inventoryIcon")[0];
             String postHash = "banners/inventory/" + id + ".png";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
-            String preHash2  = getElement(el, "profileIcon")[0];
+            String preHash2  = img_getElement(el, "profileIcon")[0];
             String postHash2 = "banners/profile/" + id + ".png";
-            addToSB(data, preHash2, postHash2);
+            img_addToSB(data, preHash2, postHash2);
         }
         
         JsonArray bframes = elem.getAsJsonArray("BannerFrames");
@@ -367,21 +367,21 @@ public class TestStoreAsRealName
             JsonObject el = element.getAsJsonObject();
             int        id = el.get("level").getAsInt();
             
-            String preHash  = getElement(el, "inventoryIcon")[0];
+            String preHash  = img_getElement(el, "inventoryIcon")[0];
             String postHash = "banners/frames/inventory/" + id + ".png";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
             if (el.has("profileIcon"))
             {
-                String preHash2  = getElement(el, "profileIcon")[0];
+                String preHash2  = img_getElement(el, "profileIcon")[0];
                 String postHash2 = "banners/frames/profile/" + id + ".png";
-                addToSB(data, preHash2, postHash2);
+                img_addToSB(data, preHash2, postHash2);
             }
         }
-        finalizeFileReading(filename, data);
+        img_finalizeFileReading(filename, data);
     }
     
-    private void finalizeFileReading(String filename, StringBuilder data)
+    private void img_finalizeFileReading(String filename, StringBuilder data)
     {
         try
         {
@@ -391,12 +391,12 @@ public class TestStoreAsRealName
                 return;
             }
             
-            if (!Files.exists(folder))
+            if (!Files.exists(img_folder))
             {
-                Files.createDirectories(folder);
+                Files.createDirectories(img_folder);
             }
             
-            Files.write(folder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
+            Files.write(img_folder.resolve(filename), data.toString().getBytes(StandardCharsets.UTF_8));
             
         } catch (IOException e)
         {
@@ -404,7 +404,7 @@ public class TestStoreAsRealName
         }
     }
     
-    private void parseEmotes(Path filepath, String filename)
+    private void img_parseEmotes(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -425,15 +425,15 @@ public class TestStoreAsRealName
                 continue;
             }
             
-            String preHash  = getElement(el, "inventoryIcon")[0];
+            String preHash  = img_getElement(el, "inventoryIcon")[0];
             String postHash = "emotes/" + id + ".png";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
         }
-        
-        finalizeFileReading(filename, data);
+    
+        img_finalizeFileReading(filename, data);
     }
     
-    private void parseMasteries(Path filepath, String filename)
+    private void img_parseMasteries(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -447,12 +447,12 @@ public class TestStoreAsRealName
         for (String key : elem.keySet())
         {
             JsonObject el = elem.getAsJsonObject(key);
-            getElement(el, "iconPath");
+            img_getElement(el, "iconPath");
         }
-        finalizeFileReading(filename, data);
+        img_finalizeFileReading(filename, data);
     }
     
-    private String[] getElement(JsonObject el, String path)
+    private String[] img_getElement(JsonObject el, String path)
     {
         if (!el.has(path))
         {
@@ -476,7 +476,7 @@ public class TestStoreAsRealName
         {
             System.err.println("WTF??");
             System.err.println(wip);
-            System.err.println(pre + wip);
+            System.err.println(img_pre + wip);
         }
         
         if (wip.lastIndexOf('.') < 0)
@@ -484,10 +484,10 @@ public class TestStoreAsRealName
             return null;
         }
         
-        return new String[]{pre + wip, wip.substring(wip.lastIndexOf('.'))};
+        return new String[]{img_pre + wip, wip.substring(wip.lastIndexOf('.'))};
     }
     
-    private void parseWardSkins(Path filepath, String filename)
+    private void img_parseWardSkins(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -503,19 +503,19 @@ public class TestStoreAsRealName
             JsonObject el = element.getAsJsonObject();
             int        id = el.get("id").getAsInt();
             
-            String preHash  = getElement(el, "wardImagePath")[0];
+            String preHash  = img_getElement(el, "wardImagePath")[0];
             String postHash = "wards/" + id + ".png";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
-            String preHash2  = getElement(el, "wardShadowImagePath")[0];
+            String preHash2  = img_getElement(el, "wardShadowImagePath")[0];
             String postHash2 = "wards/shadow/" + id + ".png";
-            addToSB(data, preHash2, postHash2);
+            img_addToSB(data, preHash2, postHash2);
             
         }
-        finalizeFileReading(filename, data);
+        img_finalizeFileReading(filename, data);
     }
     
-    private void findInChampionFile(Path filepath, String filename)
+    private void img_findInChampionFile(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -532,7 +532,7 @@ public class TestStoreAsRealName
         
         if (!passive.isEmpty())
         {
-            String[] elemen = getElement(elem.getAsJsonObject("passive"), "abilityIconPath");
+            String[] elemen = img_getElement(elem.getAsJsonObject("passive"), "abilityIconPath");
             if (elemen == null)
             {
                 return;
@@ -540,7 +540,7 @@ public class TestStoreAsRealName
             
             String preHash  = elemen[0];
             String postHash = "abilities/" + id + "/passive.png";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
         }
         
         JsonArray arr = elem.getAsJsonArray("spells");
@@ -549,7 +549,7 @@ public class TestStoreAsRealName
         {
             JsonObject current = element.getAsJsonObject();
             String     key     = current.get("spellKey").getAsString();
-            String[]   elemen  = getElement(current, "abilityIconPath");
+            String[]   elemen  = img_getElement(current, "abilityIconPath");
             if (elemen == null)
             {
                 return;
@@ -557,7 +557,7 @@ public class TestStoreAsRealName
             
             String preHash  = elemen[0];
             String postHash = "abilities/" + id + "/" + key + ".png ";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
         }
         
         
@@ -568,7 +568,7 @@ public class TestStoreAsRealName
             JsonObject ob   = element.getAsJsonObject();
             int        skin = Integer.parseInt(ob.get("id").getAsString().substring(String.valueOf(id).length()));
             
-            String[] elemen = getElement(ob, "splashPath");
+            String[] elemen = img_getElement(ob, "splashPath");
             if (elemen == null)
             {
                 return;
@@ -576,9 +576,9 @@ public class TestStoreAsRealName
             
             String preHash  = elemen[0];
             String postHash = "splash-art/" + id + "/" + skin + ".png ";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
-            elemen = getElement(ob, "uncenteredSplashPath");
+            elemen = img_getElement(ob, "uncenteredSplashPath");
             if (elemen == null)
             {
                 return;
@@ -586,9 +586,9 @@ public class TestStoreAsRealName
             
             preHash = elemen[0];
             postHash = "uncentered-splash-art/" + id + "/" + skin + ".png ";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
-            elemen = getElement(ob, "tilePath");
+            elemen = img_getElement(ob, "tilePath");
             if (elemen == null)
             {
                 return;
@@ -596,9 +596,9 @@ public class TestStoreAsRealName
             
             preHash = elemen[0];
             postHash = "tile/" + id + "/" + skin + ".png ";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
-            elemen = getElement(ob, "loadScreenPath");
+            elemen = img_getElement(ob, "loadScreenPath");
             if (elemen == null)
             {
                 return;
@@ -606,12 +606,12 @@ public class TestStoreAsRealName
             
             preHash = elemen[0];
             postHash = "loading-screen/" + id + "/" + skin + ".png ";
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
             
             
             if (ob.has("chromas"))
             {
-                elemen = getElement(ob, "chromaPath");
+                elemen = img_getElement(ob, "chromaPath");
                 if (elemen == null)
                 {
                     return;
@@ -619,14 +619,14 @@ public class TestStoreAsRealName
                 
                 preHash = elemen[0];
                 postHash = "chroma/" + id + "/" + skin + ".png ";
-                addToSB(data, preHash, postHash);
+                img_addToSB(data, preHash, postHash);
                 
                 JsonArray chrom = ob.getAsJsonArray("chromas");
                 for (JsonElement ch : chrom)
                 {
                     skin = Integer.parseInt(ch.getAsJsonObject().get("id").getAsString().substring(String.valueOf(id).length()));
                     
-                    elemen = getElement(ch.getAsJsonObject(), "chromaPath");
+                    elemen = img_getElement(ch.getAsJsonObject(), "chromaPath");
                     if (elemen == null)
                     {
                         return;
@@ -634,15 +634,15 @@ public class TestStoreAsRealName
                     
                     preHash = elemen[0];
                     postHash = "chroma/" + id + "/" + skin + ".png ";
-                    addToSB(data, preHash, postHash);
+                    img_addToSB(data, preHash, postHash);
                 }
             }
         }
-        
-        finalizeFileReading(filename, data);
+    
+        img_finalizeFileReading(filename, data);
     }
     
-    private void findIconPathInJsonArrayFile(Path filepath, String filename)
+    private void img_findIconPathInJsonArrayFile(Path filepath, String filename)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -658,7 +658,7 @@ public class TestStoreAsRealName
         for (JsonElement element : arr)
         {
             JsonObject ob     = element.getAsJsonObject();
-            String[]   elemen = getElement(ob, "iconPath");
+            String[]   elemen = img_getElement(ob, "iconPath");
             if (elemen == null)
             {
                 return;
@@ -666,29 +666,29 @@ public class TestStoreAsRealName
             
             String preHash  = elemen[0];
             String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
-            addToSB(data, preHash, postHash);
+            img_addToSB(data, preHash, postHash);
         }
-        
-        finalizeFileReading(filename, data);
+    
+        img_finalizeFileReading(filename, data);
     }
     
-    private void generateHashList(String folderName, Integer depths, String fileType)
+    private void img_generateHashList(String folderName, Integer depths, String fileType)
     {
-        String pathPrefix = pre + "v1/" + folderName + "/";
+        String pathPrefix = img_pre + "v1/" + folderName + "/";
         
         StringBuilder sb = new StringBuilder("{\n");
         for (int i = -1; i < depths; i++)
         {
             String value  = String.format(pathPrefix + "%s." + fileType, i);
             String pretty = String.format(folderName + "/%s." + fileType, i);
-            addToSB(sb, value, pretty);
+            img_addToSB(sb, value, pretty);
         }
-        finalizeFileReading(folderName + "." + fileType + ".json", sb);
+        img_finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
-    private void generateHashListNested(String folderName, Integer[] depths, String fileType)
+    private void img_generateHashListNested(String folderName, Integer[] depths, String fileType)
     {
-        String        pathPrefix = pre + "v1/" + folderName + "/";
+        String        pathPrefix = img_pre + "v1/" + folderName + "/";
         StringBuilder sb         = new StringBuilder("{\n");
         String        format     = pathPrefix + "%1$s/%2$s%3$03d." + fileType;
         
@@ -701,16 +701,16 @@ public class TestStoreAsRealName
                 {
                     value = String.format(format, i, i, j);
                     String pretty = String.format(folderName + "/%1$s/%2$d." + fileType, i, j);
-                    addToSB(sb, value, pretty);
+                    img_addToSB(sb, value, pretty);
                 }
                 
             }
         }
-        
-        finalizeFileReading(folderName + "." + fileType + ".json", sb);
+    
+        img_finalizeFileReading(folderName + "." + fileType + ".json", sb);
     }
     
-    private void addToSB(StringBuilder sb, String hashMe, String realPath)
+    private void img_addToSB(StringBuilder sb, String hashMe, String realPath)
     {
         Path path = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/").resolve(hashMe.trim());
         if (Files.exists(path))
@@ -720,7 +720,7 @@ public class TestStoreAsRealName
     }
     
     
-    private void writeFile(Path file, String data)
+    private void img_writeFile(Path file, String data)
     {
         try
         {
@@ -731,11 +731,11 @@ public class TestStoreAsRealName
         }
     }
     
-    private void combineAndDeleteTemp() throws IOException
+    private void img_combineAndDeleteTemp() throws IOException
     {
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
         
-        Files.walkFileTree(folder, new SimpleFileVisitor<>()
+        Files.walkFileTree(img_folder, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException

@@ -84,6 +84,13 @@
             <version>1.15</version>
         </dependency>
 
+        <!-- used for uploading files to a webserver -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.6</version>
+        </dependency>
+
         <!-- used for decryption of the ROFL entries -->
         <dependency>
             <groupId>org.bouncycastle</groupId>

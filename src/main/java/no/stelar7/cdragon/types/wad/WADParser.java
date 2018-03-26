@@ -35,10 +35,14 @@ public class WADParser implements Parseable<WADFile>
         String cacheKey = "lastGoodVersion-" + pluginName;
         int    version  = UtilHandler.getPreferences().getInt(cacheKey, 397);
         
+        int use  = version;
         int next = UtilHandler.getMaxVersion(url, type, version);
-        int use  = (next > version) ? next : version;
-        
-        UtilHandler.getPreferences().putInt(cacheKey, use);
+        if (next > version)
+        {
+            deleteOld(path.resolve(String.format("%s-%s", pluginName, version)));
+            use = next;
+            UtilHandler.getPreferences().putInt(cacheKey, use);
+        }
         
         return handleAll(pluginName, String.format(url + "%s", "%s", type), UtilHandler.getIPFromLong(use), path);
     }

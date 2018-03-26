@@ -38,6 +38,11 @@ public final class UtilHandler
         return path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf('.'));
     }
     
+    public static String pathToFolderName(Path path)
+    {
+        return path.getFileName().toString();
+    }
+    
     public static BitSet longToBitSet(long value)
     {
         BitSet bits  = new BitSet();
