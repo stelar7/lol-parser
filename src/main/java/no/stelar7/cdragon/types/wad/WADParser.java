@@ -40,6 +40,7 @@ public class WADParser implements Parseable<WADFile>
         if (next > version)
         {
             deleteOld(path.resolve(String.format("%s-%s", pluginName, version)));
+            deleteOld(path.resolve(String.format("%s-%s", pluginName, version) + ".nocompress"));
             use = next;
             UtilHandler.getPreferences().putInt(cacheKey, use);
         }
@@ -85,7 +86,7 @@ public class WADParser implements Parseable<WADFile>
     {
         try
         {
-            System.out.println("Trying to delete compressed WAD");
+            System.out.println("Trying to delete file");
             Files.deleteIfExists(fileLocation);
         } catch (IOException e)
         {

@@ -32,7 +32,7 @@ public class TestAll
         deleteUnknownFolder();
         downloadWAD();
         extractImages();
-        uploadToFTP();
+      //  uploadToFTP();
     }
     
     private void deleteUnknownFolder() throws IOException
