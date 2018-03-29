@@ -32,7 +32,7 @@ public class TestAll
         deleteUnknownFolder();
         downloadWAD();
         extractImages();
-      //  uploadToFTP();
+        //  uploadToFTP();
     }
     
     private void deleteUnknownFolder() throws IOException
@@ -129,7 +129,7 @@ public class TestAll
     {
         Path innerFolder = tmp_hashes.resolve(dir.getFileName());
         currentInnerFolder = innerFolder;
-        hashes = getUnknownHashes(dir);
+        hashes = getUnknownHashes();
         
         if (hashes.isEmpty())
         {
@@ -884,6 +884,32 @@ public class TestAll
             {
                 JsonObject ob = element.getAsJsonObject();
                 
+                String id = ob.get("id").getAsString();
+                id = id.substring(3);
+                int    skinid = Integer.parseInt(id);
+                String alias  = elem.get("alias").getAsString();
+                
+                String loadScreen = "assets/characters/" + alias + "/skins/";
+                if (skinid > 0)
+                {
+                    loadScreen += "skin" + id + "/";
+                    hashAndAddToSB(data, loadScreen + alias + "loadscreen_" + skinid + ".dds");
+                    String basePathL = loadScreen + alias + "_" + "skin" + id;
+                    hashAndAddToSB(data, basePathL + ".skl");
+                    hashAndAddToSB(data, basePathL + ".skn");
+                    hashAndAddToSB(data, basePathL + "tx_cm.dds");
+                }
+                
+                String minimapCircle = "assets/characters/" + alias + "/hud/" + alias + "_circle";
+                if (skinid > 0)
+                {
+                    minimapCircle += "_" + skinid;
+                }
+                minimapCircle += ".dds";
+                
+                hashAndAddToSB(data, loadScreen);
+                hashAndAddToSB(data, minimapCircle);
+                
                 getElementAndCheckHash(ob, "splashPath", data);
                 getElementAndCheckHash(ob, "uncenteredSplashPath", data);
                 getElementAndCheckHash(ob, "tilePath", data);
@@ -1017,15 +1043,29 @@ public class TestAll
     }
     
     
-    private List<String> getUnknownHashes(Path dir)
+    private List<String> getUnknownHashes()
     {
+        List<String> unknowns = new ArrayList<>();
         try
         {
-            return Files.readAllLines(dir.resolve("unknown.json"));
+            Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("temp"), new SimpleFileVisitor<>()
+            {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+                {
+                    if (file.getFileName().toString().equals("unknown.json"))
+                    {
+                        unknowns.addAll(Files.readAllLines(file));
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+            
         } catch (IOException e)
         {
-            return Collections.emptyList();
+            e.printStackTrace();
         }
+        return unknowns;
     }
     
     

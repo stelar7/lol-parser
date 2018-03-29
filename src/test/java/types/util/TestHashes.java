@@ -1145,16 +1145,21 @@ public class TestHashes
         {
             String[] parts  = u.split("\": \"");
             String   first  = parts[0].replaceAll("[\"]", "").trim();
-            String   second = parts[1].replaceAll("[\",]", "").trim();
+            String[] second = {parts[1].replaceAll("[\",]", "").trim()};
             
-            String       pluginPre = second.substring("plugins/".length());
+            String       pluginPre = second[0].substring("plugins/".length());
             final String plugin    = pluginPre.substring(0, pluginPre.indexOf('/'));
+            
+            if (plugin.equalsIgnoreCase("champions"))
+            {
+                second[0] = second[0].substring("plugins/champions/".length());
+            }
             
             
             Map<String, String> hashes = HashHandler.getWadHashes(plugin);
             hashes.computeIfAbsent(first, (key) -> {
                 changedPlugins.add(plugin);
-                return second;
+                return second[0];
             });
         }
         
