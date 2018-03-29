@@ -104,6 +104,14 @@ public class WADFile
             data = FileTypeHandler.makePrettyJson(data);
         }
         
+        if (Files.exists(self))
+        {
+            if (Files.size(self) > data.length)
+            {
+                return;
+            }
+        }
+        
         if ("unknown".equals(parentName))
         {
             Files.write(savePath.resolve(unknownHashContainer), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
