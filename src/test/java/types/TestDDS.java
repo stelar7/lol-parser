@@ -20,26 +20,31 @@ public class TestDDS
         {
             DDSParser parser = new DDSParser();
             
-            Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("nid");
+            Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
             
             Files.walkFileTree(file, new SimpleFileVisitor<>()
             {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
                 {
-                    BufferedImage img;
+                    BufferedImage img = null;
                     if (file.toString().endsWith(".dds.compressed"))
                     {
                         img = parser.parseCompressed(file);
                     } else if (file.toString().endsWith(".dds"))
                     {
                         img = parser.parse(file);
-                    } else
+                    }
+                    
+                    if (img == null)
                     {
                         return FileVisitResult.CONTINUE;
                     }
                     
-                    ImageIO.write(img, "png", file.resolve("../png/" + UtilHandler.pathToFilename(file) + ".png").normalize().toFile());
+                    Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("png/" + UtilHandler.pathToFilename(file) + ".png");
+                    Files.createDirectories(output.getParent());
+                    
+                    ImageIO.write(img, "png", output.toFile());
                     return FileVisitResult.CONTINUE;
                 }
             });
