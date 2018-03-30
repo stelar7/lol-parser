@@ -380,6 +380,7 @@
 	"d17070de0ac06a43": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-notif-bad-invite.ogg",
 	"4ec802554a9a863e": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-notif-captain-granted.ogg",
 	"459361179aab92e3": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-notif-invite-granted.ogg",
+	"2eed0f0b919c9b2d": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-notif-playerkicked.ogg",
 	"7c526fff69367e5a": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-notif-revoke.ogg",
 	"a47aa851bd78f5aa": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-radialmenu-open.ogg",
 	"47584e24d974e906": "plugins/rcp-fe-lol-parties/global/default/sfx-lobby-radialmenu-position-hover.ogg",

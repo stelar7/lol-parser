@@ -46,6 +46,8 @@
 	"6f50ed640d0493fd": "plugins/rcp-fe-lol-premade-voice/global/default/init.js",
 	"8d7d3284d6431d11": "plugins/rcp-fe-lol-premade-voice/global/default/init.js",
 	"982942d1359efa92": "plugins/rcp-fe-lol-premade-voice/global/default/license.json",
+	"216915c30c5047a6": "plugins/rcp-fe-lol-premade-voice/global/default/sfx-voicechat-notif-join.ogg",
+	"5eb331b33cd8bfd9": "plugins/rcp-fe-lol-premade-voice/global/default/sfx-voicechat-notif-leave.ogg",
 	"e353ab2823dfa15b": "plugins/rcp-fe-lol-premade-voice/global/default/trans.json",
 	"4f130519846cdfca": "plugins/rcp-fe-lol-premade-voice/global/el_gr/trans.json",
 	"3b63af55a0fcb348": "plugins/rcp-fe-lol-premade-voice/global/en_au/trans.json",
