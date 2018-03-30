@@ -54,4 +54,13 @@ public class TestDDS
             e.printStackTrace();
         }
     }
+    
+    @Test
+    public void testSingle() throws IOException
+    {
+        DDSParser     parser = new DDSParser();
+        Path          file   = UtilHandler.DOWNLOADS_FOLDER.resolve("Baron_Minimap_Icon.DDS.compressed");
+        BufferedImage img    = parser.parseCompressed(file);
+        ImageIO.write(img, "png", file.resolveSibling("Baron_Minimap_Icon.png").toFile());
+    }
 }

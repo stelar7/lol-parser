@@ -143,7 +143,14 @@ public class LiveXXHashTest
         chooser.setCurrentDirectory(Paths.get(System.getProperty("user.home"), "Downloads").toFile());
         chooser.showOpenDialog(null);
         
-        List<String> uk = Files.readAllLines(chooser.getSelectedFile().toPath());
+        List<String> uk = Collections.emptyList();
+        try
+        {
+            Files.readAllLines(chooser.getSelectedFile().toPath());
+        } catch (NullPointerException e)
+        {
+            // ignore
+        }
         
         input.addKeyListener(new KeyListener()
         {
