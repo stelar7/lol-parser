@@ -1215,4 +1215,26 @@ public class TestHashes
         
         testUnsplit();
     }
+    
+    
+    @Test
+    public void testFixedClientHashes() throws IOException
+    {
+        Path loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt");
+        List<String> lines = Files.readAllLines(loadPath);
+        
+        StringBuilder sb = new StringBuilder("{\n");
+        for (String line : lines)
+        {
+            String hash = HashHandler.computeXXHash64(line);
+            
+            sb.append("\t\"").append(hash).append("\": \"").append(line).append("\",\n");
+        }
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        
+        Files.deleteIfExists(loadPath);
+        Files.write(Paths.get("combined.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        
+        testUnsplit();
+    }
 }

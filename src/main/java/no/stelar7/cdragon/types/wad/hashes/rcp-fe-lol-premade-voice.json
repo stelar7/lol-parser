@@ -1,8 +1,10 @@
 {
 	"134093e6eef1d234": "plugins/rcp-fe-lol-premade-voice/description.json",
+	"9a34705214ed9473": "plugins/rcp-fe-lol-premade-voice/euw/default/70a363ad8661be6de1dd3b0241459867.png",
 	"901474a0c88483f8": "plugins/rcp-fe-lol-premade-voice/euw/default/index.html",
 	"7358ff171c683af0": "plugins/rcp-fe-lol-premade-voice/euw/default/init.js",
 	"c6c92699461c1434": "plugins/rcp-fe-lol-premade-voice/euw/default/trans.json",
+	"08bc0bd3b3a88fa9": "plugins/rcp-fe-lol-premade-voice/euw/en_gb/70a363ad8661be6de1dd3b0241459867.png",
 	"c3cad9e5574c8767": "plugins/rcp-fe-lol-premade-voice/euw/en_gb/index.html",
 	"f51dd907c8890425": "plugins/rcp-fe-lol-premade-voice/euw/en_gb/init.js",
 	"7bc9a2a80278917b": "plugins/rcp-fe-lol-premade-voice/euw/en_gb/trans.json",
@@ -47,6 +49,7 @@
 	"e353ab2823dfa15b": "plugins/rcp-fe-lol-premade-voice/global/default/trans.json",
 	"4f130519846cdfca": "plugins/rcp-fe-lol-premade-voice/global/el_gr/trans.json",
 	"3b63af55a0fcb348": "plugins/rcp-fe-lol-premade-voice/global/en_au/trans.json",
+	"3b932efe78382e6b": "plugins/rcp-fe-lol-premade-voice/global/en_gb/70a363ad8661be6de1dd3b0241459867.png",
 	"5bdfcaeb4cb2e6ee": "plugins/rcp-fe-lol-premade-voice/global/en_gb/index.html",
 	"335807fd80fad54f": "plugins/rcp-fe-lol-premade-voice/global/en_gb/init.js",
 	"341d6838b1766463": "plugins/rcp-fe-lol-premade-voice/global/en_gb/trans.json",

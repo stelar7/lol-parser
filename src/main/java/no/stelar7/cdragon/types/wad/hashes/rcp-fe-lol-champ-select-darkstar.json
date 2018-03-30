@@ -1,9 +1,13 @@
 {
 	"d0968cb39f354a83": "plugins/rcp-fe-lol-champ-select-darkstar/description.json",
 	"13c41298306cab4b": "plugins/rcp-fe-lol-champ-select-darkstar/euw/default/bundle.js",
+	"7edb95ea3f526627": "plugins/rcp-fe-lol-champ-select-darkstar/euw/default/bundle.js",
 	"29112cd7fc1f1d01": "plugins/rcp-fe-lol-champ-select-darkstar/euw/default/index.html",
+	"ce8c3161fce202d0": "plugins/rcp-fe-lol-champ-select-darkstar/euw/default/index.html",
 	"3c71d0c9d946222c": "plugins/rcp-fe-lol-champ-select-darkstar/euw/en_gb/bundle.js",
+	"33cda108aef0e30a": "plugins/rcp-fe-lol-champ-select-darkstar/euw/en_gb/bundle.js",
 	"0e8d8c6de1343aa5": "plugins/rcp-fe-lol-champ-select-darkstar/euw/en_gb/index.html",
+	"6bba82a6f38df4ea": "plugins/rcp-fe-lol-champ-select-darkstar/euw/en_gb/index.html",
 	"e7ff37ffa14398bd": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/bundle.js",
 	"92b389ef6b60dc64": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/bundle.js",
 	"4a3a87a9f10b780c": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/description.json",
@@ -13,7 +17,9 @@
 	"27c43c11198b9fe7": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/license.json",
 	"a22abe080529cc76": "plugins/rcp-fe-lol-champ-select-darkstar/global/default/trans.json",
 	"7620277d97927d02": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_gb/bundle.js",
+	"b4e5b2bc9b59e71c": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_gb/bundle.js",
 	"80fcd54e4493cc0e": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_gb/index.html",
+	"2b67c03fb99afb11": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_gb/index.html",
 	"ed4e803dc36abef9": "plugins/rcp-fe-lol-champ-select-darkstar/global/en_us/trans.json",
 	"0709c28db0c75c91": "plugins/rcp-fe-lol-champ-select-darkstar/global/es_mx/trans.json"
 }
