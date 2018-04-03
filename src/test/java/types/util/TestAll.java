@@ -31,7 +31,7 @@ public class TestAll
         getHashes();
         deleteUnknownFolder();
         downloadWAD();
-        extractImages();
+        //extractImages();
         //  uploadToFTP();
     }
     
@@ -1048,7 +1048,7 @@ public class TestAll
         List<String> unknowns = new ArrayList<>();
         try
         {
-            Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("temp"), new SimpleFileVisitor<>()
+            Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER, new SimpleFileVisitor<>()
             {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
