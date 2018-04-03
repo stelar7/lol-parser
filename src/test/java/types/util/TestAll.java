@@ -31,7 +31,7 @@ public class TestAll
         getHashes();
         deleteUnknownFolder();
         downloadWAD();
-        //extractImages();
+        extractImages();
         //  uploadToFTP();
     }
     
@@ -523,7 +523,10 @@ public class TestAll
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException
             {
-                Files.deleteIfExists(dir);
+                if (!dir.equals(currentInnerFolder))
+                {
+                    Files.deleteIfExists(dir);
+                }
                 return FileVisitResult.CONTINUE;
             }
             
@@ -914,6 +917,7 @@ public class TestAll
                 getElementAndCheckHash(ob, "uncenteredSplashPath", data);
                 getElementAndCheckHash(ob, "tilePath", data);
                 getElementAndCheckHash(ob, "loadScreenPath", data);
+                getElementAndCheckHash(ob, "loadScreenVintagePath", data);
                 getElementAndCheckHash(ob, "splashVideoPath", data);
                 
                 if (ob.has("chromas"))
@@ -1675,14 +1679,12 @@ public class TestAll
         if (!passive.isEmpty())
         {
             String[] elemen = img_getElement(elem.getAsJsonObject("passive"), "abilityIconPath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                String preHash  = elemen[0];
+                String postHash = "abilities/" + id + "/passive.png";
+                img_addToSB(data, preHash, postHash);
             }
-            
-            String preHash  = elemen[0];
-            String postHash = "abilities/" + id + "/passive.png";
-            img_addToSB(data, preHash, postHash);
         }
         
         JsonArray arr = elem.getAsJsonArray("spells");
@@ -1692,14 +1694,12 @@ public class TestAll
             JsonObject current = element.getAsJsonObject();
             String     key     = current.get("spellKey").getAsString();
             String[]   elemen  = img_getElement(current, "abilityIconPath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                String preHash  = elemen[0];
+                String postHash = "abilities/" + id + "/" + key + ".png ";
+                img_addToSB(data, preHash, postHash);
             }
-            
-            String preHash  = elemen[0];
-            String postHash = "abilities/" + id + "/" + key + ".png ";
-            img_addToSB(data, preHash, postHash);
         }
         
         
@@ -1709,46 +1709,49 @@ public class TestAll
         {
             JsonObject ob   = element.getAsJsonObject();
             int        skin = Integer.parseInt(ob.get("id").getAsString().substring(String.valueOf(id).length()));
+            String     preHash;
+            String     postHash;
+            
             
             String[] elemen = img_getElement(ob, "splashPath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                preHash = elemen[0];
+                postHash = "splash-art/" + id + "/" + skin + ".png ";
+                img_addToSB(data, preHash, postHash);
             }
-            
-            String preHash  = elemen[0];
-            String postHash = "splash-art/" + id + "/" + skin + ".png ";
-            img_addToSB(data, preHash, postHash);
             
             elemen = img_getElement(ob, "uncenteredSplashPath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                preHash = elemen[0];
+                postHash = "uncentered-splash-art/" + id + "/" + skin + ".png ";
+                img_addToSB(data, preHash, postHash);
             }
-            
-            preHash = elemen[0];
-            postHash = "uncentered-splash-art/" + id + "/" + skin + ".png ";
-            img_addToSB(data, preHash, postHash);
             
             elemen = img_getElement(ob, "tilePath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                preHash = elemen[0];
+                postHash = "tile/" + id + "/" + skin + ".png ";
+                img_addToSB(data, preHash, postHash);
             }
-            
-            preHash = elemen[0];
-            postHash = "tile/" + id + "/" + skin + ".png ";
-            img_addToSB(data, preHash, postHash);
             
             elemen = img_getElement(ob, "loadScreenPath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                preHash = elemen[0];
+                postHash = "loading-screen/" + id + "/" + skin + ".png ";
+                img_addToSB(data, preHash, postHash);
             }
             
-            preHash = elemen[0];
-            postHash = "loading-screen/" + id + "/" + skin + ".png ";
-            img_addToSB(data, preHash, postHash);
+            elemen = img_getElement(ob, "loadScreenVintagePath");
+            if (elemen != null)
+            {
+                preHash = elemen[0];
+                postHash = "loading-screen-vintage/" + id + "/" + skin + ".png ";
+                img_addToSB(data, preHash, postHash);
+            }
             
             
             if (ob.has("chromas"))
@@ -1769,14 +1772,12 @@ public class TestAll
                     skin = Integer.parseInt(ch.getAsJsonObject().get("id").getAsString().substring(String.valueOf(id).length()));
                     
                     elemen = img_getElement(ch.getAsJsonObject(), "chromaPath");
-                    if (elemen == null)
+                    if (elemen != null)
                     {
-                        return;
+                        preHash = elemen[0];
+                        postHash = "chroma/" + id + "/" + skin + ".png ";
+                        img_addToSB(data, preHash, postHash);
                     }
-                    
-                    preHash = elemen[0];
-                    postHash = "chroma/" + id + "/" + skin + ".png ";
-                    img_addToSB(data, preHash, postHash);
                 }
             }
         }
@@ -1801,14 +1802,12 @@ public class TestAll
         {
             JsonObject ob     = element.getAsJsonObject();
             String[]   elemen = img_getElement(ob, "iconPath");
-            if (elemen == null)
+            if (elemen != null)
             {
-                return;
+                String preHash  = elemen[0];
+                String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
+                img_addToSB(data, preHash, postHash);
             }
-            
-            String preHash  = elemen[0];
-            String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
-            img_addToSB(data, preHash, postHash);
         }
         
         img_finalizeFileReading(filename, data);
