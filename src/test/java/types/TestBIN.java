@@ -218,8 +218,9 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("binfiles");
-        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+        Path extractPathBin  = UtilHandler.DOWNLOADS_FOLDER.resolve("bin");
+        Path extractPathJson = UtilHandler.DOWNLOADS_FOLDER.resolve("json");
+        Path rito            = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         
         List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -249,31 +250,33 @@ public class TestBIN
         
         paths.sort(c);
         
-        Files.createDirectories(extractPath);
+        Files.createDirectories(extractPathBin);
+        Files.createDirectories(extractPathJson);
         for (Path path : paths)
         {
             try
             {
+                if (Files.exists(extractPathJson.resolve(UtilHandler.pathToFilename(path) + ".json")))
+                {
+                    continue;
+                }
+                
                 BINFile parsed = parser.parse(path);
                 if (parsed == null)
                 {
-                    continue;
+                    throw new RuntimeException("invalid bin file???");
                 }
                 
                 byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
                 byte[] data = FileTypeHandler.makePrettyJson(json);
                 
-                Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".bin"), Files.readAllBytes(path));
-                Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
+                Files.write(extractPathBin.resolve(UtilHandler.pathToFilename(path) + ".bin"), Files.readAllBytes(path));
+                Files.write(extractPathJson.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
                 
             } catch (RuntimeException ex)
             {
-                // ignore it
-                if (path.toString().endsWith(".bin"))
-                {
-                    System.out.println("Failed to parse file: " + path);
-                    System.out.println(ex.getMessage());
-                }
+                System.out.println("Failed to parse file: " + path);
+                System.out.println(ex.getMessage());
             }
         }
     }
