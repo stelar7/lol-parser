@@ -135,7 +135,9 @@ public class TestBIN
         hashes.forEach(e -> sb.append("\"").append(e.getKey()).append("\": \"").append(e.getValue()).append("\",\n"));
         sb.append("}");
         
-        Files.write(HashHandler.BIN_HASH_STORE, sb.toString().getBytes(StandardCharsets.UTF_8));
+        JsonElement obj    = new JsonParser().parse(sb.toString());
+        String      pretty = UtilHandler.getGson().toJson(obj);
+        Files.write(HashHandler.BIN_HASH_STORE, pretty.getBytes(StandardCharsets.UTF_8));
     }
     
     @Test
