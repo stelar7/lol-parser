@@ -2,6 +2,7 @@ package types;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
@@ -137,15 +138,21 @@ public class TestBIN
         List<Entry<Long, String>> hashes = new ArrayList<>(HashHandler.getBinHashes().entrySet());
         hashes.sort(Entry.comparingByKey());
         
-        StringBuilder sb = new StringBuilder("{\n");
-        hashes.forEach(e -> sb.append("\"").append(e.getKey()).append("\": \"").append(e.getValue().replace("\\", "\\\\")).append("\",\n"));
-        sb.reverse().deleteCharAt(1).reverse();
-        sb.append("}");
-        
-        JsonElement obj    = new JsonParser().parse(sb.toString());
-        String      pretty = UtilHandler.getGson().toJson(obj);
-        
-        Files.write(HashHandler.BIN_HASH_STORE, pretty.getBytes(StandardCharsets.UTF_8));
+        try (JsonWriter writer = new JsonWriter(new BufferedWriter(new FileWriter(HashHandler.BIN_HASH_STORE.toFile()))))
+        {
+            writer.setIndent("    ");
+            writer.beginObject();
+            hashes.forEach(e -> {
+                try
+                {
+                    writer.name(e.getKey().toString()).value(e.getValue().replace("\\", "\\\\"));
+                } catch (IOException e1)
+                {
+                    e1.printStackTrace();
+                }
+            });
+            writer.endObject();
+        }
     }
     
     @Test
