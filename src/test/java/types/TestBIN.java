@@ -120,6 +120,25 @@ public class TestBIN
     }
     
     @Test
+    public void testAddFromFile() throws IOException
+    {
+        List<String> names = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("binhashes.txt"));
+        names.forEach(n -> {
+            long hash = HashHandler.computeBINHash(n);
+            HashHandler.getBinHashes().putIfAbsent(hash, n);
+        });
+        
+        List<Entry<Long, String>> hashes = new ArrayList<>(HashHandler.getBinHashes().entrySet());
+        hashes.sort(Entry.comparingByKey());
+        
+        StringBuilder sb = new StringBuilder("{\n");
+        hashes.forEach(e -> sb.append("\"").append(e.getKey()).append("\": \"").append(e.getValue()).append("\",\n"));
+        sb.append("}");
+        
+        Files.write(HashHandler.BIN_HASH_STORE, sb.toString().getBytes(StandardCharsets.UTF_8));
+    }
+    
+    @Test
     public void splitResultToFile() throws IOException
     {
         
@@ -249,7 +268,7 @@ public class TestBIN
         Files.walkFileTree(folder, new SimpleFileVisitor<>()
         {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
                 JsonObject elem = UtilHandler.getJsonParser().parse(UtilHandler.readAsString(file)).getAsJsonObject();
                 
@@ -262,7 +281,7 @@ public class TestBIN
                 for (JsonElement reco : recFull)
                 {
                     JsonObject rec  = reco.getAsJsonObject();
-                    JsonObject unki = rec.getAsJsonObject(rec.keySet().toArray(new String[rec.keySet().size()])[0]);
+                    JsonObject unki = rec.getAsJsonObject(rec.keySet().toArray(new String[0])[0]);
                     
                     if (!unki.has("PrimaryAbilityResource"))
                     {
@@ -270,7 +289,7 @@ public class TestBIN
                     }
                     
                     JsonObject  par          = unki.getAsJsonObject("PrimaryAbilityResource");
-                    JsonObject  unk          = par.getAsJsonObject(par.keySet().toArray(new String[par.keySet().size()])[0]);
+                    JsonObject  unk          = par.getAsJsonObject(par.keySet().toArray(new String[0])[0]);
                     JsonElement keyContainer = unk.get("arType");
                     
                     String key;
