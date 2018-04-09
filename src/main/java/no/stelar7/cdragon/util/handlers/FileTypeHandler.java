@@ -379,7 +379,7 @@ public final class FileTypeHandler
                 (byte) 0xE6, (byte) 0x8B, (byte) 0xA6, (byte) 0x70, (byte) 0x65, (byte) 0x72,
                 (byte) 0xE3, (byte) 0x83, (byte) 0xAA, (byte) 0x74, (byte) 0x75, (byte) 0x72,
                 (byte) 0x44, (byte) 0x41, (byte) 0x54, (byte) 0xE2, (byte) 0x94, (byte) 0x80,
-                
+                (byte) 0x61, (byte) 0x61, (byte) 0x74,
                 };
         
         
