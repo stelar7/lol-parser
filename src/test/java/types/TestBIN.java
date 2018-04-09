@@ -128,15 +128,23 @@ public class TestBIN
             HashHandler.getBinHashes().putIfAbsent(hash, n);
         });
         
+        sortHashes();
+    }
+    
+    @Test
+    public void sortHashes() throws IOException
+    {
         List<Entry<Long, String>> hashes = new ArrayList<>(HashHandler.getBinHashes().entrySet());
         hashes.sort(Entry.comparingByKey());
         
         StringBuilder sb = new StringBuilder("{\n");
-        hashes.forEach(e -> sb.append("\"").append(e.getKey()).append("\": \"").append(e.getValue()).append("\",\n"));
+        hashes.forEach(e -> sb.append("\"").append(e.getKey()).append("\": \"").append(e.getValue().replace("\\", "\\\\")).append("\",\n"));
+        sb.reverse().deleteCharAt(1).reverse();
         sb.append("}");
         
         JsonElement obj    = new JsonParser().parse(sb.toString());
         String      pretty = UtilHandler.getGson().toJson(obj);
+        
         Files.write(HashHandler.BIN_HASH_STORE, pretty.getBytes(StandardCharsets.UTF_8));
     }
     
