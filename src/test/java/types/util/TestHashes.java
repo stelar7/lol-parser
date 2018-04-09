@@ -26,7 +26,7 @@ public class TestHashes
     private final String       prePre = "plugins/rcp-be-lol-game-data/";
     
     private final List<String> preRegion = Arrays.asList(
-            "global"/*,
+            "global",
             "br",
             "cn",
             "eune",
@@ -57,11 +57,11 @@ public class TestHashes
             "tr",
             "th",
             "tw",
-            "vn"*/
-                                                        );
+            "vi",
+            "vn");
     
     private final List<String> preLang = Arrays.asList(
-            "default"/*,
+            "default",
             "cs_cz",
             "de_de",
             "el_gr",
@@ -89,8 +89,7 @@ public class TestHashes
             "vn_vn",
             "zh_cn",
             "zh_my",
-            "zh_tw"*/
-                                                      );
+            "zh_tw");
     
     
     private final Path tmp_hashes = Paths.get("tmp_hashes");
@@ -1096,7 +1095,7 @@ public class TestHashes
     {
         final Map<String, String> knownHashes = loadAllHashes();
         
-        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.6.unknown.txt");
+        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.7.unknown.txt");
         System.out.println("Checking if I have hashes that cdragon needs...");
         for (String key : unknown)
         {
@@ -1115,6 +1114,7 @@ public class TestHashes
         
         List<String> unknown = UtilHandler.readWeb("https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.txt");
         System.out.println("Checking if cdragon has hashes that I'm missing...");
+        StringBuilder sb = new StringBuilder("{\n");
         for (String line : unknown)
         {
             String[] parts = line.split(" ");
@@ -1123,9 +1123,14 @@ public class TestHashes
             
             if (!knownHashes.containsKey(key))
             {
-                System.out.println("\"" + key + "\": \"" + value + "\",");
+                sb.append("\"").append(key).append("\": \"").append(value).append("\",\n");
             }
         }
+        
+        sb.append("}");
+        Files.write(Paths.get(("combined.json")), sb.toString().getBytes(StandardCharsets.UTF_8));
+        
+        testUnsplit();
     }
     
     @Test
@@ -1220,8 +1225,8 @@ public class TestHashes
     @Test
     public void testFixedClientHashes() throws IOException
     {
-        Path loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt");
-        List<String> lines = Files.readAllLines(loadPath);
+        Path         loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt");
+        List<String> lines    = Files.readAllLines(loadPath);
         
         StringBuilder sb = new StringBuilder("{\n");
         for (String line : lines)

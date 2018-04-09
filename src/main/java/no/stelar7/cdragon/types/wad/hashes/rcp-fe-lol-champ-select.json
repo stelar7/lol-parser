@@ -359,6 +359,8 @@
 	"1805442a301a747a": "plugins/rcp-fe-lol-champ-select/global/default/images/config/reticle-intent.png",
 	"a93006d963b8ba47": "plugins/rcp-fe-lol-champ-select/global/default/images/config/reticle-select.png",
 	"cdd10ab18b50ea4b": "plugins/rcp-fe-lol-champ-select/global/default/images/config/reticle-sprite-324x324-2x6f.png",
+	"f52b8b1022373371": "plugins/rcp-fe-lol-champ-select/global/default/images/config/skin-carousel-locked-hover.png",
+	"ed8206c7cf89ae7b": "plugins/rcp-fe-lol-champ-select/global/default/images/config/skin-carousel-locked-inactive.png",
 	"06aecb8caa78ddde": "plugins/rcp-fe-lol-champ-select/global/default/images/config/skin-carousel-locked.png",
 	"ae1472c22564af59": "plugins/rcp-fe-lol-champ-select/global/default/images/config/skin-carousel-pip-selected.png",
 	"dc45692768025f83": "plugins/rcp-fe-lol-champ-select/global/default/images/config/skin-carousel-pip.png",
