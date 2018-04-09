@@ -228,7 +228,10 @@ public class TestBIN
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                paths.add(file);
+                if (file.toString().endsWith(".bin"))
+                {
+                    paths.add(file);
+                }
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -236,7 +239,7 @@ public class TestBIN
         Comparator<Path> c = (cA, cB) -> {
             try
             {
-                return Files.size(cA) > Files.size(cB) ? 1 : -1;
+                return Files.size(cA) > Files.size(cB) ? -1 : 1;
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -246,6 +249,7 @@ public class TestBIN
         
         paths.sort(c);
         
+        Files.createDirectories(extractPath);
         for (Path path : paths)
         {
             try
@@ -256,11 +260,10 @@ public class TestBIN
                     continue;
                 }
                 
-                Files.createDirectories(extractPath);
-                
                 byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
                 byte[] data = FileTypeHandler.makePrettyJson(json);
                 
+                Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".bin"), Files.readAllBytes(path));
                 Files.write(extractPath.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
                 
             } catch (RuntimeException ex)

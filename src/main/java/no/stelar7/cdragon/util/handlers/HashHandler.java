@@ -20,8 +20,8 @@ public class HashHandler
     public static final Path BIN_HASH_STORE = UtilHandler.TYPES_FOLDER.resolve("bin\\data\\binhash.json");
     public static final Path INI_HASH_STORE = UtilHandler.TYPES_FOLDER.resolve("inibin\\data\\inihash.json");
     
-    private static Map<Long, String> binHashNames;
-    private static Map<Long, String> iniHashNames;
+    private static Map<Long, String>                binHashNames;
+    private static Map<Long, String>                iniHashNames;
     private static Map<String, Map<String, String>> wadHashNames = new HashMap<>();
     
     
