@@ -134,6 +134,21 @@
         </dependency>
         <!-- end lwjgl -->
 
+        <!-- used for comparing object graphs -->
+        <dependency>
+            <groupId>org.javers</groupId>
+            <artifactId>javers-core</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+
+        <!-- used to remove the NO-OP waring from slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+
+
     </dependencies>
 
     <repositories>

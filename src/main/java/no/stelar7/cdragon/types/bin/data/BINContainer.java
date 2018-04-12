@@ -7,8 +7,8 @@ import java.util.*;
 @Data
 public class BINContainer
 {
-    private byte type;
-    private int  size;
-    private int  count;
+    private BINValueType type;
+    private int          size;
+    private int          count;
     private List<Object> data = new ArrayList<>();
 }

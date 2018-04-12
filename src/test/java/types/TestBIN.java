@@ -6,7 +6,8 @@ import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
-import org.junit.Test;
+import org.javers.core.*;
+import org.junit.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -28,6 +29,21 @@ public class TestBIN
         
         BINFile data = parser.parse(file);
         System.out.println(data.toJson());
+    }
+    
+    @Test
+    public void testWriteBin() 
+    {
+        Path file  = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
+        Path file2 = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\bintest.bin");
+        
+        BINFile data = parser.parse(file);
+        data.write(file2);
+        
+        BINFile data2 = parser.parse(file2);
+        
+        Javers jav = JaversBuilder.javers().build();
+        Assert.assertTrue("Input and output .bin file is different...", jav.compare(data, data2).getChanges().isEmpty());
     }
     
     @Test

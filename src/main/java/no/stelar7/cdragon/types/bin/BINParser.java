@@ -69,8 +69,8 @@ public class BINParser implements Parseable<BINFile>
         BINValue value = new BINValue();
         
         value.setHash(HashHandler.getBINHash(raf.readInt()));
-        value.setType(raf.readByte());
-        value.setValue(readByType(BINValueType.valueOf(value.getType()), raf));
+        value.setType(BINValueType.valueOf(raf.readByte()));
+        value.setValue(readByType(value.getType(), raf));
         
         return value;
     }
@@ -118,13 +118,13 @@ public class BINParser implements Parseable<BINFile>
             case CONTAINER:
                 BINContainer bc = new BINContainer();
                 
-                bc.setType(raf.readByte());
+                bc.setType(BINValueType.valueOf(raf.readByte()));
                 bc.setSize(raf.readInt());
                 bc.setCount(raf.readInt());
                 
                 for (int i = 0; i < bc.getCount(); i++)
                 {
-                    bc.getData().add(readByType(BINValueType.valueOf(bc.getType()), raf));
+                    bc.getData().add(readByType(bc.getType(), raf));
                 }
                 
                 return bc;
@@ -152,25 +152,25 @@ public class BINParser implements Parseable<BINFile>
             case OPTIONAL_DATA:
                 BINData bd = new BINData();
                 
-                bd.setType(raf.readByte());
+                bd.setType(BINValueType.valueOf(raf.readByte()));
                 bd.setCount(raf.readByte());
                 for (int i = 0; i < bd.getCount(); i++)
                 {
-                    bd.getData().add(readByType(BINValueType.valueOf(bd.getType()), raf));
+                    bd.getData().add(readByType(bd.getType(), raf));
                 }
                 
                 return bd;
             case PAIR:
                 BINMap bm = new BINMap();
                 
-                bm.setType1(raf.readByte());
-                bm.setType2(raf.readByte());
+                bm.setType1(BINValueType.valueOf(raf.readByte()));
+                bm.setType2(BINValueType.valueOf(raf.readByte()));
                 bm.setSize(raf.readInt());
                 bm.setCount(raf.readInt());
                 
                 for (int i = 0; i < bm.getCount(); i++)
                 {
-                    bm.getData().add(new Vector2<>(readByType(BINValueType.valueOf(bm.getType1()), raf), readByType(BINValueType.valueOf(bm.getType2()), raf)));
+                    bm.getData().add(new Vector2<>(readByType(bm.getType1(), raf), readByType(bm.getType2(), raf)));
                 }
                 
                 return bm;

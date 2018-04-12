@@ -7,7 +7,7 @@ import java.util.*;
 @Data
 public class BINData
 {
-    private byte type;
-    private byte count;
+    private BINValueType type;
+    private byte         count;
     private List<Object> data = new ArrayList<>();
 }

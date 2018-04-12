@@ -246,4 +246,24 @@ public class HashHandler
         
         return getWadHashes(plugin);
     }
+    
+    private static Map<String, Long> reverseCache = new HashMap<>();
+    
+    public static int getBinKeyForHash(String hash)
+    {
+        if (reverseCache.containsKey(hash))
+        {
+            return reverseCache.get(hash).intValue();
+        }
+        
+        Long value = getBinHashes().entrySet()
+                                   .stream()
+                                   .filter(e -> e.getValue().toLowerCase().equalsIgnoreCase(hash.toLowerCase()))
+                                   .findAny()
+                                   .map(Map.Entry::getKey)
+                                   .orElseGet(() -> Long.valueOf(hash));
+        
+        reverseCache.put(hash, value);
+        return value.intValue();
+    }
 }
