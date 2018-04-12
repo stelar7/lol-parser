@@ -57,165 +57,90 @@ public class BINFile
             bw.writeInt(HashHandler.getBinKeyForHash(t.getHash()));
             bw.writeByte((byte) type.value);
         }
+        
+        Object datapoint = v instanceof BINValue ? ((BINValue) v).getValue() : v;
+        
         switch (type)
         {
             case BOOLEAN:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeBoolean((boolean) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeBoolean((boolean) v);
-                }
+                bw.writeBoolean((boolean) datapoint);
                 break;
             }
             case BYTE:
             case SIGNED_BYTE:
             case UNKNOWN_BYTE:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeByte((byte) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeByte((byte) v);
-                }
+                bw.writeByte((byte) datapoint);
                 break;
             }
             case SHORT:
             case SIGNED_SHORT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeShort((short) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeShort((short) v);
-                }
+                bw.writeShort((short) datapoint);
                 break;
             }
             case INT:
             case SIGNED_INT:
             case LINK_OFFSET:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeInt((Integer) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeInt((Integer) v);
-                }
+                bw.writeInt((Integer) datapoint);
                 break;
             }
             case LONG:
             case SIGNED_LONG:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeLong((Long) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeLong((Long) v);
-                }
+                bw.writeLong((Long) datapoint);
                 break;
             }
             case FLOAT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeFloat((Float) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeFloat((Float) v);
-                }
+                bw.writeFloat((Float) datapoint);
                 break;
             }
             case V2_FLOAT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeVec2F((Vector2f) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeVec2F((Vector2f) v);
-                }
+                bw.writeVec2F((Vector2f) datapoint);
                 break;
             }
             case V3_FLOAT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeVec3F((Vector3f) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeVec3F((Vector3f) v);
-                }
+                bw.writeVec3F((Vector3f) datapoint);
                 break;
             }
             case V3_SHORT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeVec3S((Vector3s) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeVec3S((Vector3s) v);
-                }
+                bw.writeVec3S((Vector3s) datapoint);
                 break;
             }
             case V4_FLOAT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeVec4F((Vector4f) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeVec4F((Vector4f) v);
-                }
+                bw.writeVec4F((Vector4f) datapoint);
                 break;
             }
             case M4X4_FLOAT:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeFloat4x4((Matrix4f) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeFloat4x4((Matrix4f) v);
-                }
+                bw.writeFloat4x4((Matrix4f) datapoint);
                 break;
             }
             case RGBA_BYTE:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeVec4B((Vector4b) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeVec4B((Vector4b) v);
-                }
+                bw.writeVec4B((Vector4b) datapoint);
                 break;
             }
             case STRING:
             {
-                if (v instanceof BINValue)
-                {
-                    bw.writeStringWithLength((String) ((BINValue) v).getValue());
-                } else
-                {
-                    bw.writeStringWithLength((String) v);
-                }
+                bw.writeStringWithLength((String) datapoint);
                 break;
             }
             case STRING_HASH:
             {
-                bw.writeInt(HashHandler.getBinKeyForHash(String.valueOf(v instanceof BINValue ? ((BINValue) v).getValue() : v)));
+                bw.writeInt(HashHandler.getBinKeyForHash(String.valueOf(datapoint)));
                 break;
             }
             case CONTAINER:
             {
-                BINContainer bc = v instanceof BINContainer ? (BINContainer) v : (BINContainer) (((BINValue) v).getValue());
+                BINContainer bc = (BINContainer) datapoint;
                 bw.writeByte((byte) bc.getType().value);
                 bw.writeInt(bc.getSize());
                 bw.writeInt(bc.getCount());
@@ -225,7 +150,7 @@ public class BINFile
             case STRUCTURE:
             case EMBEDDED:
             {
-                BINStruct bs = v instanceof BINStruct ? (BINStruct) v : (BINStruct) (((BINValue) v).getValue());
+                BINStruct bs = (BINStruct) datapoint;
                 bw.writeInt(HashHandler.getBinKeyForHash(bs.getHash()));
                 bw.writeInt(bs.getEntry());
                 bw.writeShort(bs.getCount());
@@ -234,7 +159,7 @@ public class BINFile
             }
             case OPTIONAL_DATA:
             {
-                BINData bd = v instanceof BINData ? (BINData) v : (BINData) (((BINValue) v).getValue());
+                BINData bd = (BINData) datapoint;
                 bw.writeByte((byte) bd.getType().value);
                 bw.writeByte(bd.getCount());
                 bd.getData().forEach(bv -> writeBinValue(bd.getType(), bv, bw, false));
@@ -242,7 +167,7 @@ public class BINFile
             }
             case PAIR:
             {
-                BINMap bm = v instanceof BINMap ? (BINMap) v : (BINMap) (((BINValue) v).getValue());
+                BINMap bm = (BINMap) datapoint;
                 bw.writeByte((byte) bm.getType1().value);
                 bw.writeByte((byte) bm.getType2().value);
                 bw.writeInt(bm.getSize());

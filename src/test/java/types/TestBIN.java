@@ -32,7 +32,7 @@ public class TestBIN
     }
     
     @Test
-    public void testWriteBin() 
+    public void testWriteBin()
     {
         Path file  = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
         Path file2 = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\bintest.bin");
