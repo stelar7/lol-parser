@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.anm.ANMParser;
 import no.stelar7.cdragon.types.anm.data.ANMFile;

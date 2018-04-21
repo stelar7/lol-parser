@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.cac.CACParser;
 import no.stelar7.cdragon.types.cac.data.CACFile;

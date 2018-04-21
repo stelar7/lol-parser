@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.wem.WEMParser;
 import no.stelar7.cdragon.types.wem.data.WEMFile;

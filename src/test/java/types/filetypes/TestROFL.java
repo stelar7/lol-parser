@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.rofl.ROFLParser;
 import no.stelar7.cdragon.types.rofl.data.ROFLFile;

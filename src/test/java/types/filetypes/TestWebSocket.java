@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.lockfile.LockfileParser;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
@@ -22,9 +22,6 @@ public class TestWebSocket
             reader.subscribe("OnJsonApiEvent", System.out::println);
         });
         th.start();
-        while (true)
-        {
-            Thread.sleep(Long.MAX_VALUE);
-        }
+        Thread.sleep(Long.MAX_VALUE);
     }
 }

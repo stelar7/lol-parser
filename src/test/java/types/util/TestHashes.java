@@ -1095,7 +1095,7 @@ public class TestHashes
     {
         final Map<String, String> knownHashes = loadAllHashes();
         
-        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.7.unknown.txt");
+        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.8.unknown.txt");
         System.out.println("Checking if I have hashes that cdragon needs...");
         for (String key : unknown)
         {

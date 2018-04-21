@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.SKNFile;

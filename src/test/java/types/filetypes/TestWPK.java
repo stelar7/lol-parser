@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.wpk.WPKParser;
 import no.stelar7.cdragon.types.wpk.data.WPKFile;

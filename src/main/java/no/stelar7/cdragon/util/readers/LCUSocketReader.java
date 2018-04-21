@@ -49,6 +49,7 @@ public class LCUSocketReader
         try
         {
             socket.connect();
+            System.out.println("Connected!");
         } catch (WebSocketException e)
         {
             e.printStackTrace();
@@ -69,6 +70,7 @@ public class LCUSocketReader
     {
         sendMessage(5, event);
         handlers.put(event, consumer);
+        System.out.println("Subscribed");
     }
     
     
@@ -76,6 +78,7 @@ public class LCUSocketReader
     {
         sendMessage(6, event);
         handlers.remove(event);
+        System.out.println("Unsubscribed");
     }
 }
     

@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.lockfile.LockfileParser;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;

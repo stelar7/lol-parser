@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.RAFFile;

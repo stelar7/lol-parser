@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.inibin.InibinParser;
 import no.stelar7.cdragon.types.inibin.data.InibinFile;

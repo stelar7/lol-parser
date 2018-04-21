@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.ogg.OGGParser;
 import no.stelar7.cdragon.types.ogg.data.OGGStream;

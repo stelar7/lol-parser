@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.util.handlers.UtilHandler;

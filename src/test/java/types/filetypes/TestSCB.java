@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import no.stelar7.cdragon.types.scb.SCBParser;
 import no.stelar7.cdragon.types.scb.data.SCBFile;

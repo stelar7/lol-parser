@@ -1,4 +1,4 @@
-package types;
+package types.filetypes;
 
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
