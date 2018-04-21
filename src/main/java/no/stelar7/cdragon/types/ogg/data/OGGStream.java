@@ -1,13 +1,11 @@
 package no.stelar7.cdragon.types.ogg.data;
 
 import com.google.common.io.*;
-import lombok.Data;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 
 import java.nio.*;
 import java.util.Arrays;
 
-@Data
 public class OGGStream
 {
     private static final int HEADER_SIZE   = 0x1B;
@@ -32,6 +30,106 @@ public class OGGStream
     public OGGStream()
     {
         flushPage(false, false);
+    }
+    
+    public static int getHeaderSize()
+    {
+        return HEADER_SIZE;
+    }
+    
+    public static int getSegmentCount()
+    {
+        return SEGMENT_COUNT;
+    }
+    
+    public static int getSegmentSize()
+    {
+        return SEGMENT_SIZE;
+    }
+    
+    public byte getBitBuffer()
+    {
+        return bitBuffer;
+    }
+    
+    public void setBitBuffer(byte bitBuffer)
+    {
+        this.bitBuffer = bitBuffer;
+    }
+    
+    public int getBitsStored()
+    {
+        return bitsStored;
+    }
+    
+    public void setBitsStored(int bitsStored)
+    {
+        this.bitsStored = bitsStored;
+    }
+    
+    public int getPayloadBytes()
+    {
+        return payloadBytes;
+    }
+    
+    public void setPayloadBytes(int payloadBytes)
+    {
+        this.payloadBytes = payloadBytes;
+    }
+    
+    public boolean isFirst()
+    {
+        return first;
+    }
+    
+    public void setFirst(boolean first)
+    {
+        this.first = first;
+    }
+    
+    public boolean isContinued()
+    {
+        return continued;
+    }
+    
+    public void setContinued(boolean continued)
+    {
+        this.continued = continued;
+    }
+    
+    public byte[] getPageBuffer()
+    {
+        return pageBuffer;
+    }
+    
+    public void setPageBuffer(byte[] pageBuffer)
+    {
+        this.pageBuffer = pageBuffer;
+    }
+    
+    public int getGranule()
+    {
+        return granule;
+    }
+    
+    public int getSequenceNumber()
+    {
+        return sequenceNumber;
+    }
+    
+    public void setSequenceNumber(int sequenceNumber)
+    {
+        this.sequenceNumber = sequenceNumber;
+    }
+    
+    public ByteArrayDataOutput getData()
+    {
+        return data;
+    }
+    
+    public void setData(ByteArrayDataOutput data)
+    {
+        this.data = data;
     }
     
     public void flushPage(boolean nextContinued, boolean last)

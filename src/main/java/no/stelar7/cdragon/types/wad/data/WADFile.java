@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.types.wad.data;
 
-import lombok.*;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
@@ -11,13 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 
-@Data
 public class WADFile
 {
     private String unknownHashContainer = "unknown.json";
     
-    @Setter(value = AccessLevel.NONE)
-    @Getter(value = AccessLevel.NONE)
     private final RandomAccessReader fileReader;
     private       WADHeaderBase      header;
     
@@ -28,6 +24,30 @@ public class WADFile
         this.fileReader = raf;
     }
     
+    public RandomAccessReader getFileReader()
+    {
+        return fileReader;
+    }
+    
+    public WADHeaderBase getHeader()
+    {
+        return header;
+    }
+    
+    public void setHeader(WADHeaderBase header)
+    {
+        this.header = header;
+    }
+    
+    public List<WADContentHeaderV1> getContentHeaders()
+    {
+        return contentHeaders;
+    }
+    
+    public void setContentHeaders(List<WADContentHeaderV1> contentHeaders)
+    {
+        this.contentHeaders = contentHeaders;
+    }
     
     public void extractFiles(String pluginName, String wadName, Path path)
     {

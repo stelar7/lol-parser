@@ -1,9 +1,16 @@
 package no.stelar7.cdragon.types.skl.data;
 
-import lombok.Data;
-
-@Data
 public class SKLFile
 {
     private SKLHeader header;
+    
+    public SKLHeader getHeader()
+    {
+        return header;
+    }
+    
+    public void setHeader(SKLHeader header)
+    {
+        this.header = header;
+    }
 }

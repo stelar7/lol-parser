@@ -2,7 +2,6 @@ package no.stelar7.cdragon.util.readers;
 
 import com.google.gson.*;
 import com.neovisionaries.ws.client.*;
-import lombok.*;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
 import no.stelar7.cdragon.util.SimpleSSLContext;
 
@@ -11,9 +10,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.function.Consumer;
 
-@Data
-@Getter(AccessLevel.NONE)
-@Setter(AccessLevel.NONE)
 public class LCUSocketReader
 {
     

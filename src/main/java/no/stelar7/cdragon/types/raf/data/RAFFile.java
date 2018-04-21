@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.types.raf.data;
 
-import lombok.*;
 import no.stelar7.cdragon.interfaces.Extractable;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -10,11 +9,8 @@ import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.List;
 
-@Data
 public class RAFFile implements Extractable
 {
-    @Setter(value = AccessLevel.NONE)
-    @Getter(value = AccessLevel.NONE)
     private final RandomAccessReader datReader;
     
     private RAFHeader            header;
@@ -31,6 +27,80 @@ public class RAFFile implements Extractable
         this.datReader = new RandomAccessReader(pathToRaf.resolveSibling(pathToRaf.getFileName() + ".dat"), ByteOrder.BIG_ENDIAN);
     }
     
+    public RandomAccessReader getDatReader()
+    {
+        return datReader;
+    }
+    
+    public RAFHeader getHeader()
+    {
+        return header;
+    }
+    
+    public void setHeader(RAFHeader header)
+    {
+        this.header = header;
+    }
+    
+    public List<RAFContentFile> getFiles()
+    {
+        return files;
+    }
+    
+    public void setFiles(List<RAFContentFile> files)
+    {
+        this.files = files;
+    }
+    
+    public List<RAFContentPath> getPaths()
+    {
+        return paths;
+    }
+    
+    public void setPaths(List<RAFContentPath> paths)
+    {
+        this.paths = paths;
+    }
+    
+    public List<String> getStrings()
+    {
+        return strings;
+    }
+    
+    public void setStrings(List<String> strings)
+    {
+        this.strings = strings;
+    }
+    
+    public int getPathsSize()
+    {
+        return pathsSize;
+    }
+    
+    public void setPathsSize(int pathsSize)
+    {
+        this.pathsSize = pathsSize;
+    }
+    
+    public int getPathsCount()
+    {
+        return pathsCount;
+    }
+    
+    public void setPathsCount(int pathsCount)
+    {
+        this.pathsCount = pathsCount;
+    }
+    
+    public int getFileCount()
+    {
+        return fileCount;
+    }
+    
+    public void setFileCount(int fileCount)
+    {
+        this.fileCount = fileCount;
+    }
     
     public void extract(Path path)
     {

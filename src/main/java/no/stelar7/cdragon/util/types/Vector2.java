@@ -1,8 +1,5 @@
 package no.stelar7.cdragon.util.types;
 
-import lombok.Data;
-
-@Data
 public class Vector2<X, Y>
 {
     private X x;
@@ -16,6 +13,16 @@ public class Vector2<X, Y>
     {
         this.x = x;
         this.y = y;
+    }
+    
+    public X getX()
+    {
+        return x;
+    }
+    
+    public Y getY()
+    {
+        return y;
     }
     
     @Override

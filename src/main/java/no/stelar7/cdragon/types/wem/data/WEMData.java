@@ -1,13 +1,11 @@
 package no.stelar7.cdragon.types.wem.data;
 
-import lombok.Data;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.util.*;
 
-@Data
 public class WEMData
 {
     private int fmtChunkOffset  = 0xFFFFFFFF;
@@ -47,6 +45,315 @@ public class WEMData
     
     private byte[] dataBytes;
     
+    public int getFmtChunkOffset()
+    {
+        return fmtChunkOffset;
+    }
+    
+    public void setFmtChunkOffset(int fmtChunkOffset)
+    {
+        this.fmtChunkOffset = fmtChunkOffset;
+    }
+    
+    public int getCueChunkOffset()
+    {
+        return cueChunkOffset;
+    }
+    
+    public void setCueChunkOffset(int cueChunkOffset)
+    {
+        this.cueChunkOffset = cueChunkOffset;
+    }
+    
+    public int getListChunkOffset()
+    {
+        return listChunkOffset;
+    }
+    
+    public void setListChunkOffset(int listChunkOffset)
+    {
+        this.listChunkOffset = listChunkOffset;
+    }
+    
+    public int getSmplChunkOffset()
+    {
+        return smplChunkOffset;
+    }
+    
+    public void setSmplChunkOffset(int smplChunkOffset)
+    {
+        this.smplChunkOffset = smplChunkOffset;
+    }
+    
+    public int getVorbChunkOffset()
+    {
+        return vorbChunkOffset;
+    }
+    
+    public void setVorbChunkOffset(int vorbChunkOffset)
+    {
+        this.vorbChunkOffset = vorbChunkOffset;
+    }
+    
+    public int getDataChunkOffset()
+    {
+        return dataChunkOffset;
+    }
+    
+    public void setDataChunkOffset(int dataChunkOffset)
+    {
+        this.dataChunkOffset = dataChunkOffset;
+    }
+    
+    public int getFmtChunkSize()
+    {
+        return fmtChunkSize;
+    }
+    
+    public void setFmtChunkSize(int fmtChunkSize)
+    {
+        this.fmtChunkSize = fmtChunkSize;
+    }
+    
+    public int getCueChunkSize()
+    {
+        return cueChunkSize;
+    }
+    
+    public void setCueChunkSize(int cueChunkSize)
+    {
+        this.cueChunkSize = cueChunkSize;
+    }
+    
+    public int getListChunkSize()
+    {
+        return listChunkSize;
+    }
+    
+    public void setListChunkSize(int listChunkSize)
+    {
+        this.listChunkSize = listChunkSize;
+    }
+    
+    public int getSmplChunkSize()
+    {
+        return smplChunkSize;
+    }
+    
+    public void setSmplChunkSize(int smplChunkSize)
+    {
+        this.smplChunkSize = smplChunkSize;
+    }
+    
+    public int getVorbChunkSize()
+    {
+        return vorbChunkSize;
+    }
+    
+    public void setVorbChunkSize(int vorbChunkSize)
+    {
+        this.vorbChunkSize = vorbChunkSize;
+    }
+    
+    public int getDataChunkSize()
+    {
+        return dataChunkSize;
+    }
+    
+    public void setDataChunkSize(int dataChunkSize)
+    {
+        this.dataChunkSize = dataChunkSize;
+    }
+    
+    public int getChannelCount()
+    {
+        return channelCount;
+    }
+    
+    public void setChannelCount(int channelCount)
+    {
+        this.channelCount = channelCount;
+    }
+    
+    public int getSampleRate()
+    {
+        return sampleRate;
+    }
+    
+    public void setSampleRate(int sampleRate)
+    {
+        this.sampleRate = sampleRate;
+    }
+    
+    public int getBytesPerSecond()
+    {
+        return bytesPerSecond;
+    }
+    
+    public void setBytesPerSecond(int bytesPerSecond)
+    {
+        this.bytesPerSecond = bytesPerSecond;
+    }
+    
+    public int getCueCount()
+    {
+        return cueCount;
+    }
+    
+    public void setCueCount(int cueCount)
+    {
+        this.cueCount = cueCount;
+    }
+    
+    public int getLoopCount()
+    {
+        return loopCount;
+    }
+    
+    public void setLoopCount(int loopCount)
+    {
+        this.loopCount = loopCount;
+    }
+    
+    public int getLoopStart()
+    {
+        return loopStart;
+    }
+    
+    public void setLoopStart(int loopStart)
+    {
+        this.loopStart = loopStart;
+    }
+    
+    public int getLoopEnd()
+    {
+        return loopEnd;
+    }
+    
+    public void setLoopEnd(int loopEnd)
+    {
+        this.loopEnd = loopEnd;
+    }
+    
+    public int getSampleCount()
+    {
+        return sampleCount;
+    }
+    
+    public void setSampleCount(int sampleCount)
+    {
+        this.sampleCount = sampleCount;
+    }
+    
+    public boolean isNoGranule()
+    {
+        return noGranule;
+    }
+    
+    public void setNoGranule(boolean noGranule)
+    {
+        this.noGranule = noGranule;
+    }
+    
+    public boolean isModPackets()
+    {
+        return modPackets;
+    }
+    
+    public void setModPackets(boolean modPackets)
+    {
+        this.modPackets = modPackets;
+    }
+    
+    public int getSetupPacketOffset()
+    {
+        return setupPacketOffset;
+    }
+    
+    public void setSetupPacketOffset(int setupPacketOffset)
+    {
+        this.setupPacketOffset = setupPacketOffset;
+    }
+    
+    public int getFirstAudioPacketOffset()
+    {
+        return firstAudioPacketOffset;
+    }
+    
+    public void setFirstAudioPacketOffset(int firstAudioPacketOffset)
+    {
+        this.firstAudioPacketOffset = firstAudioPacketOffset;
+    }
+    
+    public boolean isHeaderTriadPresent()
+    {
+        return headerTriadPresent;
+    }
+    
+    public void setHeaderTriadPresent(boolean headerTriadPresent)
+    {
+        this.headerTriadPresent = headerTriadPresent;
+    }
+    
+    public boolean isOldPacketHeaders()
+    {
+        return oldPacketHeaders;
+    }
+    
+    public void setOldPacketHeaders(boolean oldPacketHeaders)
+    {
+        this.oldPacketHeaders = oldPacketHeaders;
+    }
+    
+    public int getUid()
+    {
+        return uid;
+    }
+    
+    public void setUid(int uid)
+    {
+        this.uid = uid;
+    }
+    
+    public int getBlockSize0Pow()
+    {
+        return blockSize0Pow;
+    }
+    
+    public void setBlockSize0Pow(int blockSize0Pow)
+    {
+        this.blockSize0Pow = blockSize0Pow;
+    }
+    
+    public int getBlockSize1Pow()
+    {
+        return blockSize1Pow;
+    }
+    
+    public void setBlockSize1Pow(int blockSize1Pow)
+    {
+        this.blockSize1Pow = blockSize1Pow;
+    }
+    
+    public boolean isLittleEndian()
+    {
+        return littleEndian;
+    }
+    
+    public void setLittleEndian(boolean littleEndian)
+    {
+        this.littleEndian = littleEndian;
+    }
+    
+    public byte[] getDataBytes()
+    {
+        return dataBytes;
+    }
+    
+    public void setDataBytes(byte[] dataBytes)
+    {
+        this.dataBytes = dataBytes;
+    }
     
     public WEMData(byte[] data)
     {

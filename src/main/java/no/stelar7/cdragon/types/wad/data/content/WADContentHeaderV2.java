@@ -1,10 +1,5 @@
 package no.stelar7.cdragon.types.wad.data.content;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Data
-@EqualsAndHashCode(callSuper = true)
 public class WADContentHeaderV2 extends WADContentHeaderV1
 {
     private boolean duplicate;
@@ -18,5 +13,35 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
         this.compressedFileSize = header.compressedFileSize;
         this.fileSize = header.fileSize;
         this.compressed = header.compressed;
+    }
+    
+    public boolean isDuplicate()
+    {
+        return duplicate;
+    }
+    
+    public void setDuplicate(boolean duplicate)
+    {
+        this.duplicate = duplicate;
+    }
+    
+    public short getPadding()
+    {
+        return padding;
+    }
+    
+    public void setPadding(short padding)
+    {
+        this.padding = padding;
+    }
+    
+    public long getSha256()
+    {
+        return sha256;
+    }
+    
+    public void setSha256(long sha256)
+    {
+        this.sha256 = sha256;
     }
 }

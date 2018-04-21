@@ -1,12 +1,8 @@
 package no.stelar7.cdragon.types.bnk.data;
 
-import lombok.*;
 
 import java.util.*;
 
-@Data
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
 public class BNKDIDX extends BNKHeader
 {
     public BNKDIDX(BNKHeader header)
@@ -18,4 +14,13 @@ public class BNKDIDX extends BNKHeader
     
     private List<BNKDIDXEntry> entries = new ArrayList<>();
     
+    public List<BNKDIDXEntry> getEntries()
+    {
+        return entries;
+    }
+    
+    public void setEntries(List<BNKDIDXEntry> entries)
+    {
+        this.entries = entries;
+    }
 }

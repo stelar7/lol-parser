@@ -27,16 +27,33 @@ public class WADParser implements Parseable<WADFile>
      * @param path path to store the file
      * @return WADFile
      */
-    public WADFile parseLatest(String pluginName, Path path, boolean assetDefault)
+    public WADFile parseLatest(String pluginName, Path path, boolean pbe)
     {
-        String url  = "http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
+        return parseHidden(pluginName, path, pbe, false, 0);
+    }
+    
+    private WADFile parseHidden(String pluginName, Path path, boolean pbe, boolean assetDefault, int count)
+    {
+        String url = "http://l3cdn.riotgames.com/releases/%s/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        url = String.format(url, pbe ? "pbe" : "live", "%s");
         
         String cacheKey = "lastGoodVersion-" + pluginName;
         int    version  = UtilHandler.getPreferences().getInt(cacheKey, 397);
         
-        int use  = version;
-        int next = UtilHandler.getMaxVersion(url, type, version);
+        String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
+        int    use  = version;
+        int    next = UtilHandler.getMaxVersion(url, type, version);
+        
+        if (count >= 3)
+        {
+            return null;
+        }
+        
+        if (next == -1)
+        {
+            return parseHidden(pluginName, path, pbe, !assetDefault, ++count);
+        }
+        
         if (next > version)
         {
             deleteOld(path.resolve(String.format("%s-%s", pluginName, version)));

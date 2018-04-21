@@ -1,10 +1,8 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
 
-import lombok.ToString;
 import no.stelar7.cdragon.viewer.rendering.buffers.VAO;
 
-@ToString
 public class Model implements AutoCloseable
 {
     private static final int VERTEX_SIZE  = 3;

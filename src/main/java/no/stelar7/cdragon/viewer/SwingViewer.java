@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.viewer;
 
-import lombok.*;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.*;
@@ -32,12 +31,13 @@ public class SwingViewer
         new SwingViewer();
     }
     
-    private JTree tree;
+    private JTree                  tree;
     private List<Path>             singles     = new ArrayList<>();
     private List<Path>             containers  = new ArrayList<>();
     private NaturalOrderComparator comparator  = new NaturalOrderComparator();
     private JScrollPane            contentPane = new JScrollPane();
     
+    @SuppressWarnings("unchecked")
     public SwingViewer()
     {
         DefaultMutableTreeNode top  = new DefaultMutableTreeNode("Riot Games folder");
@@ -75,7 +75,7 @@ public class SwingViewer
                     
                     if (elem.getContent() instanceof ByteArray)
                     {
-                        data.add(elem);
+                        data.add((DataPair<ByteArray>) elem);
                     }
                 }
                 
@@ -118,7 +118,7 @@ public class SwingViewer
                 });
                 
                 JFileChooser saveDialog = new JFileChooser();
-                saveDialog.setSelectedFiles(files.keySet().toArray(new File[files.size()]));
+                saveDialog.setSelectedFiles(files.keySet().toArray(new File[0]));
                 
                 int option = saveDialog.showSaveDialog(null);
                 if (option == JFileChooser.APPROVE_OPTION)
@@ -217,6 +217,7 @@ public class SwingViewer
         return file.getParent().getFileName() + "/" + file.getFileName();
     }
     
+    @SuppressWarnings("unchecked")
     private void add(Path file, DefaultMutableTreeNode parent)
     {
         String                 path = extractParentFileName(file);
@@ -226,6 +227,7 @@ public class SwingViewer
     
     Map<Path, List<DataPair>> parsed = new HashMap<>();
     
+    @SuppressWarnings("unchecked")
     private List<DataPair> getContent(Path path)
     {
         if (parsed.containsKey(path))
@@ -280,6 +282,7 @@ public class SwingViewer
         return content;
     }
     
+    @SuppressWarnings("unchecked")
     private void valueChangedListener(TreeSelectionEvent e)
     {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode) tree.getLastSelectedPathComponent();
@@ -343,12 +346,16 @@ public class SwingViewer
         }
     }
     
-    @Getter
-    @AllArgsConstructor
     class DataPair<T> implements Comparable<DataPair<T>>
     {
         private String name;
         private T      content;
+        
+        public DataPair(String name, T content)
+        {
+            this.name = name;
+            this.content = content;
+        }
         
         @Override
         public int compareTo(DataPair<T> o)
@@ -372,6 +379,26 @@ public class SwingViewer
             }
             
             return comparator.compare(name, o.name);
+        }
+        
+        public String getName()
+        {
+            return name;
+        }
+        
+        public void setName(String name)
+        {
+            this.name = name;
+        }
+        
+        public T getContent()
+        {
+            return content;
+        }
+        
+        public void setContent(T content)
+        {
+            this.content = content;
         }
         
         @Override

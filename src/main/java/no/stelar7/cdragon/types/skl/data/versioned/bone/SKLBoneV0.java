@@ -1,9 +1,7 @@
 package no.stelar7.cdragon.types.skl.data.versioned.bone;
 
-import lombok.Data;
 import org.joml.*;
 
-@Data
 public class SKLBoneV0
 {
     private short    unknown1;

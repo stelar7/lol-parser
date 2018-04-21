@@ -1,7 +1,6 @@
 package no.stelar7.cdragon.types.bin.data;
 
 import com.google.gson.stream.JsonWriter;
-import lombok.Data;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.ByteWriter;
 import no.stelar7.cdragon.util.types.*;
@@ -10,11 +9,30 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 
-@Data
 public class BINFile
 {
     private BINHeader      header;
     private List<BINEntry> entries = new ArrayList<>();
+    
+    public BINHeader getHeader()
+    {
+        return header;
+    }
+    
+    public void setHeader(BINHeader header)
+    {
+        this.header = header;
+    }
+    
+    public List<BINEntry> getEntries()
+    {
+        return entries;
+    }
+    
+    public void setEntries(List<BINEntry> entries)
+    {
+        this.entries = entries;
+    }
     
     private String json;
     

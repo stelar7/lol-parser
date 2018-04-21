@@ -1,11 +1,9 @@
 package no.stelar7.cdragon.types.skl.data.versioned.data;
 
-import lombok.Data;
 import no.stelar7.cdragon.types.skl.data.versioned.bone.*;
 
 import java.util.List;
 
-@Data
 public class SKLDataV0
 {
     private short                unknown1;

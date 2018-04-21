@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.types.inibin.data;
 
-import lombok.Data;
 import no.stelar7.cdragon.interfaces.Extractable;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.types.Vector2;
@@ -10,11 +9,30 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 
-@Data
 public class InibinFile implements Extractable
 {
     private InibinHeader        header;
     private Map<String, Object> keys;
+    
+    public InibinHeader getHeader()
+    {
+        return header;
+    }
+    
+    public void setHeader(InibinHeader header)
+    {
+        this.header = header;
+    }
+    
+    public Map<String, Object> getKeys()
+    {
+        return keys;
+    }
+    
+    public void setKeys(Map<String, Object> keys)
+    {
+        this.keys = keys;
+    }
     
     public void extract(Path path)
     {

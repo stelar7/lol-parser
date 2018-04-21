@@ -1,15 +1,43 @@
 package no.stelar7.cdragon.types.releasemanifest.data;
 
-import lombok.Data;
 
 import java.util.*;
 
-@Data
 public class ReleasemanifestDirectory
 {
     private String name;
     private List<ReleasemanifestContentFile> files          = new ArrayList<>();
     private List<ReleasemanifestDirectory>   subDirectories = new ArrayList<>();
+    
+    public String getName()
+    {
+        return name;
+    }
+    
+    public void setName(String name)
+    {
+        this.name = name;
+    }
+    
+    public List<ReleasemanifestContentFile> getFiles()
+    {
+        return files;
+    }
+    
+    public void setFiles(List<ReleasemanifestContentFile> files)
+    {
+        this.files = files;
+    }
+    
+    public List<ReleasemanifestDirectory> getSubDirectories()
+    {
+        return subDirectories;
+    }
+    
+    public void setSubDirectories(List<ReleasemanifestDirectory> subDirectories)
+    {
+        this.subDirectories = subDirectories;
+    }
     
     public List<String> printLines(String pre, String post)
     {

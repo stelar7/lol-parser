@@ -1,9 +1,6 @@
 package no.stelar7.cdragon.types.rofl.data;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.Data;
-
-@Data
 public class ROFLMetadataStats
 {
     @SerializedName("NAME")

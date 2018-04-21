@@ -1,11 +1,9 @@
 package no.stelar7.cdragon.viewer.rendering.buffers;
 
-import lombok.ToString;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import static org.lwjgl.opengl.GL15.*;
 
-@ToString
 public class VBO implements AutoCloseable
 {
     private int id;

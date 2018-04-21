@@ -1,10 +1,5 @@
 package no.stelar7.cdragon.types.wad.data.header;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@Data
-@EqualsAndHashCode(callSuper = true)
 public class WADHeaderV1 extends WADHeaderBase
 {
     private int entryHeaderOffset;
@@ -16,5 +11,25 @@ public class WADHeaderV1 extends WADHeaderBase
         this.major = base.major;
         this.minor = base.minor;
         this.fileCount = base.fileCount;
+    }
+    
+    public int getEntryHeaderOffset()
+    {
+        return entryHeaderOffset;
+    }
+    
+    public void setEntryHeaderOffset(int entryHeaderOffset)
+    {
+        this.entryHeaderOffset = entryHeaderOffset;
+    }
+    
+    public int getEntryHeaderCellSize()
+    {
+        return entryHeaderCellSize;
+    }
+    
+    public void setEntryHeaderCellSize(int entryHeaderCellSize)
+    {
+        this.entryHeaderCellSize = entryHeaderCellSize;
     }
 }

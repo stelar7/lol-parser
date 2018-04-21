@@ -120,6 +120,7 @@ public final class UtilHandler
         int failCount = 0;
         int lastGood  = -1;
         
+        System.out.println("Finding current version for: " + file);
         while (failCount < 5)
         {
             String versionAsIP = getIPFromLong(++i);

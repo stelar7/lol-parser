@@ -745,6 +745,7 @@ public class TestStoreAsRealName
             }
             
             @Override
+            @SuppressWarnings("unchecked")
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
                 ((Map<String, String>) UtilHandler.getGson().fromJson(UtilHandler.readAsString(file), new TypeToken<Map<String, String>>() {}.getType())).forEach((k, v) -> {

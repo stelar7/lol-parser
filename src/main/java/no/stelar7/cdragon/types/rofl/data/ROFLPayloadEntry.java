@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.types.rofl.data;
 
-import lombok.*;
 import no.stelar7.cdragon.util.handlers.CompressionHandler;
 import org.bouncycastle.crypto.BufferedBlockCipher;
 import org.bouncycastle.crypto.engines.BlowfishEngine;
@@ -8,7 +7,6 @@ import org.bouncycastle.crypto.params.KeyParameter;
 
 import java.nio.charset.StandardCharsets;
 
-@Data
 public class ROFLPayloadEntry
 {
     public static final int HEADER_SIZE = 17;
@@ -19,6 +17,66 @@ public class ROFLPayloadEntry
     private int    offset;
     private byte   type;
     private byte[] data;
+    
+    public static int getHeaderSize()
+    {
+        return HEADER_SIZE;
+    }
+    
+    public int getId()
+    {
+        return id;
+    }
+    
+    public void setId(int id)
+    {
+        this.id = id;
+    }
+    
+    public int getLength()
+    {
+        return length;
+    }
+    
+    public void setLength(int length)
+    {
+        this.length = length;
+    }
+    
+    public int getNextChunkId()
+    {
+        return nextChunkId;
+    }
+    
+    public void setNextChunkId(int nextChunkId)
+    {
+        this.nextChunkId = nextChunkId;
+    }
+    
+    public int getOffset()
+    {
+        return offset;
+    }
+    
+    public void setOffset(int offset)
+    {
+        this.offset = offset;
+    }
+    
+    public byte getType()
+    {
+        return type;
+    }
+    
+    public void setType(byte type)
+    {
+        this.type = type;
+    }
+    
+    public void setData(byte[] data)
+    {
+        this.data = data;
+    }
     
     public byte[] getData()
     {

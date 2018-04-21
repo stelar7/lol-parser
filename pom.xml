@@ -28,13 +28,6 @@
             <version>2.8.1</version>
         </dependency>
 
-        <!-- used to avoid creating getters and setters -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.20</version>
-        </dependency>
-
         <!-- used for XXHash64 -->
         <dependency>
             <groupId>org.lz4</groupId>
@@ -224,18 +217,6 @@
                         <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED</arg>
                     </compilerArgs>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.16.20.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>delombok</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -1,13 +1,11 @@
 package no.stelar7.cdragon.types.ogg.data;
 
-import lombok.Data;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.io.File;
 import java.nio.ByteOrder;
 
-@Data
 public class CodebookLibrary
 {
     private RandomAccessReader raf;
