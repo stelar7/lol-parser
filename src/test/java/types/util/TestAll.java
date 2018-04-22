@@ -473,7 +473,7 @@ public class TestAll
         
         try
         {
-            WADFile parsed = parser.parseLatest(pluginName, extractPath, false);
+            WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
             parsed.extractFiles(pluginName, null, extractPath);
         } catch (Exception e)
         {

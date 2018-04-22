@@ -34,11 +34,12 @@ public class WADParser implements Parseable<WADFile>
     
     private WADFile parseHidden(String pluginName, Path path, boolean pbe, boolean assetDefault, int count)
     {
-        String url = "http://l3cdn.riotgames.com/releases/%s/projects/league_client/releases/%s/files/Plugins/" + pluginName;
-        url = String.format(url, pbe ? "pbe" : "live", "%s");
+        String url       = "http://l3cdn.riotgames.com/releases/%s/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String pbeString = pbe ? "pbe" : "live";
+        url = String.format(url, pbeString, "%s");
         
-        String cacheKey = "lastGoodVersion-" + pluginName;
-        int    version  = UtilHandler.getPreferences().getInt(cacheKey, 397);
+        String cacheKey = String.format("lastGoodVersion-%s-%s", pbeString, pluginName);
+        int    version  = UtilHandler.getPreferences().getInt(cacheKey, 390);
         
         String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
         int    use  = version;
