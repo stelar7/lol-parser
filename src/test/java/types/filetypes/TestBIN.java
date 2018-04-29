@@ -54,7 +54,7 @@ public class TestBIN
                 {
                     if (link.startsWith("DATA/Characters") || link.substring(ignored.length()).indexOf('_') == -1)
                     {
-                        String linkVal = link.replace("DATA", "assets").toLowerCase(Locale.ENGLISH);
+                        String linkVal = link.toLowerCase(Locale.ENGLISH);
                         dupRemover.add(new Vector2<>(HashHandler.computeXXHash64(linkVal), linkVal));
                     } else
                     {
@@ -82,7 +82,7 @@ public class TestBIN
                                 skinString = "";
                             }
                             
-                            String result = String.format("assets/characters/%s/%s/%s%s", character, folder, skin, ext).toLowerCase(Locale.ENGLISH);
+                            String result = String.format("data/characters/%s/%s/%s%s", character, folder, skin, ext).toLowerCase(Locale.ENGLISH);
                             dupRemover.add(new Vector2<>(HashHandler.computeXXHash64(result), result));
                         }
                     }
@@ -114,18 +114,25 @@ public class TestBIN
             return;
         }
         
-        String                        txt         = new String(Files.readAllBytes(loadPath), StandardCharsets.UTF_8);
-        Map<String, String>           val         = UtilHandler.getGson().fromJson(txt, new TypeToken<Map<String, String>>() {}.getType());
         List<Vector2<String, String>> foundHashes = new ArrayList<>();
-        val.forEach((k, v) -> foundHashes.add(new Vector2(k, v)));
         
-        HashHandler.getWadHashes("champions").forEach((k, v) -> {
-            Vector2<String, String> data = new Vector2<>(k, v);
-            if (!foundHashes.contains(data))
-            {
-                foundHashes.add(data);
-            }
-        });
+        String              txt = new String(Files.readAllBytes(loadPath), StandardCharsets.UTF_8);
+        Map<String, String> val = UtilHandler.getGson().fromJson(txt, new TypeToken<Map<String, String>>() {}.getType());
+        val.entrySet()
+           .stream()
+           .map((e) -> new Vector2<>(e.getKey(), e.getValue()))
+           .forEach(foundHashes::add);
+        
+        HashHandler.getWadHashes("champions")
+                   .entrySet()
+                   .stream()
+                   .map((e) -> new Vector2<>(e.getKey(), e.getValue()))
+                   .forEach(data -> {
+                       if (!foundHashes.contains(data))
+                       {
+                           foundHashes.add(data);
+                       }
+                   });
         
         foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
         
