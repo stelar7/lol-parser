@@ -36,8 +36,8 @@ public class TestBIN
     @Test
     public void testBINLinkedFileHash() throws IOException
     {
-        Path         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test");
-        Set<Vector2> dupRemover = new HashSet<>();
+        Path                         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test");
+        Set<Vector2<String, String>> dupRemover = new HashSet<>();
         Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
             @Override
@@ -120,13 +120,13 @@ public class TestBIN
         Map<String, String> val = UtilHandler.getGson().fromJson(txt, new TypeToken<Map<String, String>>() {}.getType());
         val.entrySet()
            .stream()
-           .map((e) -> new Vector2<>(e.getKey(), e.getValue()))
+           .map(Vector2::new)
            .forEach(foundHashes::add);
         
         HashHandler.getWadHashes("champions")
                    .entrySet()
                    .stream()
-                   .map((e) -> new Vector2<>(e.getKey(), e.getValue()))
+                   .map(Vector2::new)
                    .forEach(data -> {
                        if (!foundHashes.contains(data))
                        {

@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.types;
 
-import java.util.Objects;
+import java.util.*;
 
 public class Vector2<X, Y>
 {
@@ -9,6 +9,12 @@ public class Vector2<X, Y>
     
     public Vector2()
     {
+    }
+    
+    public Vector2(Map.Entry<X, Y> entry)
+    {
+        this.x = entry.getKey();
+        this.y = entry.getValue();
     }
     
     public Vector2(X x, Y y)
