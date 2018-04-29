@@ -48,7 +48,13 @@ public class TestWAD
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                if (file.getFileName().toString().endsWith(".wad") || file.getFileName().toString().endsWith(".wad.client"))
+                if (file.getFileName().toString().endsWith(".wad"))
+                {
+                    WADFile parsed = parser.parse(file);
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
+                }
+                
+                if (file.getFileName().toString().endsWith(".wad.client"))
                 {
                     WADFile parsed = parser.parse(file);
                     parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);

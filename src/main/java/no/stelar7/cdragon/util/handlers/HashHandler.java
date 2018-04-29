@@ -198,7 +198,7 @@ public class HashHandler
         } catch (IOException e)
         {
             binHashNames = new HashMap<>();
-            System.err.println("File not found: " + e.getMessage());
+            System.err.println("BIN Hash file not found: " + e.getMessage());
         }
         
         return getBinHashes();
@@ -219,7 +219,7 @@ public class HashHandler
         } catch (IOException e)
         {
             iniHashNames = new HashMap<>();
-            System.err.println("File not found: " + e.getMessage());
+            System.err.println("INI Hash file not found: " + e.getMessage());
         }
         
         return getIniHashes();
@@ -241,7 +241,7 @@ public class HashHandler
         } catch (IOException e)
         {
             wadHashNames.put(plugin, new HashMap<>());
-            System.err.println("File not found: " + e.getMessage());
+            System.err.println("WAD Hash file not found: " + e.getMessage());
         }
         
         return getWadHashes(plugin);

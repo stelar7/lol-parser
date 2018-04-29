@@ -11,6 +11,40 @@ public final class ByteArray
         this.data = data;
     }
     
+    public boolean indexMatch(int index, byte b)
+    {
+        return data[index] == b;
+    }
+    
+    public ByteArray removeLastByte(int i)
+    {
+        byte[]  newData = new byte[data.length];
+        boolean found   = false;
+        for (int in = data.length - 1; in >= 0; in--)
+        {
+            if (!found && data[in] == i)
+            {
+                found = true;
+                newData[in] = data[in - 1];
+            }
+            
+            if (found)
+            {
+                if (in - 1 == -1)
+                {
+                    System.arraycopy(newData, 1, newData, 0, newData.length - 1);
+                    return new ByteArray(newData);
+                }
+                
+                newData[in] = data[in - 1];
+            } else
+            {
+                newData[in] = data[in];
+            }
+        }
+        return new ByteArray(newData);
+    }
+    
     @Override
     public boolean equals(Object other)
     {

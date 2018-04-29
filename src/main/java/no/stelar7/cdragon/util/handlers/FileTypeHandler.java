@@ -16,15 +16,16 @@ public final class FileTypeHandler
     
     public static String findFileType(byte[] data)
     {
+        ByteArray magic  = new ByteArray(Arrays.copyOf(data, data.length));
         ByteArray magic4 = new ByteArray(Arrays.copyOf(data, 4));
         ByteArray magic8 = new ByteArray(Arrays.copyOf(data, 8));
         
         if (FileTypeHandler.isProbableBOM(magic4))
         {
-            return findFileType(Arrays.copyOfRange(data, 3, 7));
+            return findFileType(Arrays.copyOfRange(data, 3, data.length));
         }
         
-        if (FileTypeHandler.isProbableJSON(magic4))
+        if (FileTypeHandler.isProbableJSON(magic))
         {
             return "json";
         }
@@ -104,8 +105,8 @@ public final class FileTypeHandler
         }
         
         
-        System.out.print("Unknown filetype: ");
-        System.out.println(magic4.toString());
+        System.err.print("Unknown filetype: ");
+        System.err.println(magic4.toString());
         return "unknown";
     }
     
@@ -245,20 +246,27 @@ public final class FileTypeHandler
     
     public static boolean isProbableJSON(ByteArray wrapper)
     {
-        byte[]  data   = wrapper.getData();
-        boolean isJSON = (isSame(data[0], (byte) 0x7B) && (isSame(data[1], (byte) 0x22) || isSame(data[1], (byte) 0x0D)));
-        
-        isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
-        isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x7D));
-        isJSON |= (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x5D));
-        isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x7D) && isSame(data[3], (byte) 0x0A));
-        isJSON |= (isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x0A) && isSame(data[3], (byte) 0x7D));
-        isJSON |= (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x22));
-        isJSON |= (isSame(data[0], (byte) 0x5B) && isSame(data[1], (byte) 0x0A) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x20));
-        
-        isJSON |= (isSame(data[0], (byte) 0x5B) && new String(Arrays.copyOfRange(data, 1, 4), StandardCharsets.UTF_8).matches("\\d*,?\\d*"));
-        
-        return isJSON;
+        try
+        {
+            if (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B))
+            {
+                UtilHandler.getJsonParser().parse(new String(wrapper.getData(), StandardCharsets.UTF_8));
+                return true;
+            }
+        } catch (JsonParseException e)
+        {
+            try
+            {
+                // try removing trailing comma
+                ByteArray newTest = wrapper.removeLastByte(44);
+                UtilHandler.getJsonParser().parse(new String(newTest.getData(), StandardCharsets.UTF_8));
+                return true;
+            } catch (JsonParseException ex)
+            {
+                return false;
+            }
+        }
+        return false;
     }
     
     public static boolean isProbableCSS(ByteArray wrapper)

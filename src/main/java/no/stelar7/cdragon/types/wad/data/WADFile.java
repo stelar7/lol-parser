@@ -170,7 +170,7 @@ public class WADFile
         
         if ("unknown".equals(fileType))
         {
-            System.err.println("Unknown filetype; " + filename + parent);
+            System.err.format("Unknown filetype: %s (%s)", filename, parent);
         }
         
         StringBuilder sb    = new StringBuilder(filename).append(".").append(fileType);
