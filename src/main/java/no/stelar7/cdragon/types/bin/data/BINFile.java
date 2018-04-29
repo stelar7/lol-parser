@@ -12,7 +12,8 @@ import java.util.*;
 public class BINFile
 {
     private BINHeader      header;
-    private List<BINEntry> entries = new ArrayList<>();
+    private List<BINEntry> entries     = new ArrayList<>();
+    private List<String>   linkedFiles = new ArrayList<>();
     
     public BINHeader getHeader()
     {
@@ -34,6 +35,16 @@ public class BINFile
         this.entries = entries;
     }
     
+    public List<String> getLinkedFiles()
+    {
+        return linkedFiles;
+    }
+    
+    public void setLinkedFiles(List<String> linkedFiles)
+    {
+        this.linkedFiles = linkedFiles;
+    }
+    
     private String json;
     
     public void write(Path output)
@@ -42,8 +53,8 @@ public class BINFile
         {
             bw.writeString("PROP");
             bw.writeInt(2);
-            bw.writeInt(this.header.getLinkedFileCount());
-            for (String s : this.header.getLinkedFiles())
+            bw.writeInt(this.getLinkedFiles().size());
+            for (String s : this.getLinkedFiles())
             {
                 bw.writeStringWithLength(s);
             }

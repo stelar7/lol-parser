@@ -19,7 +19,11 @@ public class TestWAD
         Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
-        parsed.extractFiles(pluginName, null, extractPath);
+        
+        if (parsed != null)
+        {
+            parsed.extractFiles(pluginName, null, extractPath);
+        }
     }
     
     @Test

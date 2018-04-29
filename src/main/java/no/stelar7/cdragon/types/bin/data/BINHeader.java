@@ -5,12 +5,10 @@ import java.util.*;
 
 public class BINHeader
 {
-    private String magic;
-    private int    version;
-    private int    entryCount;
-    private int    linkedFileCount;
-    private List<Integer> entryTypes  = new ArrayList<>();
-    private List<String>  linkedFiles = new ArrayList<>();
+    private String        magic;
+    private int           version;
+    private int           entryCount;
+    private List<Integer> entryTypes = new ArrayList<>();
     
     public String getMagic()
     {
@@ -42,16 +40,6 @@ public class BINHeader
         this.entryCount = entryCount;
     }
     
-    public int getLinkedFileCount()
-    {
-        return linkedFileCount;
-    }
-    
-    public void setLinkedFileCount(int linkedFileCount)
-    {
-        this.linkedFileCount = linkedFileCount;
-    }
-    
     public List<Integer> getEntryTypes()
     {
         return entryTypes;
@@ -62,13 +50,4 @@ public class BINHeader
         this.entryTypes = entryTypes;
     }
     
-    public List<String> getLinkedFiles()
-    {
-        return linkedFiles;
-    }
-    
-    public void setLinkedFiles(List<String> linkedFiles)
-    {
-        this.linkedFiles = linkedFiles;
-    }
 }

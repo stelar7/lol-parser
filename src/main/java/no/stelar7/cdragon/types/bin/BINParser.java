@@ -196,12 +196,12 @@ public class BINParser implements Parseable<BINFile>
         
         if (header.getVersion() >= 2)
         {
-            header.setLinkedFileCount(raf.readInt());
-            for (int i = 0; i < header.getLinkedFileCount(); i++)
+            int fileCount = raf.readInt();
+            for (int i = 0; i < fileCount; i++)
             {
                 short  length = raf.readShort();
                 String link   = raf.readString(length);
-                header.getLinkedFiles().add(link);
+                file.getLinkedFiles().add(link);
             }
         }
         

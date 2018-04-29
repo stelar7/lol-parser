@@ -5,7 +5,9 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.types.Vector2;
 import org.javers.core.*;
 import org.junit.*;
 
@@ -29,6 +31,113 @@ public class TestBIN
         
         BINFile data = parser.parse(file);
         System.out.println(data.toJson());
+    }
+    
+    @Test
+    public void testBINLinkedFileHash() throws IOException
+    {
+        Path         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test");
+        Set<Vector2> dupRemover = new HashSet<>();
+        Files.walkFileTree(file, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                if (!file.toString().endsWith(".bin"))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                
+                BINFile data    = parser.parse(file);
+                String  ignored = "DATA/";
+                for (String link : data.getLinkedFiles())
+                {
+                    if (link.startsWith("DATA/Characters") || link.substring(ignored.length()).indexOf('_') == -1)
+                    {
+                        String linkVal = link.replace("DATA", "assets").toLowerCase(Locale.ENGLISH);
+                        dupRemover.add(new Vector2<>(HashHandler.computeXXHash64(linkVal), linkVal));
+                    } else
+                    {
+                        String character = link.substring(ignored.length(), link.indexOf('_'));
+                        String ext       = link.substring(link.lastIndexOf("."));
+                        
+                        String afterChar = link.substring(ignored.length() + character.length() + 1);
+                        
+                        String skinString = afterChar.substring(0, afterChar.length() - ext.length());
+                        while (!skinString.isEmpty())
+                        {
+                            String folder = skinString.substring(0, skinString.indexOf('_'));
+                            skinString = skinString.substring(folder.length() + 1);
+                            
+                            String skin;
+                            
+                            int underIndex = skinString.indexOf('_');
+                            if (underIndex != -1)
+                            {
+                                skin = skinString.substring(0, underIndex);
+                                skinString = skinString.substring(skin.length() + 1);
+                            } else
+                            {
+                                skin = skinString;
+                                skinString = "";
+                            }
+                            
+                            String result = String.format("assets/characters/%s/%s/%s%s", character, folder, skin, ext).toLowerCase(Locale.ENGLISH);
+                            dupRemover.add(new Vector2<>(HashHandler.computeXXHash64(result), result));
+                        }
+                    }
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        StringWriter sw = new StringWriter();
+        JsonWriter   jw = new JsonWriter(new BufferedWriter(sw));
+        jw.setIndent("    ");
+        jw.beginObject();
+        for (Vector2<String, String> dataPair : dupRemover)
+        {
+            jw.name(dataPair.getX());
+            jw.value(dataPair.getY());
+        }
+        jw.endObject();
+        jw.flush();
+        Files.write(Paths.get("combined.json"), sw.toString().getBytes(StandardCharsets.UTF_8));
+        testUnsplit();
+    }
+    
+    public void testUnsplit() throws IOException
+    {
+        Path loadPath = Paths.get("combined.json");
+        
+        if (!Files.exists(loadPath))
+        {
+            return;
+        }
+        
+        String                        txt         = new String(Files.readAllBytes(loadPath), StandardCharsets.UTF_8);
+        Map<String, String>           val         = UtilHandler.getGson().fromJson(txt, new TypeToken<Map<String, String>>() {}.getType());
+        List<Vector2<String, String>> foundHashes = new ArrayList<>();
+        val.forEach((k, v) -> foundHashes.add(new Vector2(k, v)));
+        
+        HashHandler.getWadHashes("champions").forEach((k, v) -> {
+            Vector2<String, String> data = new Vector2<>(k, v);
+            if (!foundHashes.contains(data))
+            {
+                foundHashes.add(data);
+            }
+        });
+        
+        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+        
+        StringBuilder sb = new StringBuilder("{\n");
+        for (Vector2<String, String> pair : foundHashes)
+        {
+            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
+        }
+        sb.reverse().delete(0, 2).reverse().append("\n}");
+        Files.write(HashHandler.WAD_HASH_STORE.resolve("champions" + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        
+        Files.deleteIfExists(loadPath);
     }
     
     @Test
