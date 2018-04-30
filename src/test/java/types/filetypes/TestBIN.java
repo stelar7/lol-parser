@@ -26,7 +26,8 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
+        // Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\data\\characters\\warwick\\warwick.bin");
         System.out.println("Parsing: " + file.toString());
         
         BINFile data = parser.parse(file);
@@ -350,9 +351,8 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path extractPathBin  = UtilHandler.DOWNLOADS_FOLDER.resolve("bin");
         Path extractPathJson = UtilHandler.DOWNLOADS_FOLDER.resolve("json");
-        Path rito            = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+        Path rito            = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test");
         
         List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -382,7 +382,6 @@ public class TestBIN
         
         paths.sort(c);
         
-        Files.createDirectories(extractPathBin);
         Files.createDirectories(extractPathJson);
         for (Path path : paths)
         {
@@ -402,7 +401,6 @@ public class TestBIN
                 byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
                 byte[] data = FileTypeHandler.makePrettyJson(json);
                 
-                Files.write(extractPathBin.resolve(UtilHandler.pathToFilename(path) + ".bin"), Files.readAllBytes(path));
                 Files.write(extractPathJson.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
                 
             } catch (RuntimeException ex)
