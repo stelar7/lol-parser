@@ -3,7 +3,6 @@ package types.util;
 import com.google.common.collect.Sets;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
@@ -28,12 +27,10 @@ public class TestAll
     @Test
     public void testAll() throws IOException
     {
-        /*
         downloadWAD();
         getHashes();
         deleteUnknownFolder();
         downloadWAD();
-        */
         extractImages();
         //  uploadToFTP();
     }
@@ -121,7 +118,7 @@ public class TestAll
     
     private List<String> hashes;
     
-    private void parseClash(String pre, JsonWriter sb)
+    private void parseClash(String pre, JsonWriterWrapper sb)
     {
         Path                loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\unknown\\9d3e847588265a68.json");
         Map<String, String> data     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(loadPath), new TypeToken<Map<String, String>>() {}.getType());
@@ -134,7 +131,7 @@ public class TestAll
         }
     }
     
-    private void parseIcons(Path file, JsonWriter sb)
+    private void parseIcons(Path file, JsonWriterWrapper sb)
     {
         findIconPathInJsonArrayFile(file, "perkstyles.json", sb);
         findIconPathInJsonArrayFile(file, "perks.json", sb);
@@ -162,6 +159,7 @@ public class TestAll
         List<String> hextechValues = parseHextechFile();
         
         JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
+        jsonWriter.beginObject();
         
         String pre   = prePre + "global/default/";
         Path   file  = dir.resolve(pre + "v1");
@@ -172,31 +170,31 @@ public class TestAll
         System.out.println("Parsing filenames");
         for (String filename : filenames)
         {
-            hashAndAddToSB(jsonWriter.getJsonWriter(), pre + filename);
+            hashAndAddToSB(jsonWriter, pre + filename);
         }
         
         System.out.println("Parsing champions");
         for (int i = -1; i < championMax; i++)
         {
-            findInChampionFile(file2, i + ".json", jsonWriter.getJsonWriter());
+            findInChampionFile(file2, i + ".json", jsonWriter);
         }
         
         System.out.println("Parsing hextech");
-        doHextechParse(jsonWriter.getJsonWriter(), hextechValues, pre);
+        doHextechParse(jsonWriter, hextechValues, pre);
         
         System.out.println("Parsing loot");
-        doLootParse(jsonWriter.getJsonWriter(), hextechValues, pre);
+        doLootParse(jsonWriter, hextechValues, pre);
         
         System.out.println("Parsing icons");
-        parseIcons(file, jsonWriter.getJsonWriter());
+        parseIcons(file, jsonWriter);
         
         System.out.println("Parsing clash voices");
-        parseClash(pre, jsonWriter.getJsonWriter());
+        parseClash(pre, jsonWriter);
         
         System.out.println("Parsing remainder");
         for (final String exten : exts)
         {
-            folderData.forEach((folderName, depths) -> generateHashList(pre, folderName, depths, exten, jsonWriter.getJsonWriter()));
+            folderData.forEach((folderName, depths) -> generateHashList(pre, folderName, depths, exten, jsonWriter));
         }
         
         for (int i = -1; i < championMax; i++)
@@ -204,15 +202,11 @@ public class TestAll
             folderData.put(String.valueOf(i), new Integer[]{1});
         }
         
-        System.out.println("Merging files");
-        
-        jsonWriter.getJsonWriter().endObject();
-        jsonWriter.getJsonWriter().flush();
-        
+        jsonWriter.endObject();
         Files.write(Paths.get("combined.json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
     }
     
-    private void parseLootFile(Path filepath, String filename, JsonWriter data)
+    private void parseLootFile(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -246,7 +240,7 @@ public class TestAll
         }
     }
     
-    private void doLootParse(JsonWriter data2, List<String> hextechValues, String pre)
+    private void doLootParse(JsonWriterWrapper data2, List<String> hextechValues, String pre)
     {
         for (String attempt : hextechValues)
         {
@@ -293,7 +287,7 @@ public class TestAll
         hashAndAddToSB(data2, pre + "assets/loot/hextech-images/chest_promotion.png");
     }
     
-    private void doHextechParse(JsonWriter data2, List<String> hextechValues, String pre)
+    private void doHextechParse(JsonWriterWrapper data2, List<String> hextechValues, String pre)
     {
         for (String attempt : hextechValues)
         {
@@ -393,7 +387,7 @@ public class TestAll
         return all;
     }
     
-    private void parseMapAssets(Path filepath, String filename, JsonWriter data)
+    private void parseMapAssets(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -482,7 +476,7 @@ public class TestAll
         }
     }
     
-    private void parseBanners(Path filepath, String filename, JsonWriter data)
+    private void parseBanners(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -515,7 +509,7 @@ public class TestAll
         }
     }
     
-    private void parseEmotes(Path filepath, String filename, JsonWriter data)
+    private void parseEmotes(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -532,7 +526,7 @@ public class TestAll
         }
     }
     
-    private void parseMasteries(Path filepath, String filename, JsonWriter data)
+    private void parseMasteries(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -549,7 +543,7 @@ public class TestAll
         }
     }
     
-    private void getElementAndCheckHash(JsonObject el, String path, JsonWriter data)
+    private void getElementAndCheckHash(JsonObject el, String path, JsonWriterWrapper data)
     {
         if (!el.has(path))
         {
@@ -587,7 +581,7 @@ public class TestAll
         hashAndAddToSB(data, pre + wip);
     }
     
-    private void parseWardSkins(Path filepath, String filename, JsonWriter data)
+    private void parseWardSkins(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -606,7 +600,7 @@ public class TestAll
         }
     }
     
-    private void findInChampionFile(Path filepath, String filename, JsonWriter data)
+    private void findInChampionFile(Path filepath, String filename, JsonWriterWrapper data)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -700,7 +694,7 @@ public class TestAll
         }
     }
     
-    private void findIconPathInJsonArrayFile(Path filepath, String filename, JsonWriter sb)
+    private void findIconPathInJsonArrayFile(Path filepath, String filename, JsonWriterWrapper sb)
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -723,7 +717,7 @@ public class TestAll
         }
     }
     
-    private void generateHashList(String pre, String folderName, Integer[] depths, String fileType, JsonWriter data)
+    private void generateHashList(String pre, String folderName, Integer[] depths, String fileType, JsonWriterWrapper data)
     {
         String pathPrefix = pre + "v1/" + folderName + "/";
         if (depths.length == 1)
@@ -736,7 +730,7 @@ public class TestAll
     }
     
     
-    private void doLoop(int max, String format, JsonWriter sb)
+    private void doLoop(int max, String format, JsonWriterWrapper sb)
     {
         for (int i = -1; i < max; i++)
         {
@@ -745,7 +739,7 @@ public class TestAll
         }
     }
     
-    private void doNestedLoop(int outerMax, int innerMax, String format, JsonWriter sb)
+    private void doNestedLoop(int outerMax, int innerMax, String format, JsonWriterWrapper sb)
     {
         for (int i = -1; i < outerMax; i++)
         {
@@ -767,7 +761,7 @@ public class TestAll
     }
     
     
-    private void hashAndAddToSB(JsonWriter sb, String hashMe)
+    private void hashAndAddToSB(JsonWriterWrapper sb, String hashMe)
     {
         try
         {
@@ -793,7 +787,6 @@ public class TestAll
                     }
                     
                     sb.name(hash).value(hVal);
-                    sb.flush();
                     hashes.remove(hash);
                 }
             }
@@ -915,13 +908,12 @@ public class TestAll
             
             System.out.println("Writing hashes");
             JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
-            jsonWriter.getJsonWriter().beginObject();
+            jsonWriter.beginObject();
             for (Vector2<String, String> pair : foundHashes)
             {
-                jsonWriter.getJsonWriter().name(pair.getX()).value(pair.getY());
+                jsonWriter.name(pair.getX()).value(pair.getY());
             }
-            jsonWriter.getJsonWriter().endObject();
-            jsonWriter.getJsonWriter().flush();
+            jsonWriter.endObject();
             Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
         }
         
@@ -962,35 +954,34 @@ public class TestAll
         Path file2 = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
         JsonWriterWrapper data = new JsonWriterWrapper();
-        data.getJsonWriter().beginObject();
+        data.beginObject();
         
         System.out.println("Parsing icon files");
-        img_findIconPathInJsonArrayFile(file, "perkstyles.json", data.getJsonWriter());
-        img_findIconPathInJsonArrayFile(file, "perks.json", data.getJsonWriter());
-        img_findIconPathInJsonArrayFile(file, "items.json", data.getJsonWriter());
-        img_findIconPathInJsonArrayFile(file, "summoner-spells.json", data.getJsonWriter());
-        img_findIconPathInJsonArrayFile(file, "profile-icons.json", data.getJsonWriter());
+        img_findIconPathInJsonArrayFile(file, "perkstyles.json", data);
+        img_findIconPathInJsonArrayFile(file, "perks.json", data);
+        img_findIconPathInJsonArrayFile(file, "items.json", data);
+        img_findIconPathInJsonArrayFile(file, "summoner-spells.json", data);
+        img_findIconPathInJsonArrayFile(file, "profile-icons.json", data);
         
-        img_parseWardSkins(file, "ward-skins.json", data.getJsonWriter());
-        img_parseMasteries(file, "summoner-masteries.json", data.getJsonWriter());
-        img_parseEmotes(file, "summoner-emotes.json", data.getJsonWriter());
-        img_parseBanners(file, "summoner-banners.json", data.getJsonWriter());
-        img_parseMapAssets(file, "map-assets/map-assets.json", data.getJsonWriter());
+        img_parseWardSkins(file, "ward-skins.json", data);
+        img_parseMasteries(file, "summoner-masteries.json", data);
+        img_parseEmotes(file, "summoner-emotes.json", data);
+        img_parseBanners(file, "summoner-banners.json", data);
+        img_parseMapAssets(file, "map-assets/map-assets.json", data);
         
         System.out.println("Parsing champion files");
         for (int i = -1; i < img_championMax; i++)
         {
-            img_findInChampionFile(file2, i + ".json", data.getJsonWriter());
+            img_findInChampionFile(file2, i + ".json", data);
         }
         
         System.out.println("Parsing data from unknown files");
         for (String ext : img_exts)
         {
-            img_folderData.forEach((k, v) -> img_generateHashList(k, v, ext, data.getJsonWriter()));
-            img_folderData2.forEach((k, v) -> img_generateHashListNested(k, v, ext, data.getJsonWriter()));
+            img_folderData.forEach((k, v) -> img_generateHashList(k, v, ext, data));
+            img_folderData2.forEach((k, v) -> img_generateHashListNested(k, v, ext, data));
         }
-        data.getJsonWriter().endObject();
-        data.getJsonWriter().flush();
+        data.endObject();
         
         Files.write(Paths.get("filenames.json"), data.toString().getBytes(StandardCharsets.UTF_8));
         
@@ -1166,7 +1157,7 @@ public class TestAll
         return all;
     }
     
-    private void img_extractData(JsonWriter data, JsonObject extMe, String path, String outFormat) throws IOException
+    private void img_extractData(JsonWriterWrapper data, JsonObject extMe, String path, String outFormat) throws IOException
     {
         String[] elemen = img_getElement(extMe, path);
         if (elemen == null)
@@ -1179,7 +1170,7 @@ public class TestAll
         img_addToSB(data, preHash, postHash);
     }
     
-    private void img_parseMapAssets(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_parseMapAssets(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1243,7 +1234,7 @@ public class TestAll
     // dirty workaround for invalid levels...
     Map<String, Integer> val = new HashMap<>();
     
-    private void img_parseBanners(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_parseBanners(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1301,7 +1292,7 @@ public class TestAll
         }
     }
     
-    private void img_parseEmotes(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_parseEmotes(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1327,7 +1318,7 @@ public class TestAll
         }
     }
     
-    private void img_parseMasteries(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_parseMasteries(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1382,7 +1373,7 @@ public class TestAll
         return new String[]{img_pre + wip, wip.substring(wip.lastIndexOf('.'))};
     }
     
-    private void img_parseWardSkins(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_parseWardSkins(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1408,7 +1399,7 @@ public class TestAll
         }
     }
     
-    private void img_findInChampionFile(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_findInChampionFile(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1530,7 +1521,7 @@ public class TestAll
         
     }
     
-    private void img_findIconPathInJsonArrayFile(Path filepath, String filename, JsonWriter data) throws IOException
+    private void img_findIconPathInJsonArrayFile(Path filepath, String filename, JsonWriterWrapper data) throws IOException
     {
         Path path = filepath.resolve(filename);
         if (!Files.exists(path))
@@ -1554,7 +1545,7 @@ public class TestAll
         }
     }
     
-    private void img_generateHashList(String folderName, Integer depths, String fileType, JsonWriter sb)
+    private void img_generateHashList(String folderName, Integer depths, String fileType, JsonWriterWrapper sb)
     {
         String pathPrefix = img_pre + "v1/" + folderName + "/";
         
@@ -1572,7 +1563,7 @@ public class TestAll
         }
     }
     
-    private void img_generateHashListNested(String folderName, Integer[] depths, String fileType, JsonWriter sb)
+    private void img_generateHashListNested(String folderName, Integer[] depths, String fileType, JsonWriterWrapper sb)
     {
         String pathPrefix = img_pre + "v1/" + folderName + "/";
         String format     = pathPrefix + "%1$s/%2$s%3$03d." + fileType;
@@ -1598,7 +1589,7 @@ public class TestAll
         }
     }
     
-    private void img_addToSB(JsonWriter sb, String hashMe, String realPath) throws IOException
+    private void img_addToSB(JsonWriterWrapper sb, String hashMe, String realPath) throws IOException
     {
         Path path = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/").resolve(hashMe.trim());
         if (Files.exists(path))

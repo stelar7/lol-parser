@@ -216,8 +216,7 @@ public class BINFile
         {
             try
             {
-                StringWriter sw = new StringWriter();
-                JsonWriter   jw = new JsonWriter(new BufferedWriter(sw));
+                JsonWriterWrapper jw = new JsonWriterWrapper();
                 jw.beginObject();
                 
                 for (int i = 0; i < entries.size(); i++)
@@ -231,9 +230,8 @@ public class BINFile
                 }
                 
                 jw.endObject();
-                jw.flush();
                 
-                json = UtilHandler.mergeTopKeysToArray(sw.toString());
+                json = UtilHandler.mergeTopKeysToArray(jw.toString());
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -244,7 +242,7 @@ public class BINFile
         return json;
     }
     
-    private void printEntry(BINEntry entry, JsonWriter jw) throws IOException
+    private void printEntry(BINEntry entry, JsonWriterWrapper jw) throws IOException
     {
         jw.name(entry.getHash());
         jw.beginObject();
@@ -255,7 +253,7 @@ public class BINFile
         jw.endObject();
     }
     
-    private void printValue(BINValue value, JsonWriter jw) throws IOException
+    private void printValue(BINValue value, JsonWriterWrapper jw) throws IOException
     {
         jw.name(value.getHash());
         printType(value.getHash(), value.getType(), value.getValue(), jw);
@@ -263,7 +261,7 @@ public class BINFile
     
     // hash is here for debugging purposes
     @SuppressWarnings("unused")
-    private void printType(String hash, BINValueType type, Object data, JsonWriter jw) throws IOException
+    private void printType(String hash, BINValueType type, Object data, JsonWriterWrapper jw) throws IOException
     {
         switch (type)
         {
@@ -307,10 +305,9 @@ public class BINFile
         }
     }
     
-    private void printString(String o, JsonWriter jw) throws IOException
+    private void printString(String o, JsonWriterWrapper jw) throws IOException
     {
         // do we need to do these replacements? assuming .value() wraps it propperly
-        
         String val = o;
         
         // JSON does not allow \ in the files, so we need to escape it to \\
@@ -322,32 +319,27 @@ public class BINFile
         jw.value(val);
     }
     
-    private void printMap(BINMap value, JsonWriter jw) throws IOException
+    private void printMap(BINMap value, JsonWriterWrapper jw) throws IOException
     {
         jw.beginObject();
         for (Object o : value.getData())
         {
             Vector2<?, ?> obj = (Vector2<?, ?>) o;
             
-            StringWriter sw   = new StringWriter();
-            JsonWriter   temp = new JsonWriter(new BufferedWriter(sw));
+            JsonWriterWrapper temp = new JsonWriterWrapper();
             printType("", value.getType1(), obj.getX(), temp);
-            temp.flush();
-            String val1 = sw.toString();
+            String val1 = temp.toString();
             
-            sw = new StringWriter();
-            temp = new JsonWriter(new BufferedWriter(sw));
+            temp.clear();
             printType("", value.getType2(), obj.getY(), temp);
-            temp.flush();
-            String val2 = sw.toString();
+            String val2 = temp.toString();
             
-            jw.name(val1);
-            jw.jsonValue(val2);
+            jw.name(val1).jsonValue(val2);
         }
         jw.endObject();
     }
     
-    private void printData(BINData value, JsonWriter jw) throws IOException
+    private void printData(BINData value, JsonWriterWrapper jw) throws IOException
     {
         jw.beginArray();
         for (Object o : value.getData())
@@ -363,7 +355,7 @@ public class BINFile
         jw.endArray();
     }
     
-    private void printStruct(BINStruct value, JsonWriter jw) throws IOException
+    private void printStruct(BINStruct value, JsonWriterWrapper jw) throws IOException
     {
         jw.beginObject();
         jw.name(value.getHash());
@@ -376,7 +368,7 @@ public class BINFile
         jw.endObject();
     }
     
-    private void printContainer(BINContainer value, JsonWriter jw) throws IOException
+    private void printContainer(BINContainer value, JsonWriterWrapper jw) throws IOException
     {
         jw.beginArray();
         for (Object o : value.getData())

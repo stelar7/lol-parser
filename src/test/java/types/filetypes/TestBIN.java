@@ -7,7 +7,7 @@ import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.Vector2;
+import no.stelar7.cdragon.util.types.*;
 import org.javers.core.*;
 import org.junit.*;
 
@@ -91,18 +91,14 @@ public class TestBIN
                 return FileVisitResult.CONTINUE;
             }
         });
-        StringWriter sw = new StringWriter();
-        JsonWriter   jw = new JsonWriter(new BufferedWriter(sw));
-        jw.setIndent("    ");
+        JsonWriterWrapper jw = new JsonWriterWrapper();
         jw.beginObject();
         for (Vector2<String, String> dataPair : dupRemover)
         {
-            jw.name(dataPair.getX());
-            jw.value(dataPair.getY());
+            jw.name(dataPair.getX()).value(dataPair.getY());
         }
         jw.endObject();
-        jw.flush();
-        Files.write(Paths.get("combined.json"), sw.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get("combined.json"), jw.toString().getBytes(StandardCharsets.UTF_8));
         testUnsplit();
     }
     

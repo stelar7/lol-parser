@@ -1123,7 +1123,7 @@ public class TestHashes
             
             if (!knownHashes.containsKey(key))
             {
-                jw.getJsonWriter().name(key).value(value);
+                jw.name(key).value(value);
             }
         }
         
