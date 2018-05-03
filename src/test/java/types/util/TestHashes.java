@@ -7,7 +7,7 @@ import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.Vector2;
+import no.stelar7.cdragon.util.types.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -1095,7 +1095,7 @@ public class TestHashes
     {
         final Map<String, String> knownHashes = loadAllHashes();
         
-        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.8.unknown.txt");
+        List<String> unknown = UtilHandler.readWeb("https://raw.communitydragon.org/8.9.unknown.txt");
         System.out.println("Checking if I have hashes that cdragon needs...");
         for (String key : unknown)
         {
@@ -1114,7 +1114,7 @@ public class TestHashes
         
         List<String> unknown = UtilHandler.readWeb("https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.txt");
         System.out.println("Checking if cdragon has hashes that I'm missing...");
-        StringBuilder sb = new StringBuilder("{\n");
+        JsonWriterWrapper jw = new JsonWriterWrapper();
         for (String line : unknown)
         {
             String[] parts = line.split(" ");
@@ -1123,12 +1123,11 @@ public class TestHashes
             
             if (!knownHashes.containsKey(key))
             {
-                sb.append("\"").append(key).append("\": \"").append(value).append("\",\n");
+                jw.getJsonWriter().name(key).value(value);
             }
         }
         
-        sb.append("}");
-        Files.write(Paths.get(("combined.json")), sb.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(Paths.get(("combined.json")), jw.toString().getBytes(StandardCharsets.UTF_8));
         
         testUnsplit();
     }
