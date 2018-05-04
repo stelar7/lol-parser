@@ -237,7 +237,7 @@ public class OGGParser
             codebook.copy(bitStream, ogg);
         }
         
-        while (bitStream.getBitsRead() < setup.getSize() * 8)
+        while (bitStream.getTotalBitsRead() < setup.getSize() * 8)
         {
             ogg.writeBit(bitStream.readBits(1));
         }
@@ -389,7 +389,7 @@ public class OGGParser
         if (fullSetup)
         {
             BitField bitly = new BitField(1);
-            while (bitStream.getBitsRead() < setupPacket.getSize() * 8)
+            while (bitStream.getTotalBitsRead() < setupPacket.getSize() * 8)
             {
                 bitly.read(bitStream);
                 bitly.write(ogg);
@@ -716,7 +716,7 @@ public class OGGParser
         
         ogg.flushPage(false, false);
         
-        if (((bitStream.getBitsRead() + 7) / 8) != setupPacket.getSize())
+        if (((bitStream.getTotalBitsRead() + 7) / 8) != setupPacket.getSize())
         {
             throw new IllegalArgumentException("Didnt read exact setup packet");
         }

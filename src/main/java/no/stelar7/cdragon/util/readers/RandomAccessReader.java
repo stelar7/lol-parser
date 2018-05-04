@@ -14,7 +14,9 @@ import java.util.*;
 public class RandomAccessReader implements AutoCloseable
 {
     private ByteBuffer buffer;
-    private Path       path;
+    
+    private Path   path;
+    private byte[] rawBytes;
     
     public RandomAccessReader(File file, ByteOrder order)
     {
@@ -40,10 +42,15 @@ public class RandomAccessReader implements AutoCloseable
     
     public RandomAccessReader(byte[] dataBytes, ByteOrder order)
     {
+        this.rawBytes = dataBytes;
         this.buffer = ByteBuffer.wrap(dataBytes);
         this.buffer.order(order);
     }
     
+    public byte[] getRawBytes()
+    {
+        return rawBytes;
+    }
     
     @Override
     public void close()
@@ -83,29 +90,29 @@ public class RandomAccessReader implements AutoCloseable
     }
     
     
-    private int  bitsRemaining;
-    private int  bitsRead;
+    private int  bitsLeft;
+    private int  totalBitsRead;
     private byte bits;
     
     /**
      * Only counts bits read with the readBits(int) method!
      */
-    public int getBitsRead()
+    public int getTotalBitsRead()
     {
-        return bitsRead;
+        return totalBitsRead;
     }
     
     private byte readBit()
     {
-        if (bitsRemaining == 0)
+        if (bitsLeft == 0)
         {
             bits = readByte();
-            bitsRemaining = 8;
+            bitsLeft = 8;
         }
         
-        bitsRemaining--;
-        bitsRead++;
-        return (((bits & 0xFF) & (0x80 >> bitsRemaining)) != 0) ? (byte) 1 : (byte) 0;
+        bitsLeft--;
+        totalBitsRead++;
+        return (((bits & 0xFF) & (0x80 >> bitsLeft)) != 0) ? (byte) 1 : (byte) 0;
     }
     
     public int readBits(int count)

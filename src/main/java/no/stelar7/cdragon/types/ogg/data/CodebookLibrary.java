@@ -140,7 +140,7 @@ public class CodebookLibrary
             throw new IllegalArgumentException("Failed to rebuild codebook");
         }
         
-        if (codebookSize != 0 && (bitStream.getBitsRead() / 8) + 1 != codebookSize)
+        if (codebookSize != 0 && (bitStream.getTotalBitsRead() / 8) + 1 != codebookSize)
         {
             throw new IllegalArgumentException("Failed to rebuild codebook");
         }

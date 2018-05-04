@@ -252,7 +252,8 @@ public class OGGStream
     {
         for (int i = 0; i < size; i++)
         {
-            writeBit((value & (1 << i)) != 0 ? (byte) 1 : (byte) 0);
+            int val = (value & (1 << i)) != 0 ? (byte) 1 : (byte) 0;
+            writeBit(val);
         }
     }
     
