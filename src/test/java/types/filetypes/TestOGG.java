@@ -23,8 +23,8 @@ public class TestOGG
         WEMParser wemparser = new WEMParser();
         
         
-        Path wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\15646bae0aecf5be.wpk");
-        Path file    = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\24635440.wem");
+        Path wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\151d4d484d3bb890.wpk");
+        Path file    = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\434224659.wem");
         
         WPKFile wpk = wpkParser.parse(wpkfile);
         wpk.extract(wpkfile.getParent());
@@ -32,7 +32,7 @@ public class TestOGG
         WEMFile   wem  = wemparser.parse(file);
         OGGStream data = parser.parse(wem.getData());
         
-        Files.write(file.resolveSibling("24635440.ogg"), data.getData().toByteArray());
+        Files.write(file.resolveSibling("434224659-me.ogg"), data.getData().toByteArray());
         
         System.out.println();
     }

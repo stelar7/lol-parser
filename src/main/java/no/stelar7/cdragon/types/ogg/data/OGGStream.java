@@ -8,9 +8,9 @@ import java.util.Arrays;
 
 public class OGGStream
 {
-    private static final int HEADER_SIZE   = 0x1B;
-    private static final int SEGMENT_COUNT = 0xFF;
-    private static final int SEGMENT_SIZE  = 0xFF;
+    private static final int HEADER_BYTES = 0x1B;
+    private static final int MAX_SEGMENTS = 0xFF;
+    private static final int SEGMENT_SIZE = 0xFF;
     
     private byte bitBuffer;
     private int  bitsStored;
@@ -20,7 +20,7 @@ public class OGGStream
     private boolean first = true;
     private boolean continued;
     
-    private byte[] pageBuffer = new byte[HEADER_SIZE + SEGMENT_COUNT + (SEGMENT_SIZE * SEGMENT_COUNT)];
+    private byte[] pageBuffer = new byte[HEADER_BYTES + MAX_SEGMENTS + (SEGMENT_SIZE * MAX_SEGMENTS)];
     
     private int granule;
     private int sequenceNumber;
@@ -32,14 +32,14 @@ public class OGGStream
         flushPage(false, false);
     }
     
-    public static int getHeaderSize()
+    public static int getHeaderBytes()
     {
-        return HEADER_SIZE;
+        return HEADER_BYTES;
     }
     
-    public static int getSegmentCount()
+    public static int getMaxSegments()
     {
-        return SEGMENT_COUNT;
+        return MAX_SEGMENTS;
     }
     
     public static int getSegmentSize()
@@ -134,7 +134,7 @@ public class OGGStream
     
     public void flushPage(boolean nextContinued, boolean last)
     {
-        if (payloadBytes != SEGMENT_COUNT * SEGMENT_SIZE)
+        if (payloadBytes != (SEGMENT_SIZE * MAX_SEGMENTS))
         {
             flushBits();
         }
@@ -142,14 +142,14 @@ public class OGGStream
         if (payloadBytes != 0)
         {
             int segments = (payloadBytes + SEGMENT_SIZE) / SEGMENT_SIZE;
-            if (segments == SEGMENT_COUNT + 1)
+            if (segments == MAX_SEGMENTS + 1)
             {
-                segments = SEGMENT_COUNT;
+                segments = MAX_SEGMENTS;
             }
             
             for (int i = 0; i < payloadBytes; i++)
             {
-                pageBuffer[HEADER_SIZE + segments + i] = pageBuffer[HEADER_SIZE + SEGMENT_COUNT + i];
+                pageBuffer[HEADER_BYTES + segments + i] = pageBuffer[HEADER_BYTES + MAX_SEGMENTS + i];
             }
             
             pageBuffer[0] = 'O';
@@ -157,18 +157,24 @@ public class OGGStream
             pageBuffer[2] = 'g';
             pageBuffer[3] = 'S';
             pageBuffer[4] = 0;
+            // header type
             pageBuffer[5] = (byte) ((continued ? 1 : 0) | (first ? 2 : 0) | (last ? 4 : 0));
             
+            // granule low
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(granule).array(), 0, pageBuffer, 6, 4);
-            
+            // granule high
             Arrays.fill(pageBuffer, 10, 14, (byte) ((granule == 0xFFFFFFFF) ? 0xFF : 0));
             
+            // stream serial
             pageBuffer[14] = 1;
             
+            // page sequence
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(sequenceNumber).array(), 0, pageBuffer, 18, 4);
             
+            // clear checksum
             Arrays.fill(pageBuffer, 22, 26, (byte) 0);
             
+            // segment count
             pageBuffer[26] = (byte) segments;
             
             for (int i = 0, bytesLeft = payloadBytes; i < segments; i++)
@@ -183,10 +189,11 @@ public class OGGStream
                 }
             }
             
-            int crc = (int) HashHandler.computeCCITT32(pageBuffer, HEADER_SIZE + segments + payloadBytes);
+            // write checksum
+            int crc = (int) HashHandler.computeCCITT32(pageBuffer, HEADER_BYTES + segments + payloadBytes);
             System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(crc).array(), 0, pageBuffer, 22, 4);
             
-            for (int i = 0; i < HEADER_SIZE + segments + payloadBytes; i++)
+            for (int i = 0; i < HEADER_BYTES + segments + payloadBytes; i++)
             {
                 data.write(pageBuffer[i]);
             }
@@ -198,16 +205,19 @@ public class OGGStream
         }
     }
     
+    // TODO: little endian????
     private void flushBits()
     {
         if (bitsStored != 0)
         {
-            if (payloadBytes == SEGMENT_SIZE * SEGMENT_COUNT)
+            if (payloadBytes == SEGMENT_SIZE * MAX_SEGMENTS)
             {
                 throw new IllegalArgumentException("OGGPacket out of space");
             }
             
-            pageBuffer[HEADER_SIZE + SEGMENT_COUNT + payloadBytes] = bitBuffer;
+            int page = HEADER_BYTES + MAX_SEGMENTS + payloadBytes;
+            
+            pageBuffer[page] = bitBuffer;
             payloadBytes++;
             
             bitBuffer = 0;
