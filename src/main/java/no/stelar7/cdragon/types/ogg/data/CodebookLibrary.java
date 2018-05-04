@@ -8,7 +8,6 @@ import java.nio.ByteOrder;
 
 public class CodebookLibrary
 {
-    private RandomAccessReader raf;
     
     private int   codebookCount;
     private int[] codebookOffsets;
@@ -20,7 +19,7 @@ public class CodebookLibrary
         String codebook     = getClass().getClassLoader().getResource("codebook/packed_codebooks_aoTuV_603.bin").getFile();
         File   codebookFile = new File(codebook);
         
-        raf = new RandomAccessReader(codebookFile, ByteOrder.LITTLE_ENDIAN);
+        RandomAccessReader raf = RandomAccessReader.create(codebookFile, ByteOrder.LITTLE_ENDIAN);
         
         int streamSize = raf.remaining();
         

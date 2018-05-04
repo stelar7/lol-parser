@@ -27,11 +27,6 @@ public class OGGStream
     
     private ByteArrayDataOutput data = ByteStreams.newDataOutput();
     
-    public OGGStream()
-    {
-        flushPage(false, false);
-    }
-    
     public static int getHeaderBytes()
     {
         return HEADER_BYTES;

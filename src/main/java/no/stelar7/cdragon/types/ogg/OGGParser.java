@@ -86,12 +86,17 @@ public class OGGParser
                 BitField packetType = new BitField(1, 0);
                 packetType.write(ogg);
                 
+                RandomAccessReader ss = RandomAccessReader.create(bitStream);
+                ss.seek(offset);
+                
                 BitField modeNumber = new BitField(modeBits);
-                modeNumber.read(bitStream);
+                modeNumber.read(ss);
                 modeNumber.write(ogg);
                 
                 BitField remainder = new BitField(8 - modeBits);
-                remainder.read(bitStream);
+                remainder.read(ss);
+                
+                bitStream.seek(ss.pos());
                 
                 
                 if (modeBlockFlag[modeNumber.getValue()])
@@ -135,20 +140,21 @@ public class OGGParser
                 }
                 b.write(ogg);
             }
-            BitField b2 = new BitField(8);
+            
             for (int i = 1; i < size; i++)
             {
-                b2.read(bitStream);
-                if (b2.getValue() < 0)
+                BitField v = new BitField(8, bitStream.readByte());
+                if ((v.getValue() & 0xFF) < 0)
                 {
                     throw new IllegalArgumentException("file truncated");
                 }
-                b2.write(ogg);
+                v.write(ogg);
             }
             
             offset = nextOffset;
             boolean finalPage = (offset == wem.getDataChunkOffset() + wem.getDataChunkSize());
             ogg.flushPage(false, finalPage);
+            
         }
         
         if (offset > wem.getDataChunkOffset() + wem.getDataChunkSize())
@@ -325,6 +331,8 @@ public class OGGParser
     {
         Boolean[] modeBlockFlag = null;
         int       modeBits      = -1;
+        
+        // todo this is being generated wrongly now....??
         
         ogg.writeVorbisHeader(5);
         OGGPacket setupPacket = new OGGPacket(bitStream, wem.getDataChunkOffset() + wem.getSetupPacketOffset(), wem.isNoGranule());

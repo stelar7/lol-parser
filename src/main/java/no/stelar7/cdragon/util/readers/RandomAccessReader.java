@@ -15,12 +15,24 @@ public class RandomAccessReader implements AutoCloseable
 {
     private ByteBuffer buffer;
     
-    private Path   path;
-    private byte[] rawBytes;
+    private Path      path;
+    private byte[]    rawBytes;
+    private ByteOrder byteOrder;
     
-    public RandomAccessReader(File file, ByteOrder order)
+    public static RandomAccessReader create(RandomAccessReader raf)
     {
-        this(file.toPath(), order);
+        if (raf.getPath() != null)
+        {
+            return new RandomAccessReader(raf.getPath(), raf.byteOrder);
+        } else
+        {
+            return new RandomAccessReader(raf.getRawBytes(), raf.byteOrder);
+        }
+    }
+    
+    public static RandomAccessReader create(File file, ByteOrder order)
+    {
+        return new RandomAccessReader(file.toPath(), order);
     }
     
     public RandomAccessReader(Path path, ByteOrder order)

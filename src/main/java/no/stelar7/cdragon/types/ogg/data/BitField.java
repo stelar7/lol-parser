@@ -38,4 +38,13 @@ public class BitField
     {
         stream.bitWrite(value, bits);
     }
+    
+    @Override
+    public String toString()
+    {
+        return "BitField{" +
+               "size=" + size +
+               ", value=" + value +
+               '}';
+    }
 }
