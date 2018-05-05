@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public class TestOGG
 {
@@ -23,17 +24,24 @@ public class TestOGG
         WEMParser wemparser = new WEMParser();
         
         
-        Path wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\151d4d484d3bb890.wpk");
-        Path file    = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\434224659.wem");
-        
-        WPKFile wpk = wpkParser.parse(wpkfile);
+        Path    wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\151d4d484d3bb890.wpk");
+        WPKFile wpk     = wpkParser.parse(wpkfile);
         wpk.extract(wpkfile.getParent());
         
-        WEMFile   wem  = wemparser.parse(file);
-        OGGStream data = parser.parse(wem.getData());
-        
-        Files.write(file.resolveSibling("434224659-me.ogg"), data.getData().toByteArray());
-        
-        System.out.println();
+        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test"), new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                if (file.toString().endsWith("wem"))
+                {
+                    WEMFile   wem  = wemparser.parse(file);
+                    OGGStream data = parser.parse(wem.getData());
+                    
+                    Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".ogg"), data.getData().toByteArray());
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }
