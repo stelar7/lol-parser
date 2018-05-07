@@ -16,16 +16,16 @@ import java.nio.file.*;
 
 import static org.lwjgl.opengl.GL11.*;
 
-public class SKLViewer extends Renderer
+public class SKNViewer extends Renderer
 {
-    public SKLViewer(int width, int height)
+    public SKNViewer(int width, int height)
     {
         super(width, height);
     }
     
     public static void main(String[] args)
     {
-        new SKLViewer(600, 600).start();
+        new SKNViewer(600, 600).start();
     }
     
     @Override
@@ -38,16 +38,13 @@ public class SKLViewer extends Renderer
         {
             e.printStackTrace();
         }
-
-//        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Brand");
-//        model = new Model(path, "Brand_frostfire.skn", "brand_frostfire_TX_CM.dds");
         
-        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Caitlyn");
-        SKNFile skn  = new SKNParser().parse(path.resolve("Caitlyn_cop.skn"));
+        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
+        SKNFile skn  = new SKNParser().parse(path.resolve("aatrox.skn"));
         
         Mesh mesh = new Mesh(skn);
         
-        BufferedImage texImg = new DDSParser().parse(path.resolve("caitlyn_cop_TX_CM.dds"));
+        BufferedImage texImg = new DDSParser().parse(path.resolve("aatrox_base_tx_cm.dds"));
         Texture       tex    = new Texture(skn, texImg);
         
         model = new Model(mesh, tex);
@@ -67,8 +64,8 @@ public class SKLViewer extends Renderer
         prog.link();
     }
     
-    float x;
-    float z;
+    float   x;
+    float   z;
     float   time  = 0;
     boolean dirty = true;
     
@@ -105,8 +102,12 @@ public class SKLViewer extends Renderer
     {
         time += .01f;
         
-        x = (float) Math.sin(time) * 10;
-        z = (float) Math.cos(time) * 10;
+        float distance = 6;
+        
+        x = (float) Math.sin(time) * distance;
+        z = (float) Math.cos(time) * distance;
+        
+        //dirty = true;
         
         updateMVP();
     }

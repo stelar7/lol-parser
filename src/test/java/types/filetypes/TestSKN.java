@@ -5,19 +5,21 @@ import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 
 public class TestSKN
 {
     
     @Test
-    public void testSKL()
+    public void testSKN()
     {
         SKNParser parser = new SKNParser();
         
-        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48\\DATA\\Characters\\TeemoMushroom\\SuperTrap.skn");
+        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
+        SKNFile skn  = parser.parse(path.resolve("aatrox.skn"));
         
-        SKNFile data = parser.parse(path);
         System.out.println();
     }
 }
