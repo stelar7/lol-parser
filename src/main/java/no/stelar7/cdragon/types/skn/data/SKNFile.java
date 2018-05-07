@@ -268,9 +268,9 @@ public class SKNFile
         
         for (int i = 0; i < indeciesList.size(); i = i + 3)
         {
-            int a = indeciesList.get(i);
-            int b = indeciesList.get(i + 1);
-            int c = indeciesList.get(i + 2);
+            int a = indeciesList.get(i) + 1;
+            int b = indeciesList.get(i + 1) + 1;
+            int c = indeciesList.get(i + 2) + 1;
             
             sb.append(String.format("f %1$s/%1$s/%1$s %2$s/%2$s/%2$s %3$s/%3$s/%3$s%n", a, b, c));
         }
