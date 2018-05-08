@@ -188,7 +188,7 @@ public class SKNFile
         this.materials = materials;
     }
     
-    public List<Vector3f> getScaledVertices()
+    public Vector2<Vector3f, Vector3f> getScaleFactorMinMax()
     {
         // scale to 0-1 then load
         float minx = Integer.MAX_VALUE;
@@ -212,7 +212,13 @@ public class SKNFile
             minz = Math.min(minz, pos.z);
         }
         
-        // load with scaling
+        return new Vector2<>(new Vector3f(minx, miny, minz), new Vector3f(maxx, maxy, maxz));
+    }
+    
+    public List<Vector3f> getScaledVertices()
+    {
+        Vector2<Vector3f, Vector3f> scaleFactor = getScaleFactorMinMax();
+        
         List<Vector3f> verts = new ArrayList<>();
         for (int i = 0; i < getVertexCount(); i++)
         {
@@ -220,9 +226,9 @@ public class SKNFile
             Vector3f pos = v.getPosition();
             
             Vector3f vert = new Vector3f();
-            vert.x = UtilHandler.scale(pos.x, minx, maxx, -1, 1);
-            vert.y = UtilHandler.scale(pos.y, miny, maxy, -1, 1);
-            vert.z = UtilHandler.scale(pos.z, minz, maxz, -1, 1);
+            vert.x = UtilHandler.scale(pos.x, scaleFactor.getFirst().x, scaleFactor.getSecond().x, -1, 1);
+            vert.y = UtilHandler.scale(pos.y, scaleFactor.getFirst().y, scaleFactor.getSecond().y, -1, 1);
+            vert.z = UtilHandler.scale(pos.z, scaleFactor.getFirst().z, scaleFactor.getSecond().z, -1, 1);
             verts.add(vert);
         }
         

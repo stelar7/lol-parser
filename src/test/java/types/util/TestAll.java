@@ -904,14 +904,14 @@ public class TestAll
             });
             
             System.out.println("Sorting hashes");
-            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
             
             System.out.println("Writing hashes");
             JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
             jsonWriter.beginObject();
             for (Vector2<String, String> pair : foundHashes)
             {
-                jsonWriter.name(pair.getX()).value(pair.getY());
+                jsonWriter.name(pair.getFirst()).value(pair.getSecond());
             }
             jsonWriter.endObject();
             Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));

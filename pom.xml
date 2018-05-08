@@ -60,7 +60,7 @@
         <dependency>
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
-            <version>1.9.7</version>
+            <version>1.9.9</version>
         </dependency>
 
         <!-- used for connecting to the lcu via websocket -->

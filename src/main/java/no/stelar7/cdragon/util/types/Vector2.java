@@ -4,8 +4,8 @@ import java.util.*;
 
 public class Vector2<X, Y>
 {
-    private X x;
-    private Y y;
+    private X first;
+    private Y second;
     
     public Vector2()
     {
@@ -13,30 +13,30 @@ public class Vector2<X, Y>
     
     public Vector2(Map.Entry<X, Y> entry)
     {
-        this.x = entry.getKey();
-        this.y = entry.getValue();
+        this.first = entry.getKey();
+        this.second = entry.getValue();
     }
     
     public Vector2(X x, Y y)
     {
-        this.x = x;
-        this.y = y;
+        this.first = x;
+        this.second = y;
     }
     
-    public X getX()
+    public X getFirst()
     {
-        return x;
+        return first;
     }
     
-    public Y getY()
+    public Y getSecond()
     {
-        return y;
+        return second;
     }
     
     @Override
     public String toString()
     {
-        return String.format("{\"x\":%s, \"y\":%s}", x, y);
+        return String.format("{\"x\":%s, \"y\":%s}", first, second);
     }
     
     @Override
@@ -51,13 +51,13 @@ public class Vector2<X, Y>
             return false;
         }
         Vector2<?, ?> vector2 = (Vector2<?, ?>) o;
-        return Objects.equals(x, vector2.x) &&
-               Objects.equals(y, vector2.y);
+        return Objects.equals(first, vector2.first) &&
+               Objects.equals(second, vector2.second);
     }
     
     @Override
     public int hashCode()
     {
-        return Objects.hash(x, y);
+        return Objects.hash(first, second);
     }
 }

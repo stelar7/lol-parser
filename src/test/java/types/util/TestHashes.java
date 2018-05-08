@@ -436,12 +436,12 @@ public class TestHashes
         
         try
         {
-            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
             
             StringBuilder sb = new StringBuilder("{\n");
             for (Vector2<String, String> pair : foundHashes)
             {
-                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
+                sb.append("\t\"").append(pair.getFirst()).append("\": \"").append(pair.getSecond()).append("\",\n");
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
@@ -567,12 +567,12 @@ public class TestHashes
         
         try
         {
-            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
             
             StringBuilder sb = new StringBuilder("{\n");
             for (Vector2<String, String> pair : foundHashes)
             {
-                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
+                sb.append("\t\"").append(pair.getFirst()).append("\": \"").append(pair.getSecond()).append("\",\n");
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             
@@ -1181,12 +1181,12 @@ public class TestHashes
                 }
             });
             
-            foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+            foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
             
             StringBuilder sb = new StringBuilder("{\n");
             for (Vector2<String, String> pair : foundHashes)
             {
-                sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
+                sb.append("\t\"").append(pair.getFirst()).append("\": \"").append(pair.getSecond()).append("\",\n");
             }
             sb.reverse().delete(0, 2).reverse().append("\n}");
             Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));

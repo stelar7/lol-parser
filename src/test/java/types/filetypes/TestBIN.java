@@ -95,7 +95,7 @@ public class TestBIN
         jw.beginObject();
         for (Vector2<String, String> dataPair : dupRemover)
         {
-            jw.name(dataPair.getX()).value(dataPair.getY());
+            jw.name(dataPair.getFirst()).value(dataPair.getSecond());
         }
         jw.endObject();
         Files.write(Paths.get("combined.json"), jw.toString().getBytes(StandardCharsets.UTF_8));
@@ -131,12 +131,12 @@ public class TestBIN
                        }
                    });
         
-        foundHashes.sort(Comparator.comparing(Vector2::getY, new NaturalOrderComparator()));
+        foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
         
         StringBuilder sb = new StringBuilder("{\n");
         for (Vector2<String, String> pair : foundHashes)
         {
-            sb.append("\t\"").append(pair.getX()).append("\": \"").append(pair.getY()).append("\",\n");
+            sb.append("\t\"").append(pair.getFirst()).append("\": \"").append(pair.getSecond()).append("\",\n");
         }
         sb.reverse().delete(0, 2).reverse().append("\n}");
         Files.write(HashHandler.WAD_HASH_STORE.resolve("champions" + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));

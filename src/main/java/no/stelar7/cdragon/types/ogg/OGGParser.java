@@ -35,8 +35,8 @@ public class OGGParser
         } else
         {
             Vector2<Integer, Boolean[]> data = generateOGGHeader(ogg, bitStream, wem, false, false);
-            modeBits = data.getX();
-            modeBlockFlag = data.getY();
+            modeBits = data.getFirst();
+            modeBlockFlag = data.getSecond();
         }
         
         int offset = wem.getDataChunkOffset() + wem.getFirstAudioPacketOffset();

@@ -44,7 +44,7 @@ public class InibinFile implements Extractable
             values.sort(new NaturalOrderComparator());
             
             StringBuilder sb = new StringBuilder();
-            values.forEach(p -> sb.append(String.format("%s = %s%n", p.getX(), p.getY())));
+            values.forEach(p -> sb.append(String.format("%s = %s%n", p.getFirst(), p.getSecond())));
             
             Files.createDirectories(path.getParent());
             Files.write(path, sb.toString().getBytes(StandardCharsets.UTF_8));

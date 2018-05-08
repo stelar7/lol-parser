@@ -202,8 +202,8 @@ public class BINFile
                 bw.writeInt(bm.getSize());
                 bw.writeInt(bm.getCount());
                 bm.getData().forEach(bv -> {
-                    writeBinValue(bm.getType1(), bv.getX(), bw, false);
-                    writeBinValue(bm.getType2(), bv.getY(), bw, false);
+                    writeBinValue(bm.getType1(), bv.getFirst(), bw, false);
+                    writeBinValue(bm.getType2(), bv.getSecond(), bw, false);
                 });
                 break;
             }
@@ -327,11 +327,11 @@ public class BINFile
             Vector2<?, ?> obj = (Vector2<?, ?>) o;
             
             JsonWriterWrapper temp = new JsonWriterWrapper();
-            printType("", value.getType1(), obj.getX(), temp);
+            printType("", value.getType1(), obj.getFirst(), temp);
             String val1 = temp.toString();
             
             temp.clear();
-            printType("", value.getType2(), obj.getY(), temp);
+            printType("", value.getType2(), obj.getSecond(), temp);
             String val2 = temp.toString();
             
             jw.name(val1).jsonValue(val2);
