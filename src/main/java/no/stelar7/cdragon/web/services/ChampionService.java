@@ -39,7 +39,7 @@ public class ChampionService
         {
             Path INNER_SPLASH_PATH = SPLASH_PATH.resolve(String.valueOf(champ.get().getId()));
             
-            if (skin == null)
+            if (skin == null || skin.equalsIgnoreCase("0"))
             {
                 return champ.map(staticChampion -> INNER_SPLASH_PATH.resolve(staticChampion.getId() + "000.jpg"));
             } else
@@ -66,7 +66,7 @@ public class ChampionService
         {
             Path INNER_SPLASH_PATH = SPLASH_PATH.resolve(String.valueOf(champ.get().getId()));
             
-            if (skin == null)
+            if (skin == null || skin.equalsIgnoreCase("0"))
             {
                 return champ.map(staticChampion -> INNER_SPLASH_PATH.resolve(staticChampion.getId() + "000.jpg"));
             } else
@@ -92,7 +92,7 @@ public class ChampionService
         if (champ.isPresent())
         {
             Path INNER_TILE_PATH = TILE_PATH.resolve(String.valueOf(champ.get().getId()));
-            if (skin == null)
+            if (skin == null || skin.equalsIgnoreCase("0"))
             {
                 return champ.map(staticChampion -> INNER_TILE_PATH.resolve(staticChampion.getId() + "000.jpg"));
             } else
@@ -121,7 +121,7 @@ public class ChampionService
         {
             String champKey            = champ.get().getKey().toLowerCase();
             Path   INNER_PORTRAIT_PATH = PORTRAIT_PATH.resolve(champKey).resolve("skins");
-            if (skin == null)
+            if (skin == null || skin.equalsIgnoreCase("0"))
             {
                 return Optional.of(INNER_PORTRAIT_PATH.resolve("base\\" + champKey + "loadscreen.jpg"));
             } else
@@ -133,7 +133,19 @@ public class ChampionService
                                                .findAny();
                 
                 String skinKey = skin.length() == 2 ? skin : "0" + skin;
-                return Optional.of(INNER_PORTRAIT_PATH.resolve("skin" + skinKey + "\\" + champKey + "loadscreen_" + skin + ".jpg"));
+                
+                String folder = "skin" + skinKey + "\\";
+                Path   first  = INNER_PORTRAIT_PATH.resolve(folder + champKey + "loadscreen_" + skin + ".jpg");
+                if (Files.exists(first))
+                {
+                    return Optional.of(first);
+                }
+                
+                Path second = INNER_PORTRAIT_PATH.resolve(folder + champKey + "loadscreen_" + skin + ".skins_" + champKey + "_skin" + skinKey + ".jpg");
+                if (Files.exists(second))
+                {
+                    return Optional.of(second);
+                }
             }
         }
         
