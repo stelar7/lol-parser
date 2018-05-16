@@ -118,9 +118,9 @@ public class TestAll
     
     private List<String> hashes;
     
-    private void parseClash(String pre, JsonWriterWrapper sb)
+    private void parseClash(String pre, Path file, JsonWriterWrapper sb)
     {
-        Path                loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\unknown\\9d3e847588265a68.json");
+        Path                loadPath = file.resolve("clash-vo.json");
         Map<String, String> data     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(loadPath), new TypeToken<Map<String, String>>() {}.getType());
         
         for (Entry<String, String> en : data.entrySet())
@@ -189,7 +189,7 @@ public class TestAll
         parseIcons(file, jsonWriter);
         
         System.out.println("Parsing clash voices");
-        parseClash(pre, jsonWriter);
+        parseClash(pre, file, jsonWriter);
         
         System.out.println("Parsing remainder");
         for (final String exten : exts)
@@ -337,8 +337,6 @@ public class TestAll
     
     private List<String> parseHextechFile()
     {
-        
-        // check the lol-loot plugin for more... (4c0ce4a49dbc214c)
         
         WADParser parser      = new WADParser();
         String    pluginName  = "rcp-fe-lol-loot";

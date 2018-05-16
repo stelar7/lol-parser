@@ -42,7 +42,7 @@ public class TestPackagemanifest
         Files.walkFileTree(extractPath, new SimpleFileVisitor<>()
         {
             @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) 
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs)
             {
                 System.out.println("Parsing: " + path.toString());
                 
