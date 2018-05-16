@@ -2,7 +2,7 @@ package no.stelar7.cdragon.viewer;
 
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.skl.SKLParser;
-import no.stelar7.cdragon.types.skl.data.SKLFile;
+import no.stelar7.cdragon.types.skl.data.*;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Math;
 import java.nio.file.*;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -41,11 +42,12 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
-        SKNFile skn  = new SKNParser().parse(path.resolve("aatrox.skn"));
-        SKLFile skl  = new SKLParser().parse(path.resolve("aatrox.skl"));
+        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
+        SKNFile            skn   = new SKNParser().parse(path.resolve("aatrox.skn"));
+        SKLFile            skl   = new SKLParser().parse(path.resolve("aatrox.skl"));
+        List<ReadableBone> bones = skl.toReadableBones();
         
-        Mesh mesh = new Mesh(skn);
+        Mesh               mesh  = new Mesh(skn);
         
         BufferedImage texImg = new DDSParser().parse(path.resolve("aatrox_base_tx_cm.dds"));
         Texture       tex    = new Texture(skn, texImg);

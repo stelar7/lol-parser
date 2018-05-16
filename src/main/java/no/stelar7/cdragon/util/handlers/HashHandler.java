@@ -97,6 +97,27 @@ public class HashHandler
         return Integer.toUnsignedLong(crc);
     }
     
+    public static long computeELFHash(String toHash)
+    {
+        toHash = toHash.toLowerCase(Locale.ENGLISH);
+        long hash = 0;
+        long temp;
+        
+        for (int i = 0; i < toHash.length(); i++)
+        {
+            hash = (hash << 4) + toHash.charAt(i);
+            temp = hash & 0xF0000000;
+            
+            if (temp != 0)
+            {
+                hash = hash ^ (temp >> 24);
+                hash = hash ^ temp;
+            }
+        }
+        
+        return hash;
+    }
+    
     private static final int[] CRC_LOOKUP = new int[]{
             0x00000000, 0x04C11DB7, 0x09823B6E, 0x0D4326D9,
             0x130476DC, 0x17C56B6B, 0x1A864DB2, 0x1E475005,

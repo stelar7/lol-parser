@@ -84,6 +84,7 @@ public class SKLParser implements Parseable<SKLFile>
                 {
                     name.append(raf.readString(4));
                 } while (!name.toString().contains("\u0000"));
+                
                 data.getBoneNames().add(name.toString());
             }
             file.setDataV0(data);

@@ -3,6 +3,7 @@ package no.stelar7.cdragon.util.readers;
 
 import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.Matrix4f;
+import no.stelar7.cdragon.util.types.Matrix4x3f;
 import no.stelar7.cdragon.util.types.Vector2f;
 import no.stelar7.cdragon.util.types.Vector2i;
 import no.stelar7.cdragon.util.types.Vector3f;
@@ -385,25 +386,25 @@ public class RandomAccessReader implements AutoCloseable
     {
         Matrix4f mat = new Matrix4f();
         
-        mat.m00 = buffer.getFloat();
-        mat.m01 = buffer.getFloat();
-        mat.m02 = buffer.getFloat();
-        mat.m03 = buffer.getFloat();
+        mat.m00(buffer.getFloat());
+        mat.m01(buffer.getFloat());
+        mat.m02(buffer.getFloat());
+        mat.m03(buffer.getFloat());
         
-        mat.m10 = buffer.getFloat();
-        mat.m11 = buffer.getFloat();
-        mat.m12 = buffer.getFloat();
-        mat.m13 = buffer.getFloat();
+        mat.m10(buffer.getFloat());
+        mat.m11(buffer.getFloat());
+        mat.m12(buffer.getFloat());
+        mat.m13(buffer.getFloat());
         
-        mat.m20 = buffer.getFloat();
-        mat.m21 = buffer.getFloat();
-        mat.m22 = buffer.getFloat();
-        mat.m23 = buffer.getFloat();
+        mat.m20(buffer.getFloat());
+        mat.m21(buffer.getFloat());
+        mat.m22(buffer.getFloat());
+        mat.m23(buffer.getFloat());
         
-        mat.m30 = buffer.getFloat();
-        mat.m31 = buffer.getFloat();
-        mat.m32 = buffer.getFloat();
-        mat.m33 = buffer.getFloat();
+        mat.m30(buffer.getFloat());
+        mat.m31(buffer.getFloat());
+        mat.m32(buffer.getFloat());
+        mat.m33(buffer.getFloat());
         
         return mat;
     }

@@ -12,6 +12,11 @@ public class Vector3f extends org.joml.Vector3f
         super();
     }
     
+    public Vector3f(float scale)
+    {
+        super(scale);
+    }
+    
     @Override
     public String toString()
     {

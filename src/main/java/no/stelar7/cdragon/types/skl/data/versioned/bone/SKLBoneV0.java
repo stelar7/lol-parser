@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.skl.data.versioned.bone;
 
-import org.joml.*;
+import no.stelar7.cdragon.util.types.*;
 
 public class SKLBoneV0
 {

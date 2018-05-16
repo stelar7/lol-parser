@@ -149,25 +149,25 @@ public class ByteWriter implements AutoCloseable
     {
         try
         {
-            stream.writeFloat(value.m00);
-            stream.writeFloat(value.m01);
-            stream.writeFloat(value.m02);
-            stream.writeFloat(value.m03);
+            stream.writeFloat(value.m00());
+            stream.writeFloat(value.m01());
+            stream.writeFloat(value.m02());
+            stream.writeFloat(value.m03());
             
-            stream.writeFloat(value.m10);
-            stream.writeFloat(value.m11);
-            stream.writeFloat(value.m12);
-            stream.writeFloat(value.m13);
+            stream.writeFloat(value.m10());
+            stream.writeFloat(value.m11());
+            stream.writeFloat(value.m12());
+            stream.writeFloat(value.m13());
             
-            stream.writeFloat(value.m20);
-            stream.writeFloat(value.m21);
-            stream.writeFloat(value.m22);
-            stream.writeFloat(value.m23);
+            stream.writeFloat(value.m20());
+            stream.writeFloat(value.m21());
+            stream.writeFloat(value.m22());
+            stream.writeFloat(value.m23());
             
-            stream.writeFloat(value.m30);
-            stream.writeFloat(value.m31);
-            stream.writeFloat(value.m32);
-            stream.writeFloat(value.m33);
+            stream.writeFloat(value.m30());
+            stream.writeFloat(value.m31());
+            stream.writeFloat(value.m32());
+            stream.writeFloat(value.m33());
         } catch (IOException e)
         {
             e.printStackTrace();
