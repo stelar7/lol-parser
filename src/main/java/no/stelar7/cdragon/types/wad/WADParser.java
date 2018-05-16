@@ -57,8 +57,6 @@ public class WADParser implements Parseable<WADFile>
         
         if (next > version)
         {
-            deleteOld(path.resolve(String.format("%s-%s", pluginName, version)));
-            deleteOld(path.resolve(String.format("%s-%s", pluginName, version) + ".nocompress"));
             use = next;
             UtilHandler.getPreferences().putInt(cacheKey, use);
         }

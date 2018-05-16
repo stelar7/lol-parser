@@ -112,7 +112,7 @@ public class SKNViewer extends Renderer
         x = (float) Math.sin(time) * distance;
         z = (float) Math.cos(time) * distance;
         
-        //dirty = true;
+        dirty = true;
         
         updateMVP();
     }

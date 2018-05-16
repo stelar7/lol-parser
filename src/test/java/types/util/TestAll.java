@@ -156,8 +156,6 @@ public class TestAll
             return;
         }
         
-        List<String> hextechValues = parseHextechFile();
-        
         JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
         jsonWriter.beginObject();
         
@@ -180,10 +178,11 @@ public class TestAll
         }
         
         System.out.println("Parsing hextech");
-        doHextechParse(jsonWriter, hextechValues, pre);
+        //List<String> hextechValues = parseHextechFile();
+        //doHextechParse(jsonWriter, hextechValues, pre);
         
         System.out.println("Parsing loot");
-        doLootParse(jsonWriter, hextechValues, pre);
+        //doLootParse(jsonWriter, hextechValues, pre);
         
         System.out.println("Parsing icons");
         parseIcons(file, jsonWriter);
@@ -195,11 +194,6 @@ public class TestAll
         for (final String exten : exts)
         {
             folderData.forEach((folderName, depths) -> generateHashList(pre, folderName, depths, exten, jsonWriter));
-        }
-        
-        for (int i = -1; i < championMax; i++)
-        {
-            folderData.put(String.valueOf(i), new Integer[]{1});
         }
         
         jsonWriter.endObject();
