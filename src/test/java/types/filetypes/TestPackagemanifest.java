@@ -2,7 +2,9 @@ package types.filetypes;
 
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.types.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -17,12 +19,12 @@ public class TestPackagemanifest
     @Test
     public void testDownloadAll()
     {
-        String       data        = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW";
+        String       data        = "http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE";
         List<String> files       = UtilHandler.readWeb(data);
         Path         extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pman");
         
         files.removeAll(Arrays.asList(extractPath.toFile().list()));
-        String url = "http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest";
+        String url = "http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/packages/files/packagemanifest";
         for (String version : files)
         {
             String download = String.format(url, version);
@@ -40,7 +42,7 @@ public class TestPackagemanifest
         Files.walkFileTree(extractPath, new SimpleFileVisitor<>()
         {
             @Override
-            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) 
             {
                 System.out.println("Parsing: " + path.toString());
                 
@@ -65,22 +67,64 @@ public class TestPackagemanifest
                     }
                     
                     String lineInner = subbed.replace(".compressed", "");
-                    names.add(lineInner);
+                    hashAndAdd(lineInner);
                 }
-                
-                StringBuilder sb = new StringBuilder();
-                for (String name : names)
-                {
-                    String hash = HashHandler.computeXXHash64(name);
-                    sb.append("\"").append(hash).append("\": \"").append(name).append("\",\n");
-                }
-                
-                Files.write(extractPath.resolve("hashes.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-                
                 return FileVisitResult.CONTINUE;
             }
         });
         
+        write();
+    }
+    
+    private void hashAndAdd(String hashMe)
+    {
+        String[] cases = new String[]{
+                hashMe.trim(), hashMe.toLowerCase(Locale.ENGLISH).trim()
+        };
         
+        for (String hVal : cases)
+        {
+            String hash      = HashHandler.computeXXHash64(hVal);
+            String knownHash = HashHandler.getWadHashes("champions").get(hash);
+            
+            if (knownHash != null)
+            {
+                continue;
+            }
+            
+            Vector2<String, String> data = new Vector2<>(hash, hVal);
+            
+            if (!foundHashes.contains(data))
+            {
+                foundHashes.add(new Vector2<>(hash, hVal));
+            }
+        }
+    }
+    
+    List<Vector2<String, String>> foundHashes = new ArrayList<>();
+    
+    private void write() throws IOException
+    {
+        System.out.println("Loading remaining hashes");
+        HashHandler.getWadHashes("champions").forEach((k, v) -> {
+            Vector2<String, String> data = new Vector2<>(k, v);
+            if (!foundHashes.contains(data))
+            {
+                foundHashes.add(data);
+            }
+        });
+        
+        System.out.println("Sorting hashes");
+        foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
+        
+        System.out.println("Writing hashes");
+        JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
+        jsonWriter.beginObject();
+        for (Vector2<String, String> pair : foundHashes)
+        {
+            jsonWriter.name(pair.getFirst()).value(pair.getSecond());
+        }
+        jsonWriter.endObject();
+        Files.write(HashHandler.WAD_HASH_STORE.resolve("champions" + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
     }
 }

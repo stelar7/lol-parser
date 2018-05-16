@@ -31,8 +31,8 @@ public class TestWAD
     {
         WADParser parser = new WADParser();
         
-        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\Zoe.wad.client"));
-        parsed.extractFiles("Champions", "Zoe.client", UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\Zoe"));
+        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke.wad.client"));
+        parsed.extractFiles("Champions", "Pyke.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke"));
     }
     
     @Test
