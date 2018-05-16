@@ -1,6 +1,8 @@
 package no.stelar7.cdragon.viewer;
 
 import no.stelar7.cdragon.types.dds.DDSParser;
+import no.stelar7.cdragon.types.skl.SKLParser;
+import no.stelar7.cdragon.types.skl.data.SKLFile;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
@@ -41,6 +43,7 @@ public class SKNViewer extends Renderer
         
         Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
         SKNFile skn  = new SKNParser().parse(path.resolve("aatrox.skn"));
+        SKLFile skl  = new SKLParser().parse(path.resolve("aatrox.skl"));
         
         Mesh mesh = new Mesh(skn);
         

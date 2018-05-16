@@ -2,7 +2,13 @@ package no.stelar7.cdragon.util.readers;
 
 
 import no.stelar7.cdragon.util.types.*;
-import org.joml.Quaternionf;
+import no.stelar7.cdragon.util.types.Matrix4f;
+import no.stelar7.cdragon.util.types.Vector2f;
+import no.stelar7.cdragon.util.types.Vector2i;
+import no.stelar7.cdragon.util.types.Vector3f;
+import no.stelar7.cdragon.util.types.Vector3i;
+import no.stelar7.cdragon.util.types.Vector4f;
+import org.joml.*;
 
 import java.io.*;
 import java.nio.*;
@@ -182,9 +188,29 @@ public class RandomAccessReader implements AutoCloseable
         return buffer.getLong();
     }
     
+    public List<Long> readLongs(int count)
+    {
+        List<Long> values = new ArrayList<>();
+        for (int j = 0; j < count; j++)
+        {
+            values.add(readLong());
+        }
+        return values;
+    }
+    
     public int readInt()
     {
         return buffer.getInt();
+    }
+    
+    public List<Integer> readInts(int count)
+    {
+        List<Integer> values = new ArrayList<>();
+        for (int j = 0; j < count; j++)
+        {
+            values.add(readInt());
+        }
+        return values;
     }
     
     public short readShort()
@@ -222,6 +248,16 @@ public class RandomAccessReader implements AutoCloseable
     public float readFloat()
     {
         return buffer.getFloat();
+    }
+    
+    public List<Float> readFloats(int count)
+    {
+        List<Float> values = new ArrayList<>();
+        for (int j = 0; j < count; j++)
+        {
+            values.add(readFloat());
+        }
+        return values;
     }
     
     
@@ -347,34 +383,56 @@ public class RandomAccessReader implements AutoCloseable
     
     public Matrix4f readMatrix4x4()
     {
-        Matrix4f vector = new Matrix4f();
+        Matrix4f mat = new Matrix4f();
         
-        vector.m00 = (buffer.getFloat());
-        vector.m01 = (buffer.getFloat());
-        vector.m02 = (buffer.getFloat());
-        vector.m03 = (buffer.getFloat());
+        mat.m00 = buffer.getFloat();
+        mat.m01 = buffer.getFloat();
+        mat.m02 = buffer.getFloat();
+        mat.m03 = buffer.getFloat();
         
-        vector.m10 = (buffer.getFloat());
-        vector.m11 = (buffer.getFloat());
-        vector.m12 = (buffer.getFloat());
-        vector.m13 = (buffer.getFloat());
+        mat.m10 = buffer.getFloat();
+        mat.m11 = buffer.getFloat();
+        mat.m12 = buffer.getFloat();
+        mat.m13 = buffer.getFloat();
         
-        vector.m20 = (buffer.getFloat());
-        vector.m21 = (buffer.getFloat());
-        vector.m22 = (buffer.getFloat());
-        vector.m23 = (buffer.getFloat());
+        mat.m20 = buffer.getFloat();
+        mat.m21 = buffer.getFloat();
+        mat.m22 = buffer.getFloat();
+        mat.m23 = buffer.getFloat();
         
-        vector.m30 = (buffer.getFloat());
-        vector.m31 = (buffer.getFloat());
-        vector.m32 = (buffer.getFloat());
-        vector.m33 = (buffer.getFloat());
+        mat.m30 = buffer.getFloat();
+        mat.m31 = buffer.getFloat();
+        mat.m32 = buffer.getFloat();
+        mat.m33 = buffer.getFloat();
         
-        return vector;
+        return mat;
+    }
+    
+    public Matrix4x3f readMatrix4x3()
+    {
+        Matrix4x3f mat = new Matrix4x3f();
+        
+        mat.m00(buffer.getFloat());
+        mat.m01(buffer.getFloat());
+        mat.m02(buffer.getFloat());
+        
+        mat.m10(buffer.getFloat());
+        mat.m11(buffer.getFloat());
+        mat.m12(buffer.getFloat());
+        
+        mat.m20(buffer.getFloat());
+        mat.m21(buffer.getFloat());
+        mat.m22(buffer.getFloat());
+        
+        mat.m30(buffer.getFloat());
+        mat.m31(buffer.getFloat());
+        mat.m32(buffer.getFloat());
+        
+        return mat;
     }
     
     public boolean isEOF()
     {
         return !buffer.hasRemaining();
     }
-    
 }
