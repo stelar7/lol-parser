@@ -112,6 +112,7 @@ public class TestUnpackFullWAD
         
     }
     
+    @Test
     public void checkForChampionHash() throws IOException
     {
         Path              outputFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
@@ -127,10 +128,32 @@ public class TestUnpackFullWAD
                 if (UtilHandler.getEnding(file).equalsIgnoreCase("bin"))
                 {
                     System.out.println(file.toString());
+                    
+                    // tried to be cool and do it properly, but that seems to just miss some assets..?
                     JsonElement e = UtilHandler.getJsonParser().parse(parser.parse(file).toJson());
                     parseRecursive(e);
+                    
+                    parseDumb(parser.parse(file).toJson());
+                    
                 }
                 return FileVisitResult.CONTINUE;
+            }
+            
+            private void parseDumb(String json) throws IOException
+            {
+                String[] lines = json.split("\n");
+                for (String line : lines)
+                {
+                    line = line.toLowerCase(Locale.ENGLISH);
+                    if (!line.contains("assets"))
+                    {
+                        continue;
+                    }
+                    
+                    line = line.substring(line.indexOf("assets"));
+                    line = line.substring(0, line.lastIndexOf("\""));
+                    parsePrimitive(line);
+                }
             }
             
             private void parseRecursive(JsonElement e) throws IOException
@@ -191,9 +214,6 @@ public class TestUnpackFullWAD
                         {
                             parseRecursive(element);
                         }
-                    } else
-                    {
-                        System.out.println();
                     }
                 }
             }
@@ -227,10 +247,14 @@ public class TestUnpackFullWAD
             String   first  = parts[0].replaceAll("[\"]", "").trim();
             String   second = parts[1].replaceAll("[\",]", "").trim();
             
-            String   pluginPre = second.substring("plugins/".length());
-            String[] plugin    = {pluginPre.substring(0, pluginPre.indexOf('/'))};
+            String pluginPre = second;
+            if (second.startsWith("plugins/"))
+            {
+                pluginPre = second.substring("plugins/".length());
+            }
             
-            if (second.startsWith("assets"))
+            String[] plugin = {pluginPre.substring(0, pluginPre.indexOf('/'))};
+            if (second.startsWith("assets") || second.startsWith("content"))
             {
                 plugin[0] = "champions";
             }
