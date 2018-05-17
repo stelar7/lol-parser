@@ -26,12 +26,12 @@ public class Texture implements AutoCloseable
         this.tbo = new VBO(GL_ARRAY_BUFFER);
     }
     
-    public Texture(SKNFile data, BufferedImage textureImage)
+    public Texture(SKNMaterial data, BufferedImage textureImage)
     {
         this();
         
-        float[] uvs = new float[data.getVertexCount() * 2];
-        for (int i = 0; i < data.getVertexCount(); i++)
+        float[] uvs = new float[data.getNumVertex() * 2];
+        for (int i = 0; i < data.getNumVertex(); i++)
         {
             SKNData  v   = data.getVertices().get(i);
             Vector2f pos = v.getUv();

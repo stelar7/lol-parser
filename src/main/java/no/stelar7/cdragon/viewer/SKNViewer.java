@@ -50,7 +50,7 @@ public class SKNViewer extends Renderer
         SKLFile            skl   = new SKLParser().parse(path.resolve("pyke_base.pyke.skl"));
         List<ReadableBone> bones = skl.toReadableBones();
         
-        BufferedImage texImg = new DDSParser().parse(path.resolve("pyke_base_tx_cm.pyke.dds"));
+        BufferedImage texImg = new DDSParser().parse(path.resolve("pyke_base_nensi_tx_cm.pyke.dds"));
         
         /*
         Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\nautilus\\skins\\base");
@@ -62,10 +62,9 @@ public class SKNViewer extends Renderer
         */
         
         
-        Texture tex = new Texture(skn, texImg);
-        
         for (SKNMaterial submesh : skn.getMaterials())
         {
+            Texture tex = new Texture(submesh, texImg);
             models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex)));
         }
         
