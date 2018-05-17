@@ -127,48 +127,81 @@ public class TestUnpackFullWAD
                 if (UtilHandler.getEnding(file).equalsIgnoreCase("bin"))
                 {
                     System.out.println(file.toString());
-                    JsonObject e = UtilHandler.getJsonParser().parse(parser.parse(file).toJson()).getAsJsonObject();
+                    JsonElement e = UtilHandler.getJsonParser().parse(parser.parse(file).toJson());
                     parseRecursive(e);
                 }
                 return FileVisitResult.CONTINUE;
             }
             
-            private void parseRecursive(JsonObject e) throws IOException
+            private void parseRecursive(JsonElement e) throws IOException
+            {
+                if (e.isJsonObject())
+                {
+                    parseObject(e.getAsJsonObject());
+                } else if (e.isJsonArray())
+                {
+                    JsonArray arr = e.getAsJsonArray();
+                    for (JsonElement element : arr)
+                    {
+                        parseRecursive(element);
+                    }
+                } else if (e.isJsonPrimitive())
+                {
+                    parsePrimitive(e.getAsString().toLowerCase(Locale.ENGLISH));
+                }
+            }
+            
+            private void parsePrimitive(String primitive) throws IOException
+            {
+                if (primitive.contains("assets"))
+                {
+                    String hash      = HashHandler.computeXXHash64(primitive);
+                    String knownHash = HashHandler.getWadHashes("champions").get(hash);
+                    
+                    if (knownHash != null)
+                    {
+                        return;
+                    }
+                    
+                    if (jsonWriter.toString().contains(hash))
+                    {
+                        return;
+                    }
+                    
+                    jsonWriter.name(hash).value(primitive);
+                }
+            }
+            
+            private void parseObject(JsonObject e) throws IOException
             {
                 for (String key : e.keySet())
                 {
                     JsonElement elem = e.get(key);
                     if (elem.isJsonObject())
                     {
-                        parseRecursive(elem.getAsJsonObject());
+                        parseRecursive(elem);
                     } else if (elem.isJsonPrimitive())
                     {
                         String primitive = elem.getAsString().toLowerCase(Locale.ENGLISH);
-                        if (primitive.contains("assets"))
+                        parsePrimitive(primitive);
+                    } else if (elem.isJsonArray())
+                    {
+                        JsonArray arr = elem.getAsJsonArray();
+                        for (JsonElement element : arr)
                         {
-                            String hash      = HashHandler.computeXXHash64(primitive);
-                            String knownHash = HashHandler.getWadHashes("champions").get(hash);
-                            
-                            if (knownHash != null)
-                            {
-                                continue;
-                            }
-                            
-                            if (jsonWriter.toString().contains(hash))
-                            {
-                                continue;
-                            }
-                            
-                            jsonWriter.name(hash).value(primitive);
+                            parseRecursive(element);
                         }
+                    } else
+                    {
+                        System.out.println();
                     }
                 }
             }
         });
+        
         jsonWriter.endObject();
         Files.write(Paths.get("combined.json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
         unsplit();
-        
     }
     
     public void unsplit() throws IOException
@@ -215,6 +248,7 @@ public class TestUnpackFullWAD
             System.out.println("Found new hashes for: " + plugin);
             List<Vector2<String, String>> foundHashes = new ArrayList<>();
             
+            System.out.println("Loading remaining hashes");
             HashHandler.getWadHashes(plugin).forEach((k, v) -> {
                 Vector2<String, String> data = new Vector2<>(k, v);
                 if (!foundHashes.contains(data))
