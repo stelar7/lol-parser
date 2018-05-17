@@ -119,15 +119,16 @@ public class TestUnpackFullWAD
         JsonWriterWrapper jsonWriter   = new JsonWriterWrapper();
         jsonWriter.beginObject();
         
+        BINParser parser = new BINParser();
         Files.walkFileTree(outputFolder, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                if (UtilHandler.getEnding(file).equalsIgnoreCase("json"))
+                if (UtilHandler.getEnding(file).equalsIgnoreCase("bin"))
                 {
                     System.out.println(file.toString());
-                    JsonObject e = UtilHandler.getJsonParser().parse(UtilHandler.readAsString(file)).getAsJsonObject();
+                    JsonObject e = UtilHandler.getJsonParser().parse(parser.parse(file).toJson()).getAsJsonObject();
                     parseRecursive(e);
                 }
                 return FileVisitResult.CONTINUE;
@@ -180,7 +181,12 @@ public class TestUnpackFullWAD
             return;
         }
         
-        List<String> lines = Files.readAllLines(loadPath).stream().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
+        List<String> lines = Files.readAllLines(loadPath)
+                                  .stream()
+                                  .filter(x -> !x.equalsIgnoreCase("{"))
+                                  .filter(x -> !x.equalsIgnoreCase("}"))
+                                  .filter(x -> !x.equalsIgnoreCase("{}"))
+                                  .collect(Collectors.toList());
         
         Set<String> changedPlugins = new HashSet<>();
         for (String u : lines)
