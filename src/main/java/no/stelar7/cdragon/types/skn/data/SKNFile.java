@@ -272,7 +272,7 @@ public class SKNFile
         }
         
         
-        for (int i = 0; i < indeciesList.size(); i = i + 3)
+        for (int i = 0; i < indeciesList.size(); i += 3)
         {
             int a = indeciesList.get(i) + 1;
             int b = indeciesList.get(i + 1) + 1;

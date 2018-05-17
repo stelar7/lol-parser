@@ -14,15 +14,11 @@ public final class FileTypeHandler
         // Hide public constructor
     }
     
-    public static String findFileType(byte[] data)
+    public static String findFileType(ByteArray magic)
     {
-        ByteArray magic  = new ByteArray(Arrays.copyOf(data, data.length));
-        ByteArray magic4 = new ByteArray(Arrays.copyOf(data, 4));
-        ByteArray magic8 = new ByteArray(Arrays.copyOf(data, 8));
-        
-        if (FileTypeHandler.isProbableBOM(magic4))
+        if (FileTypeHandler.isProbableBOM(magic))
         {
-            return findFileType(Arrays.copyOfRange(data, 3, data.length));
+            return findFileType(magic.copyOfRange(3, magic.getData().length));
         }
         
         if (FileTypeHandler.isProbableJSON(magic))
@@ -30,83 +26,75 @@ public final class FileTypeHandler
             return "json";
         }
         
-        if (FileTypeHandler.isProbableJavascript(magic4))
+        if (FileTypeHandler.isProbableJavascript(magic))
         {
             return "js";
         }
         
-        if (FileTypeHandler.isProbableHTML(magic4))
+        if (FileTypeHandler.isProbableHTML(magic))
         {
             return "html";
         }
         
-        if (FileTypeHandler.isProbableCSS(magic4))
+        if (FileTypeHandler.isProbableCSS(magic))
         {
             return "css";
         }
         
-        if (FileTypeHandler.isProbableSKL(magic8))
+        if (FileTypeHandler.isProbableSKL(magic))
         {
             return "skl";
         }
         
-        if (FileTypeHandler.isProbableSCB(magic8))
+        if (FileTypeHandler.isProbableSCB(magic))
         {
             return "scb";
         }
         
-        if (FileTypeHandler.isProbableANM(magic8))
+        if (FileTypeHandler.isProbableANM(magic))
         {
             return "anm";
         }
         
-        if (FileTypeHandler.isProbableBNK(magic4))
+        if (FileTypeHandler.isProbableBNK(magic))
         {
             return "bnk";
         }
         
-        if (FileTypeHandler.isProbableSCO(magic4))
+        if (FileTypeHandler.isProbableSCO(magic))
         {
             return "sco";
         }
-        if (FileTypeHandler.isProbableLUAOBJ(magic8))
+        if (FileTypeHandler.isProbableLUAOBJ(magic))
         {
             return "luaobj";
         }
-        if (FileTypeHandler.isProbablePRELOAD(magic4))
+        if (FileTypeHandler.isProbablePRELOAD(magic))
         {
             return "preload";
         }
         
-        if (FileTypeHandler.isProbableIDX(magic4))
+        if (FileTypeHandler.isProbableIDX(magic))
         {
             return "idx";
         }
         
-        if (FileTypeHandler.isProbable3DModelStuff(magic4))
-        {
-            return "skn";
-        }
-        
-        if (FileTypeHandler.isProbableWPK(magic4))
+        if (FileTypeHandler.isProbableWPK(magic))
         {
             return "wpk";
         }
         
-        String result = FileTypeHandler.getMagicNumbers().get(magic4);
+        String result = FileTypeHandler.getMagicNumbers().get(magic.copyOfRange(0, 4));
         if (result != null)
         {
             return result;
         }
         
-        if (FileTypeHandler.isProbableTXT(magic4))
+        if (FileTypeHandler.isProbableTXT(magic))
         {
             return "txt";
         }
         
-        
-        System.err.print("Unknown filetype: ");
-        System.err.println(magic4.toString());
         return "unknown";
     }
     
@@ -408,8 +396,7 @@ public final class FileTypeHandler
     
     public static boolean isProbable3DModelStuff(ByteArray wrapper)
     {
-        byte[] data = wrapper.getData();
-        return isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
+        return wrapper.indexMatch(2, (byte) 0x00) && wrapper.indexMatch(3, (byte) 0x00);
     }
     
     public static boolean isProbableSCB(ByteArray wrapper)
@@ -419,7 +406,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableSKL(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8))) || (wrapper.indexMatch(2, (byte) 0x00) && wrapper.indexMatch(3, (byte) 0x00));
     }
     
     public static boolean isProbableANM(ByteArray wrapper)

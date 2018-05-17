@@ -231,7 +231,13 @@ public class BINFile
                 
                 jw.endObject();
                 
-                json = UtilHandler.mergeTopKeysToArray(jw.toString());
+                try
+                {
+                    json = jw.toString();
+                } catch (Exception e)
+                {
+                    json = UtilHandler.mergeTopKeysToArray(jw.toString());
+                }
             } catch (IOException e)
             {
                 e.printStackTrace();

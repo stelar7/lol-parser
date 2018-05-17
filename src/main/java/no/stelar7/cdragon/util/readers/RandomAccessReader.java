@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.util.readers;
 
 
+import com.google.common.collect.EvictingQueue;
 import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.Matrix4f;
 import no.stelar7.cdragon.util.types.Matrix4x3f;
@@ -17,6 +18,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.*;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RandomAccessReader implements AutoCloseable
 {
@@ -435,5 +437,41 @@ public class RandomAccessReader implements AutoCloseable
     public boolean isEOF()
     {
         return !buffer.hasRemaining();
+    }
+    
+    public void readUntillString(String data)
+    {
+        EvictingQueue<String> queue = EvictingQueue.create(data.length());
+        int                   index = 0;
+        while (!isEOF())
+        {
+            queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
+            String internal = queue.stream().collect(Collectors.joining());
+            if (internal.equalsIgnoreCase(data))
+            {
+                seek(pos() - data.length());
+                return;
+            }
+        }
+    }
+    
+    public boolean containsString(String data)
+    {
+        int     pos   = pos();
+        boolean found = false;
+        
+        EvictingQueue<String> queue = EvictingQueue.create(data.length());
+        while (!isEOF())
+        {
+            queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
+            String internal = queue.stream().collect(Collectors.joining());
+            if (internal.equalsIgnoreCase(data))
+            {
+                found = true;
+                break;
+            }
+        }
+        seek(pos);
+        return found;
     }
 }

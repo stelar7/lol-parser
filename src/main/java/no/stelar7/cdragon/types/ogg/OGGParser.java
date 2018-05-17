@@ -13,7 +13,7 @@ public class OGGParser
     
     public OGGStream parse(WEMData wem)
     {
-        wem.printInfo();
+        //wem.printInfo();
         
         OGGStream          ogg       = new OGGStream();
         RandomAccessReader bitStream = new RandomAccessReader(wem.getDataBytes(), ByteOrder.LITTLE_ENDIAN);

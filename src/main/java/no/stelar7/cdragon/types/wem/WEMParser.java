@@ -27,7 +27,13 @@ public class WEMParser implements Parseable<WEMFile>
         wem.setDataOffset(0);
         wem.setDataLength(raf.remaining());
         //wem.setFilename(path.getFileName().toString());
-        wem.setData(new WEMData(raf.readBytes(wem.getDataLength())));
+        
+        byte[]             data = raf.readBytes(wem.getDataLength());
+        RandomAccessReader raf2 = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
+        if (!raf2.containsString("JUNK"))
+        {
+            wem.setData(new WEMData(data));
+        }
         
         return wem;
     }

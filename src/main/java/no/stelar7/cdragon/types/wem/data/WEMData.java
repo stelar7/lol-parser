@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.wem.data;
 
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
@@ -371,7 +371,7 @@ public class WEMData
                 throw new IllegalArgumentException("This file is in big endian, and that is not supported...");
             }
         }
-        int riffSize = raf.readInt() + 8;
+        int riffSize = raf.readInt();
         
         String waveMagic = raf.readString(4);
         if (!"WAVE".equals(waveMagic))
@@ -380,10 +380,10 @@ public class WEMData
         }
         
         int chunkOffset = 12;
-        while (chunkOffset < riffSize)
+        int chunkEnd    = riffSize + 8;
+        while (chunkOffset < chunkEnd)
         {
             raf.seek(chunkOffset);
-            
             String chunkName = raf.readString(4);
             int    chunkSize = raf.readInt();
             
@@ -420,7 +420,7 @@ public class WEMData
             chunkOffset += chunkSize + 8;
         }
         
-        if (chunkOffset > riffSize)
+        if (chunkOffset > chunkEnd)
         {
             throw new IllegalArgumentException("There was an error reading the file");
         }
@@ -584,6 +584,143 @@ public class WEMData
             {
                 throw new IllegalArgumentException("Invalid loop range");
             }
+        }
+    }
+    
+    private byte[] fixWEM(byte[] data)
+    {
+        RandomAccessReader raf = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
+        ByteWriter         bw  = new ByteWriter();
+        bw.writeRAF(raf);
+        byte[] ba = bw.toByteArray();
+        
+        String magic = raf.readString(4);
+        if (!"RIFF".equals(magic))
+        {
+            if (!"RIFX".equals(magic))
+            {
+                throw new IllegalArgumentException("This is not a valid WEM file, or its an unsupported type");
+            } else
+            {
+                throw new IllegalArgumentException("This file is in big endian, and that is not supported...");
+            }
+        }
+        
+        int riffSize = raf.readInt();
+        
+        String waveMagic = raf.readString(4);
+        if (!"WAVE".equals(waveMagic))
+        {
+            throw new IllegalArgumentException("Missing WAVE magic");
+        }
+        
+        int startChunk  = 12;
+        int endChunk    = riffSize + 8;
+        int chunkOffset = startChunk;
+        int channels    = -1;
+        int block_size  = -1;
+        
+        while (chunkOffset < endChunk)
+        {
+            raf.seek(chunkOffset);
+            String type = raf.readString(4);
+            int    size = raf.readInt();
+            
+            if ((chunkOffset + 8 + size) < chunkOffset + 8 ||
+                (chunkOffset + 8 + size) > endChunk)
+            {
+                System.out.println("chunk size out of range");
+            }
+            
+            
+            switch (type)
+            {
+                case "fmt ":
+                    if (0xE > size)
+                    {
+                        System.out.println("chunk too small");
+                    }
+                    
+                    raf.seek(chunkOffset + 8 + 0);
+                    int codec = raf.readShort();
+                    if (0x2 != codec)
+                    {
+                        System.out.println("invalid codec");
+                    }
+                    
+                    ba[chunkOffset + 8 + 0] = 0x11;
+                    
+                    raf.seek(chunkOffset + 8 + 2);
+                    channels = raf.readShort();
+                    
+                    raf.seek(chunkOffset + 8 + 0xC);
+                    block_size = raf.readShort();
+                    break;
+                case "data":
+                    if (channels == -1 || block_size == -1)
+                    {
+                        System.out.println("data before fmt");
+                    }
+                    reinterleave_ms_ima(raf, ba, chunkOffset + 8, size, channels, block_size);
+                    break;
+            }
+            
+            chunkOffset += 8 + size;
+        }
+        
+        return ba;
+    }
+    
+    private void reinterleave_ms_ima(RandomAccessReader raf, byte[] ba, int offset, int size, int channels, int block_size)
+    {
+        int bps = block_size / channels;
+        if (size % block_size != 0)
+        {
+            System.out.println("blocks doesnt fit in size");
+        }
+        
+        if (block_size % channels != 0)
+        {
+            System.out.println("blocks doesnt divide channels");
+        }
+        
+        if (bps % 4 != 0)
+        {
+            System.out.println("expected 4 bytes per channel");
+        }
+        
+        while (size > 0)
+        {
+            int writes = 0;
+            
+            raf.seek(offset);
+            byte[] data = raf.readBytes(block_size);
+            
+            for (int i = 0; i < channels; i++)
+            {
+                ByteArray baw = new ByteArray(data);
+                ba[offset + writes] = baw.copyOfRange(i * bps, 1).getData()[0];
+                ba[offset + writes + 1] = baw.copyOfRange(i * bps + 1, 1).getData()[0];
+                ba[offset + writes + 2] = baw.copyOfRange(i * bps + 2, 1).getData()[0];
+                ba[offset + writes + 3] = baw.copyOfRange(i * bps + 3, 1).getData()[0];
+                writes += 4;
+            }
+            
+            for (int j = 0; j < bps - 4; j += 4)
+            {
+                for (int i = 0; i < channels; i++)
+                {
+                    ByteArray baw = new ByteArray(data);
+                    ba[offset + writes] = baw.copyOfRange(i * bps + 4 + j + 0, 1).getData()[0];
+                    ba[offset + writes + 1] = baw.copyOfRange(i * bps + 4 + j + 1, 1).getData()[0];
+                    ba[offset + writes + 2] = baw.copyOfRange(i * bps + 4 + j + 2, 1).getData()[0];
+                    ba[offset + writes + 3] = baw.copyOfRange(i * bps + 4 + j + 3, 1).getData()[0];
+                    writes += 4;
+                }
+            }
+            
+            size -= block_size;
+            offset += block_size;
         }
     }
     

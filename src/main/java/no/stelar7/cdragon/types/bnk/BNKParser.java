@@ -92,7 +92,20 @@ public class BNKParser implements Parseable<BNKFile>
     
     private void parseHIRC(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("HIRC PARSING NOT IMPLEMENTED" + header + raf + file);
+        BNKHIRC hirc = new BNKHIRC(header);
+        raf.seek(header.getDataStart());
+        
+        int objectCount = raf.readInt();
+        for (int i = 0; i < objectCount; i++)
+        {
+            BNKHIRCObject ho = new BNKHIRCObject();
+            ho.setType(raf.readByte());
+            ho.setLength(raf.readInt());
+            // the length includes the id, so we skip it for the data bytes
+            ho.setId(raf.readInt());
+            ho.setData(raf.readBytes(ho.getLength() - 4));
+            ho.parse();
+        }
     }
     
     private void parseFXPR(BNKHeader header, RandomAccessReader raf, BNKFile file)

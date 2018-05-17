@@ -17,6 +17,7 @@ public class ByteWriter implements AutoCloseable
         stream = new LittleEndianDataOutputStream(output);
     }
     
+    
     public byte[] toByteArray()
     {
         return output.toByteArray();
@@ -207,4 +208,18 @@ public class ByteWriter implements AutoCloseable
         stream.close();
         output.close();
     }
+    
+    public void writeRAF(RandomAccessReader raf)
+    {
+        try
+        {
+            int pos = raf.pos();
+            stream.write(raf.readBytes(raf.remaining()));
+            raf.seek(pos);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
 }

@@ -254,7 +254,7 @@ public class SwingViewer
                 
                 if (filename.equals(hash))
                 {
-                    String type = FileTypeHandler.findFileType(data);
+                    String type = FileTypeHandler.findFileType(new ByteArray(data));
                     filename = filename + "." + type;
                 }
                 

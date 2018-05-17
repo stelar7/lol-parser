@@ -377,7 +377,7 @@ public final class UtilHandler
     public static String mergeTopKeysToArray(String json)
     {
         Map<String, List<JsonElement>> data = new HashMap<>();
-        
+        json = json.replace("\n", "");
         
         for (int i = 2; i < json.length(); i++)
         {
@@ -461,5 +461,11 @@ public final class UtilHandler
         }
         
         return preferences;
+    }
+    
+    public static String getEnding(Path file)
+    {
+        String name = file.toString();
+        return name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ENGLISH);
     }
 }

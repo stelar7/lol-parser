@@ -4,6 +4,7 @@ import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -166,11 +167,12 @@ public class WADFile
     
     private void findFileTypeAndRename(byte[] data, String filename, Path parent) throws IOException
     {
-        String fileType = FileTypeHandler.findFileType(data);
+        ByteArray magic    = new ByteArray(Arrays.copyOf(data, data.length));
+        String    fileType = FileTypeHandler.findFileType(magic);
         
         if ("unknown".equals(fileType))
         {
-            System.err.format("Unknown filetype: %s (%s)", filename, parent);
+            System.err.format("Unknown filetype: %s\\%s %s%n", parent, filename, magic.copyOfRange(0, 4));
         }
         
         StringBuilder sb    = new StringBuilder(filename).append(".").append(fileType);

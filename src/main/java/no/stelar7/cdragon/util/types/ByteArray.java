@@ -78,4 +78,9 @@ public final class ByteArray
     {
         return Arrays.toString(data);
     }
+    
+    public ByteArray copyOfRange(int start, int length)
+    {
+        return new ByteArray(Arrays.copyOfRange(getData(), start, length));
+    }
 }
