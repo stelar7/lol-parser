@@ -42,14 +42,14 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
-        SKNFile            skn   = new SKNParser().parse(path.resolve("aatrox.skn"));
-        SKLFile            skl   = new SKLParser().parse(path.resolve("aatrox.skl"));
+        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke\\Champions\\assets\\characters\\pyke\\skins\\base");
+        SKNFile            skn   = new SKNParser().parse(path.resolve("pyke_base.pyke.skn"));
+        SKLFile            skl   = new SKLParser().parse(path.resolve("pyke_base.pyke.skl"));
         List<ReadableBone> bones = skl.toReadableBones();
         
         Mesh               mesh  = new Mesh(skn);
         
-        BufferedImage texImg = new DDSParser().parse(path.resolve("aatrox_base_tx_cm.dds"));
+        BufferedImage texImg = new DDSParser().parse(path.resolve("pyke_base_tx_cm.pyke.dds"));
         Texture       tex    = new Texture(skn, texImg);
         
         model = new Model(mesh, tex);

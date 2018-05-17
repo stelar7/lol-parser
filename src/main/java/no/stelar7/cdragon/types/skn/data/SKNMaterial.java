@@ -1,5 +1,7 @@
 package no.stelar7.cdragon.types.skn.data;
 
+import java.util.List;
+
 public class SKNMaterial
 {
     private String name;
@@ -7,6 +9,29 @@ public class SKNMaterial
     private int    numVertex;
     private int    startIndex;
     private int    numIndex;
+    
+    private List<Short>   indecies;
+    private List<SKNData> vertices;
+    
+    public List<Short> getIndecies()
+    {
+        return indecies;
+    }
+    
+    public void setIndecies(List<Short> indecies)
+    {
+        this.indecies = indecies;
+    }
+    
+    public List<SKNData> getVertices()
+    {
+        return vertices;
+    }
+    
+    public void setVertices(List<SKNData> vertices)
+    {
+        this.vertices = vertices;
+    }
     
     public String getName()
     {

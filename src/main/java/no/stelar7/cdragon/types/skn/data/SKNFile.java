@@ -9,11 +9,13 @@ import java.util.*;
 public class SKNFile
 {
     private int   magic;
-    private short version;
-    private short objectCount;
+    private short major;
+    private short minor;
+    private int   objectCount;
     private int   indexCount;
     private int   vertexCount;
     private int   materialCount;
+    private int   vertexSize;
     
     private int    unknown;
     private byte[] unknown2;
@@ -28,6 +30,16 @@ public class SKNFile
     private List<SKNData>     vertices;
     private List<SKNMaterial> materials;
     
+    public int getVertexSize()
+    {
+        return vertexSize;
+    }
+    
+    public void setVertexSize(int vertexSize)
+    {
+        this.vertexSize = vertexSize;
+    }
+    
     public int getMagic()
     {
         return magic;
@@ -38,22 +50,32 @@ public class SKNFile
         this.magic = magic;
     }
     
-    public short getVersion()
+    public short getMajor()
     {
-        return version;
+        return major;
     }
     
-    public void setVersion(short version)
+    public void setMajor(short major)
     {
-        this.version = version;
+        this.major = major;
     }
     
-    public short getObjectCount()
+    public short getMinor()
+    {
+        return minor;
+    }
+    
+    public void setMinor(short minor)
+    {
+        this.minor = minor;
+    }
+    
+    public int getObjectCount()
     {
         return objectCount;
     }
     
-    public void setObjectCount(short objectCount)
+    public void setObjectCount(int objectCount)
     {
         this.objectCount = objectCount;
     }
@@ -108,9 +130,9 @@ public class SKNFile
         this.unknown2 = unknown2;
     }
     
-    public int getContainsTangent()
+    public boolean containsTangent()
     {
-        return containsTangent;
+        return containsTangent == 1;
     }
     
     public void setContainsTangent(int containsTangent)
@@ -190,7 +212,6 @@ public class SKNFile
     
     public Vector2<Vector3f, Vector3f> getScaleFactorMinMax()
     {
-        // scale to 0-1 then load
         float minx = Integer.MAX_VALUE;
         float maxx = Integer.MIN_VALUE;
         float miny = Integer.MAX_VALUE;

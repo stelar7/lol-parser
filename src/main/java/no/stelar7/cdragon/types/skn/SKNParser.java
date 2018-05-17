@@ -27,16 +27,12 @@ public class SKNParser implements Parseable<SKNFile>
     {
         SKNFile file = new SKNFile();
         file.setMagic(raf.readInt());
-        file.setVersion(raf.readShort());
-        file.setObjectCount(raf.readShort());
+        file.setMajor(raf.readShort());
+        file.setMinor(raf.readShort());
+        file.setObjectCount(raf.readInt());
+        file.setMaterials((parseMaterials(raf, file.getObjectCount())));
         
-        if (file.getVersion() >= 1)
-        {
-            file.setMaterialCount(raf.readInt());
-            file.setMaterials(parseMaterials(raf, file.getMaterialCount()));
-        }
-        
-        if (file.getVersion() >= 4)
+        if (file.getMajor() == 4)
         {
             file.setUnknown(raf.readInt());
         }
@@ -44,8 +40,9 @@ public class SKNParser implements Parseable<SKNFile>
         file.setIndexCount(raf.readInt());
         file.setVertexCount(raf.readInt());
         
-        if (file.getVersion() >= 4)
+        if (file.getMajor() == 4)
         {
+            file.setVertexSize(raf.readInt());
             file.setContainsTangent(raf.readInt());
             file.setBoundingBoxMin(raf.readVec3F());
             file.setBoundingBoxMax(raf.readVec3F());
@@ -53,13 +50,16 @@ public class SKNParser implements Parseable<SKNFile>
             file.setBoundingSphereRadius(raf.readFloat());
         }
         
-        if (file.getVersion() >= 1)
+        file.setIndecies(raf.readShorts(file.getIndexCount()));
+        file.setVertices(parseVertices(raf, file));
+        
+        for (int i = 0; i < file.getObjectCount(); i++)
         {
-            file.setIndecies(raf.readShorts(file.getIndexCount()));
+            SKNMaterial mat = file.getMaterials().get(i);
+            mat.setVertices(file.getVertices().subList(mat.getStartVertex(), mat.getStartVertex() + mat.getNumVertex()));
+            mat.setIndecies(file.getIndecies().subList(mat.getStartIndex(), mat.getStartIndex() + mat.getNumIndex()));
         }
         
-        file.setVertices(parseVertices(raf, file.getVertexCount()));
-        file.setUnknown2(raf.readBytes(12));
         
         return file;
     }
@@ -81,11 +81,11 @@ public class SKNParser implements Parseable<SKNFile>
         return materials;
     }
     
-    private List<SKNData> parseVertices(RandomAccessReader raf, int count)
+    private List<SKNData> parseVertices(RandomAccessReader raf, SKNFile file)
     {
         List<SKNData> datas = new ArrayList<>();
         
-        for (int i = 0; i < count; i++)
+        for (int i = 0; i < file.getVertexCount(); i++)
         {
             SKNData data = new SKNData();
             
@@ -94,6 +94,10 @@ public class SKNParser implements Parseable<SKNFile>
             data.setWeight(raf.readVec4F());
             data.setNormals(raf.readVec3F());
             data.setUv(raf.readVec2F());
+            if (file.containsTangent())
+            {
+                data.setTangent(raf.readVec4B());
+            }
             
             datas.add(data);
         }

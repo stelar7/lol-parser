@@ -108,11 +108,10 @@ public class TestUnpackFullWAD
             }
         });
         
-        handled.forEach(path -> path.toFile().delete());
+        //handled.forEach(path -> path.toFile().delete());
         
     }
     
-    @Test
     public void checkForChampionHash() throws IOException
     {
         Path              outputFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");

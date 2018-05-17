@@ -246,7 +246,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        no.stelar7.cdragon.viewer.rendering.Renderer
+                                        no.stelar7.cdragon.viewer.SKNViewer
                                     </mainClass>
                                 </manifest>
                             </archive>
