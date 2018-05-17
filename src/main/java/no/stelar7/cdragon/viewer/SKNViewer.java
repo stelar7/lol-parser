@@ -6,6 +6,7 @@ import no.stelar7.cdragon.types.skl.data.*;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.types.Vector2;
 import no.stelar7.cdragon.viewer.rendering.Renderer;
 import no.stelar7.cdragon.viewer.rendering.models.*;
 import no.stelar7.cdragon.viewer.rendering.shaders.*;
@@ -31,7 +32,7 @@ public class SKNViewer extends Renderer
         new SKNViewer(600, 600).start();
     }
     
-    List<Model> models = new ArrayList<>();
+    List<Vector2<String, Model>> models = new ArrayList<>();
     
     @Override
     public void initPostGL()
@@ -50,14 +51,25 @@ public class SKNViewer extends Renderer
         List<ReadableBone> bones = skl.toReadableBones();
         
         BufferedImage texImg = new DDSParser().parse(path.resolve("pyke_base_tx_cm.pyke.dds"));
-        Texture       tex    = new Texture(skn, texImg);
         
-        models.add(new Model(new Mesh(skn), tex));
+        /*
+        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\nautilus\\skins\\base");
+        SKNFile            skn   = new SKNParser().parse(path.resolve("nautilus.skn"));
+        SKLFile            skl   = new SKLParser().parse(path.resolve("nautilus.skl"));
+        List<ReadableBone> bones = skl.toReadableBones();
+        
+        BufferedImage texImg = new DDSParser().parse(path.resolve("nautilus_base_tx_cm.dds"));
+        */
+        
+        
+        Texture tex = new Texture(skn, texImg);
+        
         for (SKNMaterial submesh : skn.getMaterials())
         {
-            models.add(new Model(new Mesh(submesh), tex));
+            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex)));
         }
-        model = models.get(0);
+        
+        model = models.get(models.size() - 1).getSecond();
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
@@ -121,10 +133,12 @@ public class SKNViewer extends Renderer
         
         dirty = true;
         
-        if (time > 5)
+        if (time > 3)
         {
             meshIndex = (meshIndex + 1) % models.size();
-            model = models.get(meshIndex);
+            Vector2<String, Model> data = models.get(meshIndex);
+            System.out.println(data.getFirst());
+            model = data.getSecond();
             time = 0;
         }
         
@@ -142,18 +156,8 @@ public class SKNViewer extends Renderer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         UtilHandler.logToFile("gl.log", "glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)");
         
-        if (prog != Program.current)
-        {
-            Program.current = prog;
-            prog.bind();
-        }
-        
-        
-        if (model != Model.current)
-        {
-            Model.current = model;
-            model.bind();
-        }
+        prog.bind();
+        model.bind();
         
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
         UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", model.getMesh().getIndexCount()));

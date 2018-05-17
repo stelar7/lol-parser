@@ -8,9 +8,6 @@ public class Model implements AutoCloseable
     private static final int VERTEX_SIZE  = 3;
     private static final int TEXTURE_SIZE = 2;
     
-    public static Model current;
-    
-    
     private VAO vao;
     
     private Mesh    mesh;

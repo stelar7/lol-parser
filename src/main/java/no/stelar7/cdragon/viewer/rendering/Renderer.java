@@ -153,7 +153,7 @@ public abstract class Renderer
             
             if (System.currentTimeMillis() > fpstimer + 1000)
             {
-                System.out.format("fps: %d  ups: %d%n", fps, ups);
+                //System.out.format("fps: %d  ups: %d%n", fps, ups);
                 fpstimer = System.currentTimeMillis();
                 fps = ups = 0;
             }
