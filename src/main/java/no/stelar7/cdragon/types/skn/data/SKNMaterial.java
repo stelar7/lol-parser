@@ -1,6 +1,8 @@
 package no.stelar7.cdragon.types.skn.data;
 
-import java.util.List;
+import no.stelar7.cdragon.util.types.Vector3f;
+
+import java.util.*;
 
 public class SKNMaterial
 {
@@ -26,6 +28,16 @@ public class SKNMaterial
     public List<SKNData> getVertices()
     {
         return vertices;
+    }
+    
+    public List<Vector3f> getVertexPositions()
+    {
+        List<Vector3f> pos = new ArrayList<>();
+        for (SKNData vertex : vertices)
+        {
+            pos.add(vertex.getPosition());
+        }
+        return pos;
     }
     
     public void setVertices(List<SKNData> vertices)

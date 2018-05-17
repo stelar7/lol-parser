@@ -99,7 +99,7 @@ public class TestUnpackFullWAD
                     case "skn":
                     {
                         SKNFile skn = sknParser.parse(file);
-                        Files.write(outputFolder.resolve(filename + ".obj"), skn.toOBJ().getBytes(StandardCharsets.UTF_8));
+                        Files.write(outputFolder.resolve(filename + ".obj"), skn.toOBJ(skn.getMaterials().get(0)).getBytes(StandardCharsets.UTF_8));
                         handled.add(file);
                         break;
                     }

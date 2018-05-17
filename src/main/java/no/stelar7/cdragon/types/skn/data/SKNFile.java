@@ -195,6 +195,16 @@ public class SKNFile
         return vertices;
     }
     
+    public List<Vector3f> getVertexPositions()
+    {
+        List<Vector3f> pos = new ArrayList<>();
+        for (SKNData vertex : vertices)
+        {
+            pos.add(vertex.getPosition());
+        }
+        return pos;
+    }
+    
     public void setVertices(List<SKNData> vertices)
     {
         this.vertices = vertices;
@@ -210,68 +220,11 @@ public class SKNFile
         this.materials = materials;
     }
     
-    public Vector2<Vector3f, Vector3f> getScaleFactorMinMax()
-    {
-        float minx = Integer.MAX_VALUE;
-        float maxx = Integer.MIN_VALUE;
-        float miny = Integer.MAX_VALUE;
-        float maxy = Integer.MIN_VALUE;
-        float minz = Integer.MAX_VALUE;
-        float maxz = Integer.MIN_VALUE;
-        
-        // scale factor
-        for (int i = 0; i < getVertexCount(); i++)
-        {
-            SKNData  v   = getVertices().get(i);
-            Vector3f pos = v.getPosition();
-            
-            maxx = Math.max(maxx, pos.x);
-            minx = Math.min(minx, pos.x);
-            maxy = Math.max(maxy, pos.y);
-            miny = Math.min(miny, pos.y);
-            maxz = Math.max(maxz, pos.z);
-            minz = Math.min(minz, pos.z);
-        }
-        
-        return new Vector2<>(new Vector3f(minx, miny, minz), new Vector3f(maxx, maxy, maxz));
-    }
-    
-    public List<Vector3f> getScaledVertices()
-    {
-        Vector2<Vector3f, Vector3f> scaleFactor = getScaleFactorMinMax();
-        
-        List<Vector3f> verts = new ArrayList<>();
-        for (int i = 0; i < getVertexCount(); i++)
-        {
-            SKNData  v   = getVertices().get(i);
-            Vector3f pos = v.getPosition();
-            
-            Vector3f vert = new Vector3f();
-            vert.x = UtilHandler.scale(pos.x, scaleFactor.getFirst().x, scaleFactor.getSecond().x, -1, 1);
-            vert.y = UtilHandler.scale(pos.y, scaleFactor.getFirst().y, scaleFactor.getSecond().y, -1, 1);
-            vert.z = UtilHandler.scale(pos.z, scaleFactor.getFirst().z, scaleFactor.getSecond().z, -1, 1);
-            verts.add(vert);
-        }
-        
-        return verts;
-    }
-    
-    public List<Integer> getIndeciesAsIntegerList()
-    {
-        List<Integer> inds = new ArrayList<>();
-        for (int i = 0; i < getIndecies().size(); i++)
-        {
-            Short in = getIndecies().get(i);
-            inds.add(Integer.valueOf(in));
-        }
-        return inds;
-    }
-    
-    public String toOBJ()
+    public String toOBJ(SKNMaterial submesh)
     {
         StringBuilder        sb           = new StringBuilder();
-        List<Vector3f>       scaledVerts  = getScaledVertices();
-        List<Integer>        indeciesList = getIndeciesAsIntegerList();
+        List<Vector3f>       scaledVerts  = UtilHandler.getScaledVertices(submesh.getVertexPositions());
+        List<Integer>        indeciesList = UtilHandler.getIndeciesAsIntegerList(submesh.getIndecies());
         DecimalFormatSymbols dfs          = new DecimalFormatSymbols(Locale.ENGLISH);
         DecimalFormat        df           = new DecimalFormat("###.#######", dfs);
         

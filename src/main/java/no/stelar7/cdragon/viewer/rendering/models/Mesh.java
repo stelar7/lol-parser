@@ -22,13 +22,40 @@ public class Mesh implements AutoCloseable
         ibo = new VBO(GL_ELEMENT_ARRAY_BUFFER);
     }
     
+    public Mesh(SKNMaterial submesh)
+    {
+        this();
+        
+        float[]        verts          = new float[submesh.getNumVertex() * 3];
+        List<Vector3f> scaledVertices = UtilHandler.getScaledVertices(submesh.getVertexPositions());
+        for (int i = 0; i < scaledVertices.size(); i++)
+        {
+            Vector3f pos = scaledVertices.get(i);
+            
+            verts[(i * 3) + 0] = pos.x;
+            verts[(i * 3) + 1] = pos.y;
+            verts[(i * 3) + 2] = pos.z;
+        }
+        
+        // load indecies
+        int[]         inds                  = new int[submesh.getNumIndex()];
+        List<Integer> indeciesAsIntegerList = UtilHandler.getIndeciesAsIntegerList(submesh.getIndecies());
+        for (int i = 0; i < indeciesAsIntegerList.size(); i++)
+        {
+            inds[i] = indeciesAsIntegerList.get(i);
+        }
+        
+        
+        setVertices(verts);
+        setIndecies(inds);
+    }
+    
     public Mesh(SKNFile data)
     {
         this();
         
-        // load with scaling
         float[]        verts          = new float[data.getVertexCount() * 3];
-        List<Vector3f> scaledVertices = data.getScaledVertices();
+        List<Vector3f> scaledVertices = UtilHandler.getScaledVertices(data.getVertexPositions());
         for (int i = 0; i < scaledVertices.size(); i++)
         {
             Vector3f pos = scaledVertices.get(i);
@@ -41,7 +68,7 @@ public class Mesh implements AutoCloseable
         
         // load indecies
         int[]         inds                  = new int[data.getIndexCount()];
-        List<Integer> indeciesAsIntegerList = data.getIndeciesAsIntegerList();
+        List<Integer> indeciesAsIntegerList = UtilHandler.getIndeciesAsIntegerList(data.getIndecies());
         for (int i = 0; i < indeciesAsIntegerList.size(); i++)
         {
             inds[i] = indeciesAsIntegerList.get(i);

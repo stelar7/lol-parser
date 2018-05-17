@@ -64,4 +64,12 @@ public class Model implements AutoCloseable
         mesh.close();
         texture.close();
     }
+    
+    public void setMesh(Mesh mesh)
+    {
+        this.bind();
+        this.mesh = mesh;
+        mesh.bindForVAO();
+        vao.setPointer(0, VERTEX_SIZE);
+    }
 }

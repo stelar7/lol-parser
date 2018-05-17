@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.skl.SKLParser;
 import no.stelar7.cdragon.types.skl.data.*;
 import no.stelar7.cdragon.types.skn.SKNParser;
-import no.stelar7.cdragon.types.skn.data.SKNFile;
+import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.viewer.rendering.Renderer;
 import no.stelar7.cdragon.viewer.rendering.models.*;
@@ -15,7 +15,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.lang.Math;
 import java.nio.file.*;
-import java.util.List;
+import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
 
@@ -30,6 +30,8 @@ public class SKNViewer extends Renderer
     {
         new SKNViewer(600, 600).start();
     }
+    
+    List<Model> models = new ArrayList<>();
     
     @Override
     public void initPostGL()
@@ -47,12 +49,15 @@ public class SKNViewer extends Renderer
         SKLFile            skl   = new SKLParser().parse(path.resolve("pyke_base.pyke.skl"));
         List<ReadableBone> bones = skl.toReadableBones();
         
-        Mesh               mesh  = new Mesh(skn);
-        
         BufferedImage texImg = new DDSParser().parse(path.resolve("pyke_base_tx_cm.pyke.dds"));
         Texture       tex    = new Texture(skn, texImg);
         
-        model = new Model(mesh, tex);
+        models.add(new Model(new Mesh(skn), tex));
+        for (SKNMaterial submesh : skn.getMaterials())
+        {
+            models.add(new Model(new Mesh(submesh), tex));
+        }
+        model = models.get(0);
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
@@ -102,6 +107,8 @@ public class SKNViewer extends Renderer
         dirty = false;
     }
     
+    int meshIndex;
+    
     @Override
     public void update()
     {
@@ -113,6 +120,13 @@ public class SKNViewer extends Renderer
         z = (float) Math.cos(time) * distance;
         
         dirty = true;
+        
+        if (time > 5)
+        {
+            meshIndex = (meshIndex + 1) % models.size();
+            model = models.get(meshIndex);
+            time = 0;
+        }
         
         updateMVP();
     }

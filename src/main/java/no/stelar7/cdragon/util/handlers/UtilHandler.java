@@ -1,7 +1,8 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
-import no.stelar7.cdragon.util.types.Vector2;
+import no.stelar7.cdragon.types.skn.data.*;
+import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
 import java.net.*;
@@ -416,6 +417,56 @@ public final class UtilHandler
         }
         
         return getGson().toJson(data);
+    }
+    
+    public static Vector2<Vector3f, Vector3f> getScaleFactorMinMax(List<Vector3f> positions)
+    {
+        float minx = Integer.MAX_VALUE;
+        float maxx = Integer.MIN_VALUE;
+        float miny = Integer.MAX_VALUE;
+        float maxy = Integer.MIN_VALUE;
+        float minz = Integer.MAX_VALUE;
+        float maxz = Integer.MIN_VALUE;
+        
+        // scale factor
+        for (Vector3f pos : positions)
+        {
+            maxx = Math.max(maxx, pos.x);
+            minx = Math.min(minx, pos.x);
+            maxy = Math.max(maxy, pos.y);
+            miny = Math.min(miny, pos.y);
+            maxz = Math.max(maxz, pos.z);
+            minz = Math.min(minz, pos.z);
+        }
+        
+        return new Vector2<>(new Vector3f(minx, miny, minz), new Vector3f(maxx, maxy, maxz));
+    }
+    
+    public static List<Vector3f> getScaledVertices(List<Vector3f> positions)
+    {
+        Vector2<Vector3f, Vector3f> scaleFactor = getScaleFactorMinMax(positions);
+        
+        List<Vector3f> verts = new ArrayList<>();
+        for (Vector3f pos : positions)
+        {
+            Vector3f vert = new Vector3f();
+            vert.x = UtilHandler.scale(pos.x, scaleFactor.getFirst().x, scaleFactor.getSecond().x, -1, 1);
+            vert.y = UtilHandler.scale(pos.y, scaleFactor.getFirst().y, scaleFactor.getSecond().y, -1, 1);
+            vert.z = UtilHandler.scale(pos.z, scaleFactor.getFirst().z, scaleFactor.getSecond().z, -1, 1);
+            verts.add(vert);
+        }
+        
+        return verts;
+    }
+    
+    public static List<Integer> getIndeciesAsIntegerList(List<Short> indecies)
+    {
+        List<Integer> inds = new ArrayList<>();
+        for (Short in : indecies)
+        {
+            inds.add(Integer.valueOf(in));
+        }
+        return inds;
     }
     
     
