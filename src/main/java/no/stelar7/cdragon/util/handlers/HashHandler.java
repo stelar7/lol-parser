@@ -16,9 +16,9 @@ public class HashHandler
     
     private static XXHashFactory xxHashFactory = XXHashFactory.fastestInstance();
     
-    public static final Path WAD_HASH_STORE = UtilHandler.TYPES_FOLDER.resolve("wad\\hashes");
-    public static final Path BIN_HASH_STORE = UtilHandler.TYPES_FOLDER.resolve("bin\\data\\binhash.json");
-    public static final Path INI_HASH_STORE = UtilHandler.TYPES_FOLDER.resolve("inibin\\data\\inihash.json");
+    public static final Path WAD_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\wad");
+    public static final Path BIN_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\bin\\binhash.json");
+    public static final Path INI_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\inibin\\inihash.json");
     
     private static Map<Long, String>                binHashNames;
     private static Map<Long, String>                iniHashNames;
@@ -213,10 +213,10 @@ public class HashHandler
         
         try
         {
-            String sb = new String(Files.readAllBytes(BIN_HASH_STORE), StandardCharsets.UTF_8);
+            String sb = UtilHandler.readInternalAsString("hashes/bin/binhash.json");
             binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             System.out.println("Loaded known bin hashes");
-        } catch (IOException e)
+        } catch (Exception e)
         {
             binHashNames = new HashMap<>();
             System.err.println("BIN Hash file not found: " + e.getMessage());
@@ -248,6 +248,7 @@ public class HashHandler
     
     public static Map<String, String> getWadHashes(String plugin)
     {
+        plugin = plugin.toLowerCase(Locale.ENGLISH);
         if (wadHashNames.get(plugin) != null)
         {
             return wadHashNames.get(plugin);
@@ -255,11 +256,11 @@ public class HashHandler
         
         try
         {
-            String              sb  = new String(Files.readAllBytes(WAD_HASH_STORE.resolve(plugin + ".json")), StandardCharsets.UTF_8);
+            String              sb  = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
             Map<String, String> val = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
             wadHashNames.put(plugin, val);
             System.out.println("Loaded known hashes for " + plugin);
-        } catch (IOException e)
+        } catch (Exception e)
         {
             wadHashNames.put(plugin, new HashMap<>());
             System.err.println("WAD Hash file not found: " + e.getMessage());

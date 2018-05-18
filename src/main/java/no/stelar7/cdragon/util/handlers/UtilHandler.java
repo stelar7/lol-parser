@@ -32,7 +32,6 @@ public final class UtilHandler
     private static Preferences preferences;
     
     public static final Path DOWNLOADS_FOLDER = Paths.get(System.getProperty("user.home"), "Downloads");
-    public static final Path TYPES_FOLDER     = Paths.get("src\\main\\java\\no\\stelar7\\cdragon\\types");
     
     public static String pathToFilename(Path path)
     {
