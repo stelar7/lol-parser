@@ -238,6 +238,8 @@ public class BINFile
                 {
                     json = UtilHandler.mergeTopKeysToArray(jw.toString());
                 }
+                
+                json = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(json));
             } catch (IOException e)
             {
                 e.printStackTrace();
