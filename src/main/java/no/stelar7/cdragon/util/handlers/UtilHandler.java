@@ -1,8 +1,14 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
-import no.stelar7.cdragon.types.skn.data.*;
+import no.stelar7.api.l4j8.basic.APICredentials;
+import no.stelar7.api.l4j8.basic.cache.CacheProvider;
+import no.stelar7.api.l4j8.basic.cache.impl.*;
+import no.stelar7.api.l4j8.basic.calling.DataCall;
+import no.stelar7.api.l4j8.basic.constants.api.LogLevel;
+import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.web.SecretFile;
 
 import java.io.*;
 import java.net.*;
@@ -30,6 +36,7 @@ public final class UtilHandler
     private static Gson        gson;
     private static JsonParser  parser;
     private static Preferences preferences;
+    private static L4J8        api;
     
     public static final Path DOWNLOADS_FOLDER = Paths.get(System.getProperty("user.home"), "Downloads");
     
@@ -517,5 +524,21 @@ public final class UtilHandler
     {
         String name = file.toString();
         return name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ENGLISH);
+    }
+    
+    public static L4J8 getL4J8()
+    {
+        if (api == null)
+        {
+            api = new L4J8(new APICredentials(SecretFile.API_KEY, SecretFile.API_KEY));
+            
+            DataCall.setLogLevel(LogLevel.INFO);
+            DataCall.setCacheProvider(new TieredCacheProvider(
+                                              new MemoryCacheProvider(CacheProvider.TTL_INFINITY),
+                                              new FileSystemCacheProvider(CacheProvider.LOCATION_DEFAULT, CacheProvider.TTL_INFINITY))
+                                     );
+        }
+        
+        return api;
     }
 }

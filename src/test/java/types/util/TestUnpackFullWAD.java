@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class TestUnpackFullWAD
 {
@@ -224,6 +224,71 @@ public class TestUnpackFullWAD
         unsplit();
     }
     
+    @Test
+    public void testGetBins() throws IOException
+    {
+        JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
+        jsonWriter.beginObject();
+        
+        
+        UtilHandler.getL4J8().getStaticAPI().getChampions().forEach((k, v) -> {
+            String championName = v.getKey();
+            String value        = String.format("data/characters/%s/%s.bin", championName, championName).toLowerCase(Locale.ENGLISH);
+            hash(value, jsonWriter);
+            
+            v.getSkins().forEach(s -> {
+                String value2 = String.format("data/characters/%s/skins/skin%s.bin", championName, s.getNum()).toLowerCase(Locale.ENGLISH);
+                hash(value2, jsonWriter);
+                
+                String value3 = String.format("data/characters/%s/animations/skin%s.bin", championName, s.getNum()).toLowerCase(Locale.ENGLISH);
+                hash(value3, jsonWriter);
+            });
+        });
+        
+        // pyke isnt in the api yet, so we special case him
+        String championName = "pyke";
+        String value        = String.format("data/characters/%s/%s.bin", championName, championName).toLowerCase(Locale.ENGLISH);
+        hash(value, jsonWriter);
+        
+        IntStream.rangeClosed(0, 7).forEach(s -> {
+            String value2 = String.format("data/characters/%s/skins/skin%s.bin", championName, s).toLowerCase(Locale.ENGLISH);
+            hash(value2, jsonWriter);
+            
+            String value3 = String.format("data/characters/%s/animations/skin%s.bin", championName, s).toLowerCase(Locale.ENGLISH);
+            hash(value3, jsonWriter);
+        });
+        
+        
+        jsonWriter.endObject();
+        Files.write(Paths.get("combined.json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
+        
+        unsplit();
+    }
+    
+    private void hash(String value, JsonWriterWrapper output)
+    {
+        String hash      = HashHandler.computeXXHash64(value);
+        String knownHash = HashHandler.getWadHashes("champions").get(hash);
+        
+        if (knownHash != null)
+        {
+            return;
+        }
+        
+        if (output.toString().contains(hash))
+        {
+            return;
+        }
+        
+        try
+        {
+            output.name(hash).value(value);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
     public void unsplit() throws IOException
     {
         Path loadPath = Paths.get("combined.json");
@@ -254,7 +319,7 @@ public class TestUnpackFullWAD
             }
             
             String[] plugin = {pluginPre.substring(0, pluginPre.indexOf('/'))};
-            if (second.startsWith("assets") || second.startsWith("content"))
+            if (second.startsWith("assets") || second.startsWith("content") || second.startsWith("data"))
             {
                 plugin[0] = "champions";
             }
