@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import net.jpountz.xxhash.*;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -263,7 +264,8 @@ public class HashHandler
         } catch (Exception e)
         {
             wadHashNames.put(plugin, new HashMap<>());
-            System.err.println("WAD Hash file not found: " + e.getMessage());
+            System.err.println("WAD Hash file not found: " + plugin);
+            e.printStackTrace();
         }
         
         return getWadHashes(plugin);
@@ -287,5 +289,26 @@ public class HashHandler
         
         reverseCache.put(hash, value);
         return value.intValue();
+    }
+    
+    static Map<String, String> all = new HashMap<>();
+    
+    public static Map<String, String> loadAllWadHashes()
+    {
+        if (all.isEmpty())
+        {
+            InputStream  is    = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
+            Scanner      s     = new Scanner(is).useDelimiter("\\A");
+            List<String> files = new ArrayList<>();
+            System.out.println(s.next());
+            while (s.hasNext())
+            {
+                String file         = s.next();
+                String content      = UtilHandler.readInternalAsString("hashes/wad/" + file);
+                Type   mapTypeToken = new TypeToken<Map<String, String>>() {}.getType();
+                ((Map<String, String>) UtilHandler.getGson().fromJson(content, mapTypeToken)).forEach(all::putIfAbsent);
+            }
+        }
+        return all;
     }
 }

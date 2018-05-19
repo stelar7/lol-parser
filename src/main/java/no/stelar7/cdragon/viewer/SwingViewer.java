@@ -155,27 +155,20 @@ public class SwingViewer
     
     private void addBaseNodes(DefaultMutableTreeNode top)
     {
-        Path baseFolder = null;
-        Path ritoDir    = Paths.get("C:/Riot Games");
-        if (Files.exists(ritoDir))
+        Path         baseFolder = null;
+        JFileChooser chooser    = new JFileChooser("C:/Riot Games");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        int option = chooser.showOpenDialog(null);
+        
+        if (option == JFileChooser.APPROVE_OPTION)
         {
-            baseFolder = ritoDir;
-        } else
-        {
-            JFileChooser chooser = new JFileChooser("C:/Riot Games");
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            int option = chooser.showOpenDialog(null);
-            
-            if (option == JFileChooser.APPROVE_OPTION)
+            Path selectedFolder = chooser.getSelectedFile().toPath();
+            if (!Files.isDirectory(selectedFolder))
             {
-                Path selectedFolder = chooser.getSelectedFile().toPath();
-                if (!Files.isDirectory(selectedFolder))
-                {
-                    System.out.println("Please choose the Riot Games base directory");
-                    return;
-                }
-                baseFolder = selectedFolder;
+                System.out.println("Please choose the Riot Games base directory");
+                return;
             }
+            baseFolder = selectedFolder;
         }
         
         try
@@ -243,14 +236,11 @@ public class SwingViewer
             WADParser parser = new WADParser();
             WADFile   file   = parser.parse(path);
             
-            String plugin = path.toString().substring(0, path.toString().lastIndexOf("\\"));
-            plugin = plugin.substring(plugin.lastIndexOf("\\") + 1);
-            
             for (WADContentHeaderV1 header : file.getContentHeaders())
             {
                 String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-                String filename = HashHandler.getWadHashes(plugin).getOrDefault(hash, hash);
-                byte[] data     = file.readContentFromHeaderData(header);
+                String filename = HashHandler.loadAllWadHashes().getOrDefault(hash, hash);
+                byte[] data = file.readContentFromHeaderData(header);
                 
                 if (filename.equals(hash))
                 {
