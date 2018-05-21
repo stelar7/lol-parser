@@ -100,21 +100,13 @@ public class TestAll
     final int championMax = 750;
     final int iconMax     = 10000;
     
-    private final Map<String, Integer[]> folderData = new HashMap<>()
+    private final Map<Integer[], List<String>> folderData = new HashMap<>()
     {{
-        put("profile-icons", new Integer[]{iconMax});
-        
-        put("champions", new Integer[]{championMax});
-        put("champion-sfx-audios", new Integer[]{championMax});
-        put("champion-icons", new Integer[]{championMax});
-        put("champion-choose-vo", new Integer[]{championMax});
-        put("champion-ban-vo", new Integer[]{championMax});
-        put("summoner-backdrops", new Integer[]{iconMax});
-        
-        put("champion-tiles", new Integer[]{championMax, skinMax});
-        put("champion-splashes", new Integer[]{championMax, skinMax});
-        put("champion-chroma-images", new Integer[]{championMax, skinMax});
+        put(new Integer[]{iconMax}, Arrays.asList("profile-icons", "summoner-backdrops"));
+        put(new Integer[]{championMax}, Arrays.asList("champions", "champion-sfx-audios", "champion-icons", "champion-choose-vo", "champion-ban-vo"));
+        put(new Integer[]{championMax, skinMax}, Arrays.asList("champion-tiles", "champion-splashes", "champion-chroma-images"));
     }};
+    
     
     private List<String> hashes;
     
@@ -133,6 +125,28 @@ public class TestAll
     
     private void parseIcons(Path file, JsonWriterWrapper sb)
     {
+        // parse perk "backgrounds"
+        List<String> types = Arrays.asList("domination", "inspiration", "precision", "resolve", "sorcery");
+        for (String type : types)
+        {
+            for (int i = 8000; i < 8600; i += 100)
+            {
+                hashAndAddToSB(sb, String.format(prePre + "global/default/v1/perk-images/styles/%s/p%s_s%s_k%s.jpg", type, i, 0, 0));
+                
+                for (int j = 8000; j < 8600; j += 100)
+                {
+                    hashAndAddToSB(sb, String.format(prePre + "global/default/v1/perk-images/styles/%s/p%s_s%s_k%s.jpg", type, i, j, 0));
+                    
+                    for (int k = i; k < 10000; k++)
+                    {
+                        hashAndAddToSB(sb, String.format(prePre + "global/default/v1/perk-images/styles/%s/p%s_s%s_k%s.jpg", type, i, 0, k));
+                        hashAndAddToSB(sb, String.format(prePre + "global/default/v1/perk-images/styles/%s/p%s_s%s_k%s.jpg", type, i, j, k));
+                    }
+                }
+            }
+        }
+        
+        
         findIconPathInJsonArrayFile(file, "perkstyles.json", sb);
         findIconPathInJsonArrayFile(file, "perks.json", sb);
         findIconPathInJsonArrayFile(file, "items.json", sb);
@@ -193,7 +207,7 @@ public class TestAll
         System.out.println("Parsing remainder");
         for (final String exten : exts)
         {
-            folderData.forEach((folderName, depths) -> generateHashList(pre, folderName, depths, exten, jsonWriter));
+            folderData.forEach((depths, folders) -> generateHashList(pre, folders, depths, exten, jsonWriter));
         }
         
         jsonWriter.endObject();
@@ -701,53 +715,59 @@ public class TestAll
         }
         JsonArray arr = elem.getAsJsonArray();
         
-        
         for (JsonElement element : arr)
         {
             JsonObject ob = element.getAsJsonObject();
             getElementAndCheckHash(ob, "iconPath", sb);
+            
         }
     }
     
-    private void generateHashList(String pre, String folderName, Integer[] depths, String fileType, JsonWriterWrapper data)
+    private void generateHashList(String pre, List<String> folders, Integer[] depths, String fileType, JsonWriterWrapper data)
     {
-        String pathPrefix = pre + "v1/" + folderName + "/";
+        String pathPrefix = pre + "v1/%s/";
         if (depths.length == 1)
         {
-            doLoop(depths[0], pathPrefix + "%s." + fileType, data);
+            doLoop(depths[0], pathPrefix + "%s." + fileType, folders, data);
         } else
         {
-            doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, data);
+            doNestedLoop(depths[0], depths[1], pathPrefix + "%1$s/%2$s%3$03d." + fileType, folders, data);
         }
     }
     
     
-    private void doLoop(int max, String format, JsonWriterWrapper sb)
+    private void doLoop(int max, String format, List<String> folders, JsonWriterWrapper sb)
     {
-        for (int i = -1; i < max; i++)
+        for (String folder : folders)
         {
-            String value = String.format(format, i);
-            hashAndAddToSB(sb, value);
-        }
-    }
-    
-    private void doNestedLoop(int outerMax, int innerMax, String format, JsonWriterWrapper sb)
-    {
-        for (int i = -1; i < outerMax; i++)
-        {
-            for (int j = -1; j < innerMax; j++)
+            for (int i = -1; i < max; i++)
             {
-                String value;
-                if (j == 0)
-                {
-                    value = format.replace("%3$03d", "");
-                    value = String.format(value, i, "metadata");
-                } else
-                {
-                    value = String.format(format, i, i, j);
-                }
-                
+                String value = String.format(format, folder, i);
                 hashAndAddToSB(sb, value);
+            }
+        }
+    }
+    
+    private void doNestedLoop(int outerMax, int innerMax, String format, List<String> folders, JsonWriterWrapper sb)
+    {
+        for (String folder : folders)
+        {
+            for (int i = -1; i < outerMax; i++)
+            {
+                for (int j = -1; j < innerMax; j++)
+                {
+                    String value;
+                    if (j == 0)
+                    {
+                        value = format.replace("%3$03d", "");
+                        value = String.format(value, folder, i, "metadata");
+                    } else
+                    {
+                        value = String.format(format, folder, i, i, j);
+                    }
+                    
+                    hashAndAddToSB(sb, value);
+                }
             }
         }
     }
