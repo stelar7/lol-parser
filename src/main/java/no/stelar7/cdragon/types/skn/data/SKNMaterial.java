@@ -12,15 +12,15 @@ public class SKNMaterial
     private int    startIndex;
     private int    numIndex;
     
-    private List<Short>   indecies;
+    private List<Integer>   indecies;
     private List<SKNData> vertices;
     
-    public List<Short> getIndecies()
+    public List<Integer> getIndecies()
     {
         return indecies;
     }
     
-    public void setIndecies(List<Short> indecies)
+    public void setIndecies(List<Integer> indecies)
     {
         this.indecies = indecies;
     }

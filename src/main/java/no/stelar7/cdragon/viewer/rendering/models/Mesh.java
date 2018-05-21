@@ -38,14 +38,11 @@ public class Mesh implements AutoCloseable
         }
         
         // load indecies
-        int[]         inds                  = new int[submesh.getNumIndex()];
-        List<Integer> indeciesAsIntegerList = UtilHandler.getIndeciesAsIntegerList(submesh.getIndecies());
-        boolean       shouldSubtract        = indeciesAsIntegerList.stream().noneMatch(i -> i > submesh.getStartVertex());
-        for (int i = 0; i < indeciesAsIntegerList.size(); i++)
+        int[] inds = new int[submesh.getNumIndex()];
+        for (int i = 0; i < submesh.getIndecies().size(); i++)
         {
-            inds[i] = indeciesAsIntegerList.get(i) - (shouldSubtract ? 0 : submesh.getStartVertex());
+            inds[i] = submesh.getIndecies().get(i);
         }
-        
         
         setVertices(verts);
         setIndecies(inds);

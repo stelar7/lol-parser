@@ -57,7 +57,15 @@ public class SKNParser implements Parseable<SKNFile>
         {
             SKNMaterial mat = file.getMaterials().get(i);
             mat.setVertices(file.getVertices().subList(mat.getStartVertex(), mat.getStartVertex() + mat.getNumVertex()));
-            mat.setIndecies(file.getIndecies().subList(mat.getStartIndex(), mat.getStartIndex() + mat.getNumIndex()));
+            
+            List<Integer> inds           = new ArrayList<>();
+            List<Short>   sublist        = file.getIndecies().subList(mat.getStartIndex(), mat.getStartIndex() + mat.getNumIndex());
+            boolean       shouldSubtract = sublist.stream().noneMatch(in -> in > mat.getStartVertex());
+            for (Short sh : sublist)
+            {
+                inds.add(sh - (shouldSubtract ? 0 : mat.getStartVertex()));
+            }
+            mat.setIndecies(inds);
         }
         
         

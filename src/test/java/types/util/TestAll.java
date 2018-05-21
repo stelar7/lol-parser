@@ -98,7 +98,7 @@ public class TestAll
     
     final int skinMax     = 50;
     final int championMax = 750;
-    final int iconMax     = 10000;
+    final int iconMax     = 4000;
     
     private final Map<Integer[], List<String>> folderData = new HashMap<>()
     {{
@@ -126,6 +126,7 @@ public class TestAll
     private void parseIcons(Path file, JsonWriterWrapper sb)
     {
         // parse perk "backgrounds"
+        System.out.println("Parsing perk backgrounds");
         List<String> types = Arrays.asList("domination", "inspiration", "precision", "resolve", "sorcery");
         for (String type : types)
         {
@@ -146,7 +147,7 @@ public class TestAll
             }
         }
         
-        
+        System.out.println("Parsing json files");
         findIconPathInJsonArrayFile(file, "perkstyles.json", sb);
         findIconPathInJsonArrayFile(file, "perks.json", sb);
         findIconPathInJsonArrayFile(file, "items.json", sb);
@@ -738,9 +739,9 @@ public class TestAll
     
     private void doLoop(int max, String format, List<String> folders, JsonWriterWrapper sb)
     {
-        for (String folder : folders)
+        for (int i = -1; i < max; i++)
         {
-            for (int i = -1; i < max; i++)
+            for (String folder : folders)
             {
                 String value = String.format(format, folder, i);
                 hashAndAddToSB(sb, value);
@@ -750,11 +751,11 @@ public class TestAll
     
     private void doNestedLoop(int outerMax, int innerMax, String format, List<String> folders, JsonWriterWrapper sb)
     {
-        for (String folder : folders)
+        for (int i = -1; i < outerMax; i++)
         {
-            for (int i = -1; i < outerMax; i++)
+            for (int j = -1; j < innerMax; j++)
             {
-                for (int j = -1; j < innerMax; j++)
+                for (String folder : folders)
                 {
                     String value;
                     if (j == 0)

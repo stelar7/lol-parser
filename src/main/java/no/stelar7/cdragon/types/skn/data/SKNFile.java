@@ -224,7 +224,7 @@ public class SKNFile
     {
         StringBuilder        sb           = new StringBuilder();
         List<Vector3f>       scaledVerts  = UtilHandler.getScaledVertices(submesh.getVertexPositions());
-        List<Integer>        indeciesList = UtilHandler.getIndeciesAsIntegerList(submesh.getIndecies());
+        List<Integer>        indeciesList = submesh.getIndecies();
         DecimalFormatSymbols dfs          = new DecimalFormatSymbols(Locale.ENGLISH);
         DecimalFormat        df           = new DecimalFormat("###.#######", dfs);
         
