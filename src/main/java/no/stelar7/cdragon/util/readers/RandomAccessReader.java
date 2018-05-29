@@ -248,6 +248,21 @@ public class RandomAccessReader implements AutoCloseable
         return path;
     }
     
+    public double readDouble()
+    {
+        return buffer.getDouble();
+    }
+    
+    public List<Double> readDoubles(int count)
+    {
+        List<Double> values = new ArrayList<>();
+        for (int j = 0; j < count; j++)
+        {
+            values.add(readDouble());
+        }
+        return values;
+    }
+    
     public float readFloat()
     {
         return buffer.getFloat();
@@ -267,6 +282,17 @@ public class RandomAccessReader implements AutoCloseable
     public boolean readBoolean()
     {
         return buffer.get() > 0;
+    }
+    
+    
+    public List<Boolean> readBooleans(int count)
+    {
+        List<Boolean> values = new ArrayList<>();
+        for (int j = 0; j < count; j++)
+        {
+            values.add(readBoolean());
+        }
+        return values;
     }
     
     /**
@@ -473,5 +499,86 @@ public class RandomAccessReader implements AutoCloseable
         }
         seek(pos);
         return found;
+    }
+    
+    public List<?> readPattern(String pattern)
+    {
+        char[]       chars = pattern.toCharArray();
+        List<Object> data  = new ArrayList<>();
+        
+        int count = 0;
+        for (char aChar : chars)
+        {
+            if (Character.isDigit(aChar))
+            {
+                count *= 10;
+                count += Character.digit(aChar, 10);
+                continue;
+            }
+        
+            switch (aChar)
+            {
+                case 's':
+                case 'p':
+                case 'c':
+                {
+                    data.add(count > 1 ? readString(count) : readString(1));
+                    break;
+                }
+                case 'b':
+                case 'B':
+                {
+                    data.add(count > 1 ? readBytes(count) : readByte());
+                    break;
+                }
+                case '?':
+                {
+                    data.add(count > 1 ? readBooleans(count) : readBoolean());
+                    break;
+                }
+                case 'h':
+                case 'H':
+                {
+                    data.add(count > 1 ? readShorts(count) : readShort());
+                    break;
+                }
+                case 'i':
+                case 'I':
+                case 'l':
+                case 'L':
+                {
+                    data.add(count > 1 ? readInts(count) : readInt());
+                    break;
+                }
+                case 'q':
+                case 'Q':
+                {
+                    data.add(count > 1 ? readLongs(count) : readLong());
+                    break;
+                }
+                case 'f':
+                case 'F':
+                {
+                    data.add(count > 1 ? readFloats(count) : readFloat());
+                    break;
+                }
+                case 'd':
+                case 'D':
+                {
+                    data.add(count > 1 ? readDoubles(count) : readDouble());
+                    break;
+                }
+            
+                case ' ':
+                {
+                    break;
+                }
+            }
+        
+            count = 0;
+        }
+        
+        
+        return data;
     }
 }
