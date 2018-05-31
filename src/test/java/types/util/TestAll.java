@@ -193,11 +193,11 @@ public class TestAll
         }
         
         System.out.println("Parsing hextech");
-        //List<String> hextechValues = parseHextechFile();
-        //doHextechParse(jsonWriter, hextechValues, pre);
+        List<String> hextechValues = parseHextechFile();
+        doHextechParse(jsonWriter, hextechValues, pre);
         
         System.out.println("Parsing loot");
-        //doLootParse(jsonWriter, hextechValues, pre);
+        doLootParse(jsonWriter, hextechValues, pre);
         
         System.out.println("Parsing icons");
         parseIcons(file, jsonWriter);
@@ -689,11 +689,19 @@ public class TestAll
                 if (ob.has("chromas"))
                 {
                     JsonArray chrom = ob.getAsJsonArray("chromas");
+                    String    cp    = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
+                    cp = cp.substring(cp.lastIndexOf("v1"));
+                    String pre = prePre + "global/default/";
+                    hashAndAddToSB(data, pre + cp);
+                    
                     for (JsonElement ch : chrom)
                     {
-                        String cp = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
+                        cp = ob.get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
                         cp = cp.substring(cp.lastIndexOf("v1"));
-                        String pre = prePre + "global/default/";
+                        hashAndAddToSB(data, pre + cp);
+                        
+                        cp = ch.getAsJsonObject().get("chromaPath").getAsString().toLowerCase(Locale.ENGLISH);
+                        cp = cp.substring(cp.lastIndexOf("v1"));
                         hashAndAddToSB(data, pre + cp);
                     }
                 }
@@ -878,7 +886,12 @@ public class TestAll
             return;
         }
         
-        List<String> lines = Files.readAllLines(loadPath).stream().filter(x -> !x.equalsIgnoreCase("{") && !x.equalsIgnoreCase("}")).collect(Collectors.toList());
+        List<String> lines = Files.readAllLines(loadPath)
+                                  .stream()
+                                  .filter(x -> !x.equalsIgnoreCase("{"))
+                                  .filter(x -> !x.equalsIgnoreCase("}"))
+                                  .filter(x -> !x.equalsIgnoreCase("{}"))
+                                  .collect(Collectors.toList());
         
         Set<String> changedPlugins = new HashSet<>();
         for (String u : lines)
