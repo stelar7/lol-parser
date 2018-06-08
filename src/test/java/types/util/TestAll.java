@@ -98,7 +98,7 @@ public class TestAll
     
     final int skinMax     = 50;
     final int championMax = 750;
-    final int iconMax     = 4000;
+    final int iconMax     = 5000;
     
     private final Map<Integer[], List<String>> folderData = new HashMap<>()
     {{
@@ -958,7 +958,7 @@ public class TestAll
     
     final int img_skinMax     = 50;
     final int img_championMax = 700;
-    final int img_iconMax     = 2000;
+    final int img_iconMax     = 5000;
     
     private final Map<String, Integer> img_folderData = new HashMap<>()
     {{
