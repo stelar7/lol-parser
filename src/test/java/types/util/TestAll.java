@@ -1620,7 +1620,10 @@ public class TestAll
         Path path = Paths.get(System.getProperty("user.home"), "Downloads/rcp-be-lol-game-data/").resolve(hashMe.trim());
         if (Files.exists(path))
         {
-            sb.name(realPath.trim()).value(path.toString().replace("\\", "/").trim());
+            if (!sb.toString().contains(realPath.trim()))
+            {
+                sb.name(realPath.trim()).value(path.toString().replace("\\", "/").trim());
+            }
         }
     }
     
