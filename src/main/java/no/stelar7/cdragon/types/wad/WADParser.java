@@ -32,6 +32,11 @@ public class WADParser implements Parseable<WADFile>
         return parseHidden(pluginName, path, pbe, false, 0);
     }
     
+    public WADFile parseVersion(String pluginName, Path path, String version, boolean pbe)
+    {
+        return parseHiddenVersion(pluginName, path, pbe, version, false, 0);
+    }
+    
     private WADFile parseHidden(String pluginName, Path path, boolean pbe, boolean assetDefault, int count)
     {
         String url       = "http://l3cdn.riotgames.com/releases/%s/projects/league_client/releases/%s/files/Plugins/" + pluginName;
@@ -62,6 +67,24 @@ public class WADParser implements Parseable<WADFile>
         }
         
         return handleAll(pluginName, String.format(url + "%s", "%s", type), UtilHandler.getIPFromLong(use), path);
+    }
+    
+    private WADFile parseHiddenVersion(String pluginName, Path path, boolean pbe, String version, boolean assetDefault, int count)
+    {
+        String url       = "http://l3cdn.riotgames.com/releases/%s/projects/league_client/releases/%s/files/Plugins/" + pluginName;
+        String pbeString = pbe ? "pbe" : "live";
+        url = String.format(url, pbeString, "%s");
+        
+        String cacheKey = String.format("lastGoodVersion-%s-%s", pbeString, pluginName);
+        
+        String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
+        
+        if (count >= 3)
+        {
+            return null;
+        }
+        
+        return handleAll(pluginName, String.format(url + "%s", "%s", type), version, path);
     }
     
     
