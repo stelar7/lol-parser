@@ -241,7 +241,12 @@ public final class UtilHandler
     
     public static String readInternalAsString(String filename)
     {
-        InputStream   file   = UtilHandler.class.getClassLoader().getResourceAsStream(filename);
+        InputStream file = UtilHandler.class.getClassLoader().getResourceAsStream(filename);
+        if (file == null)
+        {
+            return "";
+        }
+        
         StringBuilder result = new StringBuilder();
         
         try (Scanner scanner = new Scanner(file))

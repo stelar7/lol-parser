@@ -259,6 +259,11 @@ public class HashHandler
         {
             String              sb  = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
             Map<String, String> val = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+            if (val == null)
+            {
+                val = new HashMap<>();
+            }
+            
             wadHashNames.put(plugin, val);
             System.out.println("Loaded known hashes for " + plugin);
         } catch (Exception e)

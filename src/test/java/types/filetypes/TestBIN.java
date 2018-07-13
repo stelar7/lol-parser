@@ -24,14 +24,21 @@ public class TestBIN
     BINParser parser = new BINParser();
     
     @Test
-    public void testBIN()
+    public void testBIN() throws IOException
     {
         // Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\data\\characters\\warwick\\warwick.bin");
-        System.out.println("Parsing: " + file.toString());
-        
-        BINFile data = parser.parse(file);
-        System.out.println(data.toJson());
+        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
+        {
+            
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                System.out.println("Parsing: " + file.toString());
+                BINFile data = parser.parse(file);
+                System.out.println(data.toJson());
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
     
     @Test

@@ -22,7 +22,7 @@ public enum BINValueType
     STRING(16),
     STRING_HASH(17),
     STRUCTURE(19),
-    UNKNOWN_BYTE(24),
+    BOOLEAN_FLAGS(24),
     V2_FLOAT(11),
     V3_FLOAT(12),
     V3_SHORT(0),

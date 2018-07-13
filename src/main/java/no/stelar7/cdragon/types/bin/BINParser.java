@@ -174,8 +174,8 @@ public class BINParser implements Parseable<BINFile>
                 }
                 
                 return bm;
-            case UNKNOWN_BYTE:
-                return raf.readByte();
+            case BOOLEAN_FLAGS:
+                return raf.readBoolean();
             default:
                 throw new RuntimeException("Unknown type: " + type + " at location: " + (raf.pos() - 1));
         }

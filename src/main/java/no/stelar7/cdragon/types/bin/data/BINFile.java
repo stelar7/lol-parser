@@ -92,13 +92,13 @@ public class BINFile
         switch (type)
         {
             case BOOLEAN:
+            case BOOLEAN_FLAGS:
             {
                 bw.writeBoolean((boolean) datapoint);
                 break;
             }
             case BYTE:
             case SIGNED_BYTE:
-            case UNKNOWN_BYTE:
             {
                 bw.writeByte((byte) datapoint);
                 break;

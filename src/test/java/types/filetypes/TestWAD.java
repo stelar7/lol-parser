@@ -40,7 +40,7 @@ public class TestWAD
     {
         WADParser parser = new WADParser();
         
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp2");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -48,16 +48,23 @@ public class TestWAD
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
+                
                 if (file.getFileName().toString().endsWith(".wad"))
                 {
-                    WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
+                    if (file.getFileName().toString().contains("aatrox"))
+                    {
+                        WADFile parsed = parser.parse(file);
+                        parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
+                    }
+                    
                 }
-                
                 if (file.getFileName().toString().endsWith(".wad.client"))
                 {
-                    WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
+                    if (file.getFileName().toString().toLowerCase().contains("aatrox"))
+                    {
+                        WADFile parsed = parser.parse(file);
+                        parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
+                    }
                 }
                 return FileVisitResult.CONTINUE;
             }
