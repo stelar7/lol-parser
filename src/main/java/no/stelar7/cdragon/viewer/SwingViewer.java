@@ -112,8 +112,12 @@ public class SwingViewer
             {
                 Map<File, ByteArray> files = new HashMap<>();
                 data.forEach(f -> {
-                    String filename = f.getName().substring(f.getName().lastIndexOf("/"));
-                    String newName  = UtilHandler.replaceEnding(filename, "dds", "png");
+                    String filename = f.getName();
+                    if (filename.contains("/"))
+                    {
+                        filename = filename.substring(filename.lastIndexOf("/"));
+                    }
+                    String newName = UtilHandler.replaceEnding(filename, "dds", "png");
                     files.put(new File(newName), f.getContent());
                 });
                 
@@ -240,12 +244,11 @@ public class SwingViewer
             {
                 String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
                 String filename = HashHandler.loadAllWadHashes().getOrDefault(hash, hash);
-                byte[] data = file.readContentFromHeaderData(header);
-                
+                byte[] data     = file.readContentFromHeaderData(header);
                 if (filename.equals(hash))
                 {
                     String type = FileTypeHandler.findFileType(new ByteArray(data));
-                    filename = filename + "." + type;
+                    filename = "unknown/" + filename + "." + type;
                 }
                 
                 if (header.getCompressed() != 2)
@@ -328,9 +331,6 @@ public class SwingViewer
                     JTextArea label    = new JTextArea(new String(datb, StandardCharsets.UTF_8));
                     label.setEditable(false);
                     contentPane.setViewportView(label);
-                } else
-                {
-                    JOptionPane.showMessageDialog(null, "This filetype is not supported for opening yet..\n" + filename, "Sorry, im lazy", JOptionPane.INFORMATION_MESSAGE);
                 }
             }
         }

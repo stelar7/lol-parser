@@ -296,24 +296,25 @@ public class HashHandler
         return value.intValue();
     }
     
-    static Map<String, String> all = new HashMap<>();
+    public static Map<String, String> all;
     
     public static Map<String, String> loadAllWadHashes()
     {
-        if (all.isEmpty())
+        if (all == null)
         {
-            InputStream  is    = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
-            Scanner      s     = new Scanner(is).useDelimiter("\\A");
-            List<String> files = new ArrayList<>();
-            System.out.println(s.next());
-            while (s.hasNext())
+            all = new HashMap<>();
+            InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
+            Scanner      s         = new Scanner(is).useDelimiter("\\A");
+            List<String> files     = new ArrayList<>();
+            String[]     fileArray = s.next().split("\n");
+            for (String file : fileArray)
             {
-                String file         = s.next();
                 String content      = UtilHandler.readInternalAsString("hashes/wad/" + file);
                 Type   mapTypeToken = new TypeToken<Map<String, String>>() {}.getType();
                 ((Map<String, String>) UtilHandler.getGson().fromJson(content, mapTypeToken)).forEach(all::putIfAbsent);
             }
         }
+        
         return all;
     }
 }
