@@ -92,6 +92,7 @@ public class TestAll
             "v1/summoner-masteries.json",
             "v1/summoner-spells.json",
             "v1/summoner-trophies.json",
+            "v1/summonericons.json",
             "v1/ward-skins.json"
                                                         );
     
