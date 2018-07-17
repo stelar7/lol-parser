@@ -10,11 +10,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public class TestWAD
 {
+    WADParser parser = new WADParser();
+    
     @Test
     public void testWAD()
     {
-        WADParser parser = new WADParser();
-        
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
@@ -29,8 +29,6 @@ public class TestWAD
     @Test
     public void testWEB()
     {
-        WADParser parser = new WADParser();
-        
         WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke.wad.client"));
         parsed.extractFiles("Champions", "Pyke.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke"));
     }
@@ -38,9 +36,7 @@ public class TestWAD
     @Test
     public void testClientWAD() throws Exception
     {
-        WADParser parser = new WADParser();
-        
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp2");
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -48,23 +44,16 @@ public class TestWAD
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                
                 if (file.getFileName().toString().endsWith(".wad"))
                 {
-                    if (file.getFileName().toString().contains("aatrox"))
-                    {
-                        WADFile parsed = parser.parse(file);
-                        parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
-                    }
+                    WADFile parsed = parser.parse(file);
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
                     
                 }
                 if (file.getFileName().toString().endsWith(".wad.client"))
                 {
-                    if (file.getFileName().toString().toLowerCase().contains("aatrox"))
-                    {
-                        WADFile parsed = parser.parse(file);
-                        parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
-                    }
+                    WADFile parsed = parser.parse(file);
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
                 }
                 return FileVisitResult.CONTINUE;
             }
