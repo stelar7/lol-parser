@@ -41,7 +41,7 @@ public class ReleasemanifestDirectory
     
     public List<String> printLines(String pre, String post)
     {
-        System.out.format("prefix: %s%nsuffix: %s", pre, post);
+        System.out.format("prefix: %s%nsuffix: %s%n", pre, post);
         
         List<String> output = new ArrayList<>();
         printFolder(this, "", output);
