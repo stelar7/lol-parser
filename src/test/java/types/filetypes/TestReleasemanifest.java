@@ -60,6 +60,7 @@ public class TestReleasemanifest
              .map(String::toLowerCase)
              .filter(l -> l.startsWith("/data/"))
              .map(l -> "assets" + l.substring(5))
+             .map(l -> l.replace("%20", " "))
              .map(l -> new Vector2<>(HashHandler.computeXXHash64(l), l))
              .forEach(foundHasheSet::add);
         
