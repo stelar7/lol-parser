@@ -13,7 +13,7 @@ public class TestWAD
     WADParser parser = new WADParser();
     
     @Test
-    public void testWAD()
+    public void testWeb()
     {
         String pluginName  = "rcp-be-lol-game-data";
         Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
@@ -27,7 +27,7 @@ public class TestWAD
     }
     
     @Test
-    public void testWEB()
+    public void testLocal()
     {
         WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke.wad.client"));
         parsed.extractFiles("Champions", "Pyke.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke"));
