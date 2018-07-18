@@ -225,6 +225,27 @@ public final class UtilHandler
         }
     }
     
+    public static ByteArray readBytes(String url)
+    {
+        int          read;
+        final byte[] buffer = new byte[4096];
+        
+        try (InputStream in = new URL(url).openConnection().getInputStream(); ByteArrayOutputStream bo = new ByteArrayOutputStream())
+        {
+            while ((read = in.read(buffer)) != -1)
+            {
+                bo.write(buffer, 0, read);
+            }
+            
+            bo.flush();
+            return new ByteArray(bo.toByteArray());
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public static String readAsString(Path path)
     {
         StringBuilder sb = new StringBuilder();

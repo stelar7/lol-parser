@@ -20,12 +20,15 @@ public class TestReleasemanifest
     {
         ReleasemanifestParser parser = new ReleasemanifestParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("releasemanifest (1)");
-        System.out.println("Parsing: " + file.toString());
+        List<String>             versions = UtilHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
+        ByteArray                data     = UtilHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/releasemanifest", versions.get(0)));
+        ReleasemanifestDirectory parsed   = parser.parse(data.getData());
         
-        ReleasemanifestDirectory parsed = parser.parse(file);
-        List<String>             lines  = parsed.printLines("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/0.0.0.1/files", ".compressed");
+        //http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/0.0.0.1/files
+        // .compressed
         
+        List<String> lines = parsed.printLines("", "");
+        saveToHashlist(lines);
         
         BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve("relmnf.log").toFile(), false));
         lines.stream()
