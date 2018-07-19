@@ -5,9 +5,10 @@ import java.util.*;
 
 public class ReleasemanifestDirectory
 {
-    private String name;
+    private String                           name;
     private List<ReleasemanifestContentFile> files          = new ArrayList<>();
     private List<ReleasemanifestDirectory>   subDirectories = new ArrayList<>();
+    private List<String>                     outputList     = new ArrayList<>();
     
     public String getName()
     {
@@ -39,16 +40,17 @@ public class ReleasemanifestDirectory
         this.subDirectories = subDirectories;
     }
     
-    public List<String> printLines(String pre, String post)
+    public List<String> generateFilelist(String pre, String post)
     {
-        System.out.format("prefix: %s%nsuffix: %s%n", pre, post);
+        if (outputList.isEmpty())
+        {
+            generateListFromFolder(this, "", outputList);
+        }
         
-        List<String> output = new ArrayList<>();
-        printFolder(this, "", output);
-        return output;
+        return outputList;
     }
     
-    private void printFolder(ReleasemanifestDirectory dir, String current, List<String> output)
+    private void generateListFromFolder(ReleasemanifestDirectory dir, String current, List<String> output)
     {
         String inner = (current + dir.name + "/").replace(" ", "%20");
         for (ReleasemanifestContentFile file : dir.files)
@@ -59,7 +61,7 @@ public class ReleasemanifestDirectory
         
         for (ReleasemanifestDirectory sub : dir.subDirectories)
         {
-            printFolder(sub, inner, output);
+            generateListFromFolder(sub, inner, output);
         }
     }
 }

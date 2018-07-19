@@ -15,6 +15,7 @@ import java.util.*;
 public class TestReleasemanifest
 {
     
+    
     @Test
     public void testReleasemanifest() throws IOException
     {
@@ -27,7 +28,7 @@ public class TestReleasemanifest
         //http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/0.0.0.1/files
         // .compressed
         
-        List<String> lines = parsed.printLines("", "");
+        List<String> lines = parsed.generateFilelist("", "");
         saveToHashlist(lines);
         
         BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve("relmnf.log").toFile(), false));
@@ -47,7 +48,25 @@ public class TestReleasemanifest
         bw.flush();
     }
     
-    private void saveToHashlist(List<String> lines) throws IOException
+    @Test
+    public void testGather() throws IOException
+    {
+        ReleasemanifestParser parser = new ReleasemanifestParser();
+        
+        Set<String>  dataLines = new HashSet<>();
+        List<String> versions  = UtilHandler.readWeb("http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW");
+        
+        versions.stream().parallel().forEach(s -> {
+            ByteArray                data   = UtilHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/releasemanifest", versions.get(0)));
+            ReleasemanifestDirectory parsed = parser.parse(data.getData());
+            
+            dataLines.addAll(parsed.generateFilelist("", ""));
+        });
+        
+        saveToHashlist(dataLines);
+    }
+    
+    private void saveToHashlist(Collection<String> lines) throws IOException
     {
         Set<Vector2<String, String>> foundHasheSet = new HashSet<>();
         
