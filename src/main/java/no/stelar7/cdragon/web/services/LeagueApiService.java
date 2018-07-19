@@ -16,19 +16,19 @@ public class LeagueApiService
     
     public Optional<StaticChampion> getStaticChampionFromKey(String key)
     {
-        return api.getStaticAPI().getChampions(Platform.EUW1, null, null, null).values().stream().filter(c -> c.getKey().equalsIgnoreCase(key)).findAny();
+        return api.getDDragonAPI().getChampions(null, null).values().stream().filter(c -> c.getKey().equalsIgnoreCase(key)).findAny();
     }
     
     public Optional<StaticChampion> getStaticChampionFromName(String key)
     {
-        return api.getStaticAPI().getChampions(Platform.EUW1, null, null, null).values().stream().filter(c -> c.getName().equalsIgnoreCase(key)).findAny();
+        return api.getDDragonAPI().getChampions(null, null).values().stream().filter(c -> c.getName().equalsIgnoreCase(key)).findAny();
     }
     
     public Optional<StaticChampion> getStaticChampionFromId(String key)
     {
         try
         {
-            return api.getStaticAPI().getChampions(Platform.EUW1, null, null, null).values().stream().filter(c -> c.getId() == Integer.parseInt(key)).findAny();
+            return api.getDDragonAPI().getChampions(null, null).values().stream().filter(c -> c.getId() == Integer.parseInt(key)).findAny();
         } catch (NumberFormatException e)
         {
             return Optional.empty();

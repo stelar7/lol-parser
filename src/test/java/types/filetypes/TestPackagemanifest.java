@@ -46,7 +46,7 @@ public class TestPackagemanifest
                                  .stream()
                                  .map(PackagemanifestLine::getFilePath)
                                  .map(p -> "http://l3cdn.riotgames.com/releases/live" + p)
-                                 .filter(p -> p.contains("MiniMapIcons"))
+                                 .filter(p -> p.toLowerCase().contains("inhib"))
                                  .collect(Collectors.toList());
         
         Path folder = UtilHandler.DOWNLOADS_FOLDER.resolve("icons");
@@ -67,12 +67,13 @@ public class TestPackagemanifest
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                if (file.toString().contains(".dds"))
+                if (file.toString().toLowerCase().contains(".dds"))
                 {
-                    DDSParser     parser = new DDSParser();
-                    BufferedImage image  = parser.parseCompressed(file);
-                    File          output = file.resolveSibling("parsed/" + UtilHandler.pathToFilename(file) + ".png").toFile();
-                    ImageIO.write(image, "png", output);
+                    DDSParser     parser     = new DDSParser();
+                    BufferedImage image      = parser.parseCompressed(file);
+                    Path          outputPath = file.resolveSibling("parsed/" + UtilHandler.pathToFilename(file) + ".png");
+                    Files.createDirectories(outputPath.getParent());
+                    ImageIO.write(image, "png", outputPath.toFile());
                     Files.delete(file);
                     return FileVisitResult.CONTINUE;
                 }

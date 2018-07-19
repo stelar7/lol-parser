@@ -5,10 +5,8 @@ import no.stelar7.api.l4j8.basic.APICredentials;
 import no.stelar7.api.l4j8.basic.cache.CacheProvider;
 import no.stelar7.api.l4j8.basic.cache.impl.*;
 import no.stelar7.api.l4j8.basic.calling.DataCall;
-import no.stelar7.api.l4j8.basic.constants.api.LogLevel;
 import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.cdragon.util.types.*;
-import no.stelar7.cdragon.web.SecretFile;
 
 import java.io.*;
 import java.net.*;
@@ -561,9 +559,7 @@ public final class UtilHandler
     {
         if (api == null)
         {
-            api = new L4J8(new APICredentials(SecretFile.API_KEY, SecretFile.API_KEY));
-            
-            DataCall.setLogLevel(LogLevel.INFO);
+            api = new L4J8(new APICredentials(""));
             DataCall.setCacheProvider(new TieredCacheProvider(
                                               new MemoryCacheProvider(CacheProvider.TTL_INFINITY),
                                               new FileSystemCacheProvider(CacheProvider.LOCATION_DEFAULT, CacheProvider.TTL_INFINITY))

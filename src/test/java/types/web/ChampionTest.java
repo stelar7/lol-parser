@@ -1,13 +1,11 @@
 package types.web;
 
-import no.stelar7.api.l4j8.basic.APICredentials;
 import no.stelar7.api.l4j8.basic.cache.CacheProvider;
 import no.stelar7.api.l4j8.basic.cache.impl.*;
 import no.stelar7.api.l4j8.basic.calling.DataCall;
 import no.stelar7.api.l4j8.basic.constants.api.*;
-import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.api.l4j8.pojo.staticdata.champion.*;
-import no.stelar7.cdragon.web.SecretFile;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.*;
 
 import java.io.IOException;
@@ -17,13 +15,11 @@ import java.util.*;
 public class ChampionTest
 {
     
-    static L4J8                       api;
     static Collection<StaticChampion> statics;
     
     @BeforeClass
     public static void setup()
     {
-        api = new L4J8(new APICredentials(SecretFile.API_KEY, SecretFile.API_KEY));
         
         DataCall.setLogLevel(LogLevel.INFO);
         DataCall.setCacheProvider(new TieredCacheProvider(
@@ -31,7 +27,7 @@ public class ChampionTest
                                           new FileSystemCacheProvider(CacheProvider.LOCATION_DEFAULT, CacheProvider.TTL_INFINITY))
                                  );
         
-        statics = api.getStaticAPI().getChampions(Platform.EUW1, null, null, null).values();
+        statics = UtilHandler.getL4J8().getDDragonAPI().getChampions(null, null).values();
         
     }
     

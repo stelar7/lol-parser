@@ -146,7 +146,7 @@
         <dependency>
             <groupId>com.github.stelar7</groupId>
             <artifactId>L4J8</artifactId>
-            <version>V1.4.8</version>
+            <version>V1.5.4</version>
         </dependency>
 
         <!-- used to create the web-api -->

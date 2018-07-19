@@ -231,7 +231,7 @@ public class TestUnpackFullWAD
         jsonWriter.beginObject();
         
         
-        UtilHandler.getL4J8().getStaticAPI().getChampions().forEach((k, v) -> {
+        UtilHandler.getL4J8().getDDragonAPI().getChampions().forEach((k, v) -> {
             String championName = v.getKey();
             String value        = String.format("data/characters/%s/%s.bin", championName, championName).toLowerCase(Locale.ENGLISH);
             hash(value, jsonWriter);
