@@ -4,6 +4,7 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.inibin.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -79,9 +80,9 @@ public final class InibinParser implements Parseable<InibinFile>
     }
     
     @Override
-    public InibinFile parse(byte[] data)
+    public InibinFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

@@ -326,7 +326,7 @@ public class SwingViewer
                 } else if (filename.endsWith(".bin"))
                 {
                     ByteArray bContent = data.getContent();
-                    String    datum    = new BINParser().parse(bContent.getData()).toJson();
+                    String    datum    = new BINParser().parse(bContent).toJson();
                     byte[]    datb     = FileTypeHandler.makePrettyJson(datum.getBytes(StandardCharsets.UTF_8));
                     JTextArea label    = new JTextArea(new String(datb, StandardCharsets.UTF_8));
                     label.setEditable(false);

@@ -3,6 +3,7 @@ package no.stelar7.cdragon.types.bnk;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bnk.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -19,9 +20,9 @@ public class BNKParser implements Parseable<BNKFile>
     }
     
     @Override
-    public BNKFile parse(byte[] data)
+    public BNKFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

@@ -4,7 +4,7 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.Vector2;
+import no.stelar7.cdragon.util.types.*;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -27,9 +27,9 @@ public class BINParser implements Parseable<BINFile>
     }
     
     @Override
-    public BINFile parse(byte[] data)
+    public BINFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

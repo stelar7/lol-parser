@@ -6,6 +6,7 @@ import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -154,9 +155,9 @@ public class WADParser implements Parseable<WADFile>
     }
     
     @Override
-    public WADFile parse(byte[] data)
+    public WADFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

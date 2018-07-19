@@ -83,7 +83,7 @@ public class TestUnpackFullWAD
                         {
                             for (BNKDATAWEMFile bnkdatawemFile : bnkFile.getData().getWemFiles())
                             {
-                                WEMFile wemFile = wemParser.parse(bnkdatawemFile.getData());
+                                WEMFile wemFile = wemParser.parse(new ByteArray(bnkdatawemFile.getData()));
                                 if (wemFile.getData() == null)
                                 {
                                     continue;

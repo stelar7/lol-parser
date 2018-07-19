@@ -3,6 +3,7 @@ package no.stelar7.cdragon.types.packagemanifest;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -18,9 +19,9 @@ public class PackagemanifestParser implements Parseable<PackagemanifestFile>
     }
     
     @Override
-    public PackagemanifestFile parse(byte[] data)
+    public PackagemanifestFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

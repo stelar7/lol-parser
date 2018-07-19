@@ -3,6 +3,7 @@ package no.stelar7.cdragon.types.scb;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.scb.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.*;
 import java.nio.file.Path;
@@ -16,9 +17,9 @@ public class SCBParser implements Parseable<SCBFile>
     }
     
     @Override
-    public SCBFile parse(byte[] data)
+    public SCBFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

@@ -7,6 +7,7 @@ import no.stelar7.cdragon.types.ogg.data.OGGStream;
 import no.stelar7.cdragon.types.wem.WEMParser;
 import no.stelar7.cdragon.types.wem.data.WEMFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.types.ByteArray;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class TestBNK
         for (BNKDATAWEMFile bnkdatawemFile : data.getData().getWemFiles())
         {
             Files.write(DOWNLOADS_FOLDER.resolve("test.wem"), bnkdatawemFile.getData());
-            WEMFile wemFile = new WEMParser().parse(bnkdatawemFile.getData());
+            WEMFile wemFile = new WEMParser().parse(new ByteArray(bnkdatawemFile.getData()));
             if (wemFile.getData() != null)
             {
                 OGGStream oggStream = new OGGParser().parse(wemFile.getData());

@@ -4,6 +4,7 @@ package no.stelar7.cdragon.types.dds;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.util.handlers.CompressionHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -26,11 +27,11 @@ public class DDSParser implements Parseable<BufferedImage>
     }
     
     @Override
-    public BufferedImage parse(byte[] data)
+    public BufferedImage parse(ByteArray data)
     {
         try
         {
-            return ImageIO.read(new ByteArrayInputStream(data));
+            return ImageIO.read(new ByteArrayInputStream(data.getData()));
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -41,7 +42,7 @@ public class DDSParser implements Parseable<BufferedImage>
     @Override
     public BufferedImage parse(RandomAccessReader raf)
     {
-        return parse(raf.readRemaining());
+        return parse(raf.readToByteArray());
     }
     
     public BufferedImage parseCompressed(Path path)
@@ -49,7 +50,7 @@ public class DDSParser implements Parseable<BufferedImage>
         try
         {
             byte[] dataBytes = CompressionHandler.uncompress(Files.readAllBytes(path));
-            return parse(dataBytes);
+            return parse(new ByteArray(dataBytes));
         } catch (IOException e)
         {
             e.printStackTrace();

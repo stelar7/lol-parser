@@ -3,6 +3,7 @@ package no.stelar7.cdragon.types.wem;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.wem.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -16,9 +17,9 @@ public class WEMParser implements Parseable<WEMFile>
     }
     
     @Override
-    public WEMFile parse(byte[] data)
+    public WEMFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     public WEMFile parse(RandomAccessReader raf)

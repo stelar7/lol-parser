@@ -23,7 +23,7 @@ public class TestReleasemanifest
         
         List<String>             versions = UtilHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
         ByteArray                data     = UtilHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/releasemanifest", versions.get(0)));
-        ReleasemanifestDirectory parsed   = parser.parse(data.getData());
+        ReleasemanifestDirectory parsed   = parser.parse(data);
         
         //http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/0.0.0.1/files
         // .compressed
@@ -56,14 +56,19 @@ public class TestReleasemanifest
         Set<String>  dataLines = new HashSet<>();
         List<String> versions  = UtilHandler.readWeb("http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW");
         
-        versions.stream().parallel().forEach(s -> {
-            ByteArray                data   = UtilHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/releasemanifest", versions.get(0)));
-            ReleasemanifestDirectory parsed = parser.parse(data.getData());
-            
-            dataLines.addAll(parsed.generateFilelist("", ""));
+        versions.forEach(s -> {
+            try
+            {
+                ByteArray                data   = UtilHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/releasemanifest", s));
+                ReleasemanifestDirectory parsed = parser.parse(data);
+                List<String>             dat    = parsed.generateFilelist("", "");
+                
+                saveToHashlist(dataLines);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
         });
-        
-        saveToHashlist(dataLines);
     }
     
     private void saveToHashlist(Collection<String> lines) throws IOException

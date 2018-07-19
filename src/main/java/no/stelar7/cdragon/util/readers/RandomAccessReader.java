@@ -515,7 +515,7 @@ public class RandomAccessReader implements AutoCloseable
                 count += Character.digit(aChar, 10);
                 continue;
             }
-        
+            
             switch (aChar)
             {
                 case 's':
@@ -568,17 +568,22 @@ public class RandomAccessReader implements AutoCloseable
                     data.add(count > 1 ? readDoubles(count) : readDouble());
                     break;
                 }
-            
+                
                 case ' ':
                 {
                     break;
                 }
             }
-        
+            
             count = 0;
         }
         
         
         return data;
+    }
+    
+    public ByteArray readToByteArray()
+    {
+        return new ByteArray(readRemaining());
     }
 }

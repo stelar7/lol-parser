@@ -45,6 +45,11 @@ public final class UtilHandler
         return path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf('.'));
     }
     
+    public static String getFilename(String path)
+    {
+        return path.substring(path.lastIndexOf('/') + 1);
+    }
+    
     public static String pathToFolderName(Path path)
     {
         return path.getFileName().toString();

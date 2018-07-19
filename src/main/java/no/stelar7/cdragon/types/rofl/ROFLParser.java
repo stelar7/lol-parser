@@ -6,6 +6,7 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.rofl.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.lang.reflect.Type;
 import java.nio.ByteOrder;
@@ -24,9 +25,9 @@ public class ROFLParser implements Parseable<ROFLFile>
     }
     
     @Override
-    public ROFLFile parse(byte[] data)
+    public ROFLFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

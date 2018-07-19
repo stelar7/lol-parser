@@ -5,6 +5,7 @@ import no.stelar7.cdragon.types.skl.data.*;
 import no.stelar7.cdragon.types.skl.data.versioned.bone.*;
 import no.stelar7.cdragon.types.skl.data.versioned.data.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -20,9 +21,9 @@ public class SKLParser implements Parseable<SKLFile>
     }
     
     @Override
-    public SKLFile parse(byte[] data)
+    public SKLFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

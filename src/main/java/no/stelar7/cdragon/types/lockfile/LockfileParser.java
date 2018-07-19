@@ -3,6 +3,7 @@ package no.stelar7.cdragon.types.lockfile;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -16,9 +17,9 @@ public class LockfileParser implements Parseable<Lockfile>
     }
     
     @Override
-    public Lockfile parse(byte[] data)
+    public Lockfile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override
