@@ -1,10 +1,10 @@
 {
-	"b106f25fc12ce930": "plugins/rcp-fe-viewport/description.json",
-	"61c6958a74c8ff89": "plugins/rcp-fe-viewport/global/default/css/main.css",
-	"aea1fa759ebc272e": "plugins/rcp-fe-viewport/global/default/description.json",
-	"094749f61b30bb6a": "plugins/rcp-fe-viewport/global/default/index.html",
-	"1b9ef6c6adeccc33": "plugins/rcp-fe-viewport/global/default/init.js",
-	"38b14fc03a9a9e68": "plugins/rcp-fe-viewport/global/default/init.js.map",
-	"04f899f48b873a09": "plugins/rcp-fe-viewport/global/default/license.json",
-	"5c3aa8d901af6b5a": "plugins/rcp-fe-viewport/global/default/rcp-fe-viewport.js"
+    "b106f25fc12ce930": "plugins/rcp-fe-viewport/description.json",
+    "61c6958a74c8ff89": "plugins/rcp-fe-viewport/global/default/css/main.css",
+    "aea1fa759ebc272e": "plugins/rcp-fe-viewport/global/default/description.json",
+    "094749f61b30bb6a": "plugins/rcp-fe-viewport/global/default/index.html",
+    "1b9ef6c6adeccc33": "plugins/rcp-fe-viewport/global/default/init.js",
+    "38b14fc03a9a9e68": "plugins/rcp-fe-viewport/global/default/init.js.map",
+    "04f899f48b873a09": "plugins/rcp-fe-viewport/global/default/license.json",
+    "5c3aa8d901af6b5a": "plugins/rcp-fe-viewport/global/default/rcp-fe-viewport.js"
 }

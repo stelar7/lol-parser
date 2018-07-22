@@ -1,7 +1,7 @@
 {
-	"c1045c3673f432e5": "plugins/rcp-fe-lol-lock-and-load/description.json",
-	"0bbe5744c77c9a56": "plugins/rcp-fe-lol-lock-and-load/global/default/description.json",
-	"1c89931f3c4c6b66": "plugins/rcp-fe-lol-lock-and-load/global/default/index.html",
-	"48eed58771769e8c": "plugins/rcp-fe-lol-lock-and-load/global/default/init.js",
-	"69e04048ad3655c4": "plugins/rcp-fe-lol-lock-and-load/global/default/license.json"
+    "c1045c3673f432e5": "plugins/rcp-fe-lol-lock-and-load/description.json",
+    "0bbe5744c77c9a56": "plugins/rcp-fe-lol-lock-and-load/global/default/description.json",
+    "1c89931f3c4c6b66": "plugins/rcp-fe-lol-lock-and-load/global/default/index.html",
+    "48eed58771769e8c": "plugins/rcp-fe-lol-lock-and-load/global/default/init.js",
+    "69e04048ad3655c4": "plugins/rcp-fe-lol-lock-and-load/global/default/license.json"
 }

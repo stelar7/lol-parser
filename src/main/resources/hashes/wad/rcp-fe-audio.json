@@ -1,7 +1,7 @@
 {
-	"537aa12e966fd3c7": "plugins/rcp-fe-audio/description.json",
-	"fced2b6fcd4fc01f": "plugins/rcp-fe-audio/global/default/description.json",
-	"a6d9b716f5839305": "plugins/rcp-fe-audio/global/default/index.html",
-	"39e9cdde32ef8871": "plugins/rcp-fe-audio/global/default/init.js",
-	"23f7e73e5e35fa76": "plugins/rcp-fe-audio/global/default/license.json"
+    "537aa12e966fd3c7": "plugins/rcp-fe-audio/description.json",
+    "fced2b6fcd4fc01f": "plugins/rcp-fe-audio/global/default/description.json",
+    "a6d9b716f5839305": "plugins/rcp-fe-audio/global/default/index.html",
+    "39e9cdde32ef8871": "plugins/rcp-fe-audio/global/default/init.js",
+    "23f7e73e5e35fa76": "plugins/rcp-fe-audio/global/default/license.json"
 }

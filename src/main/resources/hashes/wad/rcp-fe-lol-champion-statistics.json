@@ -1,15 +1,15 @@
 {
-	"29f6bb27621684bc": "plugins/rcp-fe-lol-champion-statistics/description.json",
-	"65511364ea500aeb": "plugins/rcp-fe-lol-champion-statistics/euw/default/index.html",
-	"25df886f432bd522": "plugins/rcp-fe-lol-champion-statistics/euw/default/init.js",
-	"408746dd4adf704f": "plugins/rcp-fe-lol-champion-statistics/euw/en_gb/index.html",
-	"b0359b577deaaf3b": "plugins/rcp-fe-lol-champion-statistics/euw/en_gb/init.js",
-	"cfdf4765472381c5": "plugins/rcp-fe-lol-champion-statistics/global/default/description.json",
-	"b49658f1dc5fe7de": "plugins/rcp-fe-lol-champion-statistics/global/default/index.html",
-	"338315e4fda8f7a7": "plugins/rcp-fe-lol-champion-statistics/global/default/index.html",
-	"b3252a23e553e4ce": "plugins/rcp-fe-lol-champion-statistics/global/default/init.js",
-	"7ad41d1aa7758e18": "plugins/rcp-fe-lol-champion-statistics/global/default/init.js",
-	"3f119e89abe0fb7d": "plugins/rcp-fe-lol-champion-statistics/global/default/license.json",
-	"f39d4456e5476f0e": "plugins/rcp-fe-lol-champion-statistics/global/en_gb/index.html",
-	"931ae1cf7941a097": "plugins/rcp-fe-lol-champion-statistics/global/en_gb/init.js"
+    "29f6bb27621684bc": "plugins/rcp-fe-lol-champion-statistics/description.json",
+    "65511364ea500aeb": "plugins/rcp-fe-lol-champion-statistics/euw/default/index.html",
+    "25df886f432bd522": "plugins/rcp-fe-lol-champion-statistics/euw/default/init.js",
+    "408746dd4adf704f": "plugins/rcp-fe-lol-champion-statistics/euw/en_gb/index.html",
+    "b0359b577deaaf3b": "plugins/rcp-fe-lol-champion-statistics/euw/en_gb/init.js",
+    "cfdf4765472381c5": "plugins/rcp-fe-lol-champion-statistics/global/default/description.json",
+    "b49658f1dc5fe7de": "plugins/rcp-fe-lol-champion-statistics/global/default/index.html",
+    "338315e4fda8f7a7": "plugins/rcp-fe-lol-champion-statistics/global/default/index.html",
+    "7ad41d1aa7758e18": "plugins/rcp-fe-lol-champion-statistics/global/default/init.js",
+    "b3252a23e553e4ce": "plugins/rcp-fe-lol-champion-statistics/global/default/init.js",
+    "3f119e89abe0fb7d": "plugins/rcp-fe-lol-champion-statistics/global/default/license.json",
+    "f39d4456e5476f0e": "plugins/rcp-fe-lol-champion-statistics/global/en_gb/index.html",
+    "931ae1cf7941a097": "plugins/rcp-fe-lol-champion-statistics/global/en_gb/init.js"
 }

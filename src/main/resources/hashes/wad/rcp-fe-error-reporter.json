@@ -1,15 +1,15 @@
 {
-	"b46847a143186496": "plugins/rcp-fe-error-reporter/description.json",
-	"a8070400cb039d3b": "plugins/rcp-fe-error-reporter/euw/default/index.html",
-	"1bbd0255ed30cb41": "plugins/rcp-fe-error-reporter/euw/default/init.js",
-	"a5826bcb5a72ab23": "plugins/rcp-fe-error-reporter/euw/en_gb/index.html",
-	"d13c3aac835a9746": "plugins/rcp-fe-error-reporter/euw/en_gb/init.js",
-	"b7607fbd5eb31c95": "plugins/rcp-fe-error-reporter/global/default/description.json",
-	"8f730c612e1e1066": "plugins/rcp-fe-error-reporter/global/default/index.html",
-	"5695f9b148e21ffd": "plugins/rcp-fe-error-reporter/global/default/index.html",
-	"09a2d5555b47668b": "plugins/rcp-fe-error-reporter/global/default/init.js",
-	"f5b8f086252a280a": "plugins/rcp-fe-error-reporter/global/default/init.js",
-	"bd9414977f692a14": "plugins/rcp-fe-error-reporter/global/default/license.json",
-	"a0d4244b89f9da04": "plugins/rcp-fe-error-reporter/global/en_gb/index.html",
-	"9201a8d2464fec09": "plugins/rcp-fe-error-reporter/global/en_gb/init.js"
+    "b46847a143186496": "plugins/rcp-fe-error-reporter/description.json",
+    "a8070400cb039d3b": "plugins/rcp-fe-error-reporter/euw/default/index.html",
+    "1bbd0255ed30cb41": "plugins/rcp-fe-error-reporter/euw/default/init.js",
+    "a5826bcb5a72ab23": "plugins/rcp-fe-error-reporter/euw/en_gb/index.html",
+    "d13c3aac835a9746": "plugins/rcp-fe-error-reporter/euw/en_gb/init.js",
+    "b7607fbd5eb31c95": "plugins/rcp-fe-error-reporter/global/default/description.json",
+    "5695f9b148e21ffd": "plugins/rcp-fe-error-reporter/global/default/index.html",
+    "8f730c612e1e1066": "plugins/rcp-fe-error-reporter/global/default/index.html",
+    "f5b8f086252a280a": "plugins/rcp-fe-error-reporter/global/default/init.js",
+    "09a2d5555b47668b": "plugins/rcp-fe-error-reporter/global/default/init.js",
+    "bd9414977f692a14": "plugins/rcp-fe-error-reporter/global/default/license.json",
+    "a0d4244b89f9da04": "plugins/rcp-fe-error-reporter/global/en_gb/index.html",
+    "9201a8d2464fec09": "plugins/rcp-fe-error-reporter/global/en_gb/init.js"
 }

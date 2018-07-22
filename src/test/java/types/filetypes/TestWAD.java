@@ -1,12 +1,20 @@
 package types.filetypes;
 
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.util.types.*;
 import org.junit.Test;
 
+import javax.print.attribute.HashAttributeSet;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.function.*;
+import java.util.stream.Collectors;
 
 public class TestWAD
 {
@@ -56,6 +64,64 @@ public class TestWAD
                     parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
                 }
                 return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    
+    @Test
+    public void testPullCDTB()
+    {
+        String hashA = "https://raw.githubusercontent.com/CommunityDragon/CDTB/wad-client/cdragontoolbox/hashes.game.txt";
+        String hashB = "https://raw.githubusercontent.com/CommunityDragon/CDTB/wad-client/cdragontoolbox/hashes.lcu.txt";
+        
+        Set<String> changedPlugins = new HashSet<>();
+        
+        Function<Vector2, String> findPlugin = s -> {
+            String prePre = (String) s.getSecond();
+            if (prePre.startsWith("plugins/"))
+            {
+                prePre = prePre.substring("plugins/".length());
+            }
+            String       plugin = prePre.substring(0, prePre.indexOf('/'));
+            List<String> ch     = List.of("assets", "content", "data");
+            if (ch.contains(plugin))
+            {
+                plugin = "champions";
+            }
+            return plugin;
+        };
+        
+        List<String> data = WebHandler.readWeb(hashA);
+        data.addAll(WebHandler.readWeb(hashB));
+        Map<String, Set<Vector2>> hashes = data.stream()
+                                               .map(line -> line.substring(line.indexOf(' ') + 1))
+                                               .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
+                                               .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
+        
+        hashes.forEach((plugin, set) -> {
+            
+            try
+            {
+                HashHandler.getWadHashes(plugin).forEach((k, v) -> set.add(new Vector2<>(k, v)));
+                
+                List<Vector2> foundHashes = new ArrayList<>(set);
+                
+                System.out.println("Sorting hashes");
+                foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
+                
+                System.out.println("Writing hashes");
+                JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
+                jsonWriter.beginObject();
+                for (Vector2<String, String> pair : foundHashes)
+                {
+                    jsonWriter.name(pair.getFirst()).value(pair.getSecond());
+                }
+                jsonWriter.endObject();
+                
+                Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
             }
         });
     }

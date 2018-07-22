@@ -1,10 +1,10 @@
 {
-	"01d7e189d2f1b81e": "plugins/rcp-fe-lol-startup/description.json",
-	"b733dfdd5b7bb5bd": "plugins/rcp-fe-lol-startup/global/default/description.json",
-	"bd77cba85eaa802c": "plugins/rcp-fe-lol-startup/global/default/index.html",
-	"50f62a9097113ce1": "plugins/rcp-fe-lol-startup/global/default/init.js",
-	"dd780db802924e26": "plugins/rcp-fe-lol-startup/global/default/license.json",
-	"a4e8aa63339cdda0": "plugins/rcp-fe-lol-startup/global/default/loading_spinner.png",
-	"b751a21e04a08770": "plugins/rcp-fe-lol-startup/global/default/lol_icon.png",
-	"e99a428e1b05f33e": "plugins/rcp-fe-lol-startup/global/default/trans.json"
+    "01d7e189d2f1b81e": "plugins/rcp-fe-lol-startup/description.json",
+    "b733dfdd5b7bb5bd": "plugins/rcp-fe-lol-startup/global/default/description.json",
+    "bd77cba85eaa802c": "plugins/rcp-fe-lol-startup/global/default/index.html",
+    "50f62a9097113ce1": "plugins/rcp-fe-lol-startup/global/default/init.js",
+    "dd780db802924e26": "plugins/rcp-fe-lol-startup/global/default/license.json",
+    "a4e8aa63339cdda0": "plugins/rcp-fe-lol-startup/global/default/loading_spinner.png",
+    "b751a21e04a08770": "plugins/rcp-fe-lol-startup/global/default/lol_icon.png",
+    "e99a428e1b05f33e": "plugins/rcp-fe-lol-startup/global/default/trans.json"
 }
