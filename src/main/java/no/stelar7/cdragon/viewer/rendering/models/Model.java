@@ -1,11 +1,15 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
 
+import no.stelar7.cdragon.types.skn.data.SKNData;
 import no.stelar7.cdragon.viewer.rendering.buffers.VAO;
+
+import java.util.List;
 
 public class Model implements AutoCloseable
 {
     private static final int VERTEX_SIZE  = 3;
+    private static final int NORMAL_SIZE  = 3;
     private static final int TEXTURE_SIZE = 2;
     
     private VAO vao;
@@ -35,6 +39,14 @@ public class Model implements AutoCloseable
         this.texture = texture;
         texture.bind();
         vao.setPointer(1, TEXTURE_SIZE);
+    }
+    
+    public Model(Mesh mesh, Texture texture, List<SKNData> extra)
+    {
+        this(mesh, texture);
+        vao.setPointer(2, NORMAL_SIZE);
+        
+        
     }
     
     public void bind()

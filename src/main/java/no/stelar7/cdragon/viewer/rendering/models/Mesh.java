@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
 import no.stelar7.cdragon.types.skn.data.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Vector3f;
 import no.stelar7.cdragon.viewer.rendering.buffers.VBO;
 
@@ -27,7 +27,7 @@ public class Mesh implements AutoCloseable
         this();
         
         float[]        verts          = new float[submesh.getNumVertex() * 3];
-        List<Vector3f> scaledVertices = UtilHandler.getScaledVertices(submesh.getVertexPositions());
+        List<Vector3f> scaledVertices = ModelHandler.getScaledVertices(submesh.getVertexPositions());
         for (int i = 0; i < scaledVertices.size(); i++)
         {
             Vector3f pos = scaledVertices.get(i);
@@ -53,7 +53,7 @@ public class Mesh implements AutoCloseable
         this();
         
         float[]        verts          = new float[data.getVertexCount() * 3];
-        List<Vector3f> scaledVertices = UtilHandler.getScaledVertices(data.getVertexPositions());
+        List<Vector3f> scaledVertices = ModelHandler.getScaledVertices(data.getVertexPositions());
         for (int i = 0; i < scaledVertices.size(); i++)
         {
             Vector3f pos = scaledVertices.get(i);
@@ -66,7 +66,7 @@ public class Mesh implements AutoCloseable
         
         // load indecies
         int[]         inds                  = new int[data.getIndexCount()];
-        List<Integer> indeciesAsIntegerList = UtilHandler.getIndeciesAsIntegerList(data.getIndecies());
+        List<Integer> indeciesAsIntegerList = ModelHandler.getIndeciesAsIntegerList(data.getIndecies());
         for (int i = 0; i < indeciesAsIntegerList.size(); i++)
         {
             inds[i] = indeciesAsIntegerList.get(i);

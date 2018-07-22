@@ -298,6 +298,7 @@ public class HashHandler
     
     public static Map<String, String> all;
     
+    @SuppressWarnings("unchecked")
     public static Map<String, String> loadAllWadHashes()
     {
         if (all == null)

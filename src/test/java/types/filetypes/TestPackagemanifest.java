@@ -24,7 +24,7 @@ public class TestPackagemanifest
     public void testDownloadAll()
     {
         String       data        = "http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE";
-        List<String> files       = UtilHandler.readWeb(data);
+        List<String> files       = WebHandler.readWeb(data);
         Path         extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pman");
         
         files.removeAll(Arrays.asList(extractPath.toFile().list()));
@@ -32,15 +32,15 @@ public class TestPackagemanifest
         for (String version : files)
         {
             String download = String.format(url, version);
-            UtilHandler.downloadFile(extractPath.resolve(version), download);
+            WebHandler.downloadFile(extractPath.resolve(version), download);
         }
     }
     
     @Test
     public void testFindFiles() throws IOException
     {
-        List<String>        versions = UtilHandler.readWeb("http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW");
-        ByteArray           data     = UtilHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest", versions.get(0)));
+        List<String>        versions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/releaselisting_EUW");
+        ByteArray           data     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/live/projects/lol_game_client/releases/%s/packages/files/packagemanifest", versions.get(0)));
         PackagemanifestFile file     = new PackagemanifestParser().parse(data);
         List<String> files = file.getFiles()
                                  .stream()
@@ -50,7 +50,7 @@ public class TestPackagemanifest
                                  .collect(Collectors.toList());
         
         Path folder = UtilHandler.DOWNLOADS_FOLDER.resolve("icons");
-        files.forEach(f -> UtilHandler.downloadFile(folder.resolve(UtilHandler.getFilename(f)), f));
+        files.forEach(f -> WebHandler.downloadFile(folder.resolve(UtilHandler.getFilename(f)), f));
         
         Files.walkFileTree(folder, new SimpleFileVisitor<>()
         {

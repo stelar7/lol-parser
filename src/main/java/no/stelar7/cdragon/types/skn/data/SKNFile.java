@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.skn.data;
 
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
 
 import java.text.*;
@@ -215,6 +215,11 @@ public class SKNFile
         return materials;
     }
     
+    public List<SKNData> getDataForSubmesh(SKNMaterial submesh)
+    {
+        return new ArrayList<>(vertices.subList(submesh.getStartVertex(), submesh.getNumVertex()));
+    }
+    
     public void setMaterials(List<SKNMaterial> materials)
     {
         this.materials = materials;
@@ -223,7 +228,7 @@ public class SKNFile
     public String toOBJ(SKNMaterial submesh)
     {
         StringBuilder        sb           = new StringBuilder();
-        List<Vector3f>       scaledVerts  = UtilHandler.getScaledVertices(submesh.getVertexPositions());
+        List<Vector3f>       scaledVerts  = ModelHandler.getScaledVertices(submesh.getVertexPositions());
         List<Integer>        indeciesList = submesh.getIndecies();
         DecimalFormatSymbols dfs          = new DecimalFormatSymbols(Locale.ENGLISH);
         DecimalFormat        df           = new DecimalFormat("###.#######", dfs);

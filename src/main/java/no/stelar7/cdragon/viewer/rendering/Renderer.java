@@ -16,8 +16,8 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public abstract class Renderer
 {
-    public volatile int width;
-    public volatile int height;
+    public static volatile int width;
+    public static volatile int height;
     
     private volatile boolean needsRefresh = true;
     

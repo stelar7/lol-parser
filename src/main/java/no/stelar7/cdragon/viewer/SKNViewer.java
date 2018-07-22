@@ -45,27 +45,16 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("parser");
-        SKNFile            skn   = new SKNParser().parse(path.resolve("vi.skn"));
-        SKLFile            skl   = new SKLParser().parse(path.resolve("vi.skl"));
-        List<ReadableBone> bones = skl.toReadableBones();
-        
-        BufferedImage texImg = new DDSParser().parse(path.resolve("vi_tx_cm.dds"));
-        
-        /*
-        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\nautilus\\skins\\base");
-        SKNFile            skn   = new SKNParser().parse(path.resolve("nautilus.skn"));
-        SKLFile            skl   = new SKLParser().parse(path.resolve("nautilus.skl"));
-        List<ReadableBone> bones = skl.toReadableBones();
-        
-        BufferedImage texImg = new DDSParser().parse(path.resolve("nautilus_base_tx_cm.dds"));
-        */
-        
+        Path               path   = UtilHandler.DOWNLOADS_FOLDER.resolve("parser");
+        SKNFile            skn    = new SKNParser().parse(path.resolve("vi.skn"));
+        SKLFile            skl    = new SKLParser().parse(path.resolve("vi.skl"));
+        List<ReadableBone> bones  = skl.toReadableBones();
+        BufferedImage      texImg = new DDSParser().parse(path.resolve("vi_tx_cm.dds"));
         
         for (SKNMaterial submesh : skn.getMaterials())
         {
             Texture tex = new Texture(submesh, texImg);
-            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex)));
+            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
         }
         
         model = models.get(models.size() - 1).getSecond();
@@ -108,9 +97,9 @@ public class SKNViewer extends Renderer
                 new Vector3f(0, 0, 0),
                 new Vector3f(0, 1f, 0));
         
-        Matrix4f model = new Matrix4f().scaling(2);
+        Matrix4f modelMat = new Matrix4f().translation(0, -2.5f, 0);//.scaling(2);
         
-        Matrix4f mvp = projection.mul(view, new Matrix4f()).mul(model, new Matrix4f());
+        Matrix4f mvp = projection.mul(view, new Matrix4f()).mul(modelMat, new Matrix4f());
         
         prog.bind();
         prog.setMatrix4f("mvp", mvp);

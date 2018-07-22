@@ -49,7 +49,7 @@ public class WADParser implements Parseable<WADFile>
         
         String type = assetDefault ? "/default-assets.wad.compressed" : "/assets.wad.compressed";
         int    use  = version;
-        int    next = UtilHandler.getMaxVersion(url, type, version);
+        int    next = WebHandler.getMaxVersion(url, type, version);
         
         if (count >= 3)
         {
@@ -138,7 +138,7 @@ public class WADParser implements Parseable<WADFile>
     {
         System.out.printf("Downloading %s-%s%n", pluginName, version);
         String finalUrl = String.format(url, version);
-        UtilHandler.downloadFile(save, finalUrl);
+        WebHandler.downloadFile(save, finalUrl);
     }
     
     
