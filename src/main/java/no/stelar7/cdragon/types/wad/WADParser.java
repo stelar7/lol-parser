@@ -180,7 +180,6 @@ public class WADParser implements Parseable<WADFile>
      */
     private List<WADContentHeaderV1> parseContent(RandomAccessReader raf, WADHeaderBase base)
     {
-        System.out.println("Parsing content headers");
         List<WADContentHeaderV1> content = new ArrayList<>();
         
         try
@@ -235,9 +234,6 @@ public class WADParser implements Parseable<WADFile>
     
     private WADHeaderBase parseHeader(RandomAccessReader raf)
     {
-        System.out.println("Parsing WAD header");
-        
-        
         WADHeaderBase base = new WADHeaderBase();
         base.setMagic(raf.readString(2));
         base.setMajor(raf.readByte());

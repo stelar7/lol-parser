@@ -84,7 +84,7 @@ public class WADFile
         {
             WADContentHeaderV1 fileHeader = getContentHeaders().get(index);
             
-            if (contentHeaders.size() > 500)
+            if (contentHeaders.size() > 1500)
             {
                 if (index % interval == 0)
                 {

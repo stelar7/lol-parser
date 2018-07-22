@@ -25,6 +25,11 @@ public class HashHandler
     private static Map<Long, String>                iniHashNames;
     private static Map<String, Map<String, String>> wadHashNames = new HashMap<>();
     
+    static
+    {
+        loadAllWadHashes();
+    }
+    
     
     public static String toHex(byte[] bytes)
     {
@@ -310,9 +315,8 @@ public class HashHandler
             String[]     fileArray = s.next().split("\n");
             for (String file : fileArray)
             {
-                String content      = UtilHandler.readInternalAsString("hashes/wad/" + file);
-                Type   mapTypeToken = new TypeToken<Map<String, String>>() {}.getType();
-                ((Map<String, String>) UtilHandler.getGson().fromJson(content, mapTypeToken)).forEach(all::putIfAbsent);
+                String plugin = file.substring(0, file.lastIndexOf('.'));
+                all.putAll(getWadHashes(plugin));
             }
         }
         

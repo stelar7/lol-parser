@@ -13,7 +13,7 @@ public final class ByteArray
     
     public boolean indexMatch(int index, byte b)
     {
-        return data[index] == b;
+        return (data.length > index) && data[index] == b;
     }
     
     public ByteArray removeLastByte(int i)

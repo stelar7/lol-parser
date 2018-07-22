@@ -21,11 +21,6 @@ public final class FileTypeHandler
             return findFileType(magic.copyOfRange(3, magic.getData().length));
         }
         
-        if (FileTypeHandler.isProbableJSON(magic))
-        {
-            return "json";
-        }
-        
         if (FileTypeHandler.isProbableJavascript(magic))
         {
             return "js";
@@ -90,6 +85,11 @@ public final class FileTypeHandler
             return result;
         }
         
+        if (FileTypeHandler.isProbableJSON(magic))
+        {
+            return "json";
+        }
+        
         if (FileTypeHandler.isProbableTXT(magic))
         {
             return "txt";
@@ -114,9 +114,15 @@ public final class FileTypeHandler
             dataString = sb.toString();
         }
         
-        JsonElement obj    = new JsonParser().parse(dataString);
-        String      pretty = UtilHandler.getGson().toJson(obj);
-        return pretty.getBytes(StandardCharsets.UTF_8);
+        try
+        {
+            JsonElement obj    = new JsonParser().parse(dataString);
+            String      pretty = UtilHandler.getGson().toJson(obj);
+            return pretty.getBytes(StandardCharsets.UTF_8);
+        } catch (JsonSyntaxException e)
+        {
+            return jsonString;
+        }
     }
     
     private static Map<ByteArray, String> magicNumbers = new HashMap<>();
@@ -234,27 +240,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableJSON(ByteArray wrapper)
     {
-        try
-        {
-            if (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B))
-            {
-                UtilHandler.getJsonParser().parse(new String(wrapper.getData(), StandardCharsets.UTF_8));
-                return true;
-            }
-        } catch (JsonParseException e)
-        {
-            try
-            {
-                // try removing trailing comma
-                ByteArray newTest = wrapper.removeLastByte(44);
-                UtilHandler.getJsonParser().parse(new String(newTest.getData(), StandardCharsets.UTF_8));
-                return true;
-            } catch (JsonParseException ex)
-            {
-                return false;
-            }
-        }
-        return false;
+        return (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B));
     }
     
     public static boolean isProbableCSS(ByteArray wrapper)

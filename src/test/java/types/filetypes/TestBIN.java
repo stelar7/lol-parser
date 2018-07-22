@@ -24,7 +24,7 @@ public class TestBIN
     BINParser parser = new BINParser();
     
     @Test
-    public void testBIN() throws IOException
+    public void testBIN()
     {
         Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("b834a551716301cc.bin");
         /*
