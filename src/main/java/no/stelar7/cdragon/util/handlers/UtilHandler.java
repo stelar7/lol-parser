@@ -456,25 +456,14 @@ public final class UtilHandler
     
     public static Vector2<Vector3f, Vector3f> getScaleFactorMinMax(List<Vector3f> positions)
     {
-        float minx = Integer.MAX_VALUE;
-        float maxx = Integer.MIN_VALUE;
-        float miny = Integer.MAX_VALUE;
-        float maxy = Integer.MIN_VALUE;
-        float minz = Integer.MAX_VALUE;
-        float maxz = Integer.MIN_VALUE;
+        float minValue = Integer.MIN_VALUE;
         
-        // scale factor
         for (Vector3f pos : positions)
         {
-            maxx = Math.max(maxx, pos.x);
-            minx = Math.min(minx, pos.x);
-            maxy = Math.max(maxy, pos.y);
-            miny = Math.min(miny, pos.y);
-            maxz = Math.max(maxz, pos.z);
-            minz = Math.min(minz, pos.z);
+            minValue = Math.max(minValue, Math.max(pos.x, Math.max(pos.y, pos.z)));
         }
         
-        return new Vector2<>(new Vector3f(minx, miny, minz), new Vector3f(maxx, maxy, maxz));
+        return new Vector2<>(new Vector3f(-minValue), new Vector3f(minValue));
     }
     
     public static List<Vector3f> getScaledVertices(List<Vector3f> positions)

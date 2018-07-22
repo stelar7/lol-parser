@@ -45,12 +45,12 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("Pyke\\Champions\\assets\\characters\\pyke\\skins\\base");
-        SKNFile            skn   = new SKNParser().parse(path.resolve("pyke_base.pyke.skn"));
-        SKLFile            skl   = new SKLParser().parse(path.resolve("pyke_base.pyke.skl"));
+        Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("parser");
+        SKNFile            skn   = new SKNParser().parse(path.resolve("vi.skn"));
+        SKLFile            skl   = new SKLParser().parse(path.resolve("vi.skl"));
         List<ReadableBone> bones = skl.toReadableBones();
         
-        BufferedImage texImg = new DDSParser().parse(path.resolve("pyke_base_nensi_tx_cm.pyke.dds"));
+        BufferedImage texImg = new DDSParser().parse(path.resolve("vi_tx_cm.dds"));
         
         /*
         Path               path  = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\nautilus\\skins\\base");
@@ -132,7 +132,7 @@ public class SKNViewer extends Renderer
         
         dirty = true;
         
-        if (time > 3)
+        if (time > 300)
         {
             meshIndex = (meshIndex + 1) % models.size();
             Vector2<String, Model> data = models.get(meshIndex);

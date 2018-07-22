@@ -26,8 +26,10 @@ public class TestBIN
     @Test
     public void testBIN() throws IOException
     {
-        // Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("b834a551716301cc.bin");
+        /*
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
+        
         {
             
             @Override
@@ -39,6 +41,9 @@ public class TestBIN
                 return FileVisitResult.CONTINUE;
             }
         });
+         */
+        BINFile data = parser.parse(file);
+        System.out.println(data.toJson());
     }
     
     @Test
