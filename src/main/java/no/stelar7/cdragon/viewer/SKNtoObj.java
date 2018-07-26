@@ -2,7 +2,6 @@ package no.stelar7.cdragon.viewer;
 
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

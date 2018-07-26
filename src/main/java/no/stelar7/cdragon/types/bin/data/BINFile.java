@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.types.bin.data;
 
-import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.ByteWriter;
 import no.stelar7.cdragon.util.types.*;

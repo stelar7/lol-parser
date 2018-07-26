@@ -46,8 +46,10 @@ public class TestPackagemanifest
                                  .stream()
                                  .map(PackagemanifestLine::getFilePath)
                                  .map(p -> "http://l3cdn.riotgames.com/releases/live" + p)
-                                 .filter(p -> p.toLowerCase().contains("inhib"))
+                                 //.filter(p -> p.toLowerCase().contains("inhib"))
                                  .collect(Collectors.toList());
+        
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("all.log"), String.join("\n", files).getBytes(StandardCharsets.UTF_8));
         
         Path folder = UtilHandler.DOWNLOADS_FOLDER.resolve("icons");
         files.forEach(f -> WebHandler.downloadFile(folder.resolve(UtilHandler.getFilename(f)), f));

@@ -18,7 +18,6 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.*;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class RandomAccessReader implements AutoCloseable
 {
@@ -472,7 +471,7 @@ public class RandomAccessReader implements AutoCloseable
         while (!isEOF())
         {
             queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
-            String internal = queue.stream().collect(Collectors.joining());
+            String internal = String.join("", queue);
             if (internal.equalsIgnoreCase(data))
             {
                 seek(pos() - data.length());
@@ -490,7 +489,7 @@ public class RandomAccessReader implements AutoCloseable
         while (!isEOF())
         {
             queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
-            String internal = queue.stream().collect(Collectors.joining());
+            String internal = String.join("", queue);
             if (internal.equalsIgnoreCase(data))
             {
                 found = true;

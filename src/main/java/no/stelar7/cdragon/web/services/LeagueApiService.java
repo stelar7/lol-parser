@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.web.services;
 
-import no.stelar7.api.l4j8.basic.constants.api.Platform;
 import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.api.l4j8.pojo.staticdata.champion.StaticChampion;
 import org.springframework.beans.factory.annotation.Autowired;

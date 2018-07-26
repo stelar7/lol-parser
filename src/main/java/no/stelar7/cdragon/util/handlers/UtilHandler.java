@@ -9,13 +9,11 @@ import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
-import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 
 public final class UtilHandler
 {
@@ -223,8 +221,7 @@ public final class UtilHandler
     {
         if (debug)
         {
-            Path out = Paths.get("C:\\Users\\Steffen\\Downloads").resolve(file);
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(out.toFile(), true)))
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve(file).toFile(), true)))
             {
                 bw.append(text);
                 bw.newLine();

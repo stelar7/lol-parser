@@ -30,8 +30,8 @@ public abstract class Renderer
     
     public Renderer(int width, int height)
     {
-        this.width = width;
-        this.height = height;
+        Renderer.width = width;
+        Renderer.height = height;
     }
     
     public void start()
