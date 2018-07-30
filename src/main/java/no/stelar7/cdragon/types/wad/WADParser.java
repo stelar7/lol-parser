@@ -154,6 +154,19 @@ public class WADParser implements Parseable<WADFile>
         return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
     }
     
+    public WADFile parseCompressed(Path path)
+    {
+        try
+        {
+            byte[] dataBytes = CompressionHandler.uncompress(Files.readAllBytes(path));
+            return parse(new ByteArray(dataBytes));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     @Override
     public WADFile parse(ByteArray data)
     {

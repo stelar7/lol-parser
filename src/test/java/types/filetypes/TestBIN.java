@@ -26,7 +26,7 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("b834a551716301cc.bin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("anivia.bin");
         /*
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
         
@@ -44,6 +44,29 @@ public class TestBIN
          */
         BINFile data = parser.parse(file);
         System.out.println(data.toJson());
+    }
+    
+    @Test
+    public void testBINCompare()
+    {
+        Path file  = UtilHandler.DOWNLOADS_FOLDER.resolve("anivia.bin");
+        Path file2 = UtilHandler.DOWNLOADS_FOLDER.resolve("ashe.bin");
+        Path file3 = UtilHandler.DOWNLOADS_FOLDER.resolve("aatrox.bin");
+        
+        BINFile data  = parser.parse(file);
+        BINFile data2 = parser.parse(file2);
+        BINFile data3 = parser.parse(file3);
+        
+        JsonElement ani = UtilHandler.getJsonParser().parse(data.toJson()).getAsJsonObject().get("CharacterRecord");
+        JsonElement ash = UtilHandler.getJsonParser().parse(data2.toJson()).getAsJsonObject().get("CharacterRecord");
+        JsonElement aat = UtilHandler.getJsonParser().parse(data3.toJson()).getAsJsonObject().get("CharacterRecord");
+    
+        System.out.println();
+        System.out.println(ani);
+        System.out.println();
+        System.out.println(ash);
+        System.out.println();
+        System.out.println(aat);
     }
     
     @Test
@@ -264,13 +287,15 @@ public class TestBIN
     @Test
     public void testAddFromFile() throws IOException
     {
-        List<String> names = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("binhashes.txt"));
+        List<String> names = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("BinHashes.txt"));
+        System.out.println(HashHandler.getBinHashes().size());
         names.forEach(n -> {
             long hash = HashHandler.computeBINHash(n);
-            HashHandler.getBinHashes().putIfAbsent(hash, n);
+            HashHandler.getBinHashes().put(hash, n);
         });
         
         sortHashes();
+        System.out.println(HashHandler.getBinHashes().size());
     }
     
     @Test

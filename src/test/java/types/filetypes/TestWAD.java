@@ -37,8 +37,8 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("Anivia.en_US.wad.client"));
-        parsed.extractFiles("Champions", "Anivia.en_US.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("Anivia"));
+        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ashe.wad.client"));
+        parsed.extractFiles("Champions", "Ashe.wad.client.compressed", UtilHandler.DOWNLOADS_FOLDER.resolve("Ashe"));
     }
     
     @Test
