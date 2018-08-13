@@ -116,6 +116,11 @@ public class WADFile
         String filename = HashHandler.getWadHashes(pluginName).getOrDefault(hash, "unknown\\" + hash);
         Path   self     = savePath.resolve(filename);
         
+        if (self.toString().length() > 255)
+        {
+            self = self.resolveSibling("too_long_filename_" + hash);
+        }
+        
         self.getParent().toFile().mkdirs();
         String parentName = self.getParent().getFileName().toString();
         byte[] data       = readContentFromHeaderData(header);

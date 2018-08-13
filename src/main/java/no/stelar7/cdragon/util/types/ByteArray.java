@@ -79,8 +79,18 @@ public final class ByteArray
         return Arrays.toString(data);
     }
     
-    public ByteArray copyOfRange(int start, int length)
+    public ByteArray copyOfRange(int start, int end)
     {
-        return new ByteArray(Arrays.copyOfRange(getData(), start, length));
+        return new ByteArray(Arrays.copyOfRange(getData(), start, end));
+    }
+    
+    public boolean endsWith(ByteArray bytes)
+    {
+        if (this.data.length < bytes.data.length)
+        {
+            return false;
+        }
+        ByteArray last = copyOfRange(this.data.length - bytes.data.length, this.data.length);
+        return Arrays.equals(last.data, bytes.data);
     }
 }

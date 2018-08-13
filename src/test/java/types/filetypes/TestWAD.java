@@ -71,8 +71,8 @@ public class TestWAD
     @Test
     public void testPullCDTB()
     {
-        String hashA = "https://raw.githubusercontent.com/CommunityDragon/CDTB/wad-client/cdragontoolbox/hashes.game.txt";
-        String hashB = "https://raw.githubusercontent.com/CommunityDragon/CDTB/wad-client/cdragontoolbox/hashes.lcu.txt";
+        String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.game.txt";
+        String hashB = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.lcu.txt";
         
         Set<String> changedPlugins = new HashSet<>();
         
@@ -105,11 +105,8 @@ public class TestWAD
                 HashHandler.getWadHashes(plugin).forEach((k, v) -> set.add(new Vector2<>(k, v)));
                 
                 List<Vector2> foundHashes = new ArrayList<>(set);
-                
-                System.out.println("Sorting hashes");
                 foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
                 
-                System.out.println("Writing hashes");
                 JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
                 jsonWriter.beginObject();
                 for (Vector2<String, String> pair : foundHashes)

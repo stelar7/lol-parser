@@ -56,6 +56,11 @@ public final class FileTypeHandler
             return "bnk";
         }
         
+        if (FileTypeHandler.isProbableTGA(magic))
+        {
+            return "tga";
+        }
+        
         if (FileTypeHandler.isProbableSCO(magic))
         {
             return "sco";
@@ -83,6 +88,36 @@ public final class FileTypeHandler
         if (result != null)
         {
             return result;
+        }
+        
+        if (FileTypeHandler.isProbablePATCH(magic))
+        {
+            return "patch";
+        }
+        
+        if (FileTypeHandler.isProbableWGEO(magic))
+        {
+            return "wgeo";
+        }
+        
+        if (FileTypeHandler.isProbableNVR(magic))
+        {
+            return "nvr";
+        }
+        
+        if (FileTypeHandler.isProbableELF(magic))
+        {
+            return "elf";
+        }
+        
+        if (FileTypeHandler.isProbableMOB(magic))
+        {
+            return "mob";
+        }
+        
+        if (FileTypeHandler.isProbableTROYBIN(magic))
+        {
+            return "troybin";
         }
         
         if (FileTypeHandler.isProbableJSON(magic))
@@ -238,6 +273,42 @@ public final class FileTypeHandler
     
     //<editor-fold desc="Shitty byte-comparisons, need to fix..">
     
+    public static boolean isProbableELF(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0x07) && magic.indexMatch(1, (byte) 0x01) && magic.indexMatch(2, (byte) 0x00);
+    }
+    
+    public static boolean isProbableNVR(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0x4E) && magic.indexMatch(1, (byte) 0x56) && magic.indexMatch(2, (byte) 0x52) && magic.indexMatch(3, (byte) 0x00);
+    }
+    
+    public static boolean isProbableWGEO(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0x57) && magic.indexMatch(1, (byte) 0x47) && magic.indexMatch(2, (byte) 0x45) && magic.indexMatch(3, (byte) 0x4F);
+    }
+    
+    public static boolean isProbableMOB(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0x4F) && magic.indexMatch(1, (byte) 0x50) && magic.indexMatch(2, (byte) 0x41) && magic.indexMatch(3, (byte) 0x4D);
+    }
+    
+    public static boolean isProbablePATCH(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0x50) && magic.indexMatch(1, (byte) 0x54) && magic.indexMatch(2, (byte) 0x43) && magic.indexMatch(3, (byte) 0x48);
+    }
+    
+    public static boolean isProbableTROYBIN(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0x02);
+    }
+    
+    
+    public static boolean isProbableTGA(ByteArray magic)
+    {
+        return magic.endsWith(new ByteArray(new byte[]{0x54, 0x52, 0x55, 0x45, 0x56, 0x49, 0x53, 0x49, 0x4f, 0x4e, 0x2d, 0x58, 0x46, 0x49, 0x4c, 0x45, 0x2e, 0x00}));
+    }
+    
     public static boolean isProbableJSON(ByteArray wrapper)
     {
         return (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B));
@@ -361,7 +432,13 @@ public final class FileTypeHandler
                 (byte) 0xE6, (byte) 0x8B, (byte) 0xA6, (byte) 0x70, (byte) 0x65, (byte) 0x72,
                 (byte) 0xE3, (byte) 0x83, (byte) 0xAA, (byte) 0x74, (byte) 0x75, (byte) 0x72,
                 (byte) 0x44, (byte) 0x41, (byte) 0x54, (byte) 0xE2, (byte) 0x94, (byte) 0x80,
-                (byte) 0x61, (byte) 0x61, (byte) 0x74,
+                (byte) 0x61, (byte) 0x61, (byte) 0x74, (byte) 0xEB, (byte) 0xA6, (byte) 0xAC,
+                (byte) 0x66, (byte) 0x6C, (byte) 0x6F, (byte) 0x23, (byte) 0x69, (byte) 0x6E,
+                (byte) 0x2F, (byte) 0x2F, (byte) 0x20, (byte) 0x23, (byte) 0x23, (byte) 0x23,
+                (byte) 0x44, (byte) 0x72, (byte) 0x69, (byte) 0x53, (byte) 0x52, (byte) 0x55,
+                (byte) 0x41, (byte) 0x49, (byte) 0x50, (byte) 0x0D, (byte) 0x0A, (byte) 0x5B,
+                (byte) 0x2F, (byte) 0x2F, (byte) 0x41, (byte) 0x65, (byte) 0x6E, (byte) 0x76,
+                (byte) 0x2F, (byte) 0x2F, (byte) 0x2F, (byte) 0x63, (byte) 0x6F, (byte) 0x6C,
                 };
         
         
