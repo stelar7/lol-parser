@@ -6,7 +6,7 @@ import java.util.*;
 public class BINStruct
 {
     private String         hash;
-    private int            entry;
+    private int            size;
     private short          count;
     private List<BINValue> data = new ArrayList<>();
     
@@ -20,14 +20,14 @@ public class BINStruct
         this.hash = hash;
     }
     
-    public int getEntry()
+    public int getSize()
     {
-        return entry;
+        return size;
     }
     
-    public void setEntry(int entry)
+    public void setSize(int size)
     {
-        this.entry = entry;
+        this.size = size;
     }
     
     public short getCount()

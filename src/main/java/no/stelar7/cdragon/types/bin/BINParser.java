@@ -139,7 +139,7 @@ public class BINParser implements Parseable<BINFile>
                     return bs;
                 }
                 
-                bs.setEntry(raf.readInt());
+                bs.setSize(raf.readInt());
                 bs.setCount(raf.readShort());
                 for (int i = 0; i < bs.getCount(); i++)
                 {

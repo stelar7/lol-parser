@@ -180,7 +180,7 @@ public class BINFile
             {
                 BINStruct bs = (BINStruct) datapoint;
                 bw.writeInt(HashHandler.getBinKeyForHash(bs.getHash()));
-                bw.writeInt(bs.getEntry());
+                bw.writeInt(bs.getSize());
                 bw.writeShort(bs.getCount());
                 bs.getData().forEach(bv -> writeBinValue(bv.getType(), bv, bw, true));
                 break;
