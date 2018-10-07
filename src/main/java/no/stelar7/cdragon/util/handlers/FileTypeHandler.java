@@ -21,6 +21,14 @@ public final class FileTypeHandler
             return findFileType(magic.copyOfRange(3, magic.getData().length));
         }
         
+        if (!(magic.getData().length > 3))
+        {
+            // wtf??
+            System.out.println(magic);
+            return "txt";
+        }
+        
+        
         if (FileTypeHandler.isProbableJavascript(magic))
         {
             return "js";
