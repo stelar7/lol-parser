@@ -237,6 +237,11 @@ public class RandomAccessReader implements AutoCloseable
     
     public byte[] readBytes(int length)
     {
+        if (length > remaining())
+        {
+            length = remaining();
+        }
+        
         byte[] tempData = new byte[length];
         buffer.get(tempData, 0, length);
         return Arrays.copyOf(tempData, length);
@@ -584,5 +589,26 @@ public class RandomAccessReader implements AutoCloseable
     public ByteArray readToByteArray()
     {
         return new ByteArray(readRemaining());
+    }
+    
+    public boolean seekUntil(ByteArray key)
+    {
+        ByteArray array;
+        do
+        {
+            byte[] data = readBytes(key.getData().length);
+            if (data.length == 0)
+            {
+                return false;
+            }
+            
+            array = new ByteArray(data);
+            if (array.equals(key))
+            {
+                buffer.position(buffer.position() - data.length);
+                return true;
+            }
+            
+        } while (true);
     }
 }

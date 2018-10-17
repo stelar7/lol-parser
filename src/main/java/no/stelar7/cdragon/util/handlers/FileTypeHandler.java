@@ -28,6 +28,10 @@ public final class FileTypeHandler
             return "txt";
         }
         
+        if (FileTypeHandler.isProbableSofdec(magic))
+        {
+            return "sofdec";
+        }
         
         if (FileTypeHandler.isProbableJavascript(magic))
         {
@@ -314,7 +318,11 @@ public final class FileTypeHandler
     
     public static boolean isProbableTGA(ByteArray magic)
     {
-        return magic.endsWith(new ByteArray(new byte[]{0x54, 0x52, 0x55, 0x45, 0x56, 0x49, 0x53, 0x49, 0x4f, 0x4e, 0x2d, 0x58, 0x46, 0x49, 0x4c, 0x45, 0x2e, 0x00}));
+        return magic.endsWith(new ByteArray(new byte[]{0x54, 0x52, 0x55, 0x45, 0x56, 0x49, 0x53, 0x49, 0x4f, 0x4e, 0x2d, 0x58, 0x46, 0x49, 0x4c, 0x45, 0x2e, 0x00})) ||
+               (magic.indexMatch(0, (byte) 0x00) &&
+                magic.indexMatch(1, (byte) 0x00) &&
+                magic.indexMatch(2, (byte) 0x0A) &&
+                magic.indexMatch(3, (byte) 0x00));
     }
     
     public static boolean isProbableJSON(ByteArray wrapper)
@@ -447,7 +455,11 @@ public final class FileTypeHandler
                 (byte) 0x41, (byte) 0x49, (byte) 0x50, (byte) 0x0D, (byte) 0x0A, (byte) 0x5B,
                 (byte) 0x2F, (byte) 0x2F, (byte) 0x41, (byte) 0x65, (byte) 0x6E, (byte) 0x76,
                 (byte) 0x2F, (byte) 0x2F, (byte) 0x2F, (byte) 0x63, (byte) 0x6F, (byte) 0x6C,
-                };
+                (byte) 0x3B, (byte) 0x3B, (byte) 0x3B, (byte) 0x54, (byte) 0x75, (byte) 0x72,
+                (byte) 0x54, (byte) 0x54, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x61,
+                (byte) 0x4c, (byte) 0x65, (byte) 0x76, (byte) 0x6f, (byte) 0x72, (byte) 0x64,
+                (byte) 0x63, (byte) 0x70, (byte) 0x5f
+        };
         
         
         for (int i = 0; i < magicText3Wide.length; i += 3)
@@ -511,6 +523,12 @@ public final class FileTypeHandler
     {
         return wrapper.equals(new ByteArray("r3d2".getBytes(StandardCharsets.UTF_8)));
     }
+    
+    private static boolean isProbableSofdec(ByteArray magic)
+    {
+        return magic.equals(new ByteArray("CRID".getBytes(StandardCharsets.UTF_8)));
+    }
+    
     
     public static boolean isIgnoredType(String name)
     {
