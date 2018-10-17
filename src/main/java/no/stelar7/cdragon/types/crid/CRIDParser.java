@@ -5,6 +5,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
+import java.io.*;
 import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -12,11 +13,16 @@ import java.util.*;
 
 public class CRIDParser implements Parseable
 {
-    private final String VIDEO_EXT    = "m2v";
-    private final String AUDIO_EXT    = "adx";
-    private final String HQ_AUDIO_EXT = "hca";
+    private final String VIDEO_EXT = "m2v";
+    private final String AUDIO_EXT = "adx";
+    private final String HCA_EXT   = "hca";
     
-    private final ByteArray HQA_SIGNATURE  = new ByteArray(new byte[]{0x48, 0x43, 0x41, 0x00});
+    private final String ADX_EXT = ".adx";
+    private final String AIX_EXT = ".aix";
+    private final String AC3_EXT = ".ac3";
+    
+    private final ByteArray AIX_SIGNATURE  = new ByteArray(new byte[]{0x41, 0x49, 0x58, 0x46});
+    private final ByteArray HCA_SIGNATURE  = new ByteArray(new byte[]{0x48, 0x43, 0x41, 0x00});
     private final ByteArray ALP_SIGNATURE  = new ByteArray("@ALP".getBytes(StandardCharsets.UTF_8));
     private final ByteArray SFV_SIGNATURE  = new ByteArray("@SFV".getBytes(StandardCharsets.UTF_8));
     private final ByteArray SFA_SIGNATURE  = new ByteArray("@SFA".getBytes(StandardCharsets.UTF_8));
@@ -119,7 +125,6 @@ public class CRIDParser implements Parseable
     public Object parse(RandomAccessReader raf)
     {
         demultiplexStream(raf);
-        finalize(raf);
         return null;
     }
     
@@ -128,8 +133,8 @@ public class CRIDParser implements Parseable
     {
         if (reader.seekUntil(CRID_SIGNATURE))
         {
-            Map<Integer, ByteWriter> streamOutputWriters = new HashMap<>();
-            Map<Integer, String>     streamIdFileType    = new HashMap<>();
+            Map<Integer, NamedByteWriter> streamOutputWriters = new HashMap<>();
+            Map<Integer, String>          streamIdFileType    = new HashMap<>();
             
             int currentPos = reader.pos();
             outer:
@@ -141,7 +146,6 @@ public class CRIDParser implements Parseable
                 {
                     System.out.println("unknown block found..?");
                 }
-                
                 
                 BlockType block = BLOCK_DICT.get(currentBlockIdVal);
                 
@@ -162,11 +166,14 @@ public class CRIDParser implements Parseable
                         switch (block.getSize())
                         {
                             case 4:
-                                blockSize = ByteBuffer.wrap(blockSizeArray).order(ByteOrder.LITTLE_ENDIAN).getInt();
+                                blockSize = ByteBuffer.wrap(blockSizeArray).getInt();
+                                break;
                             case 2:
-                                blockSize = ByteBuffer.wrap(blockSizeArray).order(ByteOrder.LITTLE_ENDIAN).getShort();
+                                blockSize = ByteBuffer.wrap(blockSizeArray).getShort();
+                                break;
                             case 1:
-                                blockSize = ByteBuffer.wrap(blockSizeArray).order(ByteOrder.LITTLE_ENDIAN).get();
+                                blockSize = ByteBuffer.wrap(blockSizeArray).get();
+                                break;
                         }
                         
                         boolean audioBlock = isAudioBlock(currentBlockId);
@@ -191,14 +198,38 @@ public class CRIDParser implements Parseable
                                     outputFilename += "." + VIDEO_EXT;
                                 }
                                 
-                                streamOutputWriters.put(currentStreamKey, new ByteWriter());
+                                streamOutputWriters.put(currentStreamKey, new NamedByteWriter(outputFilename));
                             }
                             
                             if (audioBlock)
                             {
-                                // int audioBlockSkipSize =
+                                int audioBlockSkipSize   = getAudioPacketHeaderSize(reader, currentPos);
+                                int audioBlockFooterSize = getAudioPacketFooterSize(reader, currentPos);
+                                
+                                int cutSize = blockSize - audioBlockSkipSize - audioBlockFooterSize;
+                                if (cutSize > 0)
+                                {
+                                    int pos = reader.pos();
+                                    reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + audioBlockSkipSize);
+                                    byte[] data = reader.readBytes(blockSize - audioBlockSkipSize);
+                                    reader.seek(pos);
+                                    
+                                    streamOutputWriters.get(currentStreamKey).writeByteArray(data);
+                                }
+                            } else
+                            {
+                                int videoBlockSkipSize   = getVideoPacketHeaderSize(reader, currentPos);
+                                int videoBlockFooterSize = getVideoPacketFooterSize(reader, currentPos);
+                                
+                                int cutSize = blockSize - videoBlockSkipSize - videoBlockFooterSize;
+                                if (cutSize > 0)
+                                {
+                                    int pos = reader.pos();
+                                    reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + videoBlockSkipSize);
+                                    byte[] data = reader.readBytes(blockSize - videoBlockSkipSize);
+                                    reader.seek(pos);
+                                }
                             }
-                            
                         }
                         
                         currentPos += currentBlockId.length + blockSizeArray.length + blockSize;
@@ -206,6 +237,61 @@ public class CRIDParser implements Parseable
                     }
                 }
             }
+            finalize(reader, streamOutputWriters);
+        }
+    }
+    
+    private int getVideoPacketFooterSize(RandomAccessReader reader, int currentPos)
+    {
+        return getVaryingByteValueAtRelativeOffset(reader, currentPos, ByteOrder.BIG_ENDIAN, 2, 10);
+    }
+    
+    private int getVideoPacketHeaderSize(RandomAccessReader reader, int currentPos)
+    {
+        return getVaryingByteValueAtRelativeOffset(reader, currentPos, ByteOrder.BIG_ENDIAN, 2, 8);
+    }
+    
+    private int getAudioPacketFooterSize(RandomAccessReader reader, int currentPos)
+    {
+        return getVaryingByteValueAtRelativeOffset(reader, currentPos, ByteOrder.BIG_ENDIAN, 2, 10);
+    }
+    
+    private int getAudioPacketHeaderSize(RandomAccessReader reader, int currentPos)
+    {
+        return getVaryingByteValueAtRelativeOffset(reader, currentPos, ByteOrder.BIG_ENDIAN, 2, 8);
+    }
+    
+    private int getVaryingByteValueAtRelativeOffset(RandomAccessReader reader, int currentOffset, ByteOrder order, int size, int value)
+    {
+        int newValueOffset = currentOffset + value;
+        int newValueLength = size;
+        
+        return getVaryingByteValueAtOffset(reader, newValueOffset, newValueLength, order == ByteOrder.LITTLE_ENDIAN, false);
+    }
+    
+    private int getVaryingByteValueAtOffset(RandomAccessReader reader, int valueOffset, int valueLength, boolean order, boolean negative)
+    {
+        
+        if (negative && (valueOffset < 0))
+        {
+            valueOffset = reader.pos() + valueOffset;
+        }
+        
+        int pos = reader.pos();
+        reader.seek(valueOffset);
+        byte[] newValueBytes = ByteBuffer.wrap(reader.readBytes(valueLength)).order(ByteOrder.LITTLE_ENDIAN).array();
+        reader.seek(pos);
+        
+        switch (newValueBytes.length)
+        {
+            case 1:
+                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.LITTLE_ENDIAN).get();
+            case 2:
+                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.LITTLE_ENDIAN).getShort();
+            case 4:
+                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            default:
+                return -1;
         }
     }
     
@@ -219,9 +305,81 @@ public class CRIDParser implements Parseable
         return ((blockToCheck[3] >= 0xC0) && (blockToCheck[3] <= 0xDF));
     }
     
-    private void finalize(RandomAccessReader raf)
+    private void finalize(RandomAccessReader raf, Map<Integer, NamedByteWriter> outputFiles)
     {
-        
+        outputFiles.forEach((key, value) -> {
+            String filename   = value.name;
+            int    headerSize = 0;
+            
+            
+            RandomAccessReader headEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
+            headEnd.seekUntil(HEADER_END);
+            int headerEndOffset = headEnd.pos();
+            
+            RandomAccessReader metaEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
+            metaEnd.seekUntil(METADATA_END);
+            int metadataEndOffset = metaEnd.pos();
+            
+            if (metadataEndOffset > headerEndOffset)
+            {
+                headerSize = metadataEndOffset + METADATA_END.getData().length;
+            } else
+            {
+                headerSize = headerEndOffset + METADATA_END.getData().length;
+            }
+            
+            RandomAccessReader footEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
+            footEnd.seekUntil(CONTENTS_END);
+            int footerOffset = footEnd.pos() - headerSize;
+            int footerSize   = value.toByteArray().length - footerOffset;
+            
+            String fileExt = "";
+            
+            if (isAudioBlock(ByteBuffer.allocate(4).putInt(key).array()))
+            {
+                RandomAccessReader checkRead = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
+                checkRead.seek(headerSize);
+                byte[] check = checkRead.readBytes(4);
+                
+                
+                if (compareSegmentUsingSourceOffset(check, 0, AIX_SIGNATURE.getData()))
+                {
+                    fileExt = AIX_EXT;
+                } else if (check[0] == 0x80)
+                {
+                    fileExt = ADX_EXT;
+                } else if (compareSegmentUsingSourceOffset(check, 0, HCA_SIGNATURE.getData()))
+                {
+                    fileExt = HCA_EXT;
+                } else
+                {
+                    fileExt = "bin";
+                }
+            } else
+            {
+                fileExt = "unkn";
+            }
+            
+            try (FileOutputStream fos = new FileOutputStream(filename + "." + fileExt))
+            {
+                fos.write(value.toByteArray());
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
     }
     
+    private boolean compareSegmentUsingSourceOffset(byte[] sourceArray, int offset, byte[] target)
+    {
+        for (int j = offset, i = offset; i < target.length; i++, j++)
+        {
+            if (sourceArray[i] != target[j])
+            {
+                return false;
+            }
+        }
+        
+        return true;
+    }
 }
