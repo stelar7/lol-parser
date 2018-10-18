@@ -1,7 +1,6 @@
 package types.filetypes;
 
 import no.stelar7.cdragon.types.crid.CRIDParser;
-import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.Test;
 

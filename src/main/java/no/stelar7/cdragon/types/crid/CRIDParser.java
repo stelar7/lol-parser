@@ -5,10 +5,9 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
-import java.io.*;
 import java.nio.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.*;
 
 public class CRIDParser implements Parseable
@@ -186,8 +185,10 @@ public class CRIDParser implements Parseable
                             
                             if (!streamOutputWriters.containsKey(currentStreamKey))
                             {
-                                byte[] currentBlockName = ByteBuffer.allocate(4).putInt(currentStreamKey).array();
-                                String outputFilename   = UtilHandler.pathToFilename(reader.getPath()) + "_" + HashHandler.toHex(currentBlockName);
+                                byte[] currentBlockName = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(currentStreamKey).array();
+                                String filePath         = UtilHandler.pathToFilename(reader.getPath());
+                                String blockHash        = HashHandler.toHex(currentBlockName);
+                                String outputFilename   = filePath + "_" + blockHash;
                                 
                                 if (audioBlock)
                                 {
@@ -212,9 +213,10 @@ public class CRIDParser implements Parseable
                                     int pos = reader.pos();
                                     reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + audioBlockSkipSize);
                                     byte[] data = reader.readBytes(blockSize - audioBlockSkipSize);
+                                    streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
+                                    streamOutputWriters.get(currentStreamKey).save();
                                     reader.seek(pos);
                                     
-                                    streamOutputWriters.get(currentStreamKey).writeByteArray(data);
                                 }
                             } else
                             {
@@ -227,12 +229,15 @@ public class CRIDParser implements Parseable
                                     int pos = reader.pos();
                                     reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + videoBlockSkipSize);
                                     byte[] data = reader.readBytes(blockSize - videoBlockSkipSize);
+                                    streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
+                                    streamOutputWriters.get(currentStreamKey).save();
                                     reader.seek(pos);
                                 }
                             }
                         }
                         
                         currentPos += currentBlockId.length + blockSizeArray.length + blockSize;
+                        reader.seek(currentPos);
                         blockSizeArray = new byte[0];
                     }
                 }
@@ -285,11 +290,11 @@ public class CRIDParser implements Parseable
         switch (newValueBytes.length)
         {
             case 1:
-                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.LITTLE_ENDIAN).get();
+                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.BIG_ENDIAN).get();
             case 2:
-                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.LITTLE_ENDIAN).getShort();
+                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.BIG_ENDIAN).getShort();
             case 4:
-                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+                return ByteBuffer.wrap(newValueBytes).order(ByteOrder.BIG_ENDIAN).getInt();
             default:
                 return -1;
         }
@@ -297,12 +302,12 @@ public class CRIDParser implements Parseable
     
     private boolean isVideoBlock(byte[] blockToCheck)
     {
-        return ((blockToCheck[3] >= 0xE0) && (blockToCheck[3] <= 0xEF));
+        return compareSegmentUsingSourceOffset(blockToCheck, 0, SFV_SIGNATURE.getData());
     }
     
     private boolean isAudioBlock(byte[] blockToCheck)
     {
-        return ((blockToCheck[3] >= 0xC0) && (blockToCheck[3] <= 0xDF));
+        return compareSegmentUsingSourceOffset(blockToCheck, 0, SFA_SIGNATURE.getData());
     }
     
     private void finalize(RandomAccessReader raf, Map<Integer, NamedByteWriter> outputFiles)
@@ -359,7 +364,7 @@ public class CRIDParser implements Parseable
             {
                 fileExt = "unkn";
             }
-            
+          /*
             try (FileOutputStream fos = new FileOutputStream(filename + "." + fileExt))
             {
                 fos.write(value.toByteArray());
@@ -367,6 +372,7 @@ public class CRIDParser implements Parseable
             {
                 e.printStackTrace();
             }
+            */
         });
     }
     

@@ -232,4 +232,26 @@ public class ByteWriter implements AutoCloseable
             e.printStackTrace();
         }
     }
+    
+    public void writeByteArray(byte[] data, int offset, int length)
+    {
+        try
+        {
+            stream.write(data, offset, length);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void writeByteArray(byte[] data, int length)
+    {
+        try
+        {
+            stream.write(data, 0, length);
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
