@@ -81,6 +81,7 @@ public abstract class Renderer
         }
         
         glfwSetCursorPosCallback(window, (windowPtr, x, y) -> cursor.set((float) x, (float) y));
+        glfwSetKeyCallback(window, this::keyCallback);
         glfwSetFramebufferSizeCallback(window, (windowPtr, w, h) ->
                                        {
                                            if (w > 0 && h > 0)
@@ -106,6 +107,8 @@ public abstract class Renderer
             glfwSetWindowPos(window, x, y);
         }
     }
+    
+    protected abstract void keyCallback(long window, int key, int scanCode, int action, int mods);
     
     private void loop()
     {

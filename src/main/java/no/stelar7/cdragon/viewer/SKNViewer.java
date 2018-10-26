@@ -11,6 +11,7 @@ import no.stelar7.cdragon.viewer.rendering.Renderer;
 import no.stelar7.cdragon.viewer.rendering.models.*;
 import no.stelar7.cdragon.viewer.rendering.shaders.*;
 import org.joml.*;
+import org.lwjgl.glfw.*;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -45,11 +46,11 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path               path   = UtilHandler.DOWNLOADS_FOLDER.resolve("parser");
-        SKNFile            skn    = new SKNParser().parse(path.resolve("vi.skn"));
-        SKLFile            skl    = new SKLParser().parse(path.resolve("vi.skl"));
+        Path               path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon");
+        SKNFile            skn    = new SKNParser().parse(path.resolve("illaoi_skin01.skn"));
+        SKLFile            skl    = new SKLParser().parse(path.resolve("illaoi_skin01.skl"));
         List<ReadableBone> bones  = skl.toReadableBones();
-        BufferedImage      texImg = new DDSParser().parse(path.resolve("vi_tx_cm.dds"));
+        BufferedImage      texImg = new DDSParser().parse(path.resolve("illaoi_skin01_tx_cm.dds"));
         
         for (SKNMaterial submesh : skn.getMaterials())
         {
@@ -57,7 +58,8 @@ public class SKNViewer extends Renderer
             models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
         }
         
-        model = models.get(models.size() - 1).getSecond();
+        meshIndex = models.size() - 1;
+        model = models.get(meshIndex).getSecond();
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
@@ -76,7 +78,7 @@ public class SKNViewer extends Renderer
     
     float   x;
     float   z;
-    float   time  = 0;
+    float   time  = 10;
     boolean dirty = true;
     
     private void updateMVP()
@@ -107,29 +109,18 @@ public class SKNViewer extends Renderer
         dirty = false;
     }
     
-    int meshIndex;
+    int   meshIndex;
+    float distance = 10;
     
     @Override
     public void update()
     {
         time += .01f;
         
-        float distance = 6;
-        
         x = (float) Math.sin(time) * distance;
         z = (float) Math.cos(time) * distance;
         
         dirty = true;
-        
-        if (time > 300)
-        {
-            meshIndex = (meshIndex + 1) % models.size();
-            Vector2<String, Model> data = models.get(meshIndex);
-            System.out.println(data.getFirst());
-            model = data.getSecond();
-            time = 0;
-        }
-        
         updateMVP();
     }
     
@@ -149,5 +140,37 @@ public class SKNViewer extends Renderer
         
         glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
         UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", model.getMesh().getIndexCount()));
+    }
+    
+    @Override
+    protected void keyCallback(long window, int key, int scanCode, int action, int mods)
+    {
+        if (action == GLFW.GLFW_RELEASE)
+        {
+            if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT)
+            {
+                if (key == GLFW.GLFW_KEY_LEFT)
+                {
+                    int newIndex = meshIndex - 1;
+                    meshIndex = (newIndex >= 0) ? newIndex : models.size() - 1;
+                }
+                if (key == GLFW.GLFW_KEY_RIGHT)
+                {
+                    meshIndex = (meshIndex + 1) % models.size();
+                }
+                Vector2<String, Model> data = models.get(meshIndex);
+                System.out.println(data.getFirst());
+                model = data.getSecond();
+            }
+            
+            if (key == GLFW.GLFW_KEY_UP)
+            {
+                distance--;
+            }
+            if (key == GLFW.GLFW_KEY_DOWN)
+            {
+                distance++;
+            }
+        }
     }
 }

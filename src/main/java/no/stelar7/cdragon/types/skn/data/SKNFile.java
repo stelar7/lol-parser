@@ -217,6 +217,11 @@ public class SKNFile
     
     public List<SKNData> getDataForSubmesh(SKNMaterial submesh)
     {
+        if (submesh.getNumVertex() == submesh.getVertices().size())
+        {
+            return submesh.getVertices();
+        }
+        
         return new ArrayList<>(vertices.subList(submesh.getStartVertex(), submesh.getNumVertex()));
     }
     
