@@ -26,7 +26,7 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/aatrox.bin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/skin0.bin");
         /*
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
         
@@ -60,7 +60,7 @@ public class TestBIN
         JsonElement ani = UtilHandler.getJsonParser().parse(data.toJson()).getAsJsonObject().get("CharacterRecord");
         JsonElement ash = UtilHandler.getJsonParser().parse(data2.toJson()).getAsJsonObject().get("CharacterRecord");
         JsonElement aat = UtilHandler.getJsonParser().parse(data3.toJson()).getAsJsonObject().get("CharacterRecord");
-    
+        
         System.out.println();
         System.out.println(ani);
         System.out.println();
@@ -72,7 +72,7 @@ public class TestBIN
     @Test
     public void testBINLinkedFileHash() throws IOException
     {
-        Path                         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test");
+        Path                         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         Set<Vector2<String, String>> dupRemover = new HashSet<>();
         Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
@@ -102,6 +102,10 @@ public class TestBIN
                         String skinString = afterChar.substring(0, afterChar.length() - ext.length());
                         while (!skinString.isEmpty())
                         {
+                            if (skinString.indexOf('_') == -1)
+                            {
+                                continue;
+                            }
                             String folder = skinString.substring(0, skinString.indexOf('_'));
                             skinString = skinString.substring(folder.length() + 1);
                             
@@ -384,64 +388,32 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path extractPathJson = UtilHandler.DOWNLOADS_FOLDER.resolve("json");
-        Path rito            = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test");
+        Path rito = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         
         List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
         {
             
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
                 if (file.toString().endsWith(".bin"))
                 {
-                    paths.add(file);
+                    BINFile parsed = parser.parse(file);
+                    if (parsed == null)
+                    {
+                        throw new RuntimeException("invalid bin file??? (" + file.toAbsolutePath().toString() + ")");
+                    }
+                    
+                    byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
+                    byte[] data = FileTypeHandler.makePrettyJson(json);
+                    
+                    Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), data);
+                    
                 }
                 return FileVisitResult.CONTINUE;
             }
         });
-        
-        Comparator<Path> c = (cA, cB) -> {
-            try
-            {
-                return Files.size(cA) > Files.size(cB) ? -1 : 1;
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        };
-        
-        paths.sort(c);
-        
-        Files.createDirectories(extractPathJson);
-        for (Path path : paths)
-        {
-            try
-            {
-                if (Files.exists(extractPathJson.resolve(UtilHandler.pathToFilename(path) + ".json")))
-                {
-                    continue;
-                }
-                
-                BINFile parsed = parser.parse(path);
-                if (parsed == null)
-                {
-                    throw new RuntimeException("invalid bin file???");
-                }
-                
-                byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
-                byte[] data = FileTypeHandler.makePrettyJson(json);
-                
-                Files.write(extractPathJson.resolve(UtilHandler.pathToFilename(path) + ".json"), data);
-                
-            } catch (RuntimeException ex)
-            {
-                System.out.println("Failed to parse file: " + path);
-                System.out.println(ex.getMessage());
-            }
-        }
     }
     
     @Test
