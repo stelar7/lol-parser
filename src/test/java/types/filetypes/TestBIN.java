@@ -104,7 +104,7 @@ public class TestBIN
                         {
                             if (skinString.indexOf('_') == -1)
                             {
-                                continue;
+                                break;
                             }
                             String folder = skinString.substring(0, skinString.indexOf('_'));
                             skinString = skinString.substring(folder.length() + 1);

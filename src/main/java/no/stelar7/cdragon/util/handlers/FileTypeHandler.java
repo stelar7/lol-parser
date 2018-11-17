@@ -77,10 +77,6 @@ public final class FileTypeHandler
         {
             return "sco";
         }
-        if (FileTypeHandler.isProbableLUAOBJ(magic))
-        {
-            return "luaobj";
-        }
         if (FileTypeHandler.isProbablePRELOAD(magic))
         {
             return "preload";
@@ -226,7 +222,7 @@ public final class FileTypeHandler
             
             // Div
             magicNumbers.put(zipMagic, "zip");
-            magicNumbers.put(luaMagic, "lua");
+            magicNumbers.put(luaMagic, "luaobj");
             magicNumbers.put(hlslMagic, "hlsl");
             
             // 3D model
@@ -507,11 +503,6 @@ public final class FileTypeHandler
     public static boolean isProbableSCO(ByteArray wrapper)
     {
         return wrapper.equals(new ByteArray("[Obj".getBytes(StandardCharsets.UTF_8)));
-    }
-    
-    public static boolean isProbableLUAOBJ(ByteArray wrapper)
-    {
-        return wrapper.equals(new ByteArray("LuaQ".getBytes(StandardCharsets.UTF_8)));
     }
     
     public static boolean isProbablePRELOAD(ByteArray wrapper)
