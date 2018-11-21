@@ -41,6 +41,12 @@ public class TestWAD
     @Test
     public void testPBE() throws IOException
     {
+        downloadPBEAssets();
+        extractAllWads(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("extracted"));
+    }
+    
+    public void downloadPBEAssets()
+    {
         PackagemanifestParser pparser = new PackagemanifestParser();
         String                prefix  = "http://l3cdn.riotgames.com/releases/pbe";
         
@@ -70,9 +76,6 @@ public class TestWAD
             System.out.println(filename);
             WebHandler.downloadFile(clientOutput.resolve(output), prefix + s.getFilePath());
         });
-        
-        
-        extractAllWads(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("extracted"));
     }
     
     @Test
