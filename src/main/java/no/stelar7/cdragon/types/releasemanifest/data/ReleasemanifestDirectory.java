@@ -44,24 +44,24 @@ public class ReleasemanifestDirectory
     {
         if (outputList.isEmpty())
         {
-            generateListFromFolder(this, "", outputList);
+            generateListFromFolder(this, pre, post, outputList);
         }
         
         return outputList;
     }
     
-    private void generateListFromFolder(ReleasemanifestDirectory dir, String current, List<String> output)
+    private void generateListFromFolder(ReleasemanifestDirectory dir, String current, String suffix, List<String> output)
     {
         String inner = (current + dir.name + "/").replace(" ", "%20");
         for (ReleasemanifestContentFile file : dir.files)
         {
-            String filename = inner + file.getName().replace(" ", "%20");
+            String filename = inner + file.getName().replace(" ", "%20") + suffix;
             output.add(filename);
         }
         
         for (ReleasemanifestDirectory sub : dir.subDirectories)
         {
-            generateListFromFolder(sub, inner, output);
+            generateListFromFolder(sub, inner, suffix, output);
         }
     }
 }

@@ -1,5 +1,9 @@
 package types.filetypes;
 
+import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
+import no.stelar7.cdragon.types.packagemanifest.data.*;
+import no.stelar7.cdragon.types.releasemanifest.ReleasemanifestParser;
+import no.stelar7.cdragon.types.releasemanifest.data.ReleasemanifestDirectory;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
@@ -35,6 +39,43 @@ public class TestWAD
     }
     
     @Test
+    public void testPBE() throws IOException
+    {
+        PackagemanifestParser pparser = new PackagemanifestParser();
+        String                prefix  = "http://l3cdn.riotgames.com/releases/pbe";
+        
+        
+        List<String>        gversions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
+        ByteArray           gdata     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/packages/files/packagemanifest", gversions.get(0)));
+        PackagemanifestFile gfile     = pparser.parse(gdata);
+        
+        System.out.println("Downloading game files");
+        Path gameOutput = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("game").resolve(gversions.get(0));
+        gfile.getFiles().parallelStream().forEach(s -> {
+            String output   = s.getFilePath().substring(s.getFilePath().indexOf("files") + "files".length() + 1);
+            String filename = UtilHandler.getFilename(s.getFilePath());
+            System.out.println(filename);
+            WebHandler.downloadFile(gameOutput.resolve(output), prefix + s.getFilePath());
+        });
+        
+        List<String>        cversions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/releaselisting_PBE");
+        ByteArray           cdata     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/packages/files/packagemanifest", cversions.get(0)));
+        PackagemanifestFile cfile     = pparser.parse(cdata);
+        
+        System.out.println("Downloading client files");
+        Path clientOutput = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("client").resolve(cversions.get(0));
+        cfile.getFiles().parallelStream().forEach(s -> {
+            String output   = s.getFilePath().substring(s.getFilePath().indexOf("files") + "files".length() + 1);
+            String filename = UtilHandler.getFilename(s.getFilePath());
+            System.out.println(filename);
+            WebHandler.downloadFile(clientOutput.resolve(output), prefix + s.getFilePath());
+        });
+        
+        
+        extractAllWads(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("extracted"));
+    }
+    
+    @Test
     public void testLocal()
     {
         WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ashe.wad.client"));
@@ -47,24 +88,36 @@ public class TestWAD
         Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
-        Files.walkFileTree(rito, new SimpleFileVisitor<>()
+        extractAllWads(rito, extractPath);
+    }
+    
+    private void extractAllWads(Path from, Path to) throws IOException
+    {
+        Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
+            List<String> ends = Arrays.asList(".wad", ".wad.client");
+            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+            
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                if (file.getFileName().toString().endsWith(".wad"))
+                long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                if (endsCount != 0)
                 {
                     WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
-                    
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), to);
+                    return FileVisitResult.CONTINUE;
                 }
-                if (file.getFileName().toString().endsWith(".wad.client"))
+                
+                if (endscCount != 0)
                 {
-                    WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), extractPath);
+                    WADFile parsed = parser.parseCompressed(file);
+                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), to);
                 }
                 return FileVisitResult.CONTINUE;
             }
+            
         });
     }
     

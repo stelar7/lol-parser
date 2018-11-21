@@ -126,6 +126,7 @@
     "43ef4e2ba1e44a97": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-notif-chat-start-rcvd.ogg",
     "3c710620ed170b31": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-notif-friendreq-rcvd.ogg",
     "e49f581be22c260d": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-notif-gameinvite-rcvd.ogg",
+    "12cd66d3490f3305": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-notif-player-leave-lobby.ogg",
     "1a6521f030cef624": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-notif-success.ogg",
     "102fd10566eb458e": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-ui-chatwindow-add-convo.ogg",
     "b479f3d298ba00f4": "plugins/rcp-fe-lol-social/global/default/sounds/sfx-soc-ui-chatwindow-close.ogg",

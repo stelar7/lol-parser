@@ -127,6 +127,7 @@ public class TestAll
     private void parseIcons(Path file, JsonWriterWrapper sb)
     {
         // parse perk "backgrounds"
+        
         System.out.println("Parsing perk backgrounds");
         List<String> types = Arrays.asList("domination", "inspiration", "precision", "resolve", "sorcery");
         for (String type : types)
@@ -723,13 +724,31 @@ public class TestAll
         {
             return;
         }
-        JsonArray arr = elem.getAsJsonArray();
         
-        for (JsonElement element : arr)
+        if (filename.equals("perkstyles.json"))
         {
-            JsonObject ob = element.getAsJsonObject();
-            getElementAndCheckHash(ob, "iconPath", sb);
+            JsonArray arr = elem.getAsJsonObject().getAsJsonArray("styles");
             
+            for (JsonElement element : arr)
+            {
+                JsonObject ob = element.getAsJsonObject();
+                getElementAndCheckHash(ob, "iconPath", sb);
+                
+                JsonObject assetMap = ob.getAsJsonObject("assetMap");
+                for (String key : assetMap.keySet())
+                {
+                    getElementAndCheckHash(assetMap, key, sb);
+                }
+            }
+        } else
+        {
+            JsonArray arr = elem.getAsJsonArray();
+            
+            for (JsonElement element : arr)
+            {
+                JsonObject ob = element.getAsJsonObject();
+                getElementAndCheckHash(ob, "iconPath", sb);
+            }
         }
     }
     
@@ -1275,7 +1294,7 @@ public class TestAll
         for (JsonElement element : bflags)
         {
             JsonObject el    = element.getAsJsonObject();
-            Integer    level = Integer.parseInt(el.get("level").getAsString());
+            int        level = Integer.parseInt(el.get("level").getAsString());
             String     theme = el.get("theme").getAsString();
             
             if (val.containsKey(theme))

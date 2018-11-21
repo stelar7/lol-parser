@@ -40,7 +40,7 @@ public class WebHandler
             int          read;
             final byte[] buffer = new byte[4096];
             
-            final URLConnection uc       = new URL(url).openConnection();
+            final URLConnection uc       = new URL(url.replace(" ", "%20")).openConnection();
             long                fileSize = uc.getContentLengthLong();
             
             try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
@@ -136,6 +136,7 @@ public class WebHandler
             return null;
         }
     }
+    
     public static boolean canConnect(String urlString)
     {
         try
