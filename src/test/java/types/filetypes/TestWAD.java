@@ -1,9 +1,10 @@
 package types.filetypes;
 
+import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.bin.data.BINFile;
+import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
-import no.stelar7.cdragon.types.releasemanifest.ReleasemanifestParser;
-import no.stelar7.cdragon.types.releasemanifest.data.ReleasemanifestDirectory;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
@@ -11,8 +12,9 @@ import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.types.*;
 import org.junit.Test;
 
-import javax.print.attribute.HashAttributeSet;
-import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -22,13 +24,12 @@ import java.util.stream.Collectors;
 
 public class TestWAD
 {
-    WADParser parser = new WADParser();
-    
     @Test
     public void testWeb()
     {
-        String pluginName  = "rcp-be-lol-game-data";
-        Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
+        WADParser parser      = new WADParser();
+        String    pluginName  = "rcp-be-lol-game-data";
+        Path      extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
         
@@ -39,10 +40,103 @@ public class TestWAD
     }
     
     @Test
-    public void testPBE() throws IOException
+    public void testPBE() throws IOException, InterruptedException
     {
+        final BINParser bp = new BINParser();
+        final DDSParser dp = new DDSParser();
+        
+        Path from = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
+        Path to   = from.resolve("extracted");
+        
         downloadPBEAssets();
-        extractAllWads(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("extracted"));
+        extractWads(from, to);
+        Thread.sleep(1000);
+        
+        if (Files.exists(from.resolve("client")))
+        {
+            Files.walk(from.resolve("client"))
+                 .sorted(Comparator.reverseOrder())
+                 .map(Path::toFile)
+                 .forEach(File::delete);
+        }
+        
+        if (Files.exists(from.resolve("game")))
+        {
+            Files.walk(from.resolve("game"))
+                 .sorted(Comparator.reverseOrder())
+                 .map(Path::toFile)
+                 .forEach(File::delete);
+        }
+        
+        System.out.println("Transforming bin files to json");
+        Files.walk(from)
+             .filter(a -> a.getFileName().toString().endsWith(".bin"))
+             .forEach(file -> {
+                 try
+                 {
+                     BINFile parsed = bp.parse(file);
+                     Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                     Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
+                     file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     e.printStackTrace();
+                 }
+             });
+    
+        System.out.println("Transforming dds files to png");
+        Files.walk(from)
+             .filter(a -> a.getFileName().toString().endsWith(".dds"))
+             .forEach(file -> {
+                 try
+                 {
+                     BufferedImage img    = dp.parse(file);
+                     Path          output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
+                     ImageIO.write(img, "png", output.toFile());
+                     file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     e.printStackTrace();
+                 }
+             });
+    }
+    
+    private void extractDDS(Path from) throws IOException
+    {
+        DDSParser parser = new DDSParser();
+        Files.walkFileTree(from, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                if (file.getFileName().toString().endsWith(".dds"))
+                {
+                    BufferedImage img    = parser.parse(file);
+                    Path          output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
+                    ImageIO.write(img, "png", output.toFile());
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    
+    private void extractBins(Path from) throws IOException
+    {
+        BINParser parser = new BINParser();
+        Files.walkFileTree(from, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                if (file.getFileName().toString().endsWith(".bin"))
+                {
+                    BINFile parsed = parser.parse(file);
+                    Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                    Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
     
     public void downloadPBEAssets()
@@ -81,7 +175,8 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ashe.wad.client"));
+        WADParser parser = new WADParser();
+        WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ashe.wad.client"));
         parsed.extractFiles("Champions", "Ashe.wad.client.compressed", UtilHandler.DOWNLOADS_FOLDER.resolve("Ashe"));
     }
     
@@ -91,11 +186,12 @@ public class TestWAD
         Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
-        extractAllWads(rito, extractPath);
+        extractWads(rito, extractPath);
     }
     
-    private void extractAllWads(Path from, Path to) throws IOException
+    private void extractWads(Path from, Path to) throws IOException
     {
+        WADParser parser = new WADParser();
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
             List<String> ends = Arrays.asList(".wad", ".wad.client");
@@ -120,7 +216,6 @@ public class TestWAD
                 }
                 return FileVisitResult.CONTINUE;
             }
-            
         });
     }
     
