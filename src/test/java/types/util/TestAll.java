@@ -29,10 +29,10 @@ public class TestAll
     {
         downloadWAD();
         getHashes();
-        deleteUnknownFolder();
-        downloadWAD();
-        extractImages();
-        //  uploadToFTP();
+        //deleteUnknownFolder();
+        //downloadWAD();
+        //extractImages();
+        //uploadToFTP();
     }
     
     private void deleteUnknownFolder() throws IOException
