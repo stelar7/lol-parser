@@ -8,6 +8,7 @@ import no.stelar7.api.l4j8.basic.calling.DataCall;
 import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.cdragon.util.types.*;
 
+import javax.script.ScriptException;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -33,6 +34,7 @@ public final class UtilHandler
     private static JsonParser  parser;
     private static Preferences preferences;
     private static L4J8        api;
+    private static JSPrettier  jsPretty;
     
     public static final Path DOWNLOADS_FOLDER = Paths.get(System.getProperty("user.home"), "Downloads");
     
@@ -356,6 +358,23 @@ public final class UtilHandler
         }
         
         return api;
+    }
+    
+    public static String beautifyJS(String input)
+    {
+        try
+        {
+            if (jsPretty == null)
+            {
+                jsPretty = new JSPrettier();
+            }
+            
+            return jsPretty.beautify(input);
+        } catch (ScriptException | NoSuchMethodException e)
+        {
+            e.printStackTrace();
+            return input;
+        }
     }
     
 }

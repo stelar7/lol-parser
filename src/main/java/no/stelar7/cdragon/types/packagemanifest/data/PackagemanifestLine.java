@@ -57,4 +57,10 @@ public class PackagemanifestLine
     {
         this.unknown = unknown;
     }
+    
+    @Override
+    public String toString()
+    {
+        return filePath;
+    }
 }

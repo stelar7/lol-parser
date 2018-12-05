@@ -97,7 +97,7 @@ public class WebHandler
     
     public static String[] getMaxVersion(String url, int min, int max)
     {
-        String[] urlEnds = {"/default-assets.wad.compressed", "/assets.wad.compressed"};
+        String[] urlEnds = {"/default-assets.wad.compressed", "/assets.wad.compressed" };
         for (int i = max; i >= min; i--)
         {
             for (String endPart : urlEnds)

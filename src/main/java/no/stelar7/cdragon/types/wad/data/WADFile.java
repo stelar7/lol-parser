@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.types.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -130,6 +130,11 @@ public class WADFile
             data = FileTypeHandler.makePrettyJson(data);
         }
         
+        if (filename.endsWith("js"))
+        {
+            data = UtilHandler.beautifyJS(new String(data, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
+        }
+        
         if (Files.exists(self))
         {
             if (Files.size(self) > data.length)
@@ -186,6 +191,11 @@ public class WADFile
         if ("json".equals(fileType))
         {
             data = FileTypeHandler.makePrettyJson(data);
+        }
+        
+        if ("js".equals(fileType))
+        {
+            data = UtilHandler.beautifyJS(new String(data, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
         }
         
         Files.write(other, data);

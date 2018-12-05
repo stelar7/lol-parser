@@ -50,6 +50,7 @@ public class TestWAD
         
         downloadPBEAssets();
         extractWads(from, to);
+        System.out.println("Extraction finished!");
         Thread.sleep(1000);
         
         if (Files.exists(from.resolve("client")))
@@ -83,7 +84,7 @@ public class TestWAD
                      e.printStackTrace();
                  }
              });
-    
+        
         System.out.println("Transforming dds files to png");
         Files.walk(from)
              .filter(a -> a.getFileName().toString().endsWith(".dds"))
