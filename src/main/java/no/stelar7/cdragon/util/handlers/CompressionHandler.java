@@ -82,7 +82,7 @@ public final class CompressionHandler
     
     public static byte[] uncompressZSTD(byte[] fileBytes)
     {
-        return Zstd.decompress(fileBytes, Integer.MAX_VALUE);
+        return Zstd.decompress(fileBytes, 1 * 1024 * 1024 * 1024);
     }
     
     public static byte[] uncompress(byte[] bytes)

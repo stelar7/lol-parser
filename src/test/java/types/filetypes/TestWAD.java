@@ -1,5 +1,6 @@
 package types.filetypes;
 
+import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
@@ -48,7 +49,19 @@ public class TestWAD
         Path from = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Path to   = from.resolve("extracted");
         
-        downloadPBEAssets();
+        //downloadPBEAssets("");
+        String       jsn  = String.join("\n", WebHandler.readWeb("http://ddragon.leagueoflegends.com/cdn/languages.json"));
+        List<String> data = UtilHandler.getGson().fromJson(jsn, new TypeToken<List<String>>() {}.getType());
+        data.forEach(k -> {
+            try
+            {
+                downloadPBEAssets("_" + k.toLowerCase());
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        });
+        
         extractWads(from, to);
         System.out.println("Extraction finished!");
         Thread.sleep(1000);
@@ -140,14 +153,14 @@ public class TestWAD
         });
     }
     
-    public void downloadPBEAssets()
+    public void downloadPBEAssets(String lang)
     {
         PackagemanifestParser pparser = new PackagemanifestParser();
         String                prefix  = "http://l3cdn.riotgames.com/releases/pbe";
         
         
-        List<String>        gversions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/releaselisting_PBE");
-        ByteArray           gdata     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client/releases/%s/packages/files/packagemanifest", gversions.get(0)));
+        List<String>        gversions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client" + lang + "/releases/releaselisting_PBE");
+        ByteArray           gdata     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/lol_game_client" + lang + "/releases/%s/packages/files/packagemanifest", gversions.get(0)));
         PackagemanifestFile gfile     = pparser.parse(gdata);
         
         System.out.println("Downloading game files");
@@ -159,8 +172,8 @@ public class TestWAD
             WebHandler.downloadFile(gameOutput.resolve(output), prefix + s.getFilePath());
         });
         
-        List<String>        cversions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/releaselisting_PBE");
-        ByteArray           cdata     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/league_client/releases/%s/packages/files/packagemanifest", cversions.get(0)));
+        List<String>        cversions = WebHandler.readWeb("http://l3cdn.riotgames.com/releases/pbe/projects/league_client" + lang + "/releases/releaselisting_PBE");
+        ByteArray           cdata     = WebHandler.readBytes(String.format("http://l3cdn.riotgames.com/releases/pbe/projects/league_client" + lang + "/releases/%s/packages/files/packagemanifest", cversions.get(0)));
         PackagemanifestFile cfile     = pparser.parse(cdata);
         
         System.out.println("Downloading client files");

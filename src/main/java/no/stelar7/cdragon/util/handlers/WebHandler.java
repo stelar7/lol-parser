@@ -50,7 +50,7 @@ public class WebHandler
                     out.write(buffer, 0, read);
                 }
                 out.flush();
-            } catch (SocketTimeoutException e)
+            } catch (Exception e)
             {
                 downloadFile(output, url);
             }

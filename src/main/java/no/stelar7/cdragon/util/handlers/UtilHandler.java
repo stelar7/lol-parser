@@ -369,8 +369,9 @@ public final class UtilHandler
                 jsPretty = new JSPrettier();
             }
             
-            return jsPretty.beautify(input);
-        } catch (ScriptException | NoSuchMethodException e)
+            //return jsPretty.beautify(input);
+            return input;
+        } catch (Exception e)
         {
             e.printStackTrace();
             return input;
