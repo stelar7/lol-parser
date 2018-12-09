@@ -8,7 +8,6 @@ import no.stelar7.api.l4j8.basic.calling.DataCall;
 import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.cdragon.util.types.*;
 
-import javax.script.ScriptException;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;

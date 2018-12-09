@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

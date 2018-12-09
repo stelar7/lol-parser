@@ -3,7 +3,7 @@ package no.stelar7.cdragon.web;
 import no.stelar7.api.l4j8.impl.L4J8;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.*;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 

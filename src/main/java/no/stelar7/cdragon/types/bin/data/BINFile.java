@@ -4,7 +4,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.ByteWriter;
 import no.stelar7.cdragon.util.types.*;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 

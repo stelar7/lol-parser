@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.skl.data;
 
 import no.stelar7.api.l4j8.basic.utils.Pair;
-import no.stelar7.cdragon.types.skl.data.versioned.bone.*;
+import no.stelar7.cdragon.types.skl.data.versioned.bone.SKLBoneV0;
 import no.stelar7.cdragon.types.skl.data.versioned.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 

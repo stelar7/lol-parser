@@ -2,12 +2,12 @@ package no.stelar7.cdragon.types.crid;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.*;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Path;
 import java.util.*;
 
 public class CRIDParser implements Parseable

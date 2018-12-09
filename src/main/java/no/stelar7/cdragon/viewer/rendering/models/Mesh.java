@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.viewer.rendering.models;
 
 import no.stelar7.cdragon.types.skn.data.*;
-import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.handlers.ModelHandler;
 import no.stelar7.cdragon.util.types.Vector3f;
 import no.stelar7.cdragon.viewer.rendering.buffers.VBO;
 

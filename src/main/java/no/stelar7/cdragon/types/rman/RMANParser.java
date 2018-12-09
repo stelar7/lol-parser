@@ -1,13 +1,12 @@
 package no.stelar7.cdragon.types.rman;
 
 import no.stelar7.cdragon.interfaces.Parseable;
-import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.handlers.CompressionHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
-import java.io.IOException;
 import java.nio.ByteOrder;
-import java.nio.file.*;
+import java.nio.file.Path;
 
 public class RMANParser implements Parseable<RMANFile>
 {

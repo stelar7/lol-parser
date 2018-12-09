@@ -3,14 +3,7 @@ package no.stelar7.cdragon.util.readers;
 
 import com.google.common.collect.EvictingQueue;
 import no.stelar7.cdragon.util.types.*;
-import no.stelar7.cdragon.util.types.Matrix4f;
-import no.stelar7.cdragon.util.types.Matrix4x3f;
-import no.stelar7.cdragon.util.types.Vector2f;
-import no.stelar7.cdragon.util.types.Vector2i;
-import no.stelar7.cdragon.util.types.Vector3f;
-import no.stelar7.cdragon.util.types.Vector3i;
-import no.stelar7.cdragon.util.types.Vector4f;
-import org.joml.*;
+import org.joml.Quaternionf;
 
 import java.io.*;
 import java.nio.*;

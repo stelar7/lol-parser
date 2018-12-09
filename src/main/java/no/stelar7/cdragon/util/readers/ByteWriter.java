@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.readers;
 
-import com.google.common.io.*;
+import com.google.common.io.LittleEndianDataOutputStream;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;

@@ -1,8 +1,7 @@
 package no.stelar7.cdragon.types.anm.data.versioned;
 
 import no.stelar7.cdragon.types.anm.data.ANMFrame;
-import no.stelar7.cdragon.util.types.Vector3s;
-import no.stelar7.cdragon.util.types.Vector3f;
+import no.stelar7.cdragon.util.types.*;
 
 import java.util.*;
 

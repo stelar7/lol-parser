@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.scb.data;
 
 import no.stelar7.cdragon.util.types.Vector3b;
-import org.joml.*;
+import org.joml.Vector3f;
 
 import java.util.*;
 
