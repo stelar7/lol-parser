@@ -366,6 +366,8 @@
     "28b91c218647cae7": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reroll-outro.ogg",
     "6195a3d59c96a22d": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reroll-populate.ogg",
     "f3f8725062c272d2": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reveal-acknowledge.ogg",
+    "81161289fd817efe": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reveal-currency_champion.ogg",
+    "4f351038f5d27233": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reveal-currency_cosmetic.ogg",
     "e9ab12a1c38ed2c9": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reveal-material_key.ogg",
     "e7195cad6f443849": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reveal-material_rare.ogg",
     "80066f01f62a7268": "plugins/rcp-fe-lol-loot/global/default/assets/audio/sfx-loot-reveal-permanent-rarity_epic.ogg",

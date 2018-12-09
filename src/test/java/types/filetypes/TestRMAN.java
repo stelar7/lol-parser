@@ -11,6 +11,7 @@ public class TestRMAN
     @Test
     public void testRMAN()
     {
+        // https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json
         RMANParser parser = new RMANParser();
         
         Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\DC9F6F78A04934D6.manifest");

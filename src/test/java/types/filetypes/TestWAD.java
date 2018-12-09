@@ -49,7 +49,7 @@ public class TestWAD
         Path from = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Path to   = from.resolve("extracted");
         
-        //downloadPBEAssets("");
+        downloadPBEAssets("");
         String       jsn  = String.join("\n", WebHandler.readWeb("http://ddragon.leagueoflegends.com/cdn/languages.json"));
         List<String> data = UtilHandler.getGson().fromJson(jsn, new TypeToken<List<String>>() {}.getType());
         data.forEach(k -> {
@@ -62,9 +62,11 @@ public class TestWAD
             }
         });
         
-        extractWads(from, to);
+        //extractWads(from, to);
         System.out.println("Extraction finished!");
         Thread.sleep(1000);
+        
+        /*
         
         if (Files.exists(from.resolve("client")))
         {
@@ -81,6 +83,7 @@ public class TestWAD
                  .map(Path::toFile)
                  .forEach(File::delete);
         }
+        */
         
         System.out.println("Transforming bin files to json");
         Files.walk(from)
