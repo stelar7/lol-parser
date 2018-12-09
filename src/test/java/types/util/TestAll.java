@@ -29,9 +29,9 @@ public class TestAll
     {
         downloadWAD();
         getHashes();
-        //deleteUnknownFolder();
-        //downloadWAD();
-        //extractImages();
+        deleteUnknownFolder();
+        downloadWAD();
+        extractImages();
         //uploadToFTP();
     }
     
@@ -1575,18 +1575,54 @@ public class TestAll
             return;
         }
         
-        JsonElement elem = new JsonParser().parse(UtilHandler.readAsString(path));
-        JsonArray   arr  = elem.getAsJsonArray();
         
-        for (JsonElement element : arr)
+        JsonElement elem = new JsonParser().parse(UtilHandler.readAsString(path));
+        if (elem.isJsonNull())
         {
-            JsonObject ob     = element.getAsJsonObject();
-            String[]   elemen = img_getElement(ob, "iconPath");
-            if (elemen != null)
+            return;
+        }
+        
+        if (filename.equals("perkstyles.json"))
+        {
+            JsonArray arr = elem.getAsJsonObject().getAsJsonArray("styles");
+            
+            for (JsonElement element : arr)
             {
-                String preHash  = elemen[0];
-                String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
-                img_addToSB(data, preHash, postHash);
+                JsonObject ob     = element.getAsJsonObject();
+                String[]   elemen = img_getElement(ob, "iconPath");
+                if (elemen != null)
+                {
+                    String preHash  = elemen[0];
+                    String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
+                    img_addToSB(data, preHash, postHash);
+                }
+                
+                JsonObject assetMap = ob.getAsJsonObject("assetMap");
+                for (String key : assetMap.keySet())
+                {
+                    elemen = img_getElement(assetMap, key);
+                    if (elemen != null)
+                    {
+                        String preHash  = elemen[0];
+                        String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
+                        img_addToSB(data, preHash, postHash);
+                    }
+                }
+            }
+        } else
+        {
+            JsonArray arr = elem.getAsJsonArray();
+            
+            for (JsonElement element : arr)
+            {
+                JsonObject ob     = element.getAsJsonObject();
+                String[]   elemen = img_getElement(ob, "iconPath");
+                if (elemen != null)
+                {
+                    String preHash  = elemen[0];
+                    String postHash = filename.substring(0, filename.lastIndexOf(".json")) + "/" + ob.get("id") + elemen[1];
+                    img_addToSB(data, preHash, postHash);
+                }
             }
         }
     }

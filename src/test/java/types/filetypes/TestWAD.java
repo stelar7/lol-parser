@@ -41,7 +41,7 @@ public class TestWAD
     }
     
     @Test
-    public void testPBE() throws IOException, InterruptedException
+    public void testPBE() throws IOException
     {
         final BINParser bp = new BINParser();
         final DDSParser dp = new DDSParser();
@@ -62,9 +62,8 @@ public class TestWAD
             }
         });
         
-        //extractWads(from, to);
+        extractWads(from, to);
         System.out.println("Extraction finished!");
-        Thread.sleep(1000);
         
         /*
         

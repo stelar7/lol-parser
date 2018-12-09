@@ -7,6 +7,7 @@ import no.stelar7.cdragon.types.wem.data.WEMFile;
 import no.stelar7.cdragon.types.wpk.WPKParser;
 import no.stelar7.cdragon.types.wpk.data.WPKFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.types.ByteArray;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -26,8 +27,11 @@ public class TestOGG
         
         Path    wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\151d4d484d3bb890.wpk");
         WPKFile wpk     = wpkParser.parse(wpkfile);
-        wpk.extract(wpkfile.getParent());
         
+        /*
+        this extracts all the files, then parses
+        
+        wpk.extract(wpkfile.getParent());
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test"), new SimpleFileVisitor<>()
         {
             @Override
@@ -43,5 +47,14 @@ public class TestOGG
                 return FileVisitResult.CONTINUE;
             }
         });
+        */
+        
+        for (WEMFile wemFile : wpk.getWEMFiles())
+        {
+            WEMFile   wem = wemparser.parse(new ByteArray(wemFile.getData().getDataBytes()));
+            OGGStream ogg = parser.parse(wem.getData());
+            Files.write(wpkfile.resolveSibling(wemFile.getFilename() + ".ogg"), ogg.getData().toByteArray());
+        }
+        
     }
 }
