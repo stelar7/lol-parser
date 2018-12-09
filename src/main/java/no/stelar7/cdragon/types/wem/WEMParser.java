@@ -22,6 +22,7 @@ public class WEMParser implements Parseable<WEMFile>
         return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
+    
     public WEMFile parse(RandomAccessReader raf)
     {
         WEMFile wem = new WEMFile();
@@ -31,10 +32,7 @@ public class WEMParser implements Parseable<WEMFile>
         
         byte[]             data = raf.readBytes(wem.getDataLength());
         RandomAccessReader raf2 = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
-        if (!raf2.containsString("JUNK"))
-        {
-            wem.setData(new WEMData(data));
-        }
+        wem.setData(new WEMData(data));
         
         return wem;
     }

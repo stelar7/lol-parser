@@ -25,7 +25,7 @@ public class TestOGG
         WEMParser wemparser = new WEMParser();
         
         
-        Path    wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\151d4d484d3bb890.wpk");
+        Path    wpkfile = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\aatrox_base_vo_audio.wpk");
         WPKFile wpk     = wpkParser.parse(wpkfile);
         
         /*
@@ -53,7 +53,7 @@ public class TestOGG
         {
             WEMFile   wem = wemparser.parse(new ByteArray(wemFile.getData().getDataBytes()));
             OGGStream ogg = parser.parse(wem.getData());
-            Files.write(wpkfile.resolveSibling(wemFile.getFilename() + ".ogg"), ogg.getData().toByteArray());
+            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\ogg\\" + wemFile.getFilename() + ".ogg"), ogg.getData().toByteArray());
         }
         
     }
