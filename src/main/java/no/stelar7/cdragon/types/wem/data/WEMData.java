@@ -414,7 +414,7 @@ public class WEMData
                     dataChunkSize = chunkSize;
                     break;
                 default:
-                    throw new RuntimeException("Invalid chunk name");
+                    throw new RuntimeException("Invalid chunk name: " + chunkName);
             }
             
             chunkOffset += chunkSize + 8;
