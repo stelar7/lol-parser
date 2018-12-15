@@ -46,4 +46,13 @@ public class WEMFile
     {
         this.data = data;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "WEMFile{" +
+               "filename='" + filename + '\'' +
+               ", data=" + data +
+               '}';
+    }
 }

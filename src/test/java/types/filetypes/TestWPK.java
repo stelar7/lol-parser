@@ -21,12 +21,15 @@ public class TestWPK
     {
         WPKParser parser = new WPKParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\15646bae0aecf5be.wpk");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\aatrox_base_vo_audio.wpk");
         System.out.println("Parsing: " + file.toString());
         
         WPKFile data = parser.parse(file);
-        data.extract(file.getParent());
-        System.out.println();
+        
+        for (WEMFile wemFile : data.getWEMFiles())
+        {
+            System.out.println(wemFile.getFilename() + (wemFile.getData() == null ? " - HAS JUNK CHUNK!" : ""));
+        }
     }
     
     @Test

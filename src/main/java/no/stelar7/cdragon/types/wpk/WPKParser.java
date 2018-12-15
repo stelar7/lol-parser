@@ -50,7 +50,8 @@ public class WPKParser implements Parseable<WPKFile>
             wem.setFilename(raf.readString(filenameSize, StandardCharsets.UTF_16LE));
             
             raf.seek(wem.getDataOffset());
-            wem.setData(new WEMData(raf.readBytes(wem.getDataLength())));
+            byte[] data = raf.readBytes(wem.getDataLength());
+            wem.setData(new WEMData(data));
             
             file.getWEMFiles().add(wem);
         }

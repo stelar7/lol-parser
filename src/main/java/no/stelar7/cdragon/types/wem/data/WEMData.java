@@ -14,6 +14,9 @@ public class WEMData
     private int smplChunkOffset = 0xFFFFFFFF;
     private int vorbChunkOffset = 0xFFFFFFFF;
     private int dataChunkOffset = 0xFFFFFFFF;
+    private int junkChunkOffset = 0xFFFFFFFF;
+    private int akdChunkOffset  = 0xFFFFFFFF;
+    
     
     private int fmtChunkSize  = 0xFFFFFFFF;
     private int cueChunkSize  = 0xFFFFFFFF;
@@ -21,6 +24,8 @@ public class WEMData
     private int smplChunkSize = 0xFFFFFFFF;
     private int vorbChunkSize = 0xFFFFFFFF;
     private int dataChunkSize = 0xFFFFFFFF;
+    private int junkChunkSize = 0xFFFFFFFF;
+    private int akdChunkSize  = 0xFFFFFFFF;
     
     private int channelCount;
     private int sampleRate;
@@ -44,6 +49,46 @@ public class WEMData
     private boolean littleEndian = true;
     
     private byte[] dataBytes;
+    
+    public int getJunkChunkOffset()
+    {
+        return junkChunkOffset;
+    }
+    
+    public void setJunkChunkOffset(int junkChunkOffset)
+    {
+        this.junkChunkOffset = junkChunkOffset;
+    }
+    
+    public int getAkdChunkOffset()
+    {
+        return akdChunkOffset;
+    }
+    
+    public void setAkdChunkOffset(int akdChunkOffset)
+    {
+        this.akdChunkOffset = akdChunkOffset;
+    }
+    
+    public int getJunkChunkSize()
+    {
+        return junkChunkSize;
+    }
+    
+    public void setJunkChunkSize(int junkChunkSize)
+    {
+        this.junkChunkSize = junkChunkSize;
+    }
+    
+    public int getAkdChunkSize()
+    {
+        return akdChunkSize;
+    }
+    
+    public void setAkdChunkSize(int akdChunkSize)
+    {
+        this.akdChunkSize = akdChunkSize;
+    }
     
     public int getFmtChunkOffset()
     {
@@ -413,6 +458,14 @@ public class WEMData
                     dataChunkOffset = chunkOffset + 8;
                     dataChunkSize = chunkSize;
                     break;
+                case "JUNK":
+                    junkChunkOffset = chunkOffset + 8;
+                    junkChunkSize = chunkSize;
+                case "akd ":
+                {
+                    akdChunkOffset = chunkOffset + 8;
+                    akdChunkSize = chunkSize;
+                }
                 default:
                     throw new RuntimeException("Invalid chunk name: " + chunkName);
             }
