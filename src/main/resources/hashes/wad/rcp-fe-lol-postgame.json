@@ -235,6 +235,8 @@
     "5ee339de230de380": "plugins/rcp-fe-lol-postgame/global/default/sfx-postgame-button-playagain-click.ogg",
     "df17a422b16959f3": "plugins/rcp-fe-lol-postgame/global/default/sfx-postgame-button-playagain-hover.ogg",
     "f3a83262ae3c8d88": "plugins/rcp-fe-lol-postgame/global/default/sfx-postgame-button-report-click.ogg",
+    "2912fa8db1ffd2a7": "plugins/rcp-fe-lol-postgame/global/default/sfx-ranked-ui-circle-meter-fill-small.ogg",
+    "49b69cdb765f7083": "plugins/rcp-fe-lol-postgame/global/default/sfx-ranked-ui-circle-meter-level-up.ogg",
     "2733ed88a51a06e1": "plugins/rcp-fe-lol-postgame/global/default/sfx-uikit-button-gold-click.ogg",
     "744c8e22dcabb3e4": "plugins/rcp-fe-lol-postgame/global/default/sfx-uikit-button-gold-hover.ogg",
     "7b6fdc26551b60a7": "plugins/rcp-fe-lol-postgame/global/default/sfx-uikit-click-generic.ogg",

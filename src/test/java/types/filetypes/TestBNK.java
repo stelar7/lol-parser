@@ -23,7 +23,7 @@ public class TestBNK
     {
         BNKParser parser = new BNKParser();
         
-        Path file = DOWNLOADS_FOLDER.resolve("Pyke\\Champions\\unknown\\9e2a3b17be356ffc.bnk");
+        Path file = DOWNLOADS_FOLDER.resolve("cdragon\\aatrox_base_sfx_audio.bnk");
         System.out.println("Parsing: " + file.toString());
         
         BNKFile data = parser.parse(file);
