@@ -5,8 +5,10 @@ import java.util.*;
 public class RMANFile
 {
     private RMANFileHeader header;
-    private byte[]         content;
-    private byte[]         remainder;
+    private byte[]         compressedBody;
+    private byte[]         signature;
+    
+    private RMANFileBody body;
     
     public RMANFileHeader getHeader()
     {
@@ -18,30 +20,34 @@ public class RMANFile
         this.header = header;
     }
     
-    public byte[] getContent()
+    public byte[] getCompressedBody()
     {
-        return content;
+        return compressedBody;
     }
     
-    public void setContent(byte[] zstd)
+    public void setCompressedBody(byte[] compressedBody)
     {
-        this.content = zstd;
+        this.compressedBody = compressedBody;
     }
     
-    public byte[] getRemainder()
+    public byte[] getSignature()
     {
-        return remainder;
+        return signature;
     }
     
-    public void setRemainder(byte[] remainder)
+    public void setSignature(byte[] signature)
     {
-        this.remainder = remainder;
+        this.signature = signature;
     }
     
-    @Override
-    public String toString()
+    public RMANFileBody getBody()
     {
-        return "RMANFile{" + "header=" + header + '}';
+        return body;
+    }
+    
+    public void setBody(RMANFileBody body)
+    {
+        this.body = body;
     }
     
     @Override
@@ -57,16 +63,28 @@ public class RMANFile
         }
         RMANFile rmanFile = (RMANFile) o;
         return Objects.equals(header, rmanFile.header) &&
-               Arrays.equals(content, rmanFile.content) &&
-               Arrays.equals(remainder, rmanFile.remainder);
+               Arrays.equals(compressedBody, rmanFile.compressedBody) &&
+               Arrays.equals(signature, rmanFile.signature) &&
+               Objects.equals(body, rmanFile.body);
     }
     
     @Override
     public int hashCode()
     {
-        int result = Objects.hash(header);
-        result = 31 * result + Arrays.hashCode(content);
-        result = 31 * result + Arrays.hashCode(remainder);
+        int result = Objects.hash(header, body);
+        result = 31 * result + Arrays.hashCode(compressedBody);
+        result = 31 * result + Arrays.hashCode(signature);
         return result;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "RMANFile{" +
+               "header=" + header +
+               ", compressedBody=" + Arrays.toString(compressedBody) +
+               ", signature=" + Arrays.toString(signature) +
+               ", body=" + body +
+               '}';
     }
 }

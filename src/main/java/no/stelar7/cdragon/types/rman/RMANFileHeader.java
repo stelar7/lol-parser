@@ -8,9 +8,11 @@ public class RMANFileHeader
     private byte   major;
     private byte   minor;
     private byte   unknown;
-    private byte   signed;
+    private byte   signatureType;
     private int    offset;
     private int    length;
+    private long   manifestId;
+    private int    decompressedLength;
     
     public String getMagic()
     {
@@ -52,14 +54,34 @@ public class RMANFileHeader
         this.unknown = unknown;
     }
     
-    public byte getSigned()
+    public byte getSignatureType()
     {
-        return signed;
+        return signatureType;
     }
     
-    public void setSigned(byte signed)
+    public void setSignatureType(byte signatureType)
     {
-        this.signed = signed;
+        this.signatureType = signatureType;
+    }
+    
+    public long getManifestId()
+    {
+        return manifestId;
+    }
+    
+    public void setManifestId(long manifestId)
+    {
+        this.manifestId = manifestId;
+    }
+    
+    public int getDecompressedLength()
+    {
+        return decompressedLength;
+    }
+    
+    public void setDecompressedLength(int decompressedLength)
+    {
+        this.decompressedLength = decompressedLength;
     }
     
     public int getOffset()
@@ -97,21 +119,33 @@ public class RMANFileHeader
         return major == that.major &&
                minor == that.minor &&
                unknown == that.unknown &&
-               signed == that.signed &&
+               signatureType == that.signatureType &&
                offset == that.offset &&
                length == that.length &&
+               manifestId == that.manifestId &&
+               decompressedLength == that.decompressedLength &&
                Objects.equals(magic, that.magic);
     }
     
     @Override
     public int hashCode()
     {
-        return Objects.hash(magic, major, minor, unknown, signed, offset, length);
+        return Objects.hash(magic, major, minor, unknown, signatureType, offset, length, manifestId, decompressedLength);
     }
     
     @Override
     public String toString()
     {
-        return String.format("RMANFileHeader{magic='%s', major=%s, minor=%s, unknown=%s, signed=%s, offset=%d, length=%d}", magic, major, minor, unknown, signed, offset, length);
+        return "RMANFileHeader{" +
+               "magic='" + magic + '\'' +
+               ", major=" + major +
+               ", minor=" + minor +
+               ", unknown=" + unknown +
+               ", signatureType=" + signatureType +
+               ", offset=" + offset +
+               ", length=" + length +
+               ", manifestId=" + manifestId +
+               ", decompressedLength=" + decompressedLength +
+               '}';
     }
 }

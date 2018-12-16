@@ -66,7 +66,6 @@ public class TestWAD
         System.out.println("Extraction finished!");
         
         /*
-        
         if (Files.exists(from.resolve("client")))
         {
             Files.walk(from.resolve("client"))
