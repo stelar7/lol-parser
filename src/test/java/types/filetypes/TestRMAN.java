@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TestRMAN
 {
@@ -25,15 +26,17 @@ public class TestRMAN
         System.out.println("Parsing: " + file.toString());
         RMANFile data = parser.parse(file);
         
+        List<RMANFileBodyFile> files = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Map11.de")).collect(Collectors.toList());
         
-        RMANFileBodyFile testFile = data.getBody().getFiles().get(5);
+        
+        RMANFileBodyFile testFile = files.get(0);
         downloadFile(data, testFile);
         
         Path extractedPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/");
         
         WADParser wp = new WADParser();
         WADFile   wf = wp.parse(extractedPath.resolve(testFile.getName()));
-        wf.extractFiles("champions", testFile.getName(), extractedPath);
+        wf.extractFiles("levels", testFile.getName(), extractedPath);
     }
     
     private void downloadFile(RMANFile manifest, RMANFileBodyFile file) throws IOException

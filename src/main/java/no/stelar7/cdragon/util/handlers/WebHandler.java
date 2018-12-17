@@ -33,6 +33,11 @@ public class WebHandler
     public static void downloadBundle(String bundleId, Path output)
     {
         // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
+        if (Files.exists(output))
+        {
+            return;
+        }
+        
         downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
     
@@ -58,6 +63,7 @@ public class WebHandler
                 out.flush();
             } catch (Exception e)
             {
+                e.printStackTrace();
                 downloadFile(output, url);
             }
             

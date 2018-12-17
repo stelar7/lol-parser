@@ -49,7 +49,13 @@ public class HashHandler
     
     public static String toHex(Long str)
     {
-        return Long.toHexString(str).toUpperCase(Locale.ENGLISH);
+        String pre = Long.toHexString(str).toUpperCase(Locale.ENGLISH);
+        if (pre.length() % 2 != 0)
+        {
+            pre = "0" + pre;
+        }
+        
+        return pre;
     }
     
     public static String computeXXHash64(String text)
