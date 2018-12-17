@@ -269,7 +269,6 @@ public class HashHandler
             }
             
             wadHashNames.put(plugin, val);
-            System.out.println("Loaded known hashes for " + plugin);
         } catch (Exception e)
         {
             wadHashNames.put(plugin, new HashMap<>());
