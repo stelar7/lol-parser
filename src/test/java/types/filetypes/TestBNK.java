@@ -23,14 +23,13 @@ public class TestBNK
     {
         BNKParser parser = new BNKParser();
         
-        Path file = DOWNLOADS_FOLDER.resolve("cdragon\\aatrox_base_sfx_audio.bnk");
+        Path file = DOWNLOADS_FOLDER.resolve("Ashe\\levels\\unknown\\e42848c953b2e155.bnk");
         System.out.println("Parsing: " + file.toString());
         
         BNKFile data = parser.parse(file);
         int     i    = 0;
         for (BNKDATAWEMFile bnkdatawemFile : data.getData().getWemFiles())
         {
-            Files.write(DOWNLOADS_FOLDER.resolve("test.wem"), bnkdatawemFile.getData());
             WEMFile wemFile = new WEMParser().parse(new ByteArray(bnkdatawemFile.getData()));
             if (wemFile.getData() != null)
             {

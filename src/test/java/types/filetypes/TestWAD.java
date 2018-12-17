@@ -191,8 +191,8 @@ public class TestWAD
     public void testLocal()
     {
         WADParser parser = new WADParser();
-        WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ashe.wad.client"));
-        parsed.extractFiles("Champions", "Ashe.wad.client.compressed", UtilHandler.DOWNLOADS_FOLDER.resolve("Ashe"));
+        WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Map11.de_DE.wad.client"));
+        parsed.extractFiles("levels", "Map11.de_DE.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("Ashe"));
     }
     
     @Test
