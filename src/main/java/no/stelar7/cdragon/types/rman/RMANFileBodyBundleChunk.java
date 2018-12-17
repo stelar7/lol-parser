@@ -4,10 +4,10 @@ import java.util.Objects;
 
 public class RMANFileBodyBundleChunk
 {
-    private int  offsetTableOffset;
-    private int  compressedSize;
-    private int  uncompressedSize;
-    private long chunkId;
+    private int    offsetTableOffset;
+    private int    compressedSize;
+    private int    uncompressedSize;
+    private String chunkId;
     
     public int getOffsetTableOffset()
     {
@@ -39,12 +39,12 @@ public class RMANFileBodyBundleChunk
         this.uncompressedSize = uncompressedSize;
     }
     
-    public long getChunkId()
+    public String getChunkId()
     {
         return chunkId;
     }
     
-    public void setChunkId(long chunkId)
+    public void setChunkId(String chunkId)
     {
         this.chunkId = chunkId;
     }

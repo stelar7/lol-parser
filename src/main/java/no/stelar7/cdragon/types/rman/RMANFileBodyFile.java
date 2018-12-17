@@ -1,25 +1,27 @@
 package no.stelar7.cdragon.types.rman;
 
+import no.stelar7.cdragon.util.handlers.HashHandler;
+
 import java.util.*;
 
 public class RMANFileBodyFile
 {
-    private int        offset;
-    private int        offsetTableOffset;
-    private int        unknown1;
-    private int        nameOffset;
-    private String     name;
-    private int        structSize;
-    private int        symlinkOffset;
-    private String     symlink;
-    private long       fileId;
-    private long       directoryId;
-    private int        fileSize;
-    private int        permissions;
-    private int        languageId;
-    private int        unknown2;
-    private int        unknown3;
-    private List<Long> chunkIds;
+    private int          offset;
+    private int          offsetTableOffset;
+    private int          unknown1;
+    private int          nameOffset;
+    private String       name;
+    private int          structSize;
+    private int          symlinkOffset;
+    private String       symlink;
+    private long         fileId;
+    private long         directoryId;
+    private int          fileSize;
+    private int          permissions;
+    private int          languageId;
+    private int          unknown2;
+    private int          unknown3;
+    private List<String> chunkIds;
     
     public int getOffset()
     {
@@ -171,14 +173,19 @@ public class RMANFileBodyFile
         this.unknown3 = unknown3;
     }
     
-    public List<Long> getChunkIds()
+    public List<String> getChunkIds()
     {
         return chunkIds;
     }
     
     public void setChunkIds(List<Long> chunkIds)
     {
-        this.chunkIds = chunkIds;
+        List<String> stringChunkIds = new ArrayList<>();
+        for (Long chunkId : chunkIds)
+        {
+            stringChunkIds.add(HashHandler.toHex(chunkId));
+        }
+        this.chunkIds = stringChunkIds;
     }
     
     @Override

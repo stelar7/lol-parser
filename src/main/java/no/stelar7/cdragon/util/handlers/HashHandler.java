@@ -47,6 +47,11 @@ public class HashHandler
         return toHex(str.getBytes(StandardCharsets.UTF_8));
     }
     
+    public static String toHex(Long str)
+    {
+        return Long.toHexString(str).toUpperCase(Locale.ENGLISH);
+    }
+    
     public static String computeXXHash64(String text)
     {
         try

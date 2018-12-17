@@ -7,7 +7,7 @@ public class RMANFileBodyBundle
     private int                           offset;
     private int                           offsetTableOffset;
     private int                           headerSize;
-    private long                          bundleId;
+    private String                        bundleId;
     private byte[]                        skipped;
     private List<RMANFileBodyBundleChunk> chunks;
     
@@ -41,12 +41,12 @@ public class RMANFileBodyBundle
         this.headerSize = headerSize;
     }
     
-    public long getBundleId()
+    public String getBundleId()
     {
         return bundleId;
     }
     
-    public void setBundleId(long bundleId)
+    public void setBundleId(String bundleId)
     {
         this.bundleId = bundleId;
     }

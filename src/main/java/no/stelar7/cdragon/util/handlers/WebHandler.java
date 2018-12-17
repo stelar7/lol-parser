@@ -30,6 +30,12 @@ public class WebHandler
         return false;
     }
     
+    public static void downloadBundle(String bundleId, Path output)
+    {
+        // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
+        downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
+    }
+    
     
     public static void downloadFile(Path output, String url)
     {
@@ -97,7 +103,7 @@ public class WebHandler
     
     public static String[] getMaxVersion(String url, int min, int max)
     {
-        String[] urlEnds = {"/default-assets.wad.compressed", "/assets.wad.compressed" };
+        String[] urlEnds = {"/default-assets.wad.compressed", "/assets.wad.compressed"};
         for (int i = max; i >= min; i--)
         {
             for (String endPart : urlEnds)
