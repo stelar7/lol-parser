@@ -6,6 +6,7 @@ import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.Triplet;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -46,35 +47,35 @@ public class TestRMAN
         System.out.println("Loading bundles needed for " + file.getName());
         
         
-        // add the needed ranges to a map
+        // generate a chunkmap
+        Map<String, Triplet<String, Long, Long>> chunksById = new HashMap<>();
+        for (RMANFileBodyBundle bundle : manifest.getBody().getBundles())
+        {
+            long currentIndex = 0;
+            for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
+            {
+                currentIndex += chunk.getCompressedSize();
+                chunksById.put(chunk.getChunkId(), new Triplet<>(bundle.getBundleId(), currentIndex - chunk.getCompressedSize(), currentIndex));
+            }
+        }
+        
+        
+        // extract the needed chunks
         Map<String, List<Pair<Long, Long>>> downloadRanges = new HashMap<>();
         for (String chunkId : file.getChunkIds())
         {
-            for (RMANFileBodyBundle bundle : manifest.getBody().getBundles())
-            {
-                long currentIndex = 0;
-                for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
-                {
-                    currentIndex += chunk.getCompressedSize();
-                    if (!chunk.getChunkId().equals(chunkId))
-                    {
-                        continue;
-                    }
-                    
-                    List<Pair<Long, Long>> ranges = downloadRanges.getOrDefault(bundle.getBundleId(), new ArrayList<>());
-                    ranges.add(new Pair<>(currentIndex - chunk.getCompressedSize(), currentIndex));
-                    downloadRanges.put(bundle.getBundleId(), ranges);
-                }
-            }
+            Triplet<String, Long, Long> data   = chunksById.get(chunkId);
+            List<Pair<Long, Long>>      ranges = downloadRanges.getOrDefault(data.getA(), new ArrayList<>());
+            ranges.add(new Pair<>(data.getB(), data.getC()));
+            downloadRanges.put(data.getA(), ranges);
         }
-    
+        
         // reduce the map to continuus ranges
         for (String key : downloadRanges.keySet())
         {
             List<Pair<Long, Long>> ranges = downloadRanges.get(key);
             ranges.sort(Comparator.comparing(Pair::getKey));
             
-            List<Pair<Long, Long>> realRanges = new ArrayList<>();
             for (int i = 0; i < ranges.size() - 1; i++)
             {
                 Pair<Long, Long> start = ranges.get(i);
@@ -91,7 +92,6 @@ public class TestRMAN
                     ranges.sort(Comparator.comparing(Pair::getKey));
                 }
             }
-            System.out.println();
         }
         
         
