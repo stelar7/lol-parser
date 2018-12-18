@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.util.handlers;
 
+import no.stelar7.api.l4j8.basic.utils.Pair;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.io.*;
@@ -183,4 +184,33 @@ public class WebHandler
         }
     }
     
+    public static void downloadBundleBytes(String bundleId, List<Pair<Long, Long>> ranges, Path outputFolder)
+    {
+        // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
+        try
+        {
+            for (Pair<Long, Long> range : ranges)
+            {
+                String url         = "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle";
+                String rangeString = range.getKey() + "-" + range.getValue();
+                Path   outputFile  = outputFolder.resolve(bundleId + "-" + rangeString);
+                
+                int                 read;
+                final byte[]        buffer = new byte[4096];
+                final URLConnection uc     = new URL(url.replace(" ", "%20")).openConnection();
+                uc.setRequestProperty("Range", "bytes=" + rangeString);
+                try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(outputFile.toFile()))
+                {
+                    while ((read = in.read(buffer)) != -1)
+                    {
+                        out.write(buffer, 0, read);
+                    }
+                    out.flush();
+                }
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

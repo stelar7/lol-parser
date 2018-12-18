@@ -1,5 +1,6 @@
 package types.filetypes;
 
+import no.stelar7.api.l4j8.basic.utils.Pair;
 import no.stelar7.cdragon.types.rman.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
@@ -30,7 +31,8 @@ public class TestRMAN
         
         
         RMANFileBodyFile testFile = files.get(0);
-        downloadFile(data, testFile);
+        //downloadFileFullBundles(data, testFile);
+        downloadFileRanged(data, testFile);
         
         Path extractedPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/");
         
@@ -39,7 +41,71 @@ public class TestRMAN
         wf.extractFiles("levels", testFile.getName(), extractedPath);
     }
     
-    private void downloadFile(RMANFile manifest, RMANFileBodyFile file) throws IOException
+    private void downloadFileRanged(RMANFile manifest, RMANFileBodyFile file) throws IOException
+    {
+        System.out.println("Loading bundles needed for " + file.getName());
+        
+        
+        // add the needed ranges to a map
+        Map<String, List<Pair<Long, Long>>> downloadRanges = new HashMap<>();
+        for (String chunkId : file.getChunkIds())
+        {
+            for (RMANFileBodyBundle bundle : manifest.getBody().getBundles())
+            {
+                long currentIndex = 0;
+                for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
+                {
+                    currentIndex += chunk.getCompressedSize();
+                    if (!chunk.getChunkId().equals(chunkId))
+                    {
+                        continue;
+                    }
+                    
+                    List<Pair<Long, Long>> ranges = downloadRanges.getOrDefault(bundle.getBundleId(), new ArrayList<>());
+                    ranges.add(new Pair<>(currentIndex - chunk.getCompressedSize(), currentIndex));
+                    downloadRanges.put(bundle.getBundleId(), ranges);
+                }
+            }
+        }
+    
+        // reduce the map to continuus ranges
+        for (String key : downloadRanges.keySet())
+        {
+            List<Pair<Long, Long>> ranges = downloadRanges.get(key);
+            ranges.sort(Comparator.comparing(Pair::getKey));
+            
+            List<Pair<Long, Long>> realRanges = new ArrayList<>();
+            for (int i = 0; i < ranges.size() - 1; i++)
+            {
+                Pair<Long, Long> start = ranges.get(i);
+                Pair<Long, Long> end   = ranges.get(i + 1);
+                if (start.getValue().equals(end.getKey()))
+                {
+                    Pair<Long, Long> joined = new Pair<>(start.getKey(), end.getValue());
+                    
+                    ranges.remove(start);
+                    ranges.remove(end);
+                    ranges.add(0, joined);
+                    i--;
+                    
+                    ranges.sort(Comparator.comparing(Pair::getKey));
+                }
+            }
+            System.out.println();
+        }
+        
+        
+        // download the ranges
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Files.createDirectories(bundleFolder);
+        downloadRanges.forEach((k, v) -> WebHandler.downloadBundleBytes(k, v, bundleFolder));
+        
+        // TODO split the range into chunks, and merge the chunks back into the file
+        System.out.println();
+        
+    }
+    
+    private void downloadFileFullBundles(RMANFile manifest, RMANFileBodyFile file) throws IOException
     {
         System.out.println("Loading bundles needed for " + file.getName());
         Set<RMANFileBodyBundle> bundlesNeeded = new HashSet<>();
