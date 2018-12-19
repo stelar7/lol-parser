@@ -10,7 +10,6 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.utils.IOUtils;
-import org.apache.commons.net.ftp.*;
 import org.junit.Test;
 
 import java.io.*;

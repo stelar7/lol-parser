@@ -1,9 +1,9 @@
 package no.stelar7.cdragon.types.skl.data;
 
-import no.stelar7.api.l4j8.basic.utils.Pair;
 import no.stelar7.cdragon.types.skl.data.versioned.bone.SKLBoneV0;
 import no.stelar7.cdragon.types.skl.data.versioned.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
+import org.javers.common.collections.Pair;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -41,13 +41,13 @@ public class SKLFile
             
             for (Entry<Short, Pair<SKLBoneV0, ReadableBone>> entry : tempret.entrySet())
             {
-                ReadableBone rself = entry.getValue().getValue();
-                SKLBoneV0    bself = entry.getValue().getKey();
+                ReadableBone rself = entry.getValue().right();
+                SKLBoneV0    bself = entry.getValue().left();
                 
                 Optional<Entry<Short, Pair<SKLBoneV0, ReadableBone>>> dat = tempret.entrySet().stream().filter(t -> t.getKey() == bself.getParent()).findFirst();
                 if (dat.isPresent())
                 {
-                    ReadableBone rother = dat.get().getValue().getValue();
+                    ReadableBone rother = dat.get().getValue().right();
                     rself.setParent(rother);
                 }
                 

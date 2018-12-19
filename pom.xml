@@ -77,13 +77,6 @@
             <version>1.15</version>
         </dependency>
 
-        <!-- used for uploading files to a webserver -->
-        <dependency>
-            <groupId>commons-net</groupId>
-            <artifactId>commons-net</artifactId>
-            <version>3.6</version>
-        </dependency>
-
         <!-- used for decryption of the ROFL entries -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
@@ -134,28 +127,13 @@
             <version>3.9.0</version>
         </dependency>
 
-        <!-- used to remove the NO-OP waring from slf4j
+        <!-- used to remove the NO-OP warning from slf4j
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
             <version>1.7.25</version>
         </dependency>
         -->
-
-        <!-- used to load data for the web-api -->
-        <dependency>
-            <groupId>com.github.stelar7</groupId>
-            <artifactId>L4J8</artifactId>
-            <version>V1.5.4</version>
-        </dependency>
-
-        <!-- used to create the web-api -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.0.1.RELEASE</version>
-        </dependency>
-
 
     </dependencies>
 

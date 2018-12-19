@@ -1,5 +1,7 @@
 package no.stelar7.cdragon.types.rman;
 
+import no.stelar7.cdragon.util.types.Triplet;
+
 import java.util.*;
 
 public class RMANFile
@@ -48,6 +50,31 @@ public class RMANFile
     public void setBody(RMANFileBody body)
     {
         this.body = body;
+    }
+    
+    private Map<String, RMANFileBodyBundleChunkInfo> chunksById = null;
+    
+    public Map<String, RMANFileBodyBundleChunkInfo> getChunkMap()
+    {
+        if (chunksById != null)
+        {
+            return chunksById;
+        }
+        
+        chunksById = new HashMap<>();
+        for (RMANFileBodyBundle bundle : getBody().getBundles())
+        {
+            long currentIndex = 0;
+            for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
+            {
+                RMANFileBodyBundleChunkInfo chunkInfo = new RMANFileBodyBundleChunkInfo(bundle.getBundleId(), chunk.getChunkId(), currentIndex, chunk.getCompressedSize());
+                chunksById.put(chunk.getChunkId(), chunkInfo);
+                
+                currentIndex += chunk.getCompressedSize();
+            }
+        }
+        
+        return chunksById;
     }
     
     @Override
