@@ -57,6 +57,7 @@ public class TestRMAN
         }
         
         // reduce the map to continuus ranges
+        System.out.println("Reducing to HTTP-bytes request");
         for (String key : downloadRanges.keySet())
         {
             List<LongRange> ranges = downloadRanges.get(key);
@@ -82,9 +83,10 @@ public class TestRMAN
         
         
         // download the ranges
+        System.out.println("Downloading files...");
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
         Files.createDirectories(bundleFolder);
-        downloadRanges.forEach((k, v) -> WebHandler.downloadBundleBytes(k, v, bundleFolder));
+        downloadRanges.entrySet().parallelStream().forEach((e) -> WebHandler.downloadBundleBytes(e.getKey(), e.getValue(), bundleFolder));
         
         // TODO split the range into chunks, and merge the chunks back into the file
         System.out.println();
