@@ -124,7 +124,12 @@ public class TestFindHashStuff
                 
                 if (file.toString().endsWith(".json"))
                 {
-                    grepFile(file, output);
+                    //grepFile(file, output, "((?:ASSETS|DATA|Character)/[0-9a-zA-Z_. /-]+)");
+                }
+                
+                if (file.toString().endsWith(".js"))
+                {
+                    grepFile(file, output, "((?:lol-)[0-9a-zA-Z_. /-]+)");
                 }
                 
                 return FileVisitResult.CONTINUE;
@@ -164,7 +169,27 @@ public class TestFindHashStuff
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
+                if (file.toString().contains("Champions") ||
+                    file.toString().contains("FINAL") ||
+                    file.toString().contains("Shipping") ||
+                    file.toString().contains("Shaders") ||
+                    file.toString().contains("Localized")
+                )
+                {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
+                
+                if (Files.isDirectory(file))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                
                 if (file.equals(output))
+                {
+                    return FileVisitResult.CONTINUE;
+                }
+                
+                if (file.toString().endsWith("unknown.json"))
                 {
                     return FileVisitResult.CONTINUE;
                 }
@@ -172,9 +197,9 @@ public class TestFindHashStuff
                 if (file.toString().contains("unknown"))
                 {
                     String name = file.toString();
-                    name = name.substring(name.lastIndexOf('\\') + 1);
-                    name = name.substring(0, name.lastIndexOf('.'));
-                    name = name + "\n";
+                    name = name.substring(name.lastIndexOf("rcp"));
+                    name = name.replace("unknown\\", "") + "\n";
+                    //name = name.substring(0, name.lastIndexOf('.'));
                     Files.write(output, name.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
                 }
                 
@@ -184,13 +209,6 @@ public class TestFindHashStuff
         
         String data = String.join("\n", Files.readAllLines(output, StandardCharsets.UTF_8).stream().filter(s -> !s.isEmpty()).collect(Collectors.toSet()));
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
-    }
-    
-    @Test
-    public void listParts()
-    {
-        getParts();
-        System.out.println();
     }
     
     Set<String> exts = null;
@@ -225,13 +243,24 @@ public class TestFindHashStuff
         return parts;
     }
     
-    public void grepFile(Path path, Path output) throws IOException
+    public void grepFile(Path path, Path output, String pattern) throws IOException
     {
         String  data = String.join("", Files.readAllLines(path));
-        Pattern p    = Pattern.compile("((?:ASSETS|DATA|Character)/[0-9a-zA-Z_. /-]+)");
+        Pattern p    = Pattern.compile(pattern);
         Matcher m    = p.matcher(data);
         
-        byte[] results = (m.results().map(MatchResult::group).collect(Collectors.joining("\n")) + "\n").getBytes(StandardCharsets.UTF_8);
+        if (m.results().count() > 0)
+        {
+            m.reset();
+        }
+        
+        byte[] results = (m.results()
+                           .map(MatchResult::group)
+                           .filter(s -> s.contains("."))
+                           .filter(s -> getExts().contains(s.substring(s.lastIndexOf('.') + 1)))
+                           .collect(Collectors.joining("\n"))
+                          + "\n").getBytes(StandardCharsets.UTF_8);
+        
         Files.write(output, results, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
     }
 }

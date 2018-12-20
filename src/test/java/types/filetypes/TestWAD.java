@@ -241,6 +241,8 @@ public class TestWAD
     {
         String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.game.txt";
         String hashB = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.lcu.txt";
+        String hashC = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.game.txt";
+        String hashD = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.lcu.txt";
         
         Set<String> changedPlugins = new HashSet<>();
         
@@ -261,6 +263,8 @@ public class TestWAD
         
         List<String> data = WebHandler.readWeb(hashA);
         data.addAll(WebHandler.readWeb(hashB));
+        data.addAll(WebHandler.readWeb(hashC));
+        data.addAll(WebHandler.readWeb(hashD));
         Map<String, Set<Vector2>> hashes = data.stream()
                                                .map(line -> line.substring(line.indexOf(' ') + 1))
                                                .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
