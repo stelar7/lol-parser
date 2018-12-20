@@ -67,9 +67,7 @@ public class TestFindHashStuff
             Set<Vector2<String, String>> foundHashes = new HashSet<>();
             
             System.out.println("Loading currently known hashes");
-            HashHandler.getWadHashes(plugin).forEach((k, v) -> {
-                foundHashes.add(new Vector2<>(k, v));
-            });
+            HashHandler.getWadHashes(plugin).forEach((k, v) -> foundHashes.add(new Vector2<>(k, v)));
             
             List<Vector2<String, String>> allHashes = new ArrayList<>(foundHashes);
             System.out.println("Sorting hashes");
