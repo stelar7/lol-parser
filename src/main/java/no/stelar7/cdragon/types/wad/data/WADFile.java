@@ -113,7 +113,7 @@ public class WADFile
     private void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName) throws IOException
     {
         String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-        String filename = HashHandler.getWadHashes(pluginName).getOrDefault(hash, "unknown\\" + hash);
+        String filename = HashHandler.loadAllWadHashes().getOrDefault(hash, "unknown\\" + hash);
         Path   self     = savePath.resolve(filename);
         
         if (self.toString().length() > 255)

@@ -26,7 +26,7 @@ public class TestFindHashStuff
         fetchHashesForUnknownFiles();
         System.out.println("Loading new hashes");
         fetchFilenameFromHash();
-        saveFoundHashes();
+        //saveFoundHashes();
     }
     
     public void saveFoundHashes() throws IOException
@@ -124,12 +124,12 @@ public class TestFindHashStuff
                 
                 if (file.toString().endsWith(".json"))
                 {
-                    //grepFile(file, output, "((?:ASSETS|DATA|Character)/[0-9a-zA-Z_. /-]+)");
+                    grepFile(file, output, "((?:ASSETS|DATA|LEVELS|Character)/[0-9a-zA-Z_. /-]+)");
                 }
                 
                 if (file.toString().endsWith(".js"))
                 {
-                    grepFile(file, output, "((?:lol-)[0-9a-zA-Z_. /-]+)");
+                    // grepFile(file, output, "((?:lol-)[0-9a-zA-Z_. /-]+)");
                 }
                 
                 return FileVisitResult.CONTINUE;
@@ -169,6 +169,8 @@ public class TestFindHashStuff
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
+                
+                /*
                 if (file.toString().contains("Champions") ||
                     file.toString().contains("FINAL") ||
                     file.toString().contains("Shipping") ||
@@ -178,6 +180,7 @@ public class TestFindHashStuff
                 {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
+                */
                 
                 if (Files.isDirectory(file))
                 {
@@ -197,9 +200,14 @@ public class TestFindHashStuff
                 if (file.toString().contains("unknown"))
                 {
                     String name = file.toString();
+                    /*
                     name = name.substring(name.lastIndexOf("rcp"));
-                    name = name.replace("unknown\\", "") + "\n";
-                    //name = name.substring(0, name.lastIndexOf('.'));
+                    name = name.replace("unknown\\", "");
+                    */
+                    name = name.substring(name.lastIndexOf('\\') + 1);
+                    name = name.substring(0, name.lastIndexOf('.'));
+                    
+                    name = name + "\n";
                     Files.write(output, name.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
                 }
                 
