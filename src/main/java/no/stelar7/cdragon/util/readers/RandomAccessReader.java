@@ -41,9 +41,9 @@ public class RandomAccessReader implements AutoCloseable
         try
         {
             this.path = path;
-            RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r");
+            RandomAccessFile raf = new RandomAccessFile(path.toFile(), "rw");
             
-            this.buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
+            this.buffer = raf.getChannel().map(MapMode.PRIVATE, 0, raf.getChannel().size());
             this.buffer.order(order);
             raf.close();
         } catch (IOException e)
@@ -603,5 +603,38 @@ public class RandomAccessReader implements AutoCloseable
             }
             
         } while (true);
+    }
+    
+    public byte[] readBytesReverse(int length)
+    {
+        if (pos() < length)
+        {
+            length = pos();
+        }
+        
+        byte[] tempData = new byte[length];
+        buffer.position(buffer.position() - length);
+        buffer.get(tempData);
+        buffer.position(buffer.position() - length);
+        return Arrays.copyOf(tempData, length);
+    }
+    
+    public int readIntReverse()
+    {
+        ByteBuffer wrapped = ByteBuffer.wrap(readBytesReverse(4));
+        wrapped.order(ByteOrder.LITTLE_ENDIAN);
+        return wrapped.getInt();
+    }
+    
+    public long readLongReverse()
+    {
+        ByteBuffer wrapped = ByteBuffer.wrap(readBytesReverse(8));
+        wrapped.order(ByteOrder.LITTLE_ENDIAN);
+        return wrapped.getLong();
+    }
+    
+    public String readStringReverse(int length)
+    {
+        return new String(readBytesReverse(length), StandardCharsets.UTF_8);
     }
 }

@@ -1,0 +1,51 @@
+package no.stelar7.cdragon.types.rbun;
+
+import no.stelar7.cdragon.interfaces.Parseable;
+import no.stelar7.cdragon.util.handlers.HashHandler;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.ByteArray;
+
+import java.nio.ByteOrder;
+import java.nio.file.Path;
+import java.util.*;
+
+public class RBUNParser implements Parseable<RBUNFile>
+{
+    
+    @Override
+    public RBUNFile parse(Path path)
+    {
+        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public RBUNFile parse(ByteArray data)
+    {
+        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    @Override
+    public RBUNFile parse(RandomAccessReader raf)
+    {
+        raf.seek(raf.remaining());
+        RBUNFile file = new RBUNFile();
+        file.setMagic(raf.readStringReverse(4));
+        file.setVersion(raf.readIntReverse());
+        file.setChunkCount(raf.readIntReverse());
+        file.setBundleId(HashHandler.toHex(raf.readLongReverse()));
+        
+        List<RBUNChunkInfo> chunkInfos = new ArrayList<>();
+        for (int i = 0; i < file.getChunkCount(); i++)
+        {
+            RBUNChunkInfo ci = new RBUNChunkInfo();
+            ci.setCompressedSize(raf.readIntReverse());
+            ci.setUncompressedSize(raf.readIntReverse());
+            ci.setChunkId(HashHandler.toHex(raf.readLongReverse()));
+            chunkInfos.add(ci);
+        }
+        
+        file.setChunks(chunkInfos);
+        
+        return file;
+    }
+}

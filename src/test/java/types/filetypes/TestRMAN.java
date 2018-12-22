@@ -1,44 +1,71 @@
 package types.filetypes;
 
 import no.stelar7.cdragon.types.rman.*;
-import no.stelar7.cdragon.types.wad.WADParser;
-import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.*;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.*;
 
 public class TestRMAN
 {
-    // https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json
     
     @Test
     public void testRMAN() throws IOException
     {
         RMANParser parser = new RMANParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\DC9F6F78A04934D6.manifest");
-        System.out.println("Parsing: " + file.toString());
-        RMANFile data = parser.parse(file);
+        System.out.println("Downloading patcher manifest");
+        String patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+        String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
         
-        List<RMANFileBodyFile> files = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Map11.de")).collect(Collectors.toList());
+        System.out.println("Downloading bundle manifest");
+        String manifestUrl = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject().get("patch_url").getAsString();
         
+        System.out.println("Parsing Manifest");
+        RMANFile data = parser.parse(WebHandler.readBytes(manifestUrl));
         
-        RMANFileBodyFile testFile = files.get(0);
+        downloadAllBundles(data);
+        
+        //List<RMANFileBodyFile> files = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Map11.de")).collect(Collectors.toList());
+        //RMANFileBodyFile testFile = files.get(0);
         //downloadFileFullBundles(data, testFile);
-        downloadFileRanged(data, testFile);
+        //downloadFileRanged(data, testFile);
         
-        Path extractedPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/");
+        //Path extractedPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/");
         
-        WADParser wp = new WADParser();
-        WADFile   wf = wp.parse(extractedPath.resolve(testFile.getName()));
-        wf.extractFiles("levels", testFile.getName(), extractedPath);
+        //WADParser wp = new WADParser();
+        //WADFile   wf = wp.parse(extractedPath.resolve(testFile.getName()));
+        //wf.extractFiles("levels", testFile.getName(), extractedPath);
+    }
+    
+    private void downloadAllBundles(RMANFile manifest) throws IOException
+    {
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Files.createDirectories(bundleFolder);
+        
+        int count = 0;
+        System.out.println("Downloading bundles");
+        for (RMANFileBodyBundle bundle : manifest.getBody().getBundles())
+        {
+            String bundleId   = bundle.getBundleId();
+            Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
+            long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
+            
+            if (!WebHandler.shouldDownloadBundle(bundlePath, bundleSize))
+            {
+                System.out.println("Bundle already exists: " + bundleId + " (" + ++count + "/" + manifest.getBody().getBundles().size() + ")");
+                continue;
+            }
+            
+            System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + manifest.getBody().getBundles().size() + ")");
+            WebHandler.downloadBundle(bundleId, bundlePath);
+        }
     }
     
     private void downloadFileRanged(RMANFile manifest, RMANFileBodyFile file) throws IOException
@@ -121,8 +148,14 @@ public class TestRMAN
         {
             String bundleId   = bundle.getBundleId();
             Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
+            long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
+            
             System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + bundlesNeeded.size() + ")");
-            WebHandler.downloadBundle(bundleId, bundlePath);
+            if (!WebHandler.shouldDownloadBundle(bundlePath, bundleSize))
+            {
+                WebHandler.downloadBundle(bundleId, bundlePath);
+            }
+            
             extractAllChunks(bundle, bundleId, bundlePath);
         }
         
@@ -139,19 +172,26 @@ public class TestRMAN
         }
     }
     
-    private void extractAllChunks(RMANFileBodyBundle bundle, String bundleId, Path bundlePath) throws IOException
+    private void extractAllChunks(RMANFileBodyBundle bundle, String bundleId, Path bundlePath)
     {
-        Path chunkFolder = bundlePath.resolveSibling("chunks");
-        Files.createDirectories(chunkFolder);
-        RandomAccessReader raf = new RandomAccessReader(bundlePath, ByteOrder.LITTLE_ENDIAN);
-        
-        for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
+        try
         {
-            String chunkId = chunk.getChunkId();
             
-            byte[] compressedChunkData = raf.readBytes(chunk.getCompressedSize());
-            byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
-            Files.write(chunkFolder.resolve(chunkId + ".chunk"), uncompressedData);
+            Path chunkFolder = bundlePath.resolveSibling("chunks");
+            Files.createDirectories(chunkFolder);
+            RandomAccessReader raf = new RandomAccessReader(bundlePath, ByteOrder.LITTLE_ENDIAN);
+            
+            for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
+            {
+                String chunkId = chunk.getChunkId();
+                
+                byte[] compressedChunkData = raf.readBytes(chunk.getCompressedSize());
+                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
+                Files.write(chunkFolder.resolve(chunkId + ".chunk"), uncompressedData);
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
         }
     }
 }

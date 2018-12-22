@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.util.handlers;
 
+import no.stelar7.cdragon.types.rbun.RBUNParser;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
@@ -30,14 +31,31 @@ public class WebHandler
         return false;
     }
     
+    public static boolean shouldDownloadBundle(Path output, long bundleSize)
+    {
+        try
+        {
+            if (Files.exists(output))
+            {
+                RBUNParser parser   = new RBUNParser();
+                int        metaSize = parser.parse(output).getMetadataSize();
+                
+                if (Files.size(output) == (bundleSize + metaSize))
+                {
+                    return false;
+                }
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return true;
+    }
+    
     public static void downloadBundle(String bundleId, Path output)
     {
         // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
-        if (Files.exists(output))
-        {
-            return;
-        }
-        
         downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
     
