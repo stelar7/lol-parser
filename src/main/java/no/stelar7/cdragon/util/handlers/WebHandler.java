@@ -5,6 +5,7 @@ import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
 import java.net.*;
+import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -31,16 +32,23 @@ public class WebHandler
         return false;
     }
     
-    public static boolean shouldDownloadBundle(Path output, long bundleSize)
+    public static boolean shouldDownloadBundle(String bundleId, Path output, long bundleSize)
     {
         try
         {
             if (Files.exists(output))
             {
-                RBUNParser parser   = new RBUNParser();
-                int        metaSize = parser.parse(output).getMetadataSize();
-                
-                if (Files.size(output) == (bundleSize + metaSize))
+                try
+                {
+                    RBUNParser parser   = new RBUNParser();
+                    int        metaSize = parser.parse(output).getMetadataSize();
+                    
+                    if (Files.size(output) == (bundleSize + metaSize))
+                    {
+                        //System.out.println("Bundle " + bundleId + " already exists");
+                        return false;
+                    }
+                } catch (BufferUnderflowException b)
                 {
                     return false;
                 }
@@ -56,6 +64,7 @@ public class WebHandler
     public static void downloadBundle(String bundleId, Path output)
     {
         // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
+        //System.out.println("Downloading bundle " + bundleId);
         downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
     
@@ -69,10 +78,9 @@ public class WebHandler
             int          read;
             final byte[] buffer = new byte[4096];
             
-            final URLConnection uc       = new URL(url.replace(" ", "%20")).openConnection();
-            long                fileSize = uc.getContentLengthLong();
-            
-            try (InputStream in = uc.getInputStream(); OutputStream out = new FileOutputStream(output.toFile()))
+            final URLConnection uc = new URL(url.replace(" ", "%20")).openConnection();
+            try (InputStream in = uc.getInputStream();
+                 OutputStream out = new FileOutputStream(output.toFile()))
             {
                 while ((read = in.read(buffer)) != -1)
                 {
@@ -82,15 +90,8 @@ public class WebHandler
             } catch (Exception e)
             {
                 e.printStackTrace();
-                downloadFile(output, url);
-            }
-            
-            long localSize = Files.size(output);
-            
-            if (localSize < fileSize)
-            {
-                System.out.format("files are different size, trying again. %s != %s%n", fileSize, localSize);
-                downloadFile(output, url);
+                output.toFile().deleteOnExit();
+                System.err.println("Failed to download file!");
             }
         } catch (IOException e)
         {

@@ -183,7 +183,7 @@ public class RMANFileBodyFile
         List<String> stringChunkIds = new ArrayList<>();
         for (Long chunkId : chunkIds)
         {
-            stringChunkIds.add(HashHandler.toHex(chunkId));
+            stringChunkIds.add(HashHandler.toHex(chunkId, 16));
         }
         this.chunkIds = stringChunkIds;
     }

@@ -230,7 +230,7 @@ public class RMANParser implements Parseable<RMANFile>
             
             bundle.setOffsetTableOffset(raf.readInt());
             bundle.setHeaderSize(raf.readInt());
-            bundle.setBundleId(HashHandler.toHex(raf.readLong()));
+            bundle.setBundleId(HashHandler.toHex(raf.readLong(), 16));
             if (bundle.getHeaderSize() > 12)
             {
                 bundle.setSkipped(raf.readBytes(bundle.getHeaderSize() - 12));
@@ -248,7 +248,7 @@ public class RMANParser implements Parseable<RMANFile>
                 chunk.setOffsetTableOffset(raf.readInt());
                 chunk.setCompressedSize(raf.readInt());
                 chunk.setUncompressedSize(raf.readInt());
-                chunk.setChunkId(HashHandler.toHex(raf.readLong()));
+                chunk.setChunkId(HashHandler.toHex(raf.readLong(), 16));
                 chunks.add(chunk);
                 
                 raf.seek(nextChunkOffset);

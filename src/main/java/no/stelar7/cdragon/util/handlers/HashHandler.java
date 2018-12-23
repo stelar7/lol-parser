@@ -39,23 +39,29 @@ public class HashHandler
             hexChars[j * 2] = hexArray[v >>> 4];
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
+        
         return new String(hexChars);
     }
     
-    public static String toHex(String str)
+    public static String toHex(String str, int minLength)
     {
         return toHex(str.getBytes(StandardCharsets.UTF_8));
     }
     
-    public static String toHex(Long str)
+    public static String toHex(Long str, int minLength)
     {
-        String pre = Long.toHexString(str).toUpperCase(Locale.ENGLISH);
+        StringBuilder pre = new StringBuilder(Long.toHexString(str).toUpperCase(Locale.ENGLISH));
         if (pre.length() % 2 != 0)
         {
-            pre = "0" + pre;
+            pre.insert(0, "0");
         }
         
-        return pre;
+        while (pre.length() < minLength)
+        {
+            pre.insert(0, "0");
+        }
+        
+        return pre.toString();
     }
     
     public static String computeXXHash64(String text)

@@ -32,7 +32,7 @@ public class RBUNParser implements Parseable<RBUNFile>
         file.setMagic(raf.readStringReverse(4));
         file.setVersion(raf.readIntReverse());
         file.setChunkCount(raf.readIntReverse());
-        file.setBundleId(HashHandler.toHex(raf.readLongReverse()));
+        file.setBundleId(HashHandler.toHex(raf.readLongReverse(), 16));
         
         List<RBUNChunkInfo> chunkInfos = new ArrayList<>();
         for (int i = 0; i < file.getChunkCount(); i++)
@@ -40,7 +40,7 @@ public class RBUNParser implements Parseable<RBUNFile>
             RBUNChunkInfo ci = new RBUNChunkInfo();
             ci.setCompressedSize(raf.readIntReverse());
             ci.setUncompressedSize(raf.readIntReverse());
-            ci.setChunkId(HashHandler.toHex(raf.readLongReverse()));
+            ci.setChunkId(HashHandler.toHex(raf.readLongReverse(), 16));
             chunkInfos.add(ci);
         }
         

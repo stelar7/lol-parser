@@ -10,7 +10,6 @@ import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.atomic.*;
 
 public class TestRMAN
 {
@@ -51,15 +50,23 @@ public class TestRMAN
         
         int count = 0;
         System.out.println("Downloading bundles");
+        
+        /*
+        manifest.getBody()
+                .getBundles()
+                .parallelStream()
+                .filter(b -> WebHandler.shouldDownloadBundle(b.getBundleId(), bundleFolder.resolve(b.getBundleId() + ".bundle"), b.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum()))
+                .forEach(b -> WebHandler.downloadBundle(b.getBundleId(), bundleFolder.resolve(b.getBundleId() + ".bundle")));
+        */
+        
         for (RMANFileBodyBundle bundle : manifest.getBody().getBundles())
         {
             String bundleId   = bundle.getBundleId();
             Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
             long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             
-            if (!WebHandler.shouldDownloadBundle(bundlePath, bundleSize))
+            if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
-                System.out.println("Bundle already exists: " + bundleId + " (" + ++count + "/" + manifest.getBody().getBundles().size() + ")");
                 continue;
             }
             
@@ -151,7 +158,7 @@ public class TestRMAN
             long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             
             System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + bundlesNeeded.size() + ")");
-            if (!WebHandler.shouldDownloadBundle(bundlePath, bundleSize))
+            if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
                 WebHandler.downloadBundle(bundleId, bundlePath);
             }
