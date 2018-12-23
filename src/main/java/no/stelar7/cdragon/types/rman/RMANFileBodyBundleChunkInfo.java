@@ -6,10 +6,10 @@ public class RMANFileBodyBundleChunkInfo
 {
     private String bundleId;
     private String chunkId;
-    private long   offsetToChunk;
-    private long   compressedSize;
+    private int    offsetToChunk;
+    private int    compressedSize;
     
-    public RMANFileBodyBundleChunkInfo(String bundleId, String chunkId, long offsetToChunk, long compressedSize)
+    public RMANFileBodyBundleChunkInfo(String bundleId, String chunkId, int offsetToChunk, int compressedSize)
     {
         this.bundleId = bundleId;
         this.chunkId = chunkId;
@@ -37,22 +37,22 @@ public class RMANFileBodyBundleChunkInfo
         this.chunkId = chunkId;
     }
     
-    public long getOffsetToChunk()
+    public int getOffsetToChunk()
     {
         return offsetToChunk;
     }
     
-    public void setOffsetToChunk(long offsetToChunk)
+    public void setOffsetToChunk(int offsetToChunk)
     {
         this.offsetToChunk = offsetToChunk;
     }
     
-    public long getCompressedSize()
+    public int getCompressedSize()
     {
         return compressedSize;
     }
     
-    public void setCompressedSize(long compressedSize)
+    public void setCompressedSize(int compressedSize)
     {
         this.compressedSize = compressedSize;
     }

@@ -23,6 +23,22 @@ public class RMANFileBodyFile
     private int          unknown3;
     private List<String> chunkIds;
     
+    public String getFullFilepath(RMANFile manifest)
+    {
+        StringBuilder         output = new StringBuilder(getName());
+        RMANFileBodyDirectory dir    = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == getDirectoryId()).findAny().get();
+        
+        while (dir.getDirectoryId() != 0)
+        {
+            output.insert(0, dir.getName() + "/");
+            
+            RMANFileBodyDirectory finalDir = dir;
+            dir = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == finalDir.getParentId()).findAny().get();
+        }
+        
+        return output.toString();
+    }
+    
     public int getOffset()
     {
         return offset;

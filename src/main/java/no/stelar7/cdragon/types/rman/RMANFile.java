@@ -64,7 +64,7 @@ public class RMANFile
         chunksById = new HashMap<>();
         for (RMANFileBodyBundle bundle : getBody().getBundles())
         {
-            long currentIndex = 0;
+            int currentIndex = 0;
             for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
             {
                 RMANFileBodyBundleChunkInfo chunkInfo = new RMANFileBodyBundleChunkInfo(bundle.getBundleId(), chunk.getChunkId(), currentIndex, chunk.getCompressedSize());
