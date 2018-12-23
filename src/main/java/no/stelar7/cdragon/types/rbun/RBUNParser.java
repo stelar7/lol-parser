@@ -45,7 +45,7 @@ public class RBUNParser implements Parseable<RBUNFile>
         }
         
         file.setChunks(chunkInfos);
-        
+        raf.close();
         return file;
     }
 }

@@ -42,7 +42,6 @@ public class WebHandler
                 {
                     RBUNParser parser   = new RBUNParser();
                     int        metaSize = parser.parse(output).getMetadataSize();
-                    
                     if (Files.size(output) == (bundleSize + metaSize))
                     {
                         //System.out.println("Bundle " + bundleId + " already exists");
@@ -50,7 +49,7 @@ public class WebHandler
                     }
                 } catch (BufferUnderflowException b)
                 {
-                    return false;
+                    return true;
                 }
             }
         } catch (IOException e)
@@ -75,10 +74,9 @@ public class WebHandler
         {
             Files.createDirectories(output.getParent());
             
-            int          read;
-            final byte[] buffer = new byte[4096];
-            
-            final URLConnection uc = new URL(url.replace(" ", "%20")).openConnection();
+            int                 read;
+            final byte[]        buffer = new byte[4096];
+            final URLConnection uc     = new URL(url.replace(" ", "%20")).openConnection();
             try (InputStream in = uc.getInputStream();
                  OutputStream out = new FileOutputStream(output.toFile()))
             {

@@ -10,12 +10,13 @@ import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class TestRMAN
 {
     
     @Test
-    public void testRMAN() throws IOException
+    public void testRMAN() throws IOException, ExecutionException, InterruptedException
     {
         RMANParser parser = new RMANParser();
         
@@ -31,7 +32,13 @@ public class TestRMAN
         
         downloadAllBundles(data);
         
-        data.getBody().getFiles().forEach(f -> extractFile(data, f));
+        /*
+        RMANFileBodyFile file = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Yorick.cs_CZ")).findAny().get();
+        extractFile(data, file);
+        */
+        ForkJoinPool forkJoinPool = new ForkJoinPool(5);
+        forkJoinPool.submit(() -> data.getBody().getFiles().parallelStream().forEach(f -> extractFile(data, f))).get();
+        forkJoinPool.shutdown();
         
         //List<RMANFileBodyFile> files = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Map11.de")).collect(Collectors.toList());
         //RMANFileBodyFile testFile = files.get(0);
@@ -70,6 +77,11 @@ public class TestRMAN
             if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
                 continue;
+            }
+            
+            if (Files.exists(bundlePath))
+            {
+                bundlePath.toFile().delete();
             }
             
             System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + manifest.getBody().getBundles().size() + ")");

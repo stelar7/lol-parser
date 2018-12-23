@@ -1,16 +1,31 @@
 package no.stelar7.cdragon.types.rman;
 
-import no.stelar7.cdragon.util.types.Triplet;
-
 import java.util.*;
 
 public class RMANFile
 {
     private RMANFileHeader header;
+    private RMANFileBody   body;
     private byte[]         compressedBody;
     private byte[]         signature;
     
-    private RMANFileBody body;
+    private Map<String, RMANFileBodyBundleChunkInfo> chunksById = null;
+    
+    public void buildChunkMap()
+    {
+        chunksById = new HashMap<>();
+        for (RMANFileBodyBundle bundle : getBody().getBundles())
+        {
+            int currentIndex = 0;
+            for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
+            {
+                RMANFileBodyBundleChunkInfo chunkInfo = new RMANFileBodyBundleChunkInfo(bundle.getBundleId(), chunk.getChunkId(), currentIndex, chunk.getCompressedSize());
+                chunksById.put(chunk.getChunkId(), chunkInfo);
+                
+                currentIndex += chunk.getCompressedSize();
+            }
+        }
+    }
     
     public RMANFileHeader getHeader()
     {
@@ -52,28 +67,8 @@ public class RMANFile
         this.body = body;
     }
     
-    private Map<String, RMANFileBodyBundleChunkInfo> chunksById = null;
-    
     public Map<String, RMANFileBodyBundleChunkInfo> getChunkMap()
     {
-        if (chunksById != null)
-        {
-            return chunksById;
-        }
-        
-        chunksById = new HashMap<>();
-        for (RMANFileBodyBundle bundle : getBody().getBundles())
-        {
-            int currentIndex = 0;
-            for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
-            {
-                RMANFileBodyBundleChunkInfo chunkInfo = new RMANFileBodyBundleChunkInfo(bundle.getBundleId(), chunk.getChunkId(), currentIndex, chunk.getCompressedSize());
-                chunksById.put(chunk.getChunkId(), chunkInfo);
-                
-                currentIndex += chunk.getCompressedSize();
-            }
-        }
-        
         return chunksById;
     }
     

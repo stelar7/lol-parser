@@ -39,13 +39,13 @@ public class RMANParser implements Parseable<RMANFile>
         }
         
         file.setBody(parseCompressedBody(file));
-        
+        file.buildChunkMap();
         return file;
     }
     
     private RMANFileBody parseCompressedBody(RMANFile file)
     {
-        byte[]             uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody());
+        byte[]             uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody(), file.getHeader().getDecompressedLength());
         RandomAccessReader raf          = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
         RMANFileBody       body         = new RMANFileBody();
         body.setHeaderOffset(raf.readInt());

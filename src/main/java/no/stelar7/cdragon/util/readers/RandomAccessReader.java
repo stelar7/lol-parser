@@ -41,9 +41,9 @@ public class RandomAccessReader implements AutoCloseable
         try
         {
             this.path = path;
-            RandomAccessFile raf = new RandomAccessFile(path.toFile(), "rw");
+            RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r");
             
-            this.buffer = raf.getChannel().map(MapMode.PRIVATE, 0, raf.getChannel().size());
+            this.buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
             this.buffer.order(order);
             raf.close();
         } catch (IOException e)

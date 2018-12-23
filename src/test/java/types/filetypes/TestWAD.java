@@ -116,44 +116,6 @@ public class TestWAD
              });
     }
     
-    private void extractDDS(Path from) throws IOException
-    {
-        DDSParser parser = new DDSParser();
-        Files.walkFileTree(from, new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-            {
-                if (file.getFileName().toString().endsWith(".dds"))
-                {
-                    BufferedImage img    = parser.parse(file);
-                    Path          output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
-                    ImageIO.write(img, "png", output.toFile());
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-    }
-    
-    private void extractBins(Path from) throws IOException
-    {
-        BINParser parser = new BINParser();
-        Files.walkFileTree(from, new SimpleFileVisitor<>()
-        {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-            {
-                if (file.getFileName().toString().endsWith(".bin"))
-                {
-                    BINFile parsed = parser.parse(file);
-                    Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
-                    Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-    }
-    
     public void downloadPBEAssets(String lang)
     {
         PackagemanifestParser pparser = new PackagemanifestParser();
@@ -204,6 +166,49 @@ public class TestWAD
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
         extractWads(rito, extractPath);
+    }
+    
+    @Test
+    public void testCDragonWAD() throws Exception
+    {
+        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
+        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
+        extractWads(rito, extractPath);
+        
+        final BINParser bp = new BINParser();
+        final DDSParser dp = new DDSParser();
+        
+        System.out.println("Transforming bin files to json");
+        Files.walk(extractPath)
+             .filter(a -> a.getFileName().toString().endsWith(".bin"))
+             .forEach(file -> {
+                 try
+                 {
+                     BINFile parsed = bp.parse(file);
+                     Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                     Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
+                     file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     e.printStackTrace();
+                 }
+             });
+        
+        System.out.println("Transforming dds files to png");
+        Files.walk(extractPath)
+             .filter(a -> a.getFileName().toString().endsWith(".dds"))
+             .forEach(file -> {
+                 try
+                 {
+                     BufferedImage img    = dp.parse(file);
+                     Path          output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
+                     ImageIO.write(img, "png", output.toFile());
+                     file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     e.printStackTrace();
+                 }
+             });
     }
     
     private void extractWads(Path from, Path to) throws IOException
