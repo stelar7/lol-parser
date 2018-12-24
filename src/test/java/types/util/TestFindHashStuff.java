@@ -112,7 +112,7 @@ public class TestFindHashStuff
     {
         Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile");
         Files.deleteIfExists(output);
-        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe/extracted"), new SimpleFileVisitor<>()
+        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -164,13 +164,12 @@ public class TestFindHashStuff
         Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("unknownFiles");
         Files.deleteIfExists(output);
         
-        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe/extracted"), new SimpleFileVisitor<>()
+        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
                 
-                /*
                 if (file.toString().contains("Champions") ||
                     file.toString().contains("FINAL") ||
                     file.toString().contains("Shipping") ||
@@ -178,9 +177,8 @@ public class TestFindHashStuff
                     file.toString().contains("Localized")
                 )
                 {
-                    return FileVisitResult.SKIP_SUBTREE;
+                    //return FileVisitResult.SKIP_SUBTREE;
                 }
-                */
                 
                 if (Files.isDirectory(file))
                 {
@@ -200,10 +198,6 @@ public class TestFindHashStuff
                 if (file.toString().contains("unknown"))
                 {
                     String name = file.toString();
-                    /*
-                    name = name.substring(name.lastIndexOf("rcp"));
-                    name = name.replace("unknown\\", "");
-                    */
                     name = name.substring(name.lastIndexOf('\\') + 1);
                     name = name.substring(0, name.lastIndexOf('.'));
                     
