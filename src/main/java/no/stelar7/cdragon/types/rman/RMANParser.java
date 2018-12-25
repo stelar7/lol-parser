@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.types.rman;
 
 import no.stelar7.cdragon.interfaces.Parseable;
+import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;

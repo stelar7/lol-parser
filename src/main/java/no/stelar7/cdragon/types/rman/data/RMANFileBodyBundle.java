@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.types.rman;
+package no.stelar7.cdragon.types.rman.data;
 
 import java.util.*;
 

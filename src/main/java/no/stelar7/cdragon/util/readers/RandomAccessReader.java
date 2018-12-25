@@ -637,4 +637,38 @@ public class RandomAccessReader implements AutoCloseable
     {
         return new String(readBytesReverse(length), StandardCharsets.UTF_8);
     }
+    
+    public BoundingBox readBoundingBox()
+    {
+        BoundingBox box = new BoundingBox();
+        box.setMin(readVec3F());
+        box.setMax(readVec3F());
+        return box;
+    }
+    
+    public Matrix4f readMatrix3x3()
+    {
+        Matrix4f m = new Matrix4f();
+        m.m00(readFloat());
+        m.m01(readFloat());
+        m.m02(readFloat());
+        m.m03(0);
+        
+        m.m10(readFloat());
+        m.m11(readFloat());
+        m.m12(readFloat());
+        m.m13(0);
+        
+        m.m20(readFloat());
+        m.m21(readFloat());
+        m.m22(readFloat());
+        m.m23(0);
+        
+        m.m30(0);
+        m.m31(0);
+        m.m32(0);
+        m.m33(1);
+        
+        return m;
+    }
 }
