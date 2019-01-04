@@ -6,6 +6,7 @@ import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
+import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
@@ -155,8 +156,20 @@ public class TestWAD
     public void testLocal()
     {
         WADParser parser = new WADParser();
-        WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/Aatrox.cs_CZ.wad.client"));
-        parsed.extractFiles("levels", "Map11.de_DE.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("extracted"));
+        //WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/Aatrox.cs_CZ.wad.client"));
+        //WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ahri.wad.client"));
+        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("Global.wad.client"));
+        
+        /*
+        parsed.getContentHeaders()
+              .stream()
+              .filter(a -> a instanceof WADContentHeaderV2)
+              .filter(a -> ((WADContentHeaderV2) a).isDuplicate())
+              .map(WADContentHeaderV1::getPathHash)
+              .map(a -> String.format("%016X", a).toLowerCase(Locale.ENGLISH))
+              .forEach(System.out::println);
+        */
+        parsed.extractFiles("Global", "Global.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("global"));
     }
     
     @Test

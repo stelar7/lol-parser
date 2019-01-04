@@ -8,6 +8,8 @@
     "098614f9b51220cf": "plugins/rcp-fe-lol-reward-notifications/euw/en_gb/trans.json",
     "39aca08a68a49cfb": "plugins/rcp-fe-lol-reward-notifications/global/cs_cz/trans.json",
     "dab804f7056c6af9": "plugins/rcp-fe-lol-reward-notifications/global/de_de/trans.json",
+    "f31ccecce51269c2": "plugins/rcp-fe-lol-reward-notifications/global/default/audio/sfx-celebrate-receive-chest.ogg",
+    "38c1eea83616c820": "plugins/rcp-fe-lol-reward-notifications/global/default/audio/sfx-celebrate-receive-key.ogg",
     "cbe7a87a9f3c92a3": "plugins/rcp-fe-lol-reward-notifications/global/default/bundle.js",
     "37c30771cb406813": "plugins/rcp-fe-lol-reward-notifications/global/default/bundle.js",
     "c0d1a74d59799bba": "plugins/rcp-fe-lol-reward-notifications/global/default/description.json",
@@ -23,6 +25,10 @@
     "34839b5791247439": "plugins/rcp-fe-lol-reward-notifications/global/default/index.html",
     "cf928629424dbb5c": "plugins/rcp-fe-lol-reward-notifications/global/default/license.json",
     "e0d51a7d96d23e34": "plugins/rcp-fe-lol-reward-notifications/global/default/trans.json",
+    "7ea973547ab2ccee": "plugins/rcp-fe-lol-reward-notifications/global/default/videos/celebration_chestgeneric_intro.webm",
+    "ac03d0358f9bcfd8": "plugins/rcp-fe-lol-reward-notifications/global/default/videos/celebration_chestgeneric_loop.webm",
+    "752fb663820fe659": "plugins/rcp-fe-lol-reward-notifications/global/default/videos/celebration_keyfragment_intro.webm",
+    "cfb68d2c5388129c": "plugins/rcp-fe-lol-reward-notifications/global/default/videos/celebration_keyfragment_loop.webm",
     "1c3ad8e1394117bd": "plugins/rcp-fe-lol-reward-notifications/global/el_gr/trans.json",
     "b7b5754f6b98acd4": "plugins/rcp-fe-lol-reward-notifications/global/en_au/trans.json",
     "8ca175273f9f75a4": "plugins/rcp-fe-lol-reward-notifications/global/en_gb/bundle.js",
@@ -54,6 +60,8 @@
     "f4c2442e4a8529fc": "plugins/rcp-fe-lol-reward-notifications/global/zh_cn/images/celebration-key-fragment.png",
     "1341c60068b39a63": "plugins/rcp-fe-lol-reward-notifications/global/zh_cn/images/celebration-key.png",
     "073f2864812e8442": "plugins/rcp-fe-lol-reward-notifications/global/zh_cn/trans.json",
+    "6f6cbd6a297d332d": "plugins/rcp-fe-lol-reward-notifications/global/zh_cn/videos/celebration_chestgeneric_intro.webm",
+    "6fff9c7a81bc2925": "plugins/rcp-fe-lol-reward-notifications/global/zh_cn/videos/celebration_keyfragment_intro.webm",
     "2049be0cf6d6c577": "plugins/rcp-fe-lol-reward-notifications/global/zh_my/trans.json",
     "872d88feda3d3ebc": "plugins/rcp-fe-lol-reward-notifications/global/zh_tw/trans.json"
 }

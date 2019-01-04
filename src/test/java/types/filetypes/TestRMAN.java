@@ -38,7 +38,7 @@ public class TestRMAN
         extractFile(data, file);
         */
         ForkJoinPool forkJoinPool = new ForkJoinPool(5);
-        forkJoinPool.submit(() -> data.getBody().getFiles().parallelStream().forEach(f -> extractFile(data, f))).get();
+       // forkJoinPool.submit(() -> data.getBody().getFiles().parallelStream().forEach(f -> extractFile(data, f))).get();
         forkJoinPool.shutdown();
         
         //List<RMANFileBodyFile> files = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Map11.de")).collect(Collectors.toList());

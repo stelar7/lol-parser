@@ -17,10 +17,13 @@ public class TestSKN
     {
         SKNParser parser = new SKNParser();
         
-        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("temp\\Champions\\assets\\characters\\aatrox\\skins\\base");
-        SKNFile skn  = parser.parse(path.resolve("aatrox.skn"));
+        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon");
+        SKNFile skn  = parser.parse(path.resolve("illaoi.skn"));
         
-        Files.write(Paths.get("test.obj"), skn.toOBJ(skn.getMaterials().get(0)).getBytes(StandardCharsets.UTF_8));
+        for (int i = 0; i < skn.getMaterials().size(); i++)
+        {
+            Files.write(path.resolve("illaoi" + i + ".obj"), skn.toOBJ(skn.getMaterials().get(i)).getBytes(StandardCharsets.UTF_8));
+        }
         
         System.out.println();
     }

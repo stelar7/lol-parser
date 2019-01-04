@@ -26,7 +26,7 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/skin0.bin");
+        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/skin14.bin");
         /*
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
         
