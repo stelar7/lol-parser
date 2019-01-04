@@ -9,7 +9,8 @@ public class RMANFile
     private byte[]         compressedBody;
     private byte[]         signature;
     
-    private Map<String, RMANFileBodyBundleChunkInfo> chunksById = null;
+    private Map<String, RMANFileBodyBundleChunkInfo> chunksById  = null;
+    private Map<String, RMANFileBodyBundle>          bundlesById = null;
     
     public void buildChunkMap()
     {
@@ -24,6 +25,15 @@ public class RMANFile
                 
                 currentIndex += chunk.getCompressedSize();
             }
+        }
+    }
+    
+    public void buildBundleMap()
+    {
+        bundlesById = new HashMap<>();
+        for (RMANFileBodyBundle bundle : getBody().getBundles())
+        {
+            bundlesById.put(bundle.getBundleId(), bundle);
         }
     }
     
@@ -70,6 +80,11 @@ public class RMANFile
     public Map<String, RMANFileBodyBundleChunkInfo> getChunkMap()
     {
         return chunksById;
+    }
+    
+    public Map<String, RMANFileBodyBundle> getBundleMap()
+    {
+        return bundlesById;
     }
     
     @Override
