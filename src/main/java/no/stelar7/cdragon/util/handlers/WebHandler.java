@@ -88,8 +88,9 @@ public class WebHandler
             } catch (Exception e)
             {
                 e.printStackTrace();
-                output.toFile().deleteOnExit();
-                System.err.println("Failed to download file!");
+                output.toFile().delete();
+                System.err.println("Failed to download file! Please delete the file if it exists!");
+                System.exit(0);
             }
         } catch (IOException e)
         {

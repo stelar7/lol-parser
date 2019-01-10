@@ -28,7 +28,7 @@ public class TestRMAN
         String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
         
         System.out.println("Downloading bundle manifest");
-        String manifestUrl = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject().get("patch_url").getAsString();
+        String manifestUrl = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject().get("game_patch_url").getAsString();
         
         System.out.println("Parsing Manifest");
         RMANFile data = parser.parse(WebHandler.readBytes(manifestUrl));
@@ -112,10 +112,10 @@ public class TestRMAN
             Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
             long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             
-            System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + bundles.size() + ")");
             
             if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
+                System.out.println("Skipping bundle: " + bundleId + " (" + ++count + "/" + bundles.size() + ")");
                 continue;
             }
             
@@ -124,6 +124,7 @@ public class TestRMAN
                 bundlePath.toFile().delete();
             }
             
+            System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + bundles.size() + ")");
             WebHandler.downloadBundle(bundleId, bundlePath);
         }
     }

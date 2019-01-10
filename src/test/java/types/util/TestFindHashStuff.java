@@ -26,7 +26,7 @@ public class TestFindHashStuff
         fetchHashesForUnknownFiles();
         System.out.println("Loading new hashes");
         fetchFilenameFromHash();
-        //saveFoundHashes();
+        saveFoundHashes();
     }
     
     public void saveFoundHashes() throws IOException
