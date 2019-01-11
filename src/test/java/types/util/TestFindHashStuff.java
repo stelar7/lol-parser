@@ -18,15 +18,16 @@ public class TestFindHashStuff
     @Test
     public void checkNewFiles() throws IOException
     {
+        Path binPath      = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Path hashFile     = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile.txt");
         Path unknownFiles = UtilHandler.DOWNLOADS_FOLDER.resolve("unknownFiles.txt");
         Path newHashes    = UtilHandler.DOWNLOADS_FOLDER.resolve("newHashes.txt");
         Path fixedHashes  = UtilHandler.DOWNLOADS_FOLDER.resolve("fixedHashes.json");
         
         System.out.println("Checking bin files for strings");
-        grepFiles(hashFile);
+        grepFiles(hashFile, binPath);
         System.out.println("Loading unknown files");
-        fetchUnknownFiles(unknownFiles);
+        fetchUnknownFiles(unknownFiles, binPath);
         System.out.println("Comparing hashes");
         fetchHashesForUnknownFiles(newHashes, unknownFiles, hashFile);
         System.out.println("Loading new hashes");
@@ -108,10 +109,10 @@ public class TestFindHashStuff
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
-    public void grepFiles(Path output) throws IOException
+    public void grepFiles(Path output, Path binPath) throws IOException
     {
         Files.deleteIfExists(output);
-        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), new SimpleFileVisitor<>()
+        Files.walkFileTree(binPath, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -156,10 +157,10 @@ public class TestFindHashStuff
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
-    public void fetchUnknownFiles(Path output) throws IOException
+    public void fetchUnknownFiles(Path output, Path binPath) throws IOException
     {
         Files.deleteIfExists(output);
-        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), new SimpleFileVisitor<>()
+        Files.walkFileTree(binPath, new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
