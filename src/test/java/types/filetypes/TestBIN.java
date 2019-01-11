@@ -4,7 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
-import no.stelar7.cdragon.types.bin.data.BINFile;
+import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
@@ -474,6 +474,18 @@ public class TestBIN
         });
         
         System.out.println(UtilHandler.getGson().toJson(typeMap));
+    }
+    
+    @Test
+    public void generateUnknownBinhashList() throws IOException
+    {
+        final BINParser bp = new BINParser();
+        Files.walk(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"))
+             .filter(a -> a.getFileName().toString().endsWith(".bin"))
+             .forEach(bp::parse);
+        
+        String output = String.join("\n", BINParser.hashes);
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("binHashes.txt"), output.getBytes(StandardCharsets.UTF_8));
     }
     
 }

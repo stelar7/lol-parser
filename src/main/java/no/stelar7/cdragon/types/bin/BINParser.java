@@ -8,10 +8,11 @@ import no.stelar7.cdragon.util.types.*;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
+import java.util.*;
 
 public class BINParser implements Parseable<BINFile>
 {
-    
+    public static Set<String> hashes = new HashSet<>();
     
     public BINFile parse(RandomAccessReader raf)
     {
@@ -47,6 +48,7 @@ public class BINParser implements Parseable<BINFile>
             int lengthCheck = raf.pos() + Integer.BYTES;
             entry.setLenght(raf.readInt());
             entry.setHash(HashHandler.getBINHash(raf.readInt()));
+            hashes.add(entry.getHash());
             entry.setValueCount(raf.readShort());
             
             for (int j = 0; j < entry.getValueCount(); j++)
@@ -69,6 +71,7 @@ public class BINParser implements Parseable<BINFile>
         BINValue value = new BINValue();
         
         value.setHash(HashHandler.getBINHash(raf.readInt()));
+        hashes.add(value.getHash());
         value.setType(BINValueType.valueOf(raf.readByte()));
         value.setValue(readByType(value.getType(), raf));
         
@@ -133,6 +136,7 @@ public class BINParser implements Parseable<BINFile>
                 BINStruct bs = new BINStruct();
                 
                 bs.setHash(HashHandler.getBINHash(raf.readInt()));
+                hashes.add(bs.getHash());
                 
                 if (bs.getHash().equalsIgnoreCase("0"))
                 {
