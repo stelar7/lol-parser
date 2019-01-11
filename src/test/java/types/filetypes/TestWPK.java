@@ -47,7 +47,7 @@ public class TestWPK
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
                 if (file.toString().endsWith(".wpk"))
                 {

@@ -64,7 +64,7 @@ public class RMANFileBodyBundleChunk
         return offsetTableOffset == that.offsetTableOffset &&
                compressedSize == that.compressedSize &&
                uncompressedSize == that.uncompressedSize &&
-               chunkId == that.chunkId;
+               Objects.equals(chunkId, that.chunkId);
     }
     
     @Override

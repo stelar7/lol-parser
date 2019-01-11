@@ -6,7 +6,6 @@ import no.stelar7.cdragon.types.ogg.OGGParser;
 import no.stelar7.cdragon.types.ogg.data.OGGStream;
 import no.stelar7.cdragon.types.wem.WEMParser;
 import no.stelar7.cdragon.types.wem.data.WEMFile;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.types.ByteArray;
 import org.junit.Test;
 

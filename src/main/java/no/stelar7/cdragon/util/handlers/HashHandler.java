@@ -50,17 +50,11 @@ public class HashHandler
     
     public static String toHex(Long str, int minLength)
     {
-        StringBuilder pre = new StringBuilder(Long.toHexString(str).toUpperCase(Locale.ENGLISH));
-        if (pre.length() % 2 != 0)
-        {
-            pre.insert(0, "0");
-        }
-        
+        StringBuilder pre = new StringBuilder(String.format("%016X", str).toLowerCase(Locale.ENGLISH));
         while (pre.length() < minLength)
         {
             pre.insert(0, "0");
         }
-        
         return pre.toString();
     }
     
@@ -316,7 +310,7 @@ public class HashHandler
         return value.intValue();
     }
     
-    public static Map<String, String> all;
+    private static Map<String, String> all;
     
     @SuppressWarnings("unchecked")
     public static Map<String, String> loadAllWadHashes()

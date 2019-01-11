@@ -204,7 +204,7 @@ public class WADParser implements Parseable<WADFile>
             for (int i = 0; i < fileCount; i++)
             {
                 WADContentHeaderV1 header = new WADContentHeaderV1();
-                header.setPathHash(raf.readLong());
+                header.setPathHash(HashHandler.toHex(raf.readLong(), 16));
                 header.setOffset(raf.readInt());
                 header.setCompressedFileSize(raf.readInt());
                 header.setFileSize(raf.readInt());
@@ -230,8 +230,7 @@ public class WADParser implements Parseable<WADFile>
                 
                 if (header.getCompressionType() == WADCompressionType.REFERENCE)
                 {
-                    System.out.println();
-                    System.out.println(raf.readString(raf.readInt()));
+                    System.out.println("Found file reference in " + raf.getPath());
                 }
                 
                 content.add(header);

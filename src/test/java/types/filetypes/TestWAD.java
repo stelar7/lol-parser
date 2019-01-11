@@ -1,12 +1,10 @@
 package types.filetypes;
 
-import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
-import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
@@ -165,18 +163,8 @@ public class TestWAD
         WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("C:\\Users\\Steffen\\Downloads\\extractedFiles\\DATA\\FINAL\\DATA.wad.client"));
         parsed.getContentHeaders()
               .stream()
-              .filter(h -> String.format("%016X", h.getPathHash()).toLowerCase(Locale.ENGLISH).equals("b7ed57db9264c8f4")).forEach(System.out::println);
-        
-        
-        /*
-        parsed.getContentHeaders()
-              .stream()
-              .filter(a -> a instanceof WADContentHeaderV2)
-              .filter(a -> ((WADContentHeaderV2) a).isDuplicate())
-              .map(WADContentHeaderV1::getPathHash)
-              .map(a -> String.format("%016X", a).toLowerCase(Locale.ENGLISH))
+              .filter(h -> HashHandler.loadAllWadHashes().containsKey(h.getPathHash()))
               .forEach(System.out::println);
-        */
     }
     
     @Test

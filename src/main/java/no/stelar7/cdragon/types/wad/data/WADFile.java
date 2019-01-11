@@ -108,13 +108,12 @@ public class WADFile
     
     public void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName)
     {
-        String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
-        String filename = HashHandler.loadAllWadHashes().getOrDefault(hash, "unknown\\" + hash);
+        String filename = HashHandler.loadAllWadHashes().getOrDefault(header.getPathHash(), "unknown\\" + header.getPathHash());
         Path   self     = savePath.resolve(filename);
         
         if (self.toString().length() > 255)
         {
-            self = self.resolveSibling("too_long_filename_" + hash);
+            self = self.resolveSibling("too_long_filename_" + header.getPathHash());
         }
         
         self.getParent().toFile().mkdirs();
@@ -142,7 +141,7 @@ public class WADFile
             }
             if ("unknown".equals(parentName))
             {
-                Files.write(savePath.resolve(unknownHashContainer), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                Files.write(savePath.resolve(unknownHashContainer), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
                 findFileTypeAndRename(data, filename, savePath);
             } else
             {

@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.wad.data.WADCompressionType;
 
 public class WADContentHeaderV1
 {
-    protected long               pathHash;
+    protected String             pathHash;
     protected int                offset;
     protected int                compressedFileSize;
     protected int                fileSize;
@@ -15,12 +15,12 @@ public class WADContentHeaderV1
         return compressionType != WADCompressionType.NONE;
     }
     
-    public long getPathHash()
+    public String getPathHash()
     {
         return pathHash;
     }
     
-    public void setPathHash(long pathHash)
+    public void setPathHash(String pathHash)
     {
         this.pathHash = pathHash;
     }

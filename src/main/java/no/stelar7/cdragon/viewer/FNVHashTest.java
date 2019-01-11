@@ -4,6 +4,7 @@ import no.stelar7.cdragon.util.handlers.*;
 
 import java.util.Scanner;
 
+@SuppressWarnings("InfiniteLoopStatement")
 public class FNVHashTest
 {
     public static void main(String[] args)

@@ -18,25 +18,30 @@ public class TestFindHashStuff
     @Test
     public void checkNewFiles() throws IOException
     {
+        Path hashFile     = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile.txt");
+        Path unknownFiles = UtilHandler.DOWNLOADS_FOLDER.resolve("unknownFiles.txt");
+        Path newHashes    = UtilHandler.DOWNLOADS_FOLDER.resolve("newHashes.txt");
+        Path fixedHashes  = UtilHandler.DOWNLOADS_FOLDER.resolve("fixedHashes.json");
+        
         System.out.println("Checking bin files for strings");
-        grepFiles();
+        grepFiles(hashFile);
         System.out.println("Loading unknown files");
-        fetchUnknownFiles();
+        fetchUnknownFiles(unknownFiles);
         System.out.println("Comparing hashes");
-        fetchHashesForUnknownFiles();
+        fetchHashesForUnknownFiles(newHashes, unknownFiles, hashFile);
         System.out.println("Loading new hashes");
-        fetchFilenameFromHash();
-        saveFoundHashes();
+        fetchFilenameFromHash(fixedHashes, newHashes, hashFile);
+        saveFoundHashes(fixedHashes);
     }
     
-    public void saveFoundHashes() throws IOException
+    public void saveFoundHashes(Path loadPath) throws IOException
     {
-        Path loadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("fixedHashes");
         List<String> lines = Files.readAllLines(loadPath)
                                   .stream()
                                   .filter(x -> !x.equalsIgnoreCase("{"))
                                   .filter(x -> !x.equalsIgnoreCase("}"))
                                   .filter(x -> !x.equalsIgnoreCase("{}"))
+                                  .filter(x -> !x.isBlank())
                                   .collect(Collectors.toList());
         
         Set<String> changedPlugins = new HashSet<>();
@@ -85,21 +90,16 @@ public class TestFindHashStuff
         }
     }
     
-    public void fetchFilenameFromHash() throws IOException
+    public void fetchFilenameFromHash(Path output, Path newHashes, Path possible) throws IOException
     {
-        Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("fixedHashes");
         Files.deleteIfExists(output);
-        
-        Path newHashes = UtilHandler.DOWNLOADS_FOLDER.resolve("newHashes");
-        Path possible  = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile");
-        
         List<String> missing = Files.readAllLines(newHashes);
-        
         List<String> dataList = Files.readAllLines(possible)
                                      .stream()
                                      .map(a -> a.toLowerCase(Locale.ENGLISH))
                                      .map(a -> new Pair<>(a, HashHandler.computeXXHash64(a)))
                                      .filter(a -> missing.contains(a.getB()))
+                                     .filter(a -> !HashHandler.loadAllWadHashes().containsKey(a.getB()))
                                      .map(a -> String.format("\"%s\":\"%s\"", a.getB(), a.getA()))
                                      .collect(Collectors.toList());
         
@@ -108,9 +108,8 @@ public class TestFindHashStuff
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
-    public void grepFiles() throws IOException
+    public void grepFiles(Path output) throws IOException
     {
-        Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile");
         Files.deleteIfExists(output);
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), new SimpleFileVisitor<>()
         {
@@ -127,10 +126,12 @@ public class TestFindHashStuff
                     grepFile(file, output, "((?:ASSETS|DATA|LEVELS|Character)/[0-9a-zA-Z_. /-]+)");
                 }
                 
+                /*
                 if (file.toString().endsWith(".js"))
                 {
-                    // grepFile(file, output, "((?:lol-)[0-9a-zA-Z_. /-]+)");
+                    grepFile(file, output, "((?:lol-)[0-9a-zA-Z_. /-]+)");
                 }
+                */
                 
                 return FileVisitResult.CONTINUE;
             }
@@ -140,13 +141,9 @@ public class TestFindHashStuff
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
-    public void fetchHashesForUnknownFiles() throws IOException
+    public void fetchHashesForUnknownFiles(Path output, Path files, Path possible) throws IOException
     {
-        Path output   = UtilHandler.DOWNLOADS_FOLDER.resolve("newHashes");
-        Path files    = UtilHandler.DOWNLOADS_FOLDER.resolve("unknownFiles");
-        Path possible = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile");
         Files.deleteIfExists(output);
-        
         List<String> possibleHashes = Files.readAllLines(possible).stream()
                                            .map(s -> s.toLowerCase(Locale.ENGLISH))
                                            .map(HashHandler::computeXXHash64)
@@ -159,17 +156,15 @@ public class TestFindHashStuff
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
-    public void fetchUnknownFiles() throws IOException
+    public void fetchUnknownFiles(Path output) throws IOException
     {
-        Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("unknownFiles");
         Files.deleteIfExists(output);
-        
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"), new SimpleFileVisitor<>()
         {
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
             {
-                
+                /*
                 if (file.toString().contains("Champions") ||
                     file.toString().contains("FINAL") ||
                     file.toString().contains("Shipping") ||
@@ -177,8 +172,9 @@ public class TestFindHashStuff
                     file.toString().contains("Localized")
                 )
                 {
-                    //return FileVisitResult.SKIP_SUBTREE;
+                    return FileVisitResult.SKIP_SUBTREE;
                 }
+                */
                 
                 if (Files.isDirectory(file))
                 {

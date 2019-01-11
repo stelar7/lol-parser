@@ -86,7 +86,7 @@ public class RMANFileBodyBundle
         return offset == that.offset &&
                offsetTableOffset == that.offsetTableOffset &&
                headerSize == that.headerSize &&
-               bundleId == that.bundleId &&
+               Objects.equals(bundleId, that.bundleId) &&
                Arrays.equals(skipped, that.skipped) &&
                Objects.equals(chunks, that.chunks);
     }
