@@ -92,25 +92,21 @@ public class WADFile
                 }
             }
             
+            /*
             if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
             {
                 //System.out.println("Duplicate file, skipping");
                 continue;
             }
+            */
             
-            try
-            {
-                saveFile(fileHeader, outputPath, realName);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            saveFile(fileHeader, outputPath, realName);
         }
         
         fileReader.close();
     }
     
-    private void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName) throws IOException
+    public void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName)
     {
         String hash     = String.format("%016X", header.getPathHash()).toLowerCase(Locale.ENGLISH);
         String filename = HashHandler.loadAllWadHashes().getOrDefault(hash, "unknown\\" + hash);
@@ -135,21 +131,26 @@ public class WADFile
             data = UtilHandler.beautifyJS(new String(data, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
         }
         
-        if (Files.exists(self))
+        try
         {
-            if (Files.size(self) > data.length)
+            if (Files.exists(self))
             {
-                return;
+                if (Files.size(self) > data.length)
+                {
+                    return;
+                }
             }
-        }
-        
-        if ("unknown".equals(parentName))
+            if ("unknown".equals(parentName))
+            {
+                Files.write(savePath.resolve(unknownHashContainer), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                findFileTypeAndRename(data, filename, savePath);
+            } else
+            {
+                Files.write(self, data);
+            }
+        } catch (IOException e)
         {
-            Files.write(savePath.resolve(unknownHashContainer), (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-            findFileTypeAndRename(data, filename, savePath);
-        } else
-        {
-            Files.write(self, data);
+            e.printStackTrace();
         }
     }
     
@@ -157,9 +158,8 @@ public class WADFile
     public synchronized byte[] readContentFromHeaderData(WADContentHeaderV1 header)
     {
         fileReader.seek(header.getOffset());
-        WADCompressionType type = WADCompressionType.valueOf(header.getCompressed());
         
-        switch (type)
+        switch (header.getCompressionType())
         {
             case NONE:
                 return fileReader.readBytes(header.getFileSize());

@@ -12,7 +12,7 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
         this.offset = header.offset;
         this.compressedFileSize = header.compressedFileSize;
         this.fileSize = header.fileSize;
-        this.compressed = header.compressed;
+        this.compressionType = header.compressionType;
     }
     
     public boolean isDuplicate()
@@ -43,5 +43,20 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
     public void setSha256(long sha256)
     {
         this.sha256 = sha256;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "WADContentHeaderV2{" +
+               "duplicate=" + duplicate +
+               ", padding=" + padding +
+               ", sha256=" + sha256 +
+               ", pathHash=" + pathHash +
+               ", offset=" + offset +
+               ", compressedFileSize=" + compressedFileSize +
+               ", fileSize=" + fileSize +
+               ", compressionType=" + compressionType +
+               '}';
     }
 }

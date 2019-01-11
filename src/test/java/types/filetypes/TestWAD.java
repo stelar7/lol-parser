@@ -50,6 +50,8 @@ public class TestWAD
         Path from = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Path to   = from.resolve("extracted");
         
+        /*
+        
         downloadPBEAssets("");
         String       jsn  = String.join("\n", WebHandler.readWeb("http://ddragon.leagueoflegends.com/cdn/languages.json"));
         List<String> data = UtilHandler.getGson().fromJson(jsn, new TypeToken<List<String>>() {}.getType());
@@ -63,6 +65,7 @@ public class TestWAD
             }
         });
         
+        */
         extractWads(from, to);
         System.out.println("Extraction finished!");
         
@@ -83,7 +86,7 @@ public class TestWAD
                  .forEach(File::delete);
         }
         */
-        
+        /*
         System.out.println("Transforming bin files to json");
         Files.walk(from)
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
@@ -115,6 +118,7 @@ public class TestWAD
                      e.printStackTrace();
                  }
              });
+             */
     }
     
     public void downloadPBEAssets(String lang)
@@ -158,7 +162,11 @@ public class TestWAD
         WADParser parser = new WADParser();
         //WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/Aatrox.cs_CZ.wad.client"));
         //WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ahri.wad.client"));
-        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("Global.wad.client"));
+        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("C:\\Users\\Steffen\\Downloads\\extractedFiles\\DATA\\FINAL\\DATA.wad.client"));
+        parsed.getContentHeaders()
+              .stream()
+              .filter(h -> String.format("%016X", h.getPathHash()).toLowerCase(Locale.ENGLISH).equals("b7ed57db9264c8f4")).forEach(System.out::println);
+        
         
         /*
         parsed.getContentHeaders()
@@ -169,7 +177,6 @@ public class TestWAD
               .map(a -> String.format("%016X", a).toLowerCase(Locale.ENGLISH))
               .forEach(System.out::println);
         */
-        parsed.extractFiles("Global", "Global.wad.client", UtilHandler.DOWNLOADS_FOLDER.resolve("global"));
     }
     
     @Test

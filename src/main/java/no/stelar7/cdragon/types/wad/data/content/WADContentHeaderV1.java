@@ -1,16 +1,18 @@
 package no.stelar7.cdragon.types.wad.data.content;
 
+import no.stelar7.cdragon.types.wad.data.WADCompressionType;
+
 public class WADContentHeaderV1
 {
-    protected long pathHash;
-    protected int  offset;
-    protected int  compressedFileSize;
-    protected int  fileSize;
-    protected byte compressed;
+    protected long               pathHash;
+    protected int                offset;
+    protected int                compressedFileSize;
+    protected int                fileSize;
+    protected WADCompressionType compressionType;
     
     public boolean isCompressed()
     {
-        return compressed > 0;
+        return compressionType != WADCompressionType.NONE;
     }
     
     public long getPathHash()
@@ -53,13 +55,25 @@ public class WADContentHeaderV1
         this.fileSize = fileSize;
     }
     
-    public byte getCompressed()
+    public WADCompressionType getCompressionType()
     {
-        return compressed;
+        return compressionType;
     }
     
-    public void setCompressed(byte compressed)
+    public void setCompressionType(WADCompressionType compressionType)
     {
-        this.compressed = compressed;
+        this.compressionType = compressionType;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "WADContentHeaderV1{" +
+               "pathHash=" + pathHash +
+               ", offset=" + offset +
+               ", compressedFileSize=" + compressedFileSize +
+               ", fileSize=" + fileSize +
+               ", compressionType=" + compressionType +
+               '}';
     }
 }

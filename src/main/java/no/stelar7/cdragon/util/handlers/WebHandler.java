@@ -78,13 +78,14 @@ public class WebHandler
             final byte[]        buffer = new byte[4096];
             final URLConnection uc     = new URL(url.replace(" ", "%20")).openConnection();
             try (InputStream in = uc.getInputStream();
-                 OutputStream out = new FileOutputStream(output.toFile()))
+                 ByteArrayOutputStream out = new ByteArrayOutputStream())
             {
                 while ((read = in.read(buffer)) != -1)
                 {
                     out.write(buffer, 0, read);
                 }
                 out.flush();
+                Files.write(output, out.toByteArray());
             } catch (Exception e)
             {
                 e.printStackTrace();

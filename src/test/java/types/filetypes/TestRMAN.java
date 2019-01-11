@@ -2,10 +2,8 @@ package types.filetypes;
 
 import no.stelar7.cdragon.types.rman.*;
 import no.stelar7.cdragon.types.rman.data.*;
-import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.*;
 import org.junit.Test;
 
 import java.io.*;
@@ -13,6 +11,7 @@ import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -41,6 +40,8 @@ public class TestRMAN
         
         int[] counter = {0};
         downloadAllBundles(data);
+        
+        // This is ran in a pool to limit the concurrent threads to 6 (parallelism + 1)
         ForkJoinPool forkJoinPool = new ForkJoinPool(5);
         forkJoinPool.submit(() -> data.getBody()
                                       .getFiles()
@@ -103,20 +104,19 @@ public class TestRMAN
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
         Files.createDirectories(bundleFolder);
         
-        int count = 0;
+        AtomicInteger count = new AtomicInteger();
         System.out.println("Downloading bundles");
         
-        for (RMANFileBodyBundle bundle : bundles)
-        {
+        bundles.parallelStream().forEach(bundle -> {
+            
             String bundleId   = bundle.getBundleId();
             Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
             long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             
-            
             if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
-                System.out.println("Skipping bundle: " + bundleId + " (" + ++count + "/" + bundles.size() + ")");
-                continue;
+                System.out.println("Skipping bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
+                return;
             }
             
             if (Files.exists(bundlePath))
@@ -124,8 +124,8 @@ public class TestRMAN
                 bundlePath.toFile().delete();
             }
             
-            System.out.println("Downloading bundle: " + bundleId + " (" + ++count + "/" + bundles.size() + ")");
+            System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
             WebHandler.downloadBundle(bundleId, bundlePath);
-        }
+        });
     }
 }

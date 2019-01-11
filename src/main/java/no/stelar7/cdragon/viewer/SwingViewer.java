@@ -4,8 +4,8 @@ import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.*;
 import no.stelar7.cdragon.types.wad.WADParser;
-import no.stelar7.cdragon.types.wad.data.WADFile;
-import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
+import no.stelar7.cdragon.types.wad.data.*;
+import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
@@ -251,7 +251,7 @@ public class SwingViewer
                     filename = "unknown/" + filename + "." + type;
                 }
                 
-                if (header.getCompressed() != 2)
+                if (header.getCompressionType() != WADCompressionType.REFERENCE)
                 {
                     content.add(new DataPair(filename, new ByteArray(data)));
                 }

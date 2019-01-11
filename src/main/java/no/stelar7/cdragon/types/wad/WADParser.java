@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.wad;
 
 import no.stelar7.cdragon.interfaces.Parseable;
-import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.types.wad.data.*;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.*;
 import no.stelar7.cdragon.util.handlers.*;
@@ -211,10 +211,10 @@ public class WADParser implements Parseable<WADFile>
                 
                 if (base.getMajor() > 1)
                 {
-                    header.setCompressed(raf.readByte());
+                    header.setCompressionType(WADCompressionType.valueOf(raf.readByte()));
                 } else
                 {
-                    header.setCompressed((byte) raf.readInt());
+                    header.setCompressionType(WADCompressionType.valueOf((byte) raf.readInt()));
                 }
                 
                 if (base.getMajor() == 2 || base.getMajor() == 3)
@@ -226,6 +226,12 @@ public class WADParser implements Parseable<WADFile>
                     
                     content.add(headerv2);
                     continue;
+                }
+                
+                if (header.getCompressionType() == WADCompressionType.REFERENCE)
+                {
+                    System.out.println();
+                    System.out.println(raf.readString(raf.readInt()));
                 }
                 
                 content.add(header);
