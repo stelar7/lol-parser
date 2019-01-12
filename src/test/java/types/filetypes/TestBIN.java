@@ -72,7 +72,7 @@ public class TestBIN
     @Test
     public void testBINLinkedFileHash() throws IOException
     {
-        Path                         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+        Path                         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Set<Vector2<String, String>> dupRemover = new HashSet<>();
         Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
@@ -486,6 +486,32 @@ public class TestBIN
         
         String output = String.join("\n", BINParser.hashes);
         Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("binHashes.txt"), output.getBytes(StandardCharsets.UTF_8));
+    }
+    
+    @Test
+    public void compareUnknownHashes() throws IOException
+    {
+        System.out.println("Loading unknown hash list");
+        Set<String> hashes = new HashSet<>(Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("binHashes.txt")));
+        
+        System.out.println("Loading test words");
+        List<String> wordsToTest = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("wordsToTest.txt"));
+        
+        System.out.println("Starting tests...");
+        StringBuilder sb = new StringBuilder("{\n");
+        wordsToTest.forEach(w -> {
+            String hash = String.valueOf(HashHandler.computeBINHash(w));
+            if (hashes.contains(hash))
+            {
+                System.out.printf("Found a new hash! (%s)%n", w);
+                sb.append(String.format("\t\"%s\":\"%s\",", hash, w));
+                sb.append("\n");
+            }
+        });
+        sb.reverse().deleteCharAt(1).reverse();
+        sb.append("}");
+        
+        System.out.println(sb.toString());
     }
     
 }
