@@ -84,6 +84,7 @@ public class TestRMAN
             Files.createDirectories(outputName.getParent());
             
             System.out.println("Loading bundles needed for " + file.getName());
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             for (String chunkId : file.getChunkIds())
             {
                 RMANFileBodyBundleChunkInfo info = manifest.getChunkMap().get(chunkId);
@@ -91,8 +92,10 @@ public class TestRMAN
                 raf.seek(info.getOffsetToChunk());
                 byte[] compressedChunkData = raf.readBytes(info.getCompressedSize());
                 byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
-                Files.write(outputName, uncompressedData, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                bos.write(uncompressedData);
             }
+            
+            Files.write(outputName, bos.toByteArray(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e)
         {
             e.printStackTrace();
