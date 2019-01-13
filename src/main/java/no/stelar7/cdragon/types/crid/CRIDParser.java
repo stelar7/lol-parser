@@ -3,16 +3,17 @@ package no.stelar7.cdragon.types.crid;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.writers.NamedByteWriter;
 
-import java.io.*;
 import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.Map.Entry;
 
-public class CRIDParser implements Parseable
+@SuppressWarnings("FieldCanBeLocal")
+public class CRIDParser implements Parseable<List<Pair<String, byte[]>>>
 {
     private final String VIDEO_EXT = "m2v";
     private final String AUDIO_EXT = "adx";
@@ -39,7 +40,6 @@ public class CRIDParser implements Parseable
     private final Map<Integer, BlockType> BLOCK_DICT = new HashMap<>()
     {
         {
-            new String(AIX_SIGNATURE.getData(), StandardCharsets.UTF_8);
             put(ByteBuffer.wrap(ALP_SIGNATURE.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
             put(ByteBuffer.wrap(CRID_SIGNATURE.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
             put(ByteBuffer.wrap(SFV_SIGNATURE.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
@@ -51,26 +51,24 @@ public class CRIDParser implements Parseable
     
     
     @Override
-    public Object parse(Path path)
+    public List<Pair<String, byte[]>> parse(Path path)
     {
         return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override
-    public Object parse(ByteArray data)
+    public List<Pair<String, byte[]>> parse(ByteArray data)
     {
         return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override
-    public Object parse(RandomAccessReader raf)
+    public List<Pair<String, byte[]>> parse(RandomAccessReader raf)
     {
-        demultiplexStream(raf);
-        return null;
+        return demultiplexStream(raf);
     }
     
-    
-    private void demultiplexStream(RandomAccessReader reader)
+    private List<Pair<String, byte[]>> demultiplexStream(RandomAccessReader reader)
     {
         if (reader.readUntillString(new String(CRID_SIGNATURE.getData(), StandardCharsets.UTF_8)))
         {
@@ -183,8 +181,9 @@ public class CRIDParser implements Parseable
                     }
                 }
             }
-            finalize(reader, streamOutputWriters);
+            return finalize(reader, streamOutputWriters);
         }
+        return null;
     }
     
     private int getVideoPacketFooterSize(RandomAccessReader reader, int currentPos)
@@ -251,10 +250,14 @@ public class CRIDParser implements Parseable
         return compareSegmentUsingSourceOffset(blockToCheck, 0, SFA_SIGNATURE.getData());
     }
     
-    private void finalize(RandomAccessReader raf, Map<Integer, NamedByteWriter> outputFiles)
+    private List<Pair<String, byte[]>> finalize(RandomAccessReader raf, Map<Integer, NamedByteWriter> outputFiles)
     {
-        outputFiles.forEach((key, value) -> {
-            String filename = value.getName();
+        List<Pair<String, byte[]>> returns = new ArrayList<>();
+        for (Entry<Integer, NamedByteWriter> entry : outputFiles.entrySet())
+        {
+            Integer         key      = entry.getKey();
+            NamedByteWriter value    = entry.getValue();
+            String          filename = value.getName();
             
             RandomAccessReader headEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
             RandomAccessReader metaEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
@@ -307,15 +310,9 @@ public class CRIDParser implements Parseable
             byte[] footerContent    = new String(remainingContent).replaceAll("\0", "").getBytes(StandardCharsets.UTF_8);
             value.remove(footerOffset, Math.min(footerContent.length + 1, footerSize));
             
-            try (FileOutputStream fos = new FileOutputStream(outputName))
-            {
-                fos.write(value.toByteArray());
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-            
-        });
+            returns.add(new Pair<>(outputName, value.toByteArray()));
+        }
+        return returns;
     }
     
     private boolean compareSegmentUsingSourceOffset(byte[] sourceArray, int offset, byte[] target)
