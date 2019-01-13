@@ -30,7 +30,7 @@ public final class FileTypeHandler
         
         if (FileTypeHandler.isProbableSofdec(magic))
         {
-            return "sofdec";
+            return "sfd";
         }
         
         if (FileTypeHandler.isProbableJavascript(magic))
