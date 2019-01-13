@@ -155,4 +155,17 @@ public class CRIDUTFTable
                ", schema=" + schema +
                '}';
     }
+    
+    public Object query(String columnName, int row)
+    {
+        for (CRIDUTFTableColumn column : getSchema())
+        {
+            if (column.getColumnName().equals(columnName))
+            {
+                return column.getValues().get(row);
+            }
+        }
+        
+        return null;
+    }
 }

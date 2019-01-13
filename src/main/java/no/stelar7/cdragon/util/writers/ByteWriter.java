@@ -18,6 +18,10 @@ public class ByteWriter implements AutoCloseable
         stream = new LittleEndianDataOutputStream(output);
     }
     
+    public int getBytesWrittenCount()
+    {
+        return output.size();
+    }
     
     public byte[] toByteArray()
     {

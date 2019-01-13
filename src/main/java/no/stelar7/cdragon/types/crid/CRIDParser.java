@@ -15,7 +15,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 @SuppressWarnings("FieldCanBeLocal")
-public class CRIDParser implements Parseable<List<Pair<String, byte[]>>>
+public class CRIDParser implements Parseable<CRIDFile>
 {
     private final String VIDEO_EXT = "m2v";
     private final String AUDIO_EXT = "adx";
@@ -25,6 +25,7 @@ public class CRIDParser implements Parseable<List<Pair<String, byte[]>>>
     private final String AIX_EXT = ".aix";
     private final String AC3_EXT = ".ac3";
     
+    private final String USM_SIGNATURE  = "USM\0";
     private final String HCA_SIGNATURE  = "HCA\0";
     private final String AIX_SIGNATURE  = "AIXF";
     private final String ALP_SIGNATURE  = "@ALP";
@@ -42,51 +43,107 @@ public class CRIDParser implements Parseable<List<Pair<String, byte[]>>>
     private final Map<Integer, BlockType> BLOCK_DICT = new HashMap<>()
     {
         {
-            put(ByteBuffer.wrap(ALP_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
-            put(ByteBuffer.wrap(CRID_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
-            put(ByteBuffer.wrap(SFV_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
-            put(ByteBuffer.wrap(SFA_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
-            put(ByteBuffer.wrap(SBT_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
-            put(ByteBuffer.wrap(CUE_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
+            put(ByteBuffer.wrap("\0\0\0\0".getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(USM_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(CRID_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(CRID_SIGNATURE, PacketType.SIZE, 4));
+            
+            put(ByteBuffer.wrap(ALP_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(ALP_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(SFV_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(SFV_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(SFA_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(SFA_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(SBT_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(SBT_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(CUE_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(CUE_SIGNATURE, PacketType.SIZE, 4));
+            
+            // not sure if these are used...
+            put(ByteBuffer.wrap(AIX_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(AIX_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(UTF_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(UTF_SIGNATURE, PacketType.SIZE, 4));
+            put(ByteBuffer.wrap(HCA_SIGNATURE.getBytes(StandardCharsets.UTF_8)).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(HCA_SIGNATURE, PacketType.SIZE, 4));
         }
     };
     
-    
     @Override
-    public List<Pair<String, byte[]>> parse(Path path)
+    public CRIDFile parse(Path path)
     {
         return parse(new RandomAccessReader(path, ByteOrder.BIG_ENDIAN));
     }
     
     @Override
-    public List<Pair<String, byte[]>> parse(ByteArray data)
+    public CRIDFile parse(ByteArray data)
     {
         return parse(new RandomAccessReader(data.getData(), ByteOrder.BIG_ENDIAN));
     }
     
     @Override
-    public List<Pair<String, byte[]>> parse(RandomAccessReader raf)
+    public CRIDFile parse(RandomAccessReader raf)
     {
-        CRIDHeader header = parseHeader(raf);
+        CRIDFile file = new CRIDFile();
+        file.setHeader(parseHeader(raf));
         
         int endOfHeader = raf.pos();
         
-        CRIDUTFTable utfBlock = parseUTF(raf, endOfHeader);
-        if (utfBlock.getRows() < 1)
+        file.setMetadata(parseUTF(raf, endOfHeader));
+        if (file.getMetadata().getRows() < 1)
         {
-            System.out.format("Expected atleast one row, (got %s)%n", utfBlock.getRows());
+            System.out.format("Expected atleast one row, (got %s)%n", file.getMetadata().getRows());
             System.exit(0);
         }
         
-        if (!utfBlock.getTableName().equals("CRIUSF_DIR_STREAM"))
+        if (!file.getMetadata().getTableName().equals("CRIUSF_DIR_STREAM"))
         {
-            System.out.format("Expected table to be \"CRIUSF_DIR_STREAM\", (got %s)%n", utfBlock.getTableName());
+            System.out.format("Expected table to be \"CRIUSF_DIR_STREAM\", (got %s)%n", file.getMetadata().getTableName());
             System.exit(0);
         }
         
+        file.setStreams(parseStreamInfo(file.getMetadata()));
+        //List<NamedByteWriter> writers = openWriters(file.getStreams());
         
+        // todo
         raf.seek(0);
-        return demultiplexStream(raf);
+        file.setStreamData(demultiplexStream(raf));
+        
+        return file;
+    }
+    
+    private List<NamedByteWriter> openWriters(List<CRIDStreamInfo> streams)
+    {
+        List<NamedByteWriter> writers = new ArrayList<>();
+        
+        for (CRIDStreamInfo stream : streams)
+        {
+            String name = stream.getFilename();
+            for (NamedByteWriter w : writers)
+            {
+                if (w.getName().equals(name))
+                {
+                    name = "-" + name;
+                    break;
+                }
+            }
+            
+            writers.add(new NamedByteWriter(name));
+        }
+        
+        return writers;
+    }
+    
+    private List<CRIDStreamInfo> parseStreamInfo(CRIDUTFTable utfBlock)
+    {
+        List<CRIDStreamInfo> infos = new ArrayList<>();
+        
+        for (int i = 0; i < utfBlock.getRows(); i++)
+        {
+            CRIDStreamInfo stream = new CRIDStreamInfo();
+            stream.setFilename((String) utfBlock.query("filename", i));
+            stream.setFilesize((Integer) utfBlock.query("filesize", i));
+            stream.setDatasize((Integer) utfBlock.query("datasize", i));
+            int LEStreamId = Integer.reverseBytes((Integer) utfBlock.query("stmid", i));
+            stream.setStreamType(BLOCK_DICT.get(LEStreamId).getBlockKey());
+            stream.setChannel((Integer) utfBlock.query("chno", i));
+            stream.setMinChunk((Integer) utfBlock.query("minchk", i));
+            stream.setMinBuffer((Integer) utfBlock.query("minbuf", i));
+            stream.setAvgBps((Integer) utfBlock.query("avbps", i));
+            infos.add(stream);
+        }
+        
+        return infos;
     }
     
     private CRIDHeader parseHeader(RandomAccessReader raf)
@@ -271,7 +328,7 @@ public class CRIDParser implements Parseable<List<Pair<String, byte[]>>>
                         Object value         = new Pair<>(extDataOffset, extDataSize);
                         table.getSchema().get(j).getValues().add(i, value);
                         bytesRead = 8;
-    
+                        
                         if (extDataSize != 0)
                         {
                             value = parseUTF(raf, table.getTableOffset() + 8 + table.getDataOffset() + extDataOffset);
