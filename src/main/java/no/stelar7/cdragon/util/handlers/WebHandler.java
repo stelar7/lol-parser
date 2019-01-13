@@ -3,6 +3,7 @@ package no.stelar7.cdragon.util.handlers;
 import no.stelar7.cdragon.types.rbun.RBUNParser;
 import no.stelar7.cdragon.util.types.*;
 
+import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.*;
 import java.nio.BufferUnderflowException;
@@ -86,6 +87,21 @@ public class WebHandler
                 }
                 out.flush();
                 Files.write(output, out.toByteArray());
+            } catch (SSLException e)
+            {
+                System.out.println("SSL Connection error, retrying " + url);
+                output.toFile().delete();
+                Thread.sleep((new Random().nextInt(10) + 1) * 100);
+                downloadFile(output, url);
+            } catch (IOException e)
+            {
+                if (e.getMessage().contains("504"))
+                {
+                    System.out.println("Connection error, retrying " + url);
+                    output.toFile().delete();
+                    Thread.sleep((new Random().nextInt(10) + 1) * 100);
+                    downloadFile(output, url);
+                }
             } catch (Exception e)
             {
                 e.printStackTrace();
@@ -93,7 +109,7 @@ public class WebHandler
                 System.err.println("Failed to download file! Please delete the file if it exists!");
                 System.exit(0);
             }
-        } catch (IOException e)
+        } catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
         }

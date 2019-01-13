@@ -2,7 +2,7 @@ package no.stelar7.cdragon.viewer.rendering.models;
 
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import no.stelar7.cdragon.util.types.Vector2f;
+import no.stelar7.cdragon.util.types.math.Vector2f;
 import no.stelar7.cdragon.viewer.rendering.buffers.VBO;
 import org.lwjgl.*;
 

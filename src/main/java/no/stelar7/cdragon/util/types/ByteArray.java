@@ -11,6 +11,12 @@ public final class ByteArray
         this.data = data;
     }
     
+    public ByteArray(byte[] data, int length)
+    {
+        this.data = new byte[length];
+        System.arraycopy(data, 0, this.data, 0, data.length);
+    }
+    
     public boolean indexMatch(int index, byte b)
     {
         return (data.length > index) && data[index] == b;

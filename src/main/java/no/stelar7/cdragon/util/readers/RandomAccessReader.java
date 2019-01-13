@@ -3,6 +3,7 @@ package no.stelar7.cdragon.util.readers;
 
 import com.google.common.collect.EvictingQueue;
 import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.*;
 import org.joml.Quaternionf;
 
 import java.io.*;
@@ -169,13 +170,9 @@ public class RandomAccessReader implements AutoCloseable
     
     public byte[] readRemaining()
     {
-        byte[] temp  = new byte[buffer.remaining()];
-        int    index = 0;
-        while (buffer.hasRemaining())
-        {
-            temp[index++] = buffer.get();
-        }
-        return temp;
+        byte[] data = new byte[buffer.remaining()];
+        buffer.get(data);
+        return data;
     }
     
     public long readLong()
@@ -462,10 +459,39 @@ public class RandomAccessReader implements AutoCloseable
         return !buffer.hasRemaining();
     }
     
-    public void readUntillString(String data)
+    public boolean readUntillString(String data)
     {
-        EvictingQueue<String> queue = EvictingQueue.create(data.length());
-        int                   index = 0;
+        int    pos     = pos();
+        String content = new String(readRemaining(), StandardCharsets.UTF_8);
+        
+        int index = content.indexOf(data);
+        if (index != -1)
+        {
+            seek(index);
+            // indexOf doesnt count the null bytes in the string, so the posision can be way earlier than what it really is..
+            readUntillStringAccurate(data);
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private void readUntillStringAccurate(String data)
+    {
+        // Is there a better way to do this?
+        // String.join() is really slow, so we want to avoid calling it...
+        EvictingQueue<String> queue      = EvictingQueue.create(data.length());
+        String                dataString = "";
+        do
+        {
+            dataString = new String(readBytes(data.length() - 1), StandardCharsets.UTF_8);
+        } while (!dataString.contains(data.substring(0, 3)));
+        
+        for (char c : dataString.toCharArray())
+        {
+            queue.add("" + c);
+        }
+        
         while (!isEOF())
         {
             queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
@@ -582,27 +608,6 @@ public class RandomAccessReader implements AutoCloseable
     public ByteArray readToByteArray()
     {
         return new ByteArray(readRemaining());
-    }
-    
-    public boolean seekUntil(ByteArray key)
-    {
-        ByteArray array;
-        do
-        {
-            byte[] data = readBytes(key.getData().length);
-            if (data.length == 0)
-            {
-                return false;
-            }
-            
-            array = new ByteArray(data);
-            if (array.equals(key))
-            {
-                buffer.position(buffer.position() - data.length);
-                return true;
-            }
-            
-        } while (true);
     }
     
     public byte[] readBytesReverse(int length)

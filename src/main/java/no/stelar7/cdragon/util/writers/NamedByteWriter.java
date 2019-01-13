@@ -1,17 +1,22 @@
-package no.stelar7.cdragon.types.crid;
+package no.stelar7.cdragon.util.writers;
 
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 
 import java.io.IOException;
 import java.nio.file.Files;
 
-public class NamedByteWriter extends no.stelar7.cdragon.util.readers.ByteWriter
+public class NamedByteWriter extends ByteWriter implements AutoCloseable
 {
     String name;
     
     public NamedByteWriter(String name)
     {
         this.name = name;
+    }
+    
+    public String getName()
+    {
+        return name;
     }
     
     public void save()
@@ -24,5 +29,4 @@ public class NamedByteWriter extends no.stelar7.cdragon.util.readers.ByteWriter
             e.printStackTrace();
         }
     }
-    
 }

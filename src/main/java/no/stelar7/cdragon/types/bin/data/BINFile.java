@@ -1,8 +1,9 @@
 package no.stelar7.cdragon.types.bin.data;
 
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.ByteWriter;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.writers.ByteWriter;
+import no.stelar7.cdragon.util.types.math.*;
+import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 
 import java.io.IOException;
 import java.nio.file.*;

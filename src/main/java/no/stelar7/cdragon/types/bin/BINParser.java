@@ -5,6 +5,7 @@ import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;

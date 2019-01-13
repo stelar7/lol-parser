@@ -4,7 +4,9 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.writers.NamedByteWriter;
 
+import java.io.*;
 import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -20,8 +22,8 @@ public class CRIDParser implements Parseable
     private final String AIX_EXT = ".aix";
     private final String AC3_EXT = ".ac3";
     
-    private final ByteArray AIX_SIGNATURE  = new ByteArray(new byte[]{0x41, 0x49, 0x58, 0x46});
-    private final ByteArray HCA_SIGNATURE  = new ByteArray(new byte[]{0x48, 0x43, 0x41, 0x00});
+    private final ByteArray HCA_SIGNATURE  = new ByteArray("HCA".getBytes(StandardCharsets.UTF_8), 4);
+    private final ByteArray AIX_SIGNATURE  = new ByteArray("AIXF".getBytes(StandardCharsets.UTF_8));
     private final ByteArray ALP_SIGNATURE  = new ByteArray("@ALP".getBytes(StandardCharsets.UTF_8));
     private final ByteArray SFV_SIGNATURE  = new ByteArray("@SFV".getBytes(StandardCharsets.UTF_8));
     private final ByteArray SFA_SIGNATURE  = new ByteArray("@SFA".getBytes(StandardCharsets.UTF_8));
@@ -30,74 +32,14 @@ public class CRIDParser implements Parseable
     private final ByteArray UTF_SIGNATURE  = new ByteArray("@UTF".getBytes(StandardCharsets.UTF_8));
     private final ByteArray CRID_SIGNATURE = new ByteArray("CRID".getBytes(StandardCharsets.UTF_8));
     
-    private final ByteArray HEADER_END   = new ByteArray("#HEADER END     ===============".getBytes(StandardCharsets.UTF_8));
-    private final ByteArray METADATA_END = new ByteArray("#METADATA END     ===============".getBytes(StandardCharsets.UTF_8));
-    private final ByteArray CONTENTS_END = new ByteArray("#CONTENTS END     ===============".getBytes(StandardCharsets.UTF_8));
+    private final ByteArray HEADER_END   = new ByteArray("#HEADER END     ===============".getBytes(StandardCharsets.UTF_8), 32);
+    private final ByteArray METADATA_END = new ByteArray("#METADATA END   ===============".getBytes(StandardCharsets.UTF_8), 32);
+    private final ByteArray CONTENTS_END = new ByteArray("#CONTENTS END   ===============".getBytes(StandardCharsets.UTF_8), 32);
     
     private final Map<Integer, BlockType> BLOCK_DICT = new HashMap<>()
     {
         {
-            // System Packets
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xB9}).getInt(), new BlockType(PacketType.EOF, -1));
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xBA}).getInt(), new BlockType(PacketType.STATIC, 0xE)); // Pack Header
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xBB}).getInt(), new BlockType(PacketType.SIZE, 2)); // System Header, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xBD}).getInt(), new BlockType(PacketType.SIZE, 2)); // Private Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xBE}).getInt(), new BlockType(PacketType.SIZE, 2)); // Padding Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xBF}).getInt(), new BlockType(PacketType.SIZE, 2)); // Private Stream, two bytes following equal length (Big Endian)
-            
-            // Audio Streams
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC1}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC2}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC3}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC4}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC5}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC6}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC7}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC8}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xC9}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xCA}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xCB}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xCC}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xCD}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xCE}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xCF}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD0}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD1}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD2}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD3}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD4}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD5}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD6}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD7}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD8}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xD9}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xDA}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xDB}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xDC}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xDD}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xDE}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xDF}).getInt(), new BlockType(PacketType.SIZE, 2)); // Audio Stream, two bytes following equal length (Big Endian)
-            
-            // Video Streams
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE0}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE1}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE2}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE3}).getInt(), new BlockType(PacketType.SIZE, 2));
-            
-            // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE4}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE5}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE6}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE7}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE8}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xE9}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xEA}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xEB}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xEC}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xED}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xEE}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            put(ByteBuffer.wrap(new byte[]{0x00, 0x00, 0x01, (byte) 0xEF}).getInt(), new BlockType(PacketType.SIZE, 2)); // Video Stream, two bytes following equal length (Big Endian)
-            
+            new String(AIX_SIGNATURE.getData(), StandardCharsets.UTF_8);
             put(ByteBuffer.wrap(ALP_SIGNATURE.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
             put(ByteBuffer.wrap(CRID_SIGNATURE.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
             put(ByteBuffer.wrap(SFV_SIGNATURE.getData()).order(ByteOrder.LITTLE_ENDIAN).getInt(), new BlockType(PacketType.SIZE, 4));
@@ -130,7 +72,7 @@ public class CRIDParser implements Parseable
     
     private void demultiplexStream(RandomAccessReader reader)
     {
-        if (reader.seekUntil(CRID_SIGNATURE))
+        if (reader.readUntillString(new String(CRID_SIGNATURE.getData(), StandardCharsets.UTF_8)))
         {
             Map<Integer, NamedByteWriter> streamOutputWriters = new HashMap<>();
             Map<Integer, String>          streamIdFileType    = new HashMap<>();
@@ -159,19 +101,20 @@ public class CRIDParser implements Parseable
                     {
                         reader.seek(currentPos + currentBlockId.length);
                         byte[] blockSizeArray = reader.readBytes(block.getSize());
+                        UtilHandler.reverse(blockSizeArray);
                         reader.seek(currentPos);
                         
                         int blockSize = 0;
                         switch (block.getSize())
                         {
                             case 4:
-                                blockSize = ByteBuffer.wrap(blockSizeArray).getInt();
+                                blockSize = ByteBuffer.wrap(blockSizeArray).order(ByteOrder.LITTLE_ENDIAN).getInt();
                                 break;
                             case 2:
-                                blockSize = ByteBuffer.wrap(blockSizeArray).getShort();
+                                blockSize = ByteBuffer.wrap(blockSizeArray).order(ByteOrder.LITTLE_ENDIAN).getShort();
                                 break;
                             case 1:
-                                blockSize = ByteBuffer.wrap(blockSizeArray).get();
+                                blockSize = ByteBuffer.wrap(blockSizeArray).order(ByteOrder.LITTLE_ENDIAN).get();
                                 break;
                         }
                         
@@ -185,7 +128,7 @@ public class CRIDParser implements Parseable
                             
                             if (!streamOutputWriters.containsKey(currentStreamKey))
                             {
-                                byte[] currentBlockName = ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(currentStreamKey).array();
+                                byte[] currentBlockName = ByteBuffer.allocate(4).putInt(currentStreamKey).order(ByteOrder.LITTLE_ENDIAN).array();
                                 String filePath         = UtilHandler.pathToFilename(reader.getPath());
                                 String blockHash        = HashHandler.toHex(currentBlockName);
                                 String outputFilename   = filePath + "_" + blockHash;
@@ -214,7 +157,6 @@ public class CRIDParser implements Parseable
                                     reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + audioBlockSkipSize);
                                     byte[] data = reader.readBytes(blockSize - audioBlockSkipSize);
                                     streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
-                                    streamOutputWriters.get(currentStreamKey).save();
                                     reader.seek(pos);
                                     
                                 }
@@ -230,7 +172,6 @@ public class CRIDParser implements Parseable
                                     reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + videoBlockSkipSize);
                                     byte[] data = reader.readBytes(blockSize - videoBlockSkipSize);
                                     streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
-                                    streamOutputWriters.get(currentStreamKey).save();
                                     reader.seek(pos);
                                 }
                             }
@@ -313,28 +254,21 @@ public class CRIDParser implements Parseable
     private void finalize(RandomAccessReader raf, Map<Integer, NamedByteWriter> outputFiles)
     {
         outputFiles.forEach((key, value) -> {
-            String filename   = value.name;
-            int    headerSize = 0;
-            
+            String filename = value.getName();
             
             RandomAccessReader headEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
-            headEnd.seekUntil(HEADER_END);
-            int headerEndOffset = headEnd.pos();
-            
             RandomAccessReader metaEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
-            metaEnd.seekUntil(METADATA_END);
+            
+            headEnd.readUntillString(new String(HEADER_END.getData(), StandardCharsets.UTF_8));
+            metaEnd.readUntillString(new String(METADATA_END.getData(), StandardCharsets.UTF_8));
+            
+            int headerEndOffset   = headEnd.pos();
             int metadataEndOffset = metaEnd.pos();
             
-            if (metadataEndOffset > headerEndOffset)
-            {
-                headerSize = metadataEndOffset + METADATA_END.getData().length;
-            } else
-            {
-                headerSize = headerEndOffset + METADATA_END.getData().length;
-            }
+            int headerSize = METADATA_END.getData().length + ((metadataEndOffset > headerEndOffset) ? metadataEndOffset : headerEndOffset);
             
             RandomAccessReader footEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
-            footEnd.seekUntil(CONTENTS_END);
+            footEnd.readUntillString(new String(CONTENTS_END.getData(), StandardCharsets.UTF_8));
             int footerOffset = footEnd.pos() - headerSize;
             int footerSize   = value.toByteArray().length - footerOffset;
             
@@ -362,17 +296,25 @@ public class CRIDParser implements Parseable
                 }
             } else
             {
-                fileExt = "unkn";
+                fileExt = UtilHandler.getEnding(filename);
             }
-          /*
-            try (FileOutputStream fos = new FileOutputStream(filename + "." + fileExt))
+            
+            String outputName = UtilHandler.replaceEnding(filename, AUDIO_EXT, fileExt);
+            outputName = UtilHandler.replaceEnding(outputName, VIDEO_EXT, fileExt);
+            
+            value.remove(0, headerSize);
+            byte[] remainingContent = Arrays.copyOfRange(value.toByteArray(), footerOffset, footerOffset + footerSize);
+            byte[] footerContent    = new String(remainingContent).replaceAll("\0", "").getBytes(StandardCharsets.UTF_8);
+            value.remove(footerOffset, Math.min(footerContent.length + 1, footerSize));
+            
+            try (FileOutputStream fos = new FileOutputStream(outputName))
             {
                 fos.write(value.toByteArray());
             } catch (IOException e)
             {
                 e.printStackTrace();
             }
-            */
+            
         });
     }
     

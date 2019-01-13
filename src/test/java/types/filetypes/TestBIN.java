@@ -7,7 +7,8 @@ import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.Vector2;
+import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.javers.core.*;
 import org.junit.*;
 

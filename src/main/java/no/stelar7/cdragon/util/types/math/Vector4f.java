@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.util.types;
+package no.stelar7.cdragon.util.types.math;
 
 public class Vector4f extends org.joml.Vector4f
 {

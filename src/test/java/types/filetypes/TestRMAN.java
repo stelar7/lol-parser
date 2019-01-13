@@ -1,5 +1,6 @@
 package types.filetypes;
 
+import com.google.gson.JsonObject;
 import no.stelar7.cdragon.types.rman.*;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
@@ -26,8 +27,19 @@ public class TestRMAN
         String patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
         String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
         
+        
+        JsonObject obj     = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+        int        version = obj.get("version").getAsInt();
+        System.out.println("Found patch version " + version);
+        
+        if (version < 42)
+        {
+            System.out.println("Version older than 42 found! PBE is on atleast this version, so we quit..");
+            System.exit(0);
+        }
+        
         System.out.println("Downloading bundle manifest");
-        String manifestUrl = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject().get("game_patch_url").getAsString();
+        String manifestUrl = obj.get("game_patch_url").getAsString();
         
         System.out.println("Parsing Manifest");
         RMANFile data = parser.parse(WebHandler.readBytes(manifestUrl));
@@ -39,9 +51,18 @@ public class TestRMAN
         */
         
         int[] counter = {0};
+        removeOldBundles(data);
         downloadAllBundles(data);
         
-        // This is ran in a pool to limit the concurrent threads to 6 (parallelism + 1)
+        // does not include .exr and .dll files
+        Map<String, List<RMANFileBodyFile>> filesPerLang = data.getBody()
+                                                               .getFiles()
+                                                               .stream()
+                                                               .filter(f -> f.getName().substring(f.getName().indexOf('.') + 1).contains("."))
+                                                               .collect(Collectors.groupingBy(
+                                                                       f -> f.getName().substring(f.getName().indexOf('.') + 1, f.getName().indexOf('.', f.getName().indexOf('.') + 1))));
+        
+        // This is ran in a pool to limit the memory usage (sets the concurrent threads to 6 (parallelism + 1))
         ForkJoinPool forkJoinPool = new ForkJoinPool(5);
         forkJoinPool.submit(() -> data.getBody()
                                       .getFiles()
@@ -56,6 +77,34 @@ public class TestRMAN
         
         TestWAD tw = new TestWAD();
         tw.testCDragonWAD();
+    }
+    
+    public void removeOldBundles(RMANFile data) throws IOException
+    {
+        Path        bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Set<String> keep         = data.getBundleMap().keySet();
+        List<String> has = Files.walk(bundleFolder)
+                                .map(Path::getFileName)
+                                .map(Path::toString)
+                                .filter(s -> s.endsWith(".bundle"))
+                                .map(s -> s.substring(0, 16))
+                                .map(s -> s.toUpperCase(Locale.ENGLISH))
+                                .collect(Collectors.toList());
+        
+        has.removeAll(keep);
+        
+        has.stream()
+           .map(s -> s.toUpperCase(Locale.ENGLISH))
+           .map(s -> s + ".bundle")
+           .forEach(s -> {
+               try
+               {
+                   Files.deleteIfExists(bundleFolder.resolve(s));
+               } catch (IOException e)
+               {
+                   e.printStackTrace();
+               }
+           });
     }
     
     private void downloadAllBundles(RMANFile manifest) throws IOException
@@ -84,7 +133,6 @@ public class TestRMAN
             Files.createDirectories(outputName.getParent());
             
             System.out.println("Loading bundles needed for " + file.getName());
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
             for (String chunkId : file.getChunkIds())
             {
                 RMANFileBodyBundleChunkInfo info = manifest.getChunkMap().get(chunkId);
@@ -92,10 +140,9 @@ public class TestRMAN
                 raf.seek(info.getOffsetToChunk());
                 byte[] compressedChunkData = raf.readBytes(info.getCompressedSize());
                 byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
-                bos.write(uncompressedData);
+                Files.write(outputName, uncompressedData, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             }
             
-            Files.write(outputName, bos.toByteArray(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e)
         {
             e.printStackTrace();

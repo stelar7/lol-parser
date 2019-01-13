@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.skn.data;
 
 import no.stelar7.cdragon.util.handlers.ModelHandler;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.*;
 
 import java.text.*;
 import java.util.*;

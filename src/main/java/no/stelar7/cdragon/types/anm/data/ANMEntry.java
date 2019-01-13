@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.anm.data;
 
-import no.stelar7.cdragon.util.types.Vector3s;
+import no.stelar7.cdragon.util.types.math.Vector3s;
 
 public class ANMEntry
 {

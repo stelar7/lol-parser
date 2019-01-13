@@ -1,7 +1,8 @@
-package no.stelar7.cdragon.util.readers;
+package no.stelar7.cdragon.util.writers;
 
 import com.google.common.io.LittleEndianDataOutputStream;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.math.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -250,6 +251,33 @@ public class ByteWriter implements AutoCloseable
         {
             stream.write(data, 0, length);
         } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void remove(int offset, int count)
+    {
+        try
+        {
+            
+            byte[] data       = output.toByteArray();
+            byte[] outputData = new byte[offset + (data.length - (offset + count))];
+            
+            byte[] preData  = new byte[offset];
+            byte[] postData = new byte[data.length - (offset + count)];
+            
+            System.arraycopy(data, 0, preData, 0, preData.length);
+            System.arraycopy(data, offset + count, postData, 0, postData.length);
+            
+            System.arraycopy(preData, 0, outputData, 0, preData.length);
+            System.arraycopy(postData, 0, outputData, preData.length, postData.length);
+            
+            output = new ByteArrayOutputStream();
+            stream = new LittleEndianDataOutputStream(output);
+            stream.write(outputData);
+            
+        } catch (IOException e)
         {
             e.printStackTrace();
         }

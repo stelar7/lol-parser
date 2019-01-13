@@ -2,6 +2,7 @@ package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
 import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -44,6 +45,16 @@ public final class UtilHandler
     public static String pathToFolderName(Path path)
     {
         return path.getFileName().toString();
+    }
+    
+    public static void reverse(byte[] data)
+    {
+        for (int i = 0; i < data.length / 2; i++)
+        {
+            byte temp = data[i];
+            data[i] = data[data.length - i - 1];
+            data[data.length - i - 1] = temp;
+        }
     }
     
     public static BitSet longToBitSet(long value)
@@ -335,8 +346,17 @@ public final class UtilHandler
     
     public static String getEnding(Path file)
     {
-        String name = file.toString();
-        return name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ENGLISH);
+        return getEnding(file.toString());
+    }
+    
+    public static String getEnding(String name)
+    {
+        if (name.contains("."))
+        {
+            return name.substring(name.lastIndexOf('.') + 1).toLowerCase(Locale.ENGLISH);
+        }
+        
+        return name;
     }
     
     public static String beautifyJS(String input)

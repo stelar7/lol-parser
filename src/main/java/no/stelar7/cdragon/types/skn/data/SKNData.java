@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.skn.data;
 
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.*;
 
 public class SKNData
 {

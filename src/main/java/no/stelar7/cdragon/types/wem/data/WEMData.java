@@ -2,6 +2,7 @@ package no.stelar7.cdragon.types.wem.data;
 
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.writers.ByteWriter;
 
 import java.nio.ByteOrder;
 import java.util.*;

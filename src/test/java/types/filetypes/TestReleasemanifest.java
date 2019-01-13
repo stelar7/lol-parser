@@ -5,6 +5,8 @@ import no.stelar7.cdragon.types.releasemanifest.data.ReleasemanifestDirectory;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.Vector2;
+import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.junit.Test;
 
 import java.io.*;

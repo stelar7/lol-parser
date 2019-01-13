@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.handlers;
 
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.*;
 
 import java.util.*;
 

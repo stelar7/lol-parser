@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.bin.data;
 
-import no.stelar7.cdragon.util.types.Vector2;
+import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.util.*;
 

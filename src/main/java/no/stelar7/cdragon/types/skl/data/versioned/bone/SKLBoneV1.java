@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.skl.data.versioned.bone;
 
 
-import no.stelar7.cdragon.util.types.Matrix4x3f;
+import no.stelar7.cdragon.util.types.math.Matrix4x3f;
 
 public class SKLBoneV1
 {

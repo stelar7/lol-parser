@@ -1,10 +1,11 @@
-package no.stelar7.cdragon.util.types;
+package no.stelar7.cdragon.util.types.math;
 
-public class Vector3b
+public class Vector4b
 {
     private byte x;
     private byte y;
     private byte z;
+    private byte w;
     
     public byte getX()
     {
@@ -36,9 +37,19 @@ public class Vector3b
         this.z = z;
     }
     
+    public byte getW()
+    {
+        return w;
+    }
+    
+    public void setW(byte w)
+    {
+        this.w = w;
+    }
+    
     @Override
     public String toString()
     {
-        return String.format("{\"x\":%s, \"y\":%s, \"z\":%s}", x, y, z);
+        return String.format("{\"x\":%s, \"y\":%s, \"z\":%s, \"w\":%s}", x, y, z, w);
     }
 }

@@ -10,6 +10,8 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.math.Vector2;
+import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
@@ -195,7 +197,7 @@ public class TestWAD
                      BINFile parsed = bp.parse(file);
                      Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
-                     file.toFile().deleteOnExit();
+                     //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
                      e.printStackTrace();

@@ -6,7 +6,7 @@ import no.stelar7.cdragon.types.skl.data.*;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import no.stelar7.cdragon.util.types.Vector2;
+import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.viewer.rendering.Renderer;
 import no.stelar7.cdragon.viewer.rendering.models.*;
 import no.stelar7.cdragon.viewer.rendering.shaders.*;

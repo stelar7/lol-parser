@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.mgeo.data;
 
-import no.stelar7.cdragon.util.types.Vector3f;
+import no.stelar7.cdragon.util.types.math.Vector3f;
 
 import java.util.*;
 

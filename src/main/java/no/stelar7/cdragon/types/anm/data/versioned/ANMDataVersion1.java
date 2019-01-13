@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.anm.data.versioned;
 
 import no.stelar7.cdragon.types.anm.data.ANMEntry;
-import no.stelar7.cdragon.util.types.Vector3f;
+import no.stelar7.cdragon.util.types.math.Vector3f;
 
 import java.util.*;
 
