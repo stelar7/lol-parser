@@ -44,17 +44,11 @@ public class TestRMAN
         System.out.println("Parsing Manifest");
         RMANFile data = parser.parse(WebHandler.readBytes(manifestUrl));
         
-        /*
-        RMANFileBodyFile file = data.getBody().getFiles().stream().filter(f -> f.getName().contains("Yorick.cs_CZ")).findAny().get();
-        downloadFileBundles(data, file);
-        extractFile(data, file);
-        */
-        
         int[] counter = {0};
         removeOldBundles(data);
         downloadAllBundles(data);
         
-        // does not include .exr and .dll files
+        // does not include .exe and .dll files
         Map<String, List<RMANFileBodyFile>> filesPerLang = data.getBody()
                                                                .getFiles()
                                                                .stream()
@@ -62,8 +56,13 @@ public class TestRMAN
                                                                .collect(Collectors.groupingBy(
                                                                        f -> f.getName().substring(f.getName().indexOf('.') + 1, f.getName().indexOf('.', f.getName().indexOf('.') + 1))));
         
-        // This is ran in a pool to limit the memory usage (sets the concurrent threads to 6 (parallelism + 1))
-        ForkJoinPool forkJoinPool = new ForkJoinPool(5);
+        
+        long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+        int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
+        
+        // This is ran in a pool to limit the memory usage (sets the concurrent threads to parallelism + 1, instead of core count (12 in my case))
+        ForkJoinPool forkJoinPool = new ForkJoinPool(suggestedThreadCount);
         forkJoinPool.submit(() -> data.getBody()
                                       .getFiles()
                                       .parallelStream()
@@ -91,8 +90,10 @@ public class TestRMAN
                                 .map(s -> s.toUpperCase(Locale.ENGLISH))
                                 .collect(Collectors.toList());
         
+        System.out.println("Found " + has.size() + " bundle files");
         has.removeAll(keep);
         
+        System.out.println(has.size() + " are not used in the current version, so we delete them");
         has.stream()
            .map(s -> s.toUpperCase(Locale.ENGLISH))
            .map(s -> s + ".bundle")
@@ -133,19 +134,37 @@ public class TestRMAN
             Files.createDirectories(outputName.getParent());
             
             System.out.println("Loading bundles needed for " + file.getName());
-            for (String chunkId : file.getChunkIds())
-            {
-                RMANFileBodyBundleChunkInfo info = manifest.getChunkMap().get(chunkId);
-                RandomAccessReader          raf  = new RandomAccessReader(bundleFolder.resolve(info.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
-                raf.seek(info.getOffsetToChunk());
-                byte[] compressedChunkData = raf.readBytes(info.getCompressedSize());
-                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
-                Files.write(outputName, uncompressedData, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
-            }
             
-        } catch (IOException e)
+            List<String>                chunkIds = file.getChunkIds();
+            ByteArrayOutputStream       bos      = new ByteArrayOutputStream();
+            RMANFileBodyBundleChunkInfo current  = manifest.getChunkMap().get(chunkIds.get(0));
+            RandomAccessReader          raf      = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
+            for (int i = 0, chunkIdsSize = chunkIds.size(); i < chunkIdsSize; i++)
+            {
+                raf.seek(current.getOffsetToChunk());
+                byte[] compressedChunkData = raf.readBytes(current.getCompressedSize());
+                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
+                bos.write(uncompressedData);
+                
+                System.out.println((i + 1) + "/" + chunkIdsSize);
+                if (i + 1 >= chunkIdsSize)
+                {
+                    break;
+                }
+                
+                RMANFileBodyBundleChunkInfo next = manifest.getChunkMap().get(chunkIds.get(i + 1));
+                if (!current.getBundleId().equals(next.getBundleId()))
+                {
+                    raf = new RandomAccessReader(bundleFolder.resolve(next.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
+                }
+                
+                current = next;
+            }
+            Files.write(outputName, bos.toByteArray(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            
+        } catch (IOException e1)
         {
-            e.printStackTrace();
+            e1.printStackTrace();
         }
     }
     

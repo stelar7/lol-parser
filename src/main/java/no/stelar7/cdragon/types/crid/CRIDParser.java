@@ -93,9 +93,9 @@ public class CRIDParser implements Parseable<CRIDFile>
         }
         
         file.setStreams(parseStreamInfo(file.getMetadata()));
-        //List<NamedByteWriter> writers = openWriters(file.getStreams());
         
         // todo
+        //List<NamedByteWriter> writers = openWriters(file.getStreams());
         raf.seek(0);
         file.setStreamData(demultiplexStream(raf));
         

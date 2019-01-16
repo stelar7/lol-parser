@@ -67,12 +67,12 @@ public class RMANFileBodyBundleChunk
                Objects.equals(chunkId, that.chunkId);
     }
     
+    /*
     @Override
     public int hashCode()
     {
         return Objects.hash(offsetTableOffset, compressedSize, uncompressedSize, chunkId);
     }
-    
     @Override
     public String toString()
     {
@@ -82,5 +82,5 @@ public class RMANFileBodyBundleChunk
                ", uncompressedSize=" + uncompressedSize +
                ", chunkId=" + chunkId +
                '}';
-    }
+    }*/
 }

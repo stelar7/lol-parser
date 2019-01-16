@@ -119,8 +119,8 @@ public class RMANFile
     {
         return "RMANFile{" +
                "header=" + header +
-               ", compressedBody=" + Arrays.toString(compressedBody) +
-               ", signature=" + Arrays.toString(signature) +
+               ", compressedBody=" + compressedBody +
+               ", signature=" + signature +
                ", body=" + body +
                '}';
     }

@@ -1,6 +1,8 @@
 {
     "f28104ec37accd10": "plugins/rcp-fe-lol-replays-settings/description.json",
     "164182f07a1e7f98": "plugins/rcp-fe-lol-replays-settings/global/.ds_store",
+    "5648d60bbfb12b95": "plugins/rcp-fe-lol-replays-settings/global/ar_eg/styles.css",
+    "1ccb9d47cb802a3c": "plugins/rcp-fe-lol-replays-settings/global/ar_eg/trans.json",
     "eea90eb80ed83a57": "plugins/rcp-fe-lol-replays-settings/global/cs_cz/trans.json",
     "cdc58188b6a4a99d": "plugins/rcp-fe-lol-replays-settings/global/de_de/trans.json",
     "9d7b50b34e32c97a": "plugins/rcp-fe-lol-replays-settings/global/default/icon-edit-click.png",
@@ -9,6 +11,7 @@
     "b5cf0a566c5ce459": "plugins/rcp-fe-lol-replays-settings/global/default/index.html",
     "b224f78df1a926ef": "plugins/rcp-fe-lol-replays-settings/global/default/init.js",
     "94a58f1b8e17b9f8": "plugins/rcp-fe-lol-replays-settings/global/default/license.json",
+    "b72f3c25ab7b16ec": "plugins/rcp-fe-lol-replays-settings/global/default/styles.css",
     "cdb20dd97becd011": "plugins/rcp-fe-lol-replays-settings/global/default/trans.json",
     "49ff8e56ce55a32d": "plugins/rcp-fe-lol-replays-settings/global/el_gr/trans.json",
     "f1c5968473404f99": "plugins/rcp-fe-lol-replays-settings/global/en_au/trans.json",

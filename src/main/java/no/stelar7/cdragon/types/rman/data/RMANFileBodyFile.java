@@ -234,12 +234,12 @@ public class RMANFileBodyFile
                Objects.equals(chunkIds, that.chunkIds);
     }
     
+    /*
     @Override
     public int hashCode()
     {
         return Objects.hash(offset, offsetTableOffset, unknown1, nameOffset, name, structSize, symlinkOffset, symlink, fileId, directoryId, fileSize, permissions, languageId, unknown2, unknown3, chunkIds);
     }
-    
     @Override
     public String toString()
     {
@@ -262,4 +262,5 @@ public class RMANFileBodyFile
                ", chunkIds=" + chunkIds +
                '}';
     }
+    */
 }

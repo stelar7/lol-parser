@@ -91,6 +91,7 @@ public class RMANFileBodyBundle
                Objects.equals(chunks, that.chunks);
     }
     
+    /*
     @Override
     public int hashCode()
     {
@@ -98,7 +99,6 @@ public class RMANFileBodyBundle
         result = 31 * result + Arrays.hashCode(skipped);
         return result;
     }
-    
     @Override
     public String toString()
     {
@@ -107,8 +107,9 @@ public class RMANFileBodyBundle
                ", offsetTableOffset=" + offsetTableOffset +
                ", headerSize=" + headerSize +
                ", bundleId=" + bundleId +
-               ", skipped=" + Arrays.toString(skipped) +
+               ", skipped=" + skipped +
                ", chunks=" + chunks +
                '}';
     }
+    */
 }
