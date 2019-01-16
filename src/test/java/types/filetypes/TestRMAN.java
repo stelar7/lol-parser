@@ -27,16 +27,9 @@ public class TestRMAN
         String patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
         String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
         
-        
         JsonObject obj     = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
         int        version = obj.get("version").getAsInt();
         System.out.println("Found patch version " + version);
-        
-        if (version < 42)
-        {
-            System.out.println("Version older than 42 found! PBE is on atleast this version, so we quit..");
-            System.exit(0);
-        }
         
         System.out.println("Downloading bundle manifest");
         String manifestUrl = obj.get("game_patch_url").getAsString();
@@ -62,7 +55,7 @@ public class TestRMAN
         int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
         
         // This is ran in a pool to limit the memory usage (sets the concurrent threads to parallelism + 1, instead of core count (12 in my case))
-        ForkJoinPool forkJoinPool = new ForkJoinPool(suggestedThreadCount);
+        ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
         forkJoinPool.submit(() -> data.getBody()
                                       .getFiles()
                                       .parallelStream()
@@ -146,7 +139,6 @@ public class TestRMAN
                 byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
                 bos.write(uncompressedData);
                 
-                System.out.println((i + 1) + "/" + chunkIdsSize);
                 if (i + 1 >= chunkIdsSize)
                 {
                     break;
