@@ -66,7 +66,7 @@ public class BINFile
             
             this.entries.forEach(e -> {
                 bw.writeInt(e.getLenght());
-                bw.writeInt(HashHandler.getBinKeyForHash(e.getHash()));
+                bw.writeInt(Integer.parseInt(HashHandler.getBinKeyForHash(e.getHash()), 16));
                 bw.writeShort(e.getValueCount());
                 e.getValues().forEach(v -> writeBinValue(v.getType(), v, bw, true));
             });
@@ -83,7 +83,7 @@ public class BINFile
         if (writeHeader)
         {
             BINValue t = (BINValue) v;
-            bw.writeInt(HashHandler.getBinKeyForHash(t.getHash()));
+            bw.writeInt(Integer.parseInt(HashHandler.getBinKeyForHash(t.getHash()), 16));
             bw.writeByte((byte) type.value);
         }
         
@@ -164,7 +164,7 @@ public class BINFile
             }
             case STRING_HASH:
             {
-                bw.writeInt(HashHandler.getBinKeyForHash(String.valueOf(datapoint)));
+                bw.writeInt(Integer.parseInt(HashHandler.getBinKeyForHash(String.valueOf(datapoint)), 16));
                 break;
             }
             case CONTAINER:
@@ -180,7 +180,7 @@ public class BINFile
             case EMBEDDED:
             {
                 BINStruct bs = (BINStruct) datapoint;
-                bw.writeInt(HashHandler.getBinKeyForHash(bs.getHash()));
+                bw.writeInt(Integer.parseInt(HashHandler.getBinKeyForHash(bs.getHash()), 16));
                 bw.writeInt(bs.getSize());
                 bw.writeShort(bs.getCount());
                 bs.getData().forEach(bv -> writeBinValue(bv.getType(), bv, bw, true));

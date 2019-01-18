@@ -14,7 +14,7 @@ public class FNVHashTest
         while (true)
         {
             String input = sc.nextLine();
-            System.out.println(HashHandler.computeBINHash(input));
+            System.out.println(HashHandler.getBINHash(input));
         }
     }
 }

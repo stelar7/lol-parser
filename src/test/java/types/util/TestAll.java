@@ -73,6 +73,7 @@ public class TestAll
     private final List<String> filenames = Arrays.asList(
             "v1/champion-summary.json",
             "v1/championperkstylemap.json",
+            "v1/discord_strings.json",
             "v1/hovertips.json",
             "v1/items.json",
             "v1/loot.json",
@@ -91,6 +92,7 @@ public class TestAll
             "v1/summoner-masteries.json",
             "v1/summoner-spells.json",
             "v1/summoner-trophies.json",
+            "v1/summonericons.json",
             "v1/summonericons.json",
             "v1/ward-skins.json"
                                                         );

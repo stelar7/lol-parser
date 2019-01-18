@@ -38,23 +38,51 @@ public class TestRMAN
         RMANFile data = parser.parse(WebHandler.readBytes(manifestUrl));
         
         int[] counter = {0};
-        removeOldBundles(data);
+        
+        List<String> removedBundles = getRemovedBundleIds(data);
+        removeOldBundles(removedBundles);
+        
         downloadAllBundles(data);
+        /*
+        List<String> addedBundles   = getNewBundleIds(data);
+        
+        List<RMANFileBodyBundle> newBundles = data.getBody()
+                                                  .getBundles()
+                                                  .stream()
+                                                  .filter(b -> addedBundles.contains(b.getBundleId()))
+                                                  .collect(Collectors.toList());
+        
+        downloadBundles(newBundles);
+        List<RMANFileBodyFile> updatedFiles = data.getBody()
+                                                  .getFiles()
+                                                  .stream()
+                                                  .filter(f -> {
+                                                      for (String chunkId : f.getChunkIds())
+                                                      {
+                                                          String bundle = data.getChunkMap().get(chunkId).getBundleId();
+                                                          if (addedBundles.contains(bundle))
+                                                          {
+                                                              return true;
+                                                          }
+                                                      }
+                                                      return false;
+                                                  }).collect(Collectors.toList());
         
         // does not include .exe and .dll files
+        /*
         Map<String, List<RMANFileBodyFile>> filesPerLang = data.getBody()
                                                                .getFiles()
                                                                .stream()
                                                                .filter(f -> f.getName().substring(f.getName().indexOf('.') + 1).contains("."))
                                                                .collect(Collectors.groupingBy(
                                                                        f -> f.getName().substring(f.getName().indexOf('.') + 1, f.getName().indexOf('.', f.getName().indexOf('.') + 1))));
-        
+        */
         
         long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
         int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
         
-        // This is ran in a pool to limit the memory usage (sets the concurrent threads to parallelism + 1, instead of core count (12 in my case))
+        // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
         ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
         forkJoinPool.submit(() -> data.getBody()
                                       .getFiles()
@@ -71,7 +99,7 @@ public class TestRMAN
         tw.testCDragonWAD();
     }
     
-    public void removeOldBundles(RMANFile data) throws IOException
+    private List<String> getRemovedBundleIds(RMANFile data) throws IOException
     {
         Path        bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
         Set<String> keep         = data.getBundleMap().keySet();
@@ -82,23 +110,41 @@ public class TestRMAN
                                 .map(s -> s.substring(0, 16))
                                 .map(s -> s.toUpperCase(Locale.ENGLISH))
                                 .collect(Collectors.toList());
-        
-        System.out.println("Found " + has.size() + " bundle files");
         has.removeAll(keep);
-        
-        System.out.println(has.size() + " are not used in the current version, so we delete them");
-        has.stream()
-           .map(s -> s.toUpperCase(Locale.ENGLISH))
-           .map(s -> s + ".bundle")
-           .forEach(s -> {
-               try
-               {
-                   Files.deleteIfExists(bundleFolder.resolve(s));
-               } catch (IOException e)
-               {
-                   e.printStackTrace();
-               }
-           });
+        return has;
+    }
+    
+    private List<String> getNewBundleIds(RMANFile data) throws IOException
+    {
+        Path        bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Set<String> keep         = data.getBundleMap().keySet();
+        List<String> has = Files.walk(bundleFolder)
+                                .map(Path::getFileName)
+                                .map(Path::toString)
+                                .filter(s -> s.endsWith(".bundle"))
+                                .map(s -> s.substring(0, 16))
+                                .map(s -> s.toUpperCase(Locale.ENGLISH))
+                                .collect(Collectors.toList());
+        keep.removeAll(has);
+        return new ArrayList<>(keep);
+    }
+    
+    public void removeOldBundles(List<String> bundleIds)
+    {
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        System.out.println(bundleIds.size() + " are not used in the current version, so we delete them");
+        bundleIds.stream()
+                 .map(s -> s.toUpperCase(Locale.ENGLISH))
+                 .map(s -> s + ".bundle")
+                 .forEach(s -> {
+                     try
+                     {
+                         Files.deleteIfExists(bundleFolder.resolve(s));
+                     } catch (IOException e)
+                     {
+                         e.printStackTrace();
+                     }
+                 });
     }
     
     private void downloadAllBundles(RMANFile manifest) throws IOException
@@ -152,7 +198,7 @@ public class TestRMAN
                 
                 current = next;
             }
-            Files.write(outputName, bos.toByteArray(), StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            Files.write(outputName, bos.toByteArray());
             
         } catch (IOException e1)
         {

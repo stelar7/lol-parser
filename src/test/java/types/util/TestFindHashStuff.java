@@ -18,6 +18,22 @@ import java.util.stream.Collectors;
 public class TestFindHashStuff
 {
     @Test
+    public void parseStringsFile() throws IOException
+    {
+        Path     stringPath = Paths.get("C:\\Riot Games\\exe.txt");
+        String[] parts      = String.join("", Files.readAllLines(stringPath)).split(".exe: ");
+        String jsonStrings = Arrays.stream(parts)
+                                   .map(s -> s.split("\n")[0].split("./League")[0])
+                                   .filter(s -> !s.isBlank())
+                                   .collect(Collectors.joining("\n"));
+        
+        List<String> lines = Arrays.stream(jsonStrings.split("\n")).collect(Collectors.toList());
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("bins.txt"), jsonStrings.getBytes(StandardCharsets.UTF_8));
+        System.out.println();
+    }
+    
+    
+    @Test
     public void checkNewFiles() throws IOException
     {
         Path binPath      = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");

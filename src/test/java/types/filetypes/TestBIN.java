@@ -281,7 +281,7 @@ public class TestBIN
             return;
         }
         
-        String hash = String.valueOf(HashHandler.computeBINHash(prefix));
+        String hash = String.valueOf(HashHandler.getBINHash(prefix));
         if (list.contains(hash))
         {
             String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
@@ -295,7 +295,7 @@ public class TestBIN
         List<String> names = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("BinHashes.txt"));
         System.out.println(HashHandler.getBinHashes().size());
         names.forEach(n -> {
-            long hash = HashHandler.computeBINHash(n);
+            String hash = HashHandler.getBINHash(n);
             HashHandler.getBinHashes().put(hash, n);
         });
         
@@ -306,7 +306,7 @@ public class TestBIN
     @Test
     public void sortHashes() throws IOException
     {
-        List<Entry<Long, String>> hashes = new ArrayList<>(HashHandler.getBinHashes().entrySet());
+        List<Entry<String, String>> hashes = new ArrayList<>(HashHandler.getBinHashes().entrySet());
         hashes.sort(Entry.comparingByKey());
         
         try (JsonWriter writer = new JsonWriter(new BufferedWriter(new FileWriter(HashHandler.BIN_HASH_STORE.toFile()))))
@@ -316,7 +316,7 @@ public class TestBIN
             hashes.forEach(e -> {
                 try
                 {
-                    writer.name(e.getKey().toString()).value(e.getValue().replace("\\", "\\\\"));
+                    writer.name(e.getKey()).value(e.getValue().replace("\\", "\\\\"));
                 } catch (IOException e1)
                 {
                     e1.printStackTrace();
@@ -485,7 +485,10 @@ public class TestBIN
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(bp::parse);
         
-        String output = String.join("\n", BINParser.hashes);
+        List<String> sortedHashes = new ArrayList<>(BINParser.hashes);
+        Collections.sort(sortedHashes);
+        
+        String output = String.join("\n", sortedHashes);
         Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("binHashes.txt"), output.getBytes(StandardCharsets.UTF_8));
     }
     
@@ -499,20 +502,24 @@ public class TestBIN
         List<String> wordsToTest = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("wordsToTest.txt"));
         
         System.out.println("Starting tests...");
-        StringBuilder sb = new StringBuilder("{\n");
+        Set<String> outputHashes = new HashSet<>();
         wordsToTest.forEach(w -> {
-            String hash = String.valueOf(HashHandler.computeBINHash(w));
+            String hash = String.valueOf(HashHandler.getBINHash(w.toLowerCase(Locale.ENGLISH)));
             if (hashes.contains(hash))
             {
                 System.out.printf("Found a new hash! (%s)%n", w);
-                sb.append(String.format("\t\"%s\":\"%s\",", hash, w));
-                sb.append("\n");
+                outputHashes.add(w);
             }
+        });
+        
+        StringBuilder sb = new StringBuilder("{\n");
+        outputHashes.forEach(w -> {
+            sb.append(String.format("\t\"%s\":\"%s\",", HashHandler.getBINHash(w.toLowerCase(Locale.ENGLISH)), w));
+            sb.append("\n");
         });
         sb.reverse().deleteCharAt(1).reverse();
         sb.append("}");
         
-        System.out.println(sb.toString());
+        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("newBinHashes.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
     }
-    
 }

@@ -49,8 +49,8 @@ public class BINParser implements Parseable<BINFile>
             int lengthCheck = raf.pos() + Integer.BYTES;
             entry.setLenght(raf.readInt());
             entry.setHash(HashHandler.getBINHash(raf.readInt()));
-            hashes.add(entry.getHash());
             entry.setValueCount(raf.readShort());
+            hashes.add(entry.getHash());
             
             for (int j = 0; j < entry.getValueCount(); j++)
             {
@@ -63,6 +63,7 @@ public class BINParser implements Parseable<BINFile>
             if (lengthCheck + entry.getLenght() != raf.pos())
             {
                 System.out.format("Wrong detail size from %s to %s, value %s, expected %s%n", lengthCheck, raf.pos(), raf.pos() - lengthCheck, entry.getLenght());
+                break;
             }
         }
     }
@@ -72,9 +73,9 @@ public class BINParser implements Parseable<BINFile>
         BINValue value = new BINValue();
         
         value.setHash(HashHandler.getBINHash(raf.readInt()));
-        hashes.add(value.getHash());
         value.setType(BINValueType.valueOf(raf.readByte()));
         value.setValue(readByType(value.getType(), raf));
+        hashes.add(value.getHash());
         
         return value;
     }
@@ -139,7 +140,7 @@ public class BINParser implements Parseable<BINFile>
                 bs.setHash(HashHandler.getBINHash(raf.readInt()));
                 hashes.add(bs.getHash());
                 
-                if (bs.getHash().equalsIgnoreCase("0"))
+                if (bs.getHash().equalsIgnoreCase("00000000"))
                 {
                     return bs;
                 }

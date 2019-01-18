@@ -108,7 +108,7 @@ public class WADFile
     
     public void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName)
     {
-        String filename = HashHandler.loadAllWadHashes().getOrDefault(header.getPathHash(), "unknown\\" + header.getPathHash());
+        String filename = HashHandler.loadAllWadHashes().getOrDefault(header.getPathHash().toLowerCase(Locale.ENGLISH), "unknown\\" + header.getPathHash());
         Path   self     = savePath.resolve(filename);
         
         if (self.toString().length() > 255)

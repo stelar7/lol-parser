@@ -20,7 +20,7 @@ public class HashHandler
     public static final Path BIN_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\bin\\binhash.json");
     public static final Path INI_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\inibin\\inihash.json");
     
-    private static Map<Long, String>                binHashNames;
+    private static Map<String, String>              binHashNames;
     private static Map<Long, String>                iniHashNames;
     private static Map<String, Map<String, String>> wadHashNames = new HashMap<>();
     
@@ -59,6 +59,11 @@ public class HashHandler
     public static String toHex(Long str, int minLength)
     {
         StringBuilder pre = new StringBuilder(String.format("%016X", str).toUpperCase(Locale.ENGLISH));
+        while (pre.length() > 0 && pre.charAt(0) == '0')
+        {
+            pre.deleteCharAt(0);
+        }
+        
         while (pre.length() < minLength)
         {
             pre.insert(0, "0");
@@ -90,7 +95,7 @@ public class HashHandler
     
     
     // FNV-1a
-    public static long computeBINHash(String input)
+    private static long computeBINHash(String input)
     {
         String toHash = input.toLowerCase(Locale.ENGLISH);
         int    hash   = Integer.parseUnsignedInt("2166136261");
@@ -212,8 +217,16 @@ public class HashHandler
     
     public static String getBINHash(int hash)
     {
-        long val = Integer.toUnsignedLong(hash);
-        return getBinHashes().getOrDefault(val, String.valueOf(val));
+        long   val = Integer.toUnsignedLong(hash);
+        String hex = toHex(val, 8);
+        return getBinHashes().getOrDefault(hex, String.valueOf(hex));
+    }
+    
+    public static String getBINHash(String hash)
+    {
+        long   hashed = computeBINHash(hash);
+        String hex    = toHex(hashed, 8);
+        return getBinHashes().getOrDefault(hex, String.valueOf(hex));
     }
     
     public static boolean hasBINHash(String hash)
@@ -228,7 +241,7 @@ public class HashHandler
     }
     
     
-    public static Map<Long, String> getBinHashes()
+    public static Map<String, String> getBinHashes()
     {
         if (binHashNames != null)
         {
@@ -238,7 +251,7 @@ public class HashHandler
         try
         {
             String sb = UtilHandler.readInternalAsString("hashes/bin/binhash.json");
-            binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
             System.out.println("Loaded known bin hashes");
         } catch (Exception e)
         {
@@ -298,24 +311,24 @@ public class HashHandler
         return getWadHashes(plugin);
     }
     
-    private static Map<String, Long> reverseCache = new HashMap<>();
+    private static Map<String, String> reverseCache = new HashMap<>();
     
-    public static int getBinKeyForHash(String hash)
+    public static String getBinKeyForHash(String hash)
     {
         if (reverseCache.containsKey(hash))
         {
-            return reverseCache.get(hash).intValue();
+            return reverseCache.get(hash);
         }
         
-        Long value = getBinHashes().entrySet()
-                                   .stream()
-                                   .filter(e -> e.getValue().toLowerCase().equalsIgnoreCase(hash.toLowerCase()))
-                                   .findAny()
-                                   .map(Map.Entry::getKey)
-                                   .orElseGet(() -> Long.valueOf(hash));
+        String value = getBinHashes().entrySet()
+                                     .stream()
+                                     .filter(e -> e.getValue().toLowerCase().equalsIgnoreCase(hash.toLowerCase()))
+                                     .findAny()
+                                     .map(Map.Entry::getKey)
+                                     .orElse(hash);
         
         reverseCache.put(hash, value);
-        return value.intValue();
+        return value;
     }
     
     private static Map<String, String> all;
