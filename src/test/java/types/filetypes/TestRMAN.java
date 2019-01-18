@@ -96,6 +96,7 @@ public class TestRMAN
         forkJoinPool.shutdown();
         
         TestWAD tw = new TestWAD();
+        tw.testPullCDTB();
         tw.testCDragonWAD();
     }
     
