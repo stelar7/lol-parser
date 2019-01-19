@@ -86,12 +86,20 @@ public class CRIDFile
             
             if (hasAlpha)
             {
-                String alphaFilename = getStreamData().stream().filter(s -> s.getA().contains("@ALP")).findFirst().get().getA();
-                alphaFilename = extractPath.resolve(alphaFilename).toAbsolutePath().toString();
-                String colorFilename = getStreamData().stream().filter(s -> s.getA().contains("@SFV")).findFirst().get().getA();
-                colorFilename = extractPath.resolve(colorFilename).toAbsolutePath().toString();
+                String alphaFilename  = getStreamData().stream().filter(s -> s.getA().contains("@ALP")).findFirst().get().getA();
+                String colorFilename  = getStreamData().stream().filter(s -> s.getA().contains("@SFV")).findFirst().get().getA();
                 String outputFilename = getStreamData().stream().filter(s -> s.getA().contains("@SFV")).findFirst().get().getA().replace("@SFV", "");
-                outputFilename = UtilHandler.replaceEnding(extractPath.resolve(outputFilename).toAbsolutePath().toString(), "m2v", "mp4");
+                
+                Path alphaFile  = extractPath.resolve(alphaFilename);
+                Path colorFile  = extractPath.resolve(colorFilename);
+                Path outputFile = extractPath.resolve(outputFilename);
+                
+                alphaFile.toFile().deleteOnExit();
+                colorFile.toFile().deleteOnExit();
+                
+                alphaFilename = alphaFile.toAbsolutePath().toString();
+                colorFilename = colorFile.toAbsolutePath().toString();
+                outputFilename = UtilHandler.replaceEnding(outputFile.toAbsolutePath().toString(), "m2v", "mp4");
                 
                 String         FFMPEG_COMMAND = "ffmpeg -y -i " + colorFilename + " -i " + alphaFilename + " -filter_complex \"[0:v][1:v]premultiply\" -c:v libx264 -an " + outputFilename;
                 ProcessBuilder pb             = new ProcessBuilder();
