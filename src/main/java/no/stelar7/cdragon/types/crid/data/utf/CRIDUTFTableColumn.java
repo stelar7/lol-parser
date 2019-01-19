@@ -1,22 +1,23 @@
 package no.stelar7.cdragon.types.crid.data.utf;
 
+
 import java.util.*;
 
 public class CRIDUTFTableColumn
 {
-    int          type;
+    int          typeFlags;
     String       columnName;
     int          constantOffset;
     List<Object> values = new ArrayList<>();
     
-    public int getType()
+    public int getTypeFlags()
     {
-        return type;
+        return typeFlags;
     }
     
-    public void setType(int type)
+    public void setTypeFlags(int typeFlags)
     {
-        this.type = type;
+        this.typeFlags = typeFlags;
     }
     
     public String getColumnName()
@@ -53,7 +54,7 @@ public class CRIDUTFTableColumn
     public String toString()
     {
         return "CRIDUTFTableColumn{" +
-               "type=" + type +
+               "type=" + Integer.toBinaryString(typeFlags) +
                ", columnName='" + columnName + '\'' +
                ", constantOffset=" + constantOffset +
                ", values=" + values +

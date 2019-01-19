@@ -1,8 +1,11 @@
 package no.stelar7.cdragon.types.crid.data;
 
 import no.stelar7.cdragon.types.crid.data.utf.CRIDUTFTable;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.types.Pair;
 
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.List;
 
 public class CRIDFile
@@ -61,5 +64,45 @@ public class CRIDFile
                ", streams=" + streams +
                ", streamData=" + streamData +
                '}';
+    }
+    
+    public void extractStreams(Path extractPath)
+    {
+        try
+        {
+            boolean hasAlpha = false;
+            for (Pair<String, byte[]> pair : getStreamData())
+            {
+                String filename = pair.getA();
+                byte[] data     = pair.getB();
+                
+                if (filename.contains("@ALP"))
+                {
+                    hasAlpha = true;
+                }
+                
+                Files.write(extractPath.resolve(filename), data);
+            }
+            
+            if (hasAlpha)
+            {
+                String alphaFilename = getStreamData().stream().filter(s -> s.getA().contains("@ALP")).findFirst().get().getA();
+                alphaFilename = extractPath.resolve(alphaFilename).toAbsolutePath().toString();
+                String colorFilename = getStreamData().stream().filter(s -> s.getA().contains("@SFV")).findFirst().get().getA();
+                colorFilename = extractPath.resolve(colorFilename).toAbsolutePath().toString();
+                String outputFilename = getStreamData().stream().filter(s -> s.getA().contains("@SFV")).findFirst().get().getA().replace("@SFV", "");
+                outputFilename = UtilHandler.replaceEnding(extractPath.resolve(outputFilename).toAbsolutePath().toString(), "m2v", "mp4");
+                
+                String         FFMPEG_COMMAND = "ffmpeg -y -i " + colorFilename + " -i " + alphaFilename + " -filter_complex \"[0:v][1:v]premultiply\" -c:v libx264 -an " + outputFilename;
+                ProcessBuilder pb             = new ProcessBuilder();
+                pb.command(FFMPEG_COMMAND.split(" "));
+                pb.inheritIO();
+                Process pr = pb.start();
+                pr.waitFor();
+            }
+        } catch (IOException | InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

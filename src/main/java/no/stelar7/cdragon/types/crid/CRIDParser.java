@@ -94,10 +94,8 @@ public class CRIDParser implements Parseable<CRIDFile>
         
         file.setStreams(parseStreamInfo(file.getMetadata()));
         
-        // todo
-        //List<NamedByteWriter> writers = openWriters(file.getStreams());
         raf.seek(0);
-        file.setStreamData(demultiplexStream(raf));
+        file.setStreamData(demultiplexStream(raf, file.getStreams()));
         
         return file;
     }
@@ -216,10 +214,10 @@ public class CRIDParser implements Parseable<CRIDFile>
         for (int i = 0; i < table.getColumns(); i++)
         {
             CRIDUTFTableColumn column = new CRIDUTFTableColumn();
-            column.setType(raf.readByte());
+            column.setTypeFlags(raf.readByte());
             int columnNameOffset = raf.readInt();
             column.setColumnName(table.getStringTable().substring(columnNameOffset, table.getStringTable().indexOf('\0', columnNameOffset)));
-            int maskedType = column.getType() & CRIDUTFTableColumnType.COLUMN_TYPE_MASK.getValue();
+            int maskedType = column.getTypeFlags() & CRIDUTFTableColumnType.COLUMN_TYPE_MASK.getValue();
             if (maskedType == 0x30)
             {
                 column.setConstantOffset(raf.pos());
@@ -271,7 +269,7 @@ public class CRIDParser implements Parseable<CRIDFile>
             
             for (int j = 0; j < table.getColumns(); j++)
             {
-                int     type           = table.getSchema().get(j).getType();
+                int     type           = table.getSchema().get(j).getTypeFlags();
                 String  columnName     = table.getSchema().get(j).getColumnName();
                 int     constantOffset = table.getSchema().get(j).getConstantOffset();
                 boolean constant       = false;
@@ -416,7 +414,7 @@ public class CRIDParser implements Parseable<CRIDFile>
         return table;
     }
     
-    private List<Pair<String, byte[]>> demultiplexStream(RandomAccessReader reader)
+    private List<Pair<String, byte[]>> demultiplexStream(RandomAccessReader reader, List<CRIDStreamInfo> streamData)
     {
         if (reader.readUntillString(CRID_SIGNATURE))
         {
@@ -474,10 +472,8 @@ public class CRIDParser implements Parseable<CRIDFile>
                             
                             if (!streamOutputWriters.containsKey(currentStreamKey))
                             {
-                                byte[] currentBlockName = ByteBuffer.allocate(4).putInt(currentStreamKey).order(ByteOrder.LITTLE_ENDIAN).array();
-                                String filePath         = UtilHandler.pathToFilename(reader.getPath());
-                                String blockHash        = HashHandler.toHex(currentBlockName);
-                                String outputFilename   = filePath + "_" + blockHash;
+                                CRIDStreamInfo stream         = streamData.stream().filter(a -> a.getStreamType().equals(block.getBlockKey())).findFirst().get();
+                                String         outputFilename = stream.getFilename() + stream.getStreamType();
                                 
                                 if (audioBlock)
                                 {
@@ -491,35 +487,28 @@ public class CRIDParser implements Parseable<CRIDFile>
                                 streamOutputWriters.put(currentStreamKey, new NamedByteWriter(outputFilename));
                             }
                             
+                            int skipSize       = 0;
+                            int footerSkipSize = 0;
+                            
                             if (audioBlock)
                             {
-                                int audioBlockSkipSize   = getAudioPacketHeaderSize(reader, currentPos);
-                                int audioBlockFooterSize = getAudioPacketFooterSize(reader, currentPos);
-                                
-                                int cutSize = blockSize - audioBlockSkipSize - audioBlockFooterSize;
-                                if (cutSize > 0)
-                                {
-                                    int pos = reader.pos();
-                                    reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + audioBlockSkipSize);
-                                    byte[] data = reader.readBytes(blockSize - audioBlockSkipSize);
-                                    streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
-                                    reader.seek(pos);
-                                    
-                                }
+                                skipSize = getAudioPacketHeaderSize(reader, currentPos);
+                                footerSkipSize = getAudioPacketFooterSize(reader, currentPos);
                             } else
                             {
-                                int videoBlockSkipSize   = getVideoPacketHeaderSize(reader, currentPos);
-                                int videoBlockFooterSize = getVideoPacketFooterSize(reader, currentPos);
+                                skipSize = getVideoPacketHeaderSize(reader, currentPos);
+                                footerSkipSize = getVideoPacketFooterSize(reader, currentPos);
+                            }
+                            
+                            int cutSize = blockSize - skipSize - footerSkipSize;
+                            if (cutSize > 0)
+                            {
+                                int pos = reader.pos();
+                                reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + skipSize);
+                                byte[] data = reader.readBytes(blockSize - skipSize);
+                                streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
+                                reader.seek(pos);
                                 
-                                int cutSize = blockSize - videoBlockSkipSize - videoBlockFooterSize;
-                                if (cutSize > 0)
-                                {
-                                    int pos = reader.pos();
-                                    reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + videoBlockSkipSize);
-                                    byte[] data = reader.readBytes(blockSize - videoBlockSkipSize);
-                                    streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
-                                    reader.seek(pos);
-                                }
                             }
                         }
                         
@@ -590,17 +579,14 @@ public class CRIDParser implements Parseable<CRIDFile>
     
     private boolean isVideoBlock(byte[] blockToCheck)
     {
-        return compareSegmentUsingSourceOffset(blockToCheck, 0, SFV_SIGNATURE.getBytes(StandardCharsets.UTF_8));
+        boolean isVideo = compareSegmentUsingSourceOffset(blockToCheck, 0, SFV_SIGNATURE.getBytes(StandardCharsets.UTF_8));
+        boolean isAlpha = compareSegmentUsingSourceOffset(blockToCheck, 0, ALP_SIGNATURE.getBytes(StandardCharsets.UTF_8));
+        return isVideo || isAlpha;
     }
     
     private boolean isAudioBlock(byte[] blockToCheck)
     {
-        return compareSegmentUsingSourceOffset(blockToCheck, 0, SFA_SIGNATURE.getBytes(StandardCharsets.UTF_8));
-    }
-    
-    private boolean isUTFBlock(byte[] blockToCheck)
-    {
-        return compareSegmentUsingSourceOffset(blockToCheck, 0, UTF_SIGNATURE.getBytes(StandardCharsets.UTF_8));
+        return (compareSegmentUsingSourceOffset(blockToCheck, 0, SFA_SIGNATURE.getBytes(StandardCharsets.UTF_8)));
     }
     
     private List<Pair<String, byte[]>> finalize(RandomAccessReader raf, Map<Integer, NamedByteWriter> outputFiles)
