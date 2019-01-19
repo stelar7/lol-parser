@@ -6,7 +6,7 @@ import no.stelar7.cdragon.util.types.Pair;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.List;
+import java.util.*;
 
 public class CRIDFile
 {
@@ -101,7 +101,9 @@ public class CRIDFile
                 colorFilename = colorFile.toAbsolutePath().toString();
                 outputFilename = UtilHandler.replaceEnding(outputFile.toAbsolutePath().toString(), "m2v", "mp4");
                 
-                String         FFMPEG_COMMAND = "ffmpeg -y -i " + colorFilename + " -i " + alphaFilename + " -filter_complex \"[0:v][1:v]premultiply\" -c:v libx264 -an " + outputFilename;
+                int averageBPS = getStreams().stream().max(Comparator.comparing(CRIDStreamInfo::getAvgBps)).get().avgBps;
+                
+                String         FFMPEG_COMMAND = "ffmpeg -y -i " + colorFilename + " -i " + alphaFilename + " -filter_complex \"[0:v][1:v]premultiply\" -b:v " + averageBPS + " -c:v libx264 -an " + outputFilename;
                 ProcessBuilder pb             = new ProcessBuilder();
                 pb.command(FFMPEG_COMMAND.split(" "));
                 pb.inheritIO();
