@@ -23,8 +23,8 @@ public class WadExtracter
         }
         
         Path    path = Paths.get(args[0]);
-        WADFile img  = parser.parse(path);
+        WADFile wad  = parser.parse(path);
         
-        img.extractFiles("", "", path);
+        wad.extractFiles(path);
     }
 }

@@ -283,6 +283,53 @@ public class HashHandler
         return getIniHashes();
     }
     
+    private static Map<String, String> reverseCache = new HashMap<>();
+    
+    public static String getBinKeyForHash(String hash)
+    {
+        if (reverseCache.containsKey(hash))
+        {
+            return reverseCache.get(hash);
+        }
+        
+        String value = getBinHashes().entrySet()
+                                     .stream()
+                                     .filter(e -> e.getValue().toLowerCase().equalsIgnoreCase(hash.toLowerCase()))
+                                     .findAny()
+                                     .map(Map.Entry::getKey)
+                                     .orElse(hash);
+        
+        reverseCache.put(hash, value);
+        return value;
+    }
+    
+    private static Map<String, String> all;
+    
+    public static String getWadHash(String hash)
+    {
+        return loadAllWadHashes().getOrDefault(hash.toLowerCase(Locale.ENGLISH), hash);
+    }
+    
+    @SuppressWarnings("unchecked")
+    private static Map<String, String> loadAllWadHashes()
+    {
+        if (all == null)
+        {
+            all = new HashMap<>();
+            InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
+            Scanner      s         = new Scanner(is).useDelimiter("\\A");
+            List<String> files     = new ArrayList<>();
+            String[]     fileArray = s.next().split("\n");
+            for (String file : fileArray)
+            {
+                String plugin = file.substring(0, file.lastIndexOf('.'));
+                all.putAll(getWadHashes(plugin));
+            }
+        }
+        
+        return all;
+    }
+    
     public static Map<String, String> getWadHashes(String plugin)
     {
         plugin = plugin.toLowerCase(Locale.ENGLISH);
@@ -309,47 +356,5 @@ public class HashHandler
         }
         
         return getWadHashes(plugin);
-    }
-    
-    private static Map<String, String> reverseCache = new HashMap<>();
-    
-    public static String getBinKeyForHash(String hash)
-    {
-        if (reverseCache.containsKey(hash))
-        {
-            return reverseCache.get(hash);
-        }
-        
-        String value = getBinHashes().entrySet()
-                                     .stream()
-                                     .filter(e -> e.getValue().toLowerCase().equalsIgnoreCase(hash.toLowerCase()))
-                                     .findAny()
-                                     .map(Map.Entry::getKey)
-                                     .orElse(hash);
-        
-        reverseCache.put(hash, value);
-        return value;
-    }
-    
-    private static Map<String, String> all;
-    
-    @SuppressWarnings("unchecked")
-    public static Map<String, String> loadAllWadHashes()
-    {
-        if (all == null)
-        {
-            all = new HashMap<>();
-            InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
-            Scanner      s         = new Scanner(is).useDelimiter("\\A");
-            List<String> files     = new ArrayList<>();
-            String[]     fileArray = s.next().split("\n");
-            for (String file : fileArray)
-            {
-                String plugin = file.substring(0, file.lastIndexOf('.'));
-                all.putAll(getWadHashes(plugin));
-            }
-        }
-        
-        return all;
     }
 }

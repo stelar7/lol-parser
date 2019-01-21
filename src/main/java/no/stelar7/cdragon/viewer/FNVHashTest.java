@@ -10,7 +10,6 @@ public class FNVHashTest
     public static void main(String[] args)
     {
         Scanner sc = new Scanner(System.in);
-        HashHandler.loadAllWadHashes();
         while (true)
         {
             String input = sc.nextLine();

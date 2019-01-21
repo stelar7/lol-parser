@@ -11,7 +11,6 @@ import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -43,40 +42,8 @@ public class TestRMAN
         removeOldBundles(removedBundles);
         
         downloadAllBundles(data);
+        
         /*
-        List<String> addedBundles   = getNewBundleIds(data);
-        
-        List<RMANFileBodyBundle> newBundles = data.getBody()
-                                                  .getBundles()
-                                                  .stream()
-                                                  .filter(b -> addedBundles.contains(b.getBundleId()))
-                                                  .collect(Collectors.toList());
-        
-        downloadBundles(newBundles);
-        List<RMANFileBodyFile> updatedFiles = data.getBody()
-                                                  .getFiles()
-                                                  .stream()
-                                                  .filter(f -> {
-                                                      for (String chunkId : f.getChunkIds())
-                                                      {
-                                                          String bundle = data.getChunkMap().get(chunkId).getBundleId();
-                                                          if (addedBundles.contains(bundle))
-                                                          {
-                                                              return true;
-                                                          }
-                                                      }
-                                                      return false;
-                                                  }).collect(Collectors.toList());
-        
-        // does not include .exe and .dll files
-        /*
-        Map<String, List<RMANFileBodyFile>> filesPerLang = data.getBody()
-                                                               .getFiles()
-                                                               .stream()
-                                                               .filter(f -> f.getName().substring(f.getName().indexOf('.') + 1).contains("."))
-                                                               .collect(Collectors.groupingBy(
-                                                                       f -> f.getName().substring(f.getName().indexOf('.') + 1, f.getName().indexOf('.', f.getName().indexOf('.') + 1))));
-        */
         
         long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
@@ -94,6 +61,7 @@ public class TestRMAN
                                                    System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
                                                })).get();
         forkJoinPool.shutdown();
+        */
         
         TestWAD tw = new TestWAD();
         tw.testPullCDTB();

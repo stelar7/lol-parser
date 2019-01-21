@@ -37,7 +37,7 @@ public class TestWAD
         
         if (parsed != null)
         {
-            parsed.extractFiles(pluginName, null, extractPath);
+            parsed.extractFiles(extractPath);
         }
     }
     
@@ -165,7 +165,7 @@ public class TestWAD
         WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("C:\\Users\\Steffen\\Downloads\\extractedFiles\\DATA\\FINAL\\DATA.wad.client"));
         parsed.getContentHeaders()
               .stream()
-              .filter(h -> HashHandler.loadAllWadHashes().containsKey(h.getPathHash()))
+              .filter(h -> HashHandler.getWadHash(h.getPathHash()).equals(h.getPathHash()))
               .forEach(System.out::println);
     }
     
@@ -183,6 +183,8 @@ public class TestWAD
     {
         Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
+        
+        generateUnknownFileList(rito);
         extractWads(rito, extractPath);
         
         final BINParser bp = new BINParser();
@@ -237,14 +239,45 @@ public class TestWAD
                 if (endsCount != 0)
                 {
                     WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), to);
+                    parsed.extractFiles(to);
                     return FileVisitResult.CONTINUE;
                 }
                 
                 if (endscCount != 0)
                 {
                     WADFile parsed = parser.parseCompressed(file);
-                    parsed.extractFiles(file.getParent().getFileName().toString(), file.getFileName().toString(), to);
+                    parsed.extractFiles(to);
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    
+    private void generateUnknownFileList(Path from) throws IOException
+    {
+        WADParser parser = new WADParser();
+        UtilHandler.DOWNLOADS_FOLDER.resolve("unknownsSorted.txt").toFile().delete();
+        Files.walkFileTree(from, new SimpleFileVisitor<>()
+        {
+            List<String> ends = Arrays.asList(".wad", ".wad.client");
+            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+            
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                if (endsCount != 0)
+                {
+                    WADFile parsed = parser.parse(file);
+                    parsed.printUnknownFiles(UtilHandler.pathToFilename(file));
+                    return FileVisitResult.CONTINUE;
+                }
+                
+                if (endscCount != 0)
+                {
+                    WADFile parsed = parser.parseCompressed(file);
+                    parsed.printUnknownFiles(UtilHandler.pathToFilename(file));
                 }
                 return FileVisitResult.CONTINUE;
             }

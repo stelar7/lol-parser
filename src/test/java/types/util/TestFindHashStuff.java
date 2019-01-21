@@ -1,10 +1,7 @@
 package types.util;
 
-import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
-import no.stelar7.cdragon.util.types.math.Vector2;
-import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -50,63 +47,6 @@ public class TestFindHashStuff
         fetchHashesForUnknownFiles(newHashes, unknownFiles, hashFile);
         System.out.println("Loading new hashes");
         fetchFilenameFromHash(fixedHashes, newHashes, hashFile);
-        saveFoundHashes(fixedHashes);
-    }
-    
-    public void saveFoundHashes(Path loadPath) throws IOException
-    {
-        List<String> lines = Files.readAllLines(loadPath)
-                                  .stream()
-                                  .filter(x -> !x.equalsIgnoreCase("{"))
-                                  .filter(x -> !x.equalsIgnoreCase("}"))
-                                  .filter(x -> !x.equalsIgnoreCase("{}"))
-                                  .filter(x -> !x.isBlank())
-                                  .collect(Collectors.toList());
-        
-        Set<String> changedPlugins = new HashSet<>();
-        for (String u : lines)
-        {
-            String[] parts  = u.split("\":\"");
-            String   first  = parts[0].replaceAll("[\"]", "").trim();
-            String   second = parts[1].replaceAll("[\",]", "").trim();
-            
-            String[] plugin = {second.substring(0, second.indexOf('/'))};
-            
-            if (second.startsWith("assets") || second.startsWith("data"))
-            {
-                plugin[0] = "champions";
-            }
-            
-            Map<String, String> hashes = HashHandler.getWadHashes(plugin[0]);
-            hashes.computeIfAbsent(first, (key) -> {
-                changedPlugins.add(plugin[0]);
-                return second;
-            });
-        }
-        
-        
-        for (String plugin : changedPlugins)
-        {
-            System.out.println("Found new hashes for: " + plugin);
-            Set<Vector2<String, String>> foundHashes = new HashSet<>();
-            
-            System.out.println("Loading currently known hashes");
-            HashHandler.getWadHashes(plugin).forEach((k, v) -> foundHashes.add(new Vector2<>(k, v)));
-            
-            List<Vector2<String, String>> allHashes = new ArrayList<>(foundHashes);
-            System.out.println("Sorting hashes");
-            allHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
-            
-            System.out.println("Writing hashes");
-            JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
-            jsonWriter.beginObject();
-            for (Vector2<String, String> pair : allHashes)
-            {
-                jsonWriter.name(pair.getFirst()).value(pair.getSecond());
-            }
-            jsonWriter.endObject();
-            Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
-        }
     }
     
     public void fetchFilenameFromHash(Path output, Path newHashes, Path possible) throws IOException
@@ -118,7 +58,7 @@ public class TestFindHashStuff
                                      .map(a -> a.toLowerCase(Locale.ENGLISH))
                                      .map(a -> new Pair<>(a, HashHandler.computeXXHash64(a)))
                                      .filter(a -> missing.contains(a.getB()))
-                                     .filter(a -> !HashHandler.loadAllWadHashes().containsKey(a.getB()))
+                                     .filter(a -> !HashHandler.getWadHash(a.getB()).equals(a.getB()))
                                      .map(a -> String.format("\"%s\":\"%s\"", a.getB(), a.getA()))
                                      .collect(Collectors.toList());
         
@@ -228,38 +168,6 @@ public class TestFindHashStuff
         Files.write(output, data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
-    Set<String> exts = null;
-    
-    private Set<String> getExts()
-    {
-        if (exts == null)
-        {
-            exts = HashHandler.loadAllWadHashes()
-                              .values()
-                              .stream()
-                              .map(s -> s.substring(s.lastIndexOf('.') + 1))
-                              .collect(Collectors.toSet());
-        }
-        
-        return exts;
-    }
-    
-    Set<String> parts = null;
-    
-    private Set<String> getParts()
-    {
-        if (parts == null)
-        {
-            parts = HashHandler.loadAllWadHashes()
-                               .values()
-                               .stream()
-                               .flatMap(a -> Arrays.stream(a.split("[_/\\-.]")))
-                               .collect(Collectors.toSet());
-        }
-        
-        return parts;
-    }
-    
     public void grepFile(Path path, Path output, String pattern) throws IOException
     {
         String  data = String.join("", Files.readAllLines(path));
@@ -274,7 +182,6 @@ public class TestFindHashStuff
         byte[] results = (m.results()
                            .map(MatchResult::group)
                            .filter(s -> s.contains("."))
-                           .filter(s -> getExts().contains(s.substring(s.lastIndexOf('.') + 1)))
                            .collect(Collectors.joining("\n"))
                           + "\n").getBytes(StandardCharsets.UTF_8);
         

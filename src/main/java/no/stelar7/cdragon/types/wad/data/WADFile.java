@@ -50,16 +50,9 @@ public class WADFile
         this.contentHeaders = contentHeaders;
     }
     
-    public void extractFiles(String pluginName, String wadName, Path path)
+    public void extractFiles(Path path)
     {
-        if (wadName == null)
-        {
-            wadName = "assets.wad";
-        }
-        System.out.println("Extracting files from " + pluginName + "/" + wadName);
-        final Path outputPath = path.resolve(pluginName);
-        
-        Path ukp = outputPath.resolve(unknownHashContainer);
+        Path ukp = path.resolve(unknownHashContainer);
         try
         {
             if (!Files.exists(ukp))
@@ -71,13 +64,6 @@ public class WADFile
         {
             e.printStackTrace();
         }
-        
-        String legitName = pluginName;
-        if (pluginName.contains("_"))
-        {
-            legitName = pluginName.substring(0, pluginName.indexOf('_'));
-        }
-        String realName = legitName;
         
         final int interval = (int) Math.floor(getContentHeaders().size() / 10f);
         for (int index = 0; index < getContentHeaders().size(); index++)
@@ -92,23 +78,16 @@ public class WADFile
                 }
             }
             
-            /*
-            if (getHeader().getMajor() > 1 && ((WADContentHeaderV2) fileHeader).isDuplicate())
-            {
-                //System.out.println("Duplicate file, skipping");
-                continue;
-            }
-            */
-            
-            saveFile(fileHeader, outputPath, realName);
+            saveFile(fileHeader, path);
         }
         
         fileReader.close();
     }
     
-    public void saveFile(WADContentHeaderV1 header, Path savePath, String pluginName)
+    public void saveFile(WADContentHeaderV1 header, Path savePath)
     {
-        String filename = HashHandler.loadAllWadHashes().getOrDefault(header.getPathHash().toLowerCase(Locale.ENGLISH), "unknown\\" + header.getPathHash());
+        String unhashed = HashHandler.getWadHash(header.getPathHash());
+        String filename = unhashed.equals(header.getPathHash()) ? "unknown\\" + header.getPathHash() : unhashed;
         Path   self     = savePath.resolve(filename);
         
         if (self.toString().length() > 255)
@@ -139,6 +118,7 @@ public class WADFile
                     return;
                 }
             }
+            
             if ("unknown".equals(parentName))
             {
                 Files.write(savePath.resolve(unknownHashContainer), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
@@ -198,5 +178,26 @@ public class WADFile
         }
         
         Files.write(other, data);
+    }
+    
+    public void printUnknownFiles(String wadfilename)
+    {
+        try
+        {
+            StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+            for (WADContentHeaderV1 header : this.getContentHeaders())
+            {
+                String filename = HashHandler.getWadHash(header.getPathHash());
+                if (!filename.equals(header.getPathHash()))
+                {
+                    continue;
+                }
+                
+                Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("unknownsSorted.txt"), (wadfilename + ": " + filename + "\n").getBytes(StandardCharsets.UTF_8), flags);
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

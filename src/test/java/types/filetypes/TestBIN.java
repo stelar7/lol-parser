@@ -5,7 +5,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
@@ -139,50 +138,8 @@ public class TestBIN
         }
         jw.endObject();
         Files.write(Paths.get("combined.json"), jw.toString().getBytes(StandardCharsets.UTF_8));
-        testUnsplit();
     }
     
-    public void testUnsplit() throws IOException
-    {
-        Path loadPath = Paths.get("combined.json");
-        
-        if (!Files.exists(loadPath))
-        {
-            return;
-        }
-        
-        List<Vector2<String, String>> foundHashes = new ArrayList<>();
-        
-        String              txt = new String(Files.readAllBytes(loadPath), StandardCharsets.UTF_8);
-        Map<String, String> val = UtilHandler.getGson().fromJson(txt, new TypeToken<Map<String, String>>() {}.getType());
-        val.entrySet()
-           .stream()
-           .map(Vector2::new)
-           .forEach(foundHashes::add);
-        
-        HashHandler.getWadHashes("champions")
-                   .entrySet()
-                   .stream()
-                   .map(Vector2::new)
-                   .forEach(data -> {
-                       if (!foundHashes.contains(data))
-                       {
-                           foundHashes.add(data);
-                       }
-                   });
-        
-        foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
-        
-        StringBuilder sb = new StringBuilder("{\n");
-        for (Vector2<String, String> pair : foundHashes)
-        {
-            sb.append("\t\"").append(pair.getFirst()).append("\": \"").append(pair.getSecond()).append("\",\n");
-        }
-        sb.reverse().delete(0, 2).reverse().append("\n}");
-        Files.write(HashHandler.WAD_HASH_STORE.resolve("champions" + ".json"), sb.toString().getBytes(StandardCharsets.UTF_8));
-        
-        Files.deleteIfExists(loadPath);
-    }
     
     @Test
     public void testWriteBin()

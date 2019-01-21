@@ -242,7 +242,7 @@ public class SwingViewer
             
             for (WADContentHeaderV1 header : file.getContentHeaders())
             {
-                String filename = HashHandler.loadAllWadHashes().getOrDefault(header.getPathHash(), header.getPathHash());
+                String filename = HashHandler.getWadHash(header.getPathHash());
                 byte[] data     = file.readContentFromHeaderData(header);
                 if (filename.equals(header.getPathHash()))
                 {
