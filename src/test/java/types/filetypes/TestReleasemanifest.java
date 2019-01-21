@@ -19,7 +19,7 @@ public class TestReleasemanifest
     
     
     @Test
-    public void testReleasemanifest() throws IOException
+    public void testReleasemanifest() 
     {
         ReleasemanifestParser parser = new ReleasemanifestParser();
         

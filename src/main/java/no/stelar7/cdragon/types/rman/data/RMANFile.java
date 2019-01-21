@@ -115,6 +115,7 @@ public class RMANFile
     }
     
     @Override
+    @SuppressWarnings("ImplicitArrayToString")
     public String toString()
     {
         return "RMANFile{" +
