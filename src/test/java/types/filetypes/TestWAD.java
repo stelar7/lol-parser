@@ -291,6 +291,7 @@ public class TestWAD
     @Test
     public void testPullCDTB()
     {
+        System.out.println("Feching hashlists from CDTB");
         String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.game.txt";
         String hashB = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.lcu.txt";
         String hashC = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.game.txt";
@@ -322,6 +323,7 @@ public class TestWAD
                                                .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
                                                .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
         
+        System.out.println("Updating local hashlists");
         hashes.forEach((plugin, set) -> {
             
             try
