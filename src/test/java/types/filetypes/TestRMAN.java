@@ -11,6 +11,7 @@ import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -40,28 +41,27 @@ public class TestRMAN
         
         List<String> removedBundles = getRemovedBundleIds(data);
         removeOldBundles(removedBundles);
-        
         downloadAllBundles(data);
         
-        /*
-        
-        long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
-        int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
-        
-        // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
-        ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
-        forkJoinPool.submit(() -> data.getBody()
-                                      .getFiles()
-                                      .parallelStream()
-                                      .forEach(f ->
-                                               {
-                                                   counter[0]++;
-                                                   extractFile(data, f);
-                                                   System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
-                                               })).get();
-        forkJoinPool.shutdown();
-        */
+        if (removedBundles.size() != 0)
+        {
+            long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+            long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+            int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
+            
+            // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
+            ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
+            forkJoinPool.submit(() -> data.getBody()
+                                          .getFiles()
+                                          .parallelStream()
+                                          .forEach(f ->
+                                                   {
+                                                       counter[0]++;
+                                                       extractFile(data, f);
+                                                       System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
+                                                   })).get();
+            forkJoinPool.shutdown();
+        }
         
         TestWAD tw = new TestWAD();
         tw.testPullCDTB();

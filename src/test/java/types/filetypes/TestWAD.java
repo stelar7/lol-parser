@@ -238,6 +238,7 @@ public class TestWAD
                 long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
                 if (endsCount != 0)
                 {
+                    System.out.println("Extracting " + UtilHandler.pathToFilename(file));
                     WADFile parsed = parser.parse(file);
                     parsed.extractFiles(to);
                     return FileVisitResult.CONTINUE;
@@ -245,6 +246,7 @@ public class TestWAD
                 
                 if (endscCount != 0)
                 {
+                    System.out.println("Extracting " + UtilHandler.pathToFilename(file));
                     WADFile parsed = parser.parseCompressed(file);
                     parsed.extractFiles(to);
                 }
@@ -255,6 +257,8 @@ public class TestWAD
     
     private void generateUnknownFileList(Path from) throws IOException
     {
+        System.out.println("Generating unknown files list");
+        
         WADParser parser = new WADParser();
         UtilHandler.DOWNLOADS_FOLDER.resolve("unknownsSorted.txt").toFile().delete();
         Files.walkFileTree(from, new SimpleFileVisitor<>()

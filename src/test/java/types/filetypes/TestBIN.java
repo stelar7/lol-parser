@@ -479,4 +479,74 @@ public class TestBIN
         
         Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("newBinHashes.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
     }
+    
+    
+    @Test
+    public void tryGenerateCharList()
+    {
+        List<String> tals = Arrays.asList("taliyah_", "taliyahwallchunk_");
+        List<String> words = Arrays.asList("", "skins_", "root_", "skin0_", "skin1_", "skin2_", "skin3_",
+                                           "skins", "root", "skin0", "skin1", "skin2", "skin3");
+        
+        
+        for (String a : tals)
+        {
+            for (String b : words)
+            {
+                for (String c : words)
+                {
+                    for (String d : words)
+                    {
+                        for (String e : words)
+                        {
+                            for (String f : words)
+                            {
+                                for (String g : words)
+                                {
+                                    for (String h : words)
+                                    {
+                                        for (String i : words)
+                                        {
+                                            for (String j : words)
+                                            {
+                                                for (String k : words)
+                                                {
+                                                    for (String l : words)
+                                                    {
+                                                        for (String m : words)
+                                                        {
+                                                            for (String n : words)
+                                                            {
+                                                                for (String o : words)
+                                                                {
+                                                                    for (String p : words)
+                                                                    {
+                                                                        for (String q : words)
+                                                                        {
+                                                                            String combination = a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q;
+                                                                            String test        = "data/" + combination + ".bin";
+                                                                            String hash        = HashHandler.computeXXHash64(test);
+                                                                            if (hash.toUpperCase(Locale.ENGLISH).startsWith("02C9C0DAF"))
+                                                                            {
+                                                                                System.out.println(test);
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+    }
 }
