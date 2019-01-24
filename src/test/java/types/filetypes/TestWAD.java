@@ -5,6 +5,7 @@ import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
+import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
@@ -246,6 +247,60 @@ public class TestWAD
                     WADFile parsed = parser.parseCompressed(file);
                     parsed.extractFiles(to);
                 }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+    
+    @Test
+    public void generateHashfileList() throws IOException
+    {
+        System.out.println("Generating hashfile list");
+        
+        WADParser parser = new WADParser();
+        UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt").toFile().delete();
+        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles"), new SimpleFileVisitor<>()
+        {
+            List<String> ends = Arrays.asList(".wad", ".wad.client");
+            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+            
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                if (endsCount != 0)
+                {
+                    WADFile parsed = parser.parse(file);
+                    try
+                    {
+                        StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+                        for (WADContentHeaderV1 header : parsed.getContentHeaders())
+                        {
+                            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
+                        }
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                
+                if (endscCount != 0)
+                {
+                    WADFile parsed = parser.parseCompressed(file);
+                    try
+                    {
+                        StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+                        for (WADContentHeaderV1 header : parsed.getContentHeaders())
+                        {
+                            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
+                        }
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                
                 return FileVisitResult.CONTINUE;
             }
         });
