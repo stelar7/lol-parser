@@ -159,14 +159,10 @@ public class TestWAD
     @Test
     public void testLocal()
     {
+        Path      path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\Blitzcrank.wad.client");
         WADParser parser = new WADParser();
-        //WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/bundles/files/Aatrox.cs_CZ.wad.client"));
-        //WADFile   parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/Ahri.wad.client"));
-        WADFile parsed = parser.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("C:\\Users\\Steffen\\Downloads\\extractedFiles\\DATA\\FINAL\\DATA.wad.client"));
-        parsed.getContentHeaders()
-              .stream()
-              .filter(h -> HashHandler.getWadHash(h.getPathHash()).equals(h.getPathHash()))
-              .forEach(System.out::println);
+        WADFile   parsed = parser.parse(path);
+        parsed.extractFiles(path.resolveSibling("blitz"));
     }
     
     @Test
