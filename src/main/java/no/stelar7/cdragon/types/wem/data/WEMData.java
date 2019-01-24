@@ -436,36 +436,52 @@ public class WEMData
             switch (chunkName)
             {
                 case "fmt ":
+                {
                     fmtChunkOffset = chunkOffset + 8;
                     fmtChunkSize = chunkSize;
                     break;
+                }
                 case "cue ":
+                {
                     cueChunkOffset = chunkOffset + 8;
                     cueChunkSize = chunkSize;
                     break;
+                }
                 case "LIST":
+                {
                     listChunkOffset = chunkOffset + 8;
                     listChunkSize = chunkSize;
                     break;
+                }
                 case "smpl":
+                {
                     smplChunkOffset = chunkOffset + 8;
                     smplChunkSize = chunkSize;
                     break;
+                }
                 case "vorb":
+                {
                     vorbChunkOffset = chunkOffset + 8;
                     vorbChunkSize = chunkSize;
                     break;
+                }
                 case "data":
+                {
                     dataChunkOffset = chunkOffset + 8;
                     dataChunkSize = chunkSize;
                     break;
+                }
                 case "JUNK":
+                {
                     junkChunkOffset = chunkOffset + 8;
                     junkChunkSize = chunkSize;
+                    break;
+                }
                 case "akd ":
                 {
                     akdChunkOffset = chunkOffset + 8;
                     akdChunkSize = chunkSize;
+                    break;
                 }
                 default:
                     throw new RuntimeException("Invalid chunk name: " + chunkName);

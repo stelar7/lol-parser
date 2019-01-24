@@ -22,19 +22,21 @@ public class TestWPK
     {
         WPKParser parser = new WPKParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("Ashe\\levels\\unknown\\e42848c953b2e155.wpk");
+        String filename = "AEF3226985BC3681.wpk";
+        Path   file     = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\" + filename);
         System.out.println("Parsing: " + file.toString());
         
-        WPKFile data = parser.parse(file);
-        
-        OGGParser ogg = new OGGParser();
+        WPKFile   data = parser.parse(file);
+        OGGParser ogg  = new OGGParser();
         
         for (WEMFile wemFile : data.getWEMFiles())
         {
             System.out.println(wemFile.getFilename() + (wemFile.getData() == null ? " - HAS JUNK CHUNK!" : ""));
             
-            OGGStream odata = ogg.parse(wemFile.getData());
-            Files.write(file.resolveSibling(file.resolveSibling(wemFile.getFilename()) + ".ogg"), odata.getData().toByteArray());
+            OGGStream odata        = ogg.parse(wemFile.getData());
+            Path      outputFolder = file.resolveSibling(filename.substring(0, filename.indexOf('.')));
+            Files.createDirectories(outputFolder);
+            Files.write(outputFolder.resolve(wemFile.getFilename() + ".ogg"), odata.getData().toByteArray());
         }
     }
     
