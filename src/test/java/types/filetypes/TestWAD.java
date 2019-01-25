@@ -181,6 +181,7 @@ public class TestWAD
         Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
         Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
         
+        HashHandler.unloadWadHashes();
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
         

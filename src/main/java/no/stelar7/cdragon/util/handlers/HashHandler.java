@@ -330,6 +330,12 @@ public class HashHandler
         return all;
     }
     
+    public static void unloadWadHashes()
+    {
+        all = null;
+        wadHashNames = new HashMap<>();
+    }
+    
     public static Map<String, String> getWadHashes(String plugin)
     {
         plugin = plugin.toLowerCase(Locale.ENGLISH);
