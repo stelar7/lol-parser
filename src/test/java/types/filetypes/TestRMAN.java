@@ -4,15 +4,12 @@ import com.google.gson.JsonObject;
 import no.stelar7.cdragon.types.rman.*;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import org.junit.Test;
 
 import java.io.*;
-import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -57,7 +54,7 @@ public class TestRMAN
                                           .forEach(f ->
                                                    {
                                                        counter[0]++;
-                                                       extractFile(data, f);
+                                                       data.extractFile(f);
                                                        System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
                                                    })).get();
             forkJoinPool.shutdown();
@@ -118,7 +115,7 @@ public class TestRMAN
     
     private void downloadAllBundles(RMANFile manifest) throws IOException
     {
-        downloadBundles(manifest.getBody().getBundles());
+        manifest.downloadBundles(manifest.getBody().getBundles());
     }
     
     private void downloadFileBundles(RMANFile manifest, RMANFileBodyFile file) throws IOException
@@ -129,79 +126,6 @@ public class TestRMAN
                                                .map(c -> manifest.getBundleMap().get(chunksById.get(c).getBundleId()))
                                                .collect(Collectors.toList());
         
-        downloadBundles(bundles);
-    }
-    
-    private void extractFile(RMANFile manifest, RMANFileBodyFile file)
-    {
-        try
-        {
-            Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-            Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
-            Path outputName   = fileFolder.resolve(file.getFullFilepath(manifest));
-            Files.createDirectories(outputName.getParent());
-            
-            System.out.println("Loading bundles needed for " + file.getName());
-            
-            List<String>                chunkIds = file.getChunkIds();
-            ByteArrayOutputStream       bos      = new ByteArrayOutputStream();
-            RMANFileBodyBundleChunkInfo current  = manifest.getChunkMap().get(chunkIds.get(0));
-            RandomAccessReader          raf      = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
-            for (int i = 0, chunkIdsSize = chunkIds.size(); i < chunkIdsSize; i++)
-            {
-                raf.seek(current.getOffsetToChunk());
-                byte[] compressedChunkData = raf.readBytes(current.getCompressedSize());
-                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
-                bos.write(uncompressedData);
-                
-                if (i + 1 >= chunkIdsSize)
-                {
-                    break;
-                }
-                
-                RMANFileBodyBundleChunkInfo next = manifest.getChunkMap().get(chunkIds.get(i + 1));
-                if (!current.getBundleId().equals(next.getBundleId()))
-                {
-                    raf = new RandomAccessReader(bundleFolder.resolve(next.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
-                }
-                
-                current = next;
-            }
-            Files.write(outputName, bos.toByteArray());
-            
-        } catch (IOException e1)
-        {
-            e1.printStackTrace();
-        }
-    }
-    
-    private void downloadBundles(List<RMANFileBodyBundle> bundles) throws IOException
-    {
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-        Files.createDirectories(bundleFolder);
-        
-        AtomicInteger count = new AtomicInteger();
-        System.out.println("Downloading bundles");
-        
-        bundles.parallelStream().forEach(bundle -> {
-            
-            String bundleId   = bundle.getBundleId();
-            Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
-            long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
-            
-            if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
-            {
-                System.out.println("Skipping bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
-                return;
-            }
-            
-            if (Files.exists(bundlePath))
-            {
-                bundlePath.toFile().delete();
-            }
-            
-            System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
-            WebHandler.downloadBundle(bundleId, bundlePath);
-        });
+        manifest.downloadBundles(bundles);
     }
 }

@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.util.handlers;
 
+import com.google.common.collect.Sets;
 import com.google.gson.*;
 import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 public final class UtilHandler
 {
@@ -45,6 +47,23 @@ public final class UtilHandler
     public static String pathToFolderName(Path path)
     {
         return path.getFileName().toString();
+    }
+    
+    public static Set<String> product(Set<String> words, int repeat)
+    {
+        List<Set<String>> preProduct = new ArrayList<>();
+        for (int i = 0; i < repeat; i++)
+        {
+            preProduct.add(words);
+        }
+        
+        Set<String> product = new HashSet<>();
+        for (List<String> p : Sets.cartesianProduct(preProduct))
+        {
+            product.add(String.join("", p));
+        }
+        
+        return product;
     }
     
     public static void reverse(byte[] data)
