@@ -37,14 +37,14 @@ public class LCUHashGuesser extends HashGuesser
         Pattern     regex      = Pattern.compile("^plugins/([^/]+)/[^/]+/[^/]+/");
         Set<String> regionLang = UtilHandler.product("/", this.REGIONS, this.LANGUAGES);
         
-        System.out.println("Substiture region and lang");
+        System.out.format("Substitute region and lang: %s regions %s languages%n", REGIONS.size(), LANGUAGES.size());
         
         for (String s : regionLang)
         {
             String replacement = "plugins/$1/" + s + "/";
             for (String value : this.known.values())
             {
-                String toCheck = value.replaceFirst(regex.pattern(), replacement);
+                String toCheck = regex.matcher(value).replaceFirst(replacement);
                 check(toCheck);
             }
         }
@@ -153,7 +153,7 @@ public class LCUHashGuesser extends HashGuesser
         Set<String> plugins = new HashSet<>();
         for (String s : all)
         {
-            plugins.add(s.split("/", 2)[1]);
+            plugins.add(s.split("/", 3)[1]);
         }
         
         Set<String> formats = new HashSet<>();

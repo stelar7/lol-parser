@@ -58,6 +58,7 @@ public class HashHandler
     
     public static String toHex(Long str, int minLength)
     {
+        //StringBuilder pre = new StringBuilder(Long.toHexString(str).toUpperCase(Locale.ENGLISH));
         StringBuilder pre = new StringBuilder(String.format("%016X", str).toUpperCase(Locale.ENGLISH));
         while (pre.length() > 0 && pre.charAt(0) == '0')
         {
@@ -68,31 +69,29 @@ public class HashHandler
         {
             pre.insert(0, "0");
         }
+        
         return pre.toString();
+    }
+    
+    private static StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
+    
+    public static long computeXXHash64AsLong(String text)
+    {
+        byte[] data = text.getBytes(StandardCharsets.UTF_8);
+        return computeXXHash64AsLong(data);
+    }
+    
+    public static synchronized long computeXXHash64AsLong(byte[] data)
+    {
+        hash64.reset();
+        hash64.update(data, 0, data.length);
+        return hash64.getValue();
     }
     
     public static String computeXXHash64(String text)
     {
-        try
-        {
-            byte[]               data = text.getBytes(StandardCharsets.UTF_8);
-            ByteArrayInputStream in   = new ByteArrayInputStream(data);
-            
-            StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
-            byte[]            buf    = new byte[8];
-            int               read;
-            while ((read = in.read(buf)) != -1)
-            {
-                hash64.update(buf, 0, read);
-            }
-            return String.format("%016X", hash64.getValue()).toLowerCase(Locale.ENGLISH);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
+        return toHex(computeXXHash64AsLong(text), 16);
     }
-    
     
     // FNV-1a
     private static long computeBINHash(String input)

@@ -101,7 +101,8 @@ public class HashGuesser
     
     public void check(String path)
     {
-        String hash = HashHandler.computeXXHash64(path);
+        Long   hashNum = HashHandler.computeXXHash64AsLong(path);
+        String hash    = HashHandler.toHex(hashNum, 16);
         if (this.unknown.contains(hash))
         {
             this.addKnown(hash, path);
@@ -173,17 +174,14 @@ public class HashGuesser
     {
         if (!cached || this.dirList == null)
         {
-            Set<String> dirs  = new HashSet<>();
-            Set<String> bases = new HashSet<>(this.known.values());
+            Set<String> dirs  = new TreeSet<>();
+            Set<String> bases = new TreeSet<>(this.known.values());
             
-            while (!bases.isEmpty())
+            for (String p : bases)
             {
-                bases.removeAll(dirs);
-                for (String p : bases)
-                {
-                    dirs.add(new File(p).getParent());
-                }
+                dirs.add(p.substring(0, p.lastIndexOf('/')));
             }
+            
             this.dirList = dirs;
         }
         
@@ -196,7 +194,7 @@ public class HashGuesser
         Set<String> names = new HashSet<>();
         for (String p : this.known.values())
         {
-            names.add(new File(p).getName());
+            names.add(UtilHandler.getFilename(p));
         }
         
         System.out.format("substitute basenamses: %s basenames, %s directories%n", names.size(), dirs.size());
@@ -205,7 +203,7 @@ public class HashGuesser
         {
             for (String dir : dirs)
             {
-                check(String.format("%s/%s", dir, name));
+                check(dir + "/" + name);
             }
         }
     }
@@ -215,7 +213,7 @@ public class HashGuesser
         String formatPartPart = "{sep}%%s".repeat(amount - 1);
         String formatPart     = "%s%%s" + formatPartPart + "%s";
         
-        Pattern     reExtract   = Pattern.compile("([^/_.-]+)(?=((?:[-_][^/_.-]+){{" + (amount - 1) + "}})[^/]*\\.[^/]+$)");
+        Pattern     reExtract   = Pattern.compile("([^/_.-]+)(?=((?:[-_][^/_.-]+){" + (amount - 1) + "})[^/]*\\.[^/]+$)");
         Set<String> tempFormats = new HashSet<>();
         for (String path : paths)
         {
@@ -237,14 +235,13 @@ public class HashGuesser
             }
         }
         
-        System.out.format("substitute basenamses: %s formats, %s words%n", formats.size(), words.size());
+        System.out.format("substitute basenames words: %s formats, %s words%n", formats.size(), words.size());
         Set<String> product = UtilHandler.product(words, amount);
         for (String fmt : formats)
         {
             for (String p : product)
             {
-                String hash = HashHandler.computeXXHash64(String.format(fmt, p));
-                check(hash);
+                check(String.format(fmt, p));
             }
         }
     }
@@ -274,8 +271,7 @@ public class HashGuesser
         {
             for (String w : words)
             {
-                String hash = HashHandler.computeXXHash64(String.format(fmt, w));
-                check(hash);
+                check(String.format(fmt, w));
             }
         }
     }
@@ -303,8 +299,7 @@ public class HashGuesser
         {
             for (String p : product)
             {
-                String hash = HashHandler.computeXXHash64(String.format(fmt, p));
-                check(hash);
+                check(String.format(fmt, p));
             }
         }
     }
@@ -347,10 +342,7 @@ public class HashGuesser
         
         for (String fmt : formats)
         {
-            IntStream.rangeClosed(0, max).forEach(n -> {
-                String hash = HashHandler.computeXXHash64(String.format(fmt, n));
-                check(hash);
-            });
+            IntStream.rangeClosed(0, max).forEach(n -> check(String.format(fmt, n)));
         }
     }
     
