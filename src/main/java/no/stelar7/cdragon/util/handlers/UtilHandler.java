@@ -66,6 +66,30 @@ public final class UtilHandler
         return product;
     }
     
+    @SafeVarargs
+    public static Set<String> product(Set<String>... words)
+    {
+        Set<String> product = new HashSet<>();
+        for (List<String> p : Sets.cartesianProduct(words))
+        {
+            product.add(String.join("", p));
+        }
+        
+        return product;
+    }
+    
+    @SafeVarargs
+    public static Set<String> product(String join, Set<String>... words)
+    {
+        Set<String> product = new HashSet<>();
+        for (List<String> p : Sets.cartesianProduct(words))
+        {
+            product.add(String.join(join, p));
+        }
+        
+        return product;
+    }
+    
     public static void reverse(byte[] data)
     {
         for (int i = 0; i < data.length / 2; i++)

@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
 import java.nio.file.*;
@@ -13,14 +14,27 @@ import java.util.stream.*;
 
 public class HashGuesser
 {
+    public static HashFile hashFileLCU  = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.lcu.txt"), null);
+    public static HashFile hashFileGAME = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.game.txt"), null);
     
-    private Set<String> hashes;
-    private HashFile    hashFile;
     
-    private Map<String, String> known;
-    private Set<String>         unknown;
-    private Set<WADFile>        wads;
-    private Set<String>         dirList;
+    protected Set<String> REGIONS = new HashSet<>(Arrays.asList("global", "br", "cn", "eun", "eune", "euw", "garena2", "garena3", "id", "jp", "kr", "la", "la1", "la2",
+                                                                "lan", "las", "na", "oc", "oc1", "oce", "pbe", "ph", "ru", "sg", "tencent", "th", "tr", "tw",
+                                                                "vn"));
+    
+    protected Set<String> LANGUAGES = new HashSet<>(Arrays.asList("default", "ar_eg", "cs_cz", "de_de", "el_gr", "en_au", "en_gb", "en_ph", "en_pl", "en_sg", "en_us",
+                                                                  "es_ar", "es_es", "es_mx", "fr_fr", "hu_hu", "id_id", "it_it", "ja_jp", "ko_kr", "ms_my",
+                                                                  "pl_pl", "pt_br", "ro_ro", "ru_ru", "th_th", "tr_tr", "vi_vn", "vn_vn", "zh_cn", "zh_my",
+                                                                  "zh_tw"));
+    
+    
+    protected Set<String> hashes;
+    protected HashFile    hashFile;
+    
+    protected Map<String, String> known;
+    protected Set<String>         unknown;
+    protected Set<WADFile>        wads;
+    protected Set<String>         dirList;
     
     public HashGuesser(HashFile hashFile, Set<String> hashes)
     {
@@ -77,6 +91,12 @@ public class HashGuesser
         System.out.format("%s %s%n", hash, path);
         this.known.put(hash, path);
         this.unknown.remove(hash);
+        
+        if (this.unknown.isEmpty())
+        {
+            System.out.println("No more unknown hashes!");
+            System.exit(0);
+        }
     }
     
     public void check(String path)
@@ -85,6 +105,12 @@ public class HashGuesser
         if (this.unknown.contains(hash))
         {
             this.addKnown(hash, path);
+        }
+        
+        if (this.unknown.isEmpty())
+        {
+            System.out.println("No more unknown hashes!");
+            System.exit(0);
         }
     }
     
@@ -330,19 +356,6 @@ public class HashGuesser
     
     public void substituteExtensions()
     {
-        /*
-         prefixes = set()
-        extensions = set()
-        for path in self.known.values():
-            prefix, ext = os.path.splitext(path)
-            prefixes.add(prefix)
-            extensions.add(ext)
-
-        logger.info(f"substitute extensions: {len(prefixes)} prefixes, {len(extensions)} extensions")
-        for prefix in progress_iterator(sorted(prefixes)):
-            self.check_iter(prefix + ext for ext in extensions)
-         */
-        
         Set<String> prefixes   = new HashSet<>();
         Set<String> extensions = new HashSet<>();
         
@@ -367,9 +380,9 @@ public class HashGuesser
         check(paths.toArray(new String[0]));
     }
     
-    public Set<String> getFilesAsText(WADFile wad)
+    public Set<Triplet<String, String, String>> getFilesAsText(WADFile wad)
     {
-        Set<String> data = new HashSet<>();
+        Set<Triplet<String, String, String>> data = new HashSet<>();
         
         Set<String> exts = new HashSet<>(Arrays.asList("png", "jpg", "ttf", "webm", "ogg", "dds", "tga"));
         for (WADContentHeaderV1 header : wad.getContentHeaders())
@@ -384,11 +397,34 @@ public class HashGuesser
                 }
             }
             
+            String ext     = UtilHandler.getEnding(unhashed);
             String content = new String(wad.readContentFromHeaderData(header));
-            data.add(content);
+            data.add(new Triplet<>(unhashed, ext, content));
         }
         
         return data;
+    }
+    
+    
+    public Set<String> buildWordlist(Set<String> paths)
+    {
+        Set<String> words   = new HashSet<>();
+        Pattern     reSplit = Pattern.compile("[/_.-]");
+        for (String path : paths)
+        {
+            words.addAll(Arrays.asList(reSplit.split(path)));
+        }
+        
+        Pattern reFilterWords = Pattern.compile("^[0-9]{3,}$");
+        for (String word : new ArrayList<>(words))
+        {
+            if (reFilterWords.matcher(word).find())
+            {
+                words.remove(word);
+            }
+        }
+        
+        return words;
     }
     
 }
