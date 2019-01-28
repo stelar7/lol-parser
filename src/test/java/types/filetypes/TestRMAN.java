@@ -135,10 +135,10 @@ public class TestRMAN
         Files.createDirectories(bundleFolder);
         
         Map<String, RMANFileBodyBundleChunkInfo> chunksById = manifest.getChunkMap();
-        List<RMANFileBodyBundle> bundles = file.getChunkIds()
-                                               .stream()
-                                               .map(c -> manifest.getBundleMap().get(chunksById.get(c).getBundleId()))
-                                               .collect(Collectors.toList());
+        Set<RMANFileBodyBundle> bundles = file.getChunkIds()
+                                              .stream()
+                                              .map(c -> manifest.getBundleMap().get(chunksById.get(c).getBundleId()))
+                                              .collect(Collectors.toSet());
         
         manifest.downloadBundles(bundles, bundleFolder);
     }
