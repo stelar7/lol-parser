@@ -1,6 +1,5 @@
 package types.filetypes;
 
-import com.google.gson.JsonObject;
 import no.stelar7.cdragon.types.rman.*;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
@@ -18,23 +17,14 @@ public class TestRMAN
     @Test
     public void testRMAN() throws Exception
     {
-        RMANParser parser = new RMANParser();
+        RMANFile data = RMANParser.loadFromPBE();
         
-        System.out.println("Downloading patcher manifest");
-        String patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-        String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
+        Files.createDirectories(bundleFolder);
+        Files.createDirectories(fileFolder);
         
-        JsonObject obj     = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
-        int        version = obj.get("version").getAsInt();
-        System.out.println("Found patch version " + version);
-        
-        System.out.println("Downloading bundle manifest");
-        String manifestUrl = obj.get("game_patch_url").getAsString();
-        
-        System.out.println("Parsing Manifest");
-        RMANFile data = parser.parse(WebHandler.readBytes(manifestUrl));
-        
-        int[] counter = {0};
+        // downloadChampionFiles(data, "", bundleFolder, fileFolder);
         
         List<String> removedBundles = getRemovedBundleIds(data);
         removeOldBundles(removedBundles);
@@ -47,6 +37,7 @@ public class TestRMAN
             int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
             
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
+            int[]        counter      = {0};
             ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
             forkJoinPool.submit(() -> data.getBody()
                                           .getFiles()
@@ -54,7 +45,7 @@ public class TestRMAN
                                           .forEach(f ->
                                                    {
                                                        counter[0]++;
-                                                       data.extractFile(f);
+                                                       data.extractFile(f, bundleFolder, fileFolder);
                                                        System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
                                                    })).get();
             forkJoinPool.shutdown();
@@ -63,6 +54,23 @@ public class TestRMAN
         TestWAD tw = new TestWAD();
         tw.testPullCDTB();
         tw.testCDragonWAD();
+    }
+    
+    /**
+     * set language to "" to download the basic files
+     * <p>
+     * all valid options;
+     * ""   , ru_ru, it_it, el_gr, pl_pl, ro_ro, tr_tr,
+     * pt_br, th_th, vn_vn, ja_jp, fr_fr, cs_cz, hu_hu,
+     * de_de, zh_tw, ko_kr, en_us, es_mx, zh_cn, es_es
+     */
+    public void downloadChampionFiles(RMANFile file, String language, Path bundleFolder, Path outputFolder)
+    {
+        Map<String, List<RMANFileBodyFile>> files     = file.getChampionFilesByLanguage();
+        List<RMANFileBodyFile>              langFiles = files.get(language);
+        
+        langFiles.stream().map(file::getBundlesForFile).forEach(list -> file.downloadBundles(list, bundleFolder));
+        langFiles.forEach(f -> file.extractFile(f, bundleFolder, outputFolder));
     }
     
     private List<String> getRemovedBundleIds(RMANFile data) throws IOException
@@ -115,17 +123,23 @@ public class TestRMAN
     
     private void downloadAllBundles(RMANFile manifest) throws IOException
     {
-        manifest.downloadBundles(manifest.getBody().getBundles());
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Files.createDirectories(bundleFolder);
+        
+        manifest.downloadBundles(manifest.getBody().getBundles(), bundleFolder);
     }
     
     private void downloadFileBundles(RMANFile manifest, RMANFileBodyFile file) throws IOException
     {
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Files.createDirectories(bundleFolder);
+        
         Map<String, RMANFileBodyBundleChunkInfo> chunksById = manifest.getChunkMap();
         List<RMANFileBodyBundle> bundles = file.getChunkIds()
                                                .stream()
                                                .map(c -> manifest.getBundleMap().get(chunksById.get(c).getBundleId()))
                                                .collect(Collectors.toList());
         
-        manifest.downloadBundles(bundles);
+        manifest.downloadBundles(bundles, bundleFolder);
     }
 }

@@ -7,9 +7,8 @@ import org.junit.Test;
 public class TestCDTBHashGuessing
 {
     @Test
-    public void doTest() throws InterruptedException
+    public void doTest()
     {
-        Thread.sleep(5000);
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon")));
         guesser.substituteRegionLang();
         guesser.substitutePlugin();

@@ -13,16 +13,11 @@ public class HashFile
     private Map<String, String> hashes;
     private Path                file;
     private String              format;
-    private int                 size;
     
-    public HashFile(Path file, Integer size)
+    public HashFile(Path file)
     {
         this.file = file;
-        this.format = "%s %s";
-        if (size == null)
-        {
-            this.size = 16;
-        }
+        this.format = "%s %s%n";
     }
     
     public Map<String, String> load(boolean force)

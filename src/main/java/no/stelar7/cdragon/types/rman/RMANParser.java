@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.rman;
 
+import com.google.gson.JsonObject;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
@@ -12,6 +13,22 @@ import java.util.*;
 
 public class RMANParser implements Parseable<RMANFile>
 {
+    
+    public static RMANFile loadFromPBE()
+    {
+        String patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+        String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
+        
+        JsonObject obj     = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+        int        version = obj.get("version").getAsInt();
+        System.out.println("Found patch version " + version);
+        
+        System.out.println("Downloading bundle manifest");
+        String manifestUrl = obj.get("game_patch_url").getAsString();
+        
+        System.out.println("Parsing Manifest");
+        return new RMANParser().parse(WebHandler.readBytes(manifestUrl));
+    }
     
     @Override
     public RMANFile parse(Path path)

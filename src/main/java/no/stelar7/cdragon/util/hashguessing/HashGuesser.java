@@ -14,8 +14,8 @@ import java.util.stream.*;
 
 public class HashGuesser
 {
-    public static HashFile hashFileLCU  = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.lcu.txt"), null);
-    public static HashFile hashFileGAME = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.game.txt"), null);
+    public static HashFile hashFileLCU  = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.lcu.txt"));
+    public static HashFile hashFileGAME = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.game.txt"));
     
     
     protected Set<String> REGIONS = new HashSet<>(Arrays.asList("global", "br", "cn", "eun", "eune", "euw", "garena2", "garena3", "id", "jp", "kr", "la", "la1", "la2",
@@ -241,7 +241,9 @@ public class HashGuesser
         {
             for (String p : product)
             {
-                check(String.format(fmt, p));
+                String[] parts   = fmt.split("%s");
+                String   toCheck = parts[0] + p + parts[1];
+                check(toCheck);
             }
         }
     }
@@ -271,7 +273,9 @@ public class HashGuesser
         {
             for (String w : words)
             {
-                check(String.format(fmt, w));
+                String[] parts   = fmt.split("%s");
+                String   toCheck = parts[0] + w + parts[1];
+                check(toCheck);
             }
         }
     }
@@ -299,7 +303,9 @@ public class HashGuesser
         {
             for (String p : product)
             {
-                check(String.format(fmt, p));
+                String[] parts   = fmt.split("%s");
+                String   toCheck = parts[0] + p + parts[1];
+                check(toCheck);
             }
         }
     }
@@ -418,5 +424,4 @@ public class HashGuesser
         
         return words;
     }
-    
 }

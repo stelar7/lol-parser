@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.rman.data;
 
+import com.google.gson.JsonElement;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
@@ -8,6 +9,8 @@ import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class RMANFile
 {
@@ -42,6 +45,17 @@ public class RMANFile
         {
             bundlesById.put(bundle.getBundleId(), bundle);
         }
+    }
+    
+    public Set<RMANFileBodyBundle> getBundlesForFile(RMANFileBodyFile file)
+    {
+        return file.getChunkIds()
+                   .stream()
+                   .map(getChunkMap()::get).collect(Collectors.toList())
+                   .stream()
+                   .map(RMANFileBodyBundleChunkInfo::getBundleId)
+                   .map(getBundleMap()::get)
+                   .collect(Collectors.toSet());
     }
     
     public RMANFileHeader getHeader()
@@ -94,13 +108,11 @@ public class RMANFile
         return bundlesById;
     }
     
-    public void extractFile(RMANFileBodyFile file)
+    public void extractFile(RMANFileBodyFile file, Path bundleFolder, Path outputFolder)
     {
         try
         {
-            Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-            Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
-            Path outputName   = fileFolder.resolve(file.getFullFilepath(this));
+            Path outputName = outputFolder.resolve(file.getFullFilepath(this));
             Files.createDirectories(outputName.getParent());
             
             System.out.println("Loading bundles needed for " + file.getName());
@@ -137,11 +149,8 @@ public class RMANFile
         }
     }
     
-    public void downloadBundles(List<RMANFileBodyBundle> bundles) throws IOException
+    public void downloadBundles(Collection<RMANFileBodyBundle> bundles, Path bundleFolder)
     {
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-        Files.createDirectories(bundleFolder);
-        
         AtomicInteger count = new AtomicInteger();
         System.out.println("Downloading bundles");
         
@@ -165,6 +174,36 @@ public class RMANFile
             System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
             WebHandler.downloadBundle(bundleId, bundlePath);
         });
+    }
+    
+    
+    public Map<String, List<RMANFileBodyFile>> getChampionFilesByLanguage()
+    {
+        List<String> champKeys = new ArrayList<>();
+        
+        String chamsum = String.join("", WebHandler.readWeb("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json"));
+        for (JsonElement element : UtilHandler.getJsonParser().parse(chamsum).getAsJsonArray())
+        {
+            champKeys.add(element.getAsJsonObject().get("alias").getAsString());
+        }
+        
+        List<RMANFileBodyFile> files = getBody().getFiles()
+                                                .stream()
+                                                .filter(a -> champKeys.stream().anyMatch(k -> a.getName().startsWith(k)))
+                                                .collect(Collectors.toList());
+        
+        Function<String, String> fixName = (input) -> {
+            
+            String value = input.substring(input.indexOf('.') + 1);
+            if (value.equalsIgnoreCase("wad.client"))
+            {
+                return "";
+            }
+            
+            return value.replace(".wad.client", "").toLowerCase(Locale.ENGLISH);
+        };
+        
+        return files.stream().collect(Collectors.groupingBy(f -> fixName.apply(f.getName()), Collectors.mapping(f -> f, Collectors.toList())));
     }
     
     

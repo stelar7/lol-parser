@@ -58,8 +58,7 @@ public class HashHandler
     
     public static String toHex(Long str, int minLength)
     {
-        //StringBuilder pre = new StringBuilder(Long.toHexString(str).toUpperCase(Locale.ENGLISH));
-        StringBuilder pre = new StringBuilder(String.format("%016X", str).toUpperCase(Locale.ENGLISH));
+        StringBuilder pre = new StringBuilder(Long.toHexString(str).toUpperCase(Locale.ENGLISH));
         while (pre.length() > 0 && pre.charAt(0) == '0')
         {
             pre.deleteCharAt(0);
