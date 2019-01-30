@@ -45,8 +45,9 @@ public class TestRMAN
                                           .forEach(f ->
                                                    {
                                                        counter[0]++;
-                                                       data.extractFile(f, bundleFolder, fileFolder);
                                                        System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
+                                                       
+                                                       data.extractFile(f, bundleFolder, fileFolder);
                                                    })).get();
             forkJoinPool.shutdown();
         }

@@ -20,9 +20,9 @@ public class HashHandler
     public static final Path BIN_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\bin\\binhash.json");
     public static final Path INI_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\inibin\\inihash.json");
     
-    private static Map<String, String>              binHashNames;
-    private static Map<Long, String>                iniHashNames;
-    private static Map<String, Map<String, String>> wadHashNames = new HashMap<>();
+    private static Map<String, String> binHashNames;
+    private static Map<Long, String>   iniHashNames;
+    private static Map<String, String> wadHashNames;
     
     /*
     public static String toFormattedHex(byte[] bytes)
@@ -301,64 +301,42 @@ public class HashHandler
         return value;
     }
     
-    private static Map<String, String> all;
-    
     public static String getWadHash(String hash)
     {
-        return loadAllWadHashes().getOrDefault(hash.toLowerCase(Locale.ENGLISH), hash);
+        return getWADHashes().getOrDefault(hash, hash);
     }
     
     @SuppressWarnings("unchecked")
-    private static Map<String, String> loadAllWadHashes()
+    public static Map<String, String> getWADHashes()
     {
-        if (all == null)
+        if (wadHashNames == null)
         {
-            all = new HashMap<>();
+            System.out.println("Reading hash files!");
+            wadHashNames = new HashMap<>();
             InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
             Scanner      s         = new Scanner(is).useDelimiter("\\A");
             List<String> files     = new ArrayList<>();
             String[]     fileArray = s.next().split("\n");
             for (String file : fileArray)
             {
-                String plugin = file.substring(0, file.lastIndexOf('.'));
-                all.putAll(getWadHashes(plugin));
+                System.out.println("Reading: " + file);
+                String              plugin = file.substring(0, file.lastIndexOf('.'));
+                String              sb     = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
+                Map<String, String> val    = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+                if (val == null)
+                {
+                    val = new HashMap<>();
+                }
+                
+                wadHashNames.putAll(val);
             }
         }
         
-        return all;
+        return wadHashNames;
     }
     
     public static void unloadWadHashes()
     {
-        all = null;
-        wadHashNames = new HashMap<>();
-    }
-    
-    public static Map<String, String> getWadHashes(String plugin)
-    {
-        plugin = plugin.toLowerCase(Locale.ENGLISH);
-        if (wadHashNames.get(plugin) != null)
-        {
-            return wadHashNames.get(plugin);
-        }
-        
-        try
-        {
-            String              sb  = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
-            Map<String, String> val = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
-            if (val == null)
-            {
-                val = new HashMap<>();
-            }
-            
-            wadHashNames.put(plugin, val);
-        } catch (Exception e)
-        {
-            wadHashNames.put(plugin, new HashMap<>());
-            System.err.println("WAD Hash file not found: " + plugin);
-            e.printStackTrace();
-        }
-        
-        return getWadHashes(plugin);
+        wadHashNames = null;
     }
 }

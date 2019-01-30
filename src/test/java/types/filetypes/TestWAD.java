@@ -160,7 +160,7 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        Path      path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\Blitzcrank.wad.client");
+        Path      path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\FiddleSticks.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
         parsed.extractFiles(path.resolveSibling("blitz"));
@@ -190,6 +190,7 @@ public class TestWAD
         
         System.out.println("Transforming bin files to json");
         Files.walk(extractPath)
+             .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(file -> {
                  try
@@ -206,6 +207,7 @@ public class TestWAD
         
         System.out.println("Transforming dds files to png");
         Files.walk(extractPath)
+             .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".dds"))
              .forEach(file -> {
                  try
@@ -236,7 +238,7 @@ public class TestWAD
                 long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
                 if (endsCount != 0)
                 {
-                    System.out.println("Extracting " + UtilHandler.pathToFilename(file));
+                    System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
                     WADFile parsed = parser.parse(file);
                     parsed.extractFiles(to);
                     return FileVisitResult.CONTINUE;
@@ -244,7 +246,7 @@ public class TestWAD
                 
                 if (endscCount != 0)
                 {
-                    System.out.println("Extracting " + UtilHandler.pathToFilename(file));
+                    System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
                     WADFile parsed = parser.parseCompressed(file);
                     parsed.extractFiles(to);
                 }
@@ -355,15 +357,10 @@ public class TestWAD
             String prePre = (String) s.getSecond();
             if (prePre.startsWith("plugins/"))
             {
-                prePre = prePre.substring("plugins/".length());
+                return "lcu";
             }
-            String       plugin = prePre.substring(0, prePre.indexOf('/'));
-            List<String> ch     = List.of("assets", "content", "data");
-            if (ch.contains(plugin))
-            {
-                plugin = "champions";
-            }
-            return plugin;
+            
+            return "game";
         };
         
         List<String> data = WebHandler.readWeb(hashA);
@@ -375,14 +372,12 @@ public class TestWAD
                                                .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
                                                .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
         
+        
         System.out.println("Updating local hashlists");
-        hashes.forEach((plugin, set) -> {
-            
+        hashes.forEach((k, v) -> {
             try
             {
-                HashHandler.getWadHashes(plugin).forEach((k, v) -> set.add(new Vector2<>(k, v)));
-                
-                List<Vector2> foundHashes = new ArrayList<>(set);
+                List<Vector2> foundHashes = new ArrayList<>(v);
                 foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
                 
                 JsonWriterWrapper jsonWriter = new JsonWriterWrapper();
@@ -393,7 +388,7 @@ public class TestWAD
                 }
                 jsonWriter.endObject();
                 
-                Files.write(HashHandler.WAD_HASH_STORE.resolve(plugin + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
+                Files.write(HashHandler.WAD_HASH_STORE.resolve(k + ".json"), jsonWriter.toString().getBytes(StandardCharsets.UTF_8));
             } catch (IOException e)
             {
                 e.printStackTrace();
