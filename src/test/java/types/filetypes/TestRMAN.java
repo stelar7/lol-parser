@@ -1,6 +1,7 @@
 package types.filetypes;
 
 import no.stelar7.cdragon.types.rman.*;
+import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.Test;
@@ -8,7 +9,7 @@ import org.junit.Test;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -17,20 +18,21 @@ public class TestRMAN
     @Test
     public void testRMAN() throws Exception
     {
-        RMANFile data = RMANParser.loadFromPBE();
+        List<RMANFile> files = new ArrayList<>();
+        //files.add(RMANParser.loadFromPBE(RMANFileType.GAME));
+        files.add(RMANParser.loadFromPBE(RMANFileType.LCU));
         
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
+        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
         Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
         Files.createDirectories(bundleFolder);
         Files.createDirectories(fileFolder);
         
-        // downloadChampionFiles(data, "", bundleFolder, fileFolder);
+        List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
+        removeOldBundles(removedBundles, bundleFolder);
+        downloadAllBundles(files, bundleFolder);
         
-        List<String> removedBundles = getRemovedBundleIds(data);
-        removeOldBundles(removedBundles);
-        downloadAllBundles(data);
-        
-        if (removedBundles.size() != 0)
+        boolean shouldExport = true;
+        if (shouldExport)
         {
             long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
@@ -39,17 +41,26 @@ public class TestRMAN
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
             int[]        counter      = {0};
             ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
-            forkJoinPool.submit(() -> data.getBody()
-                                          .getFiles()
-                                          .parallelStream()
-                                          .forEach(f ->
-                                                   {
-                                                       counter[0]++;
-                                                       System.out.format("Extracting file %s of %s%n", counter[0], data.getBody().getFiles().size());
-                                                       
-                                                       data.extractFile(f, bundleFolder, fileFolder);
-                                                   })).get();
+            files.forEach(rfile -> {
+                try
+                {
+                    forkJoinPool.submit(() -> rfile.getBody()
+                                                   .getFiles()
+                                                   .parallelStream()
+                                                   .forEach(f ->
+                                                            {
+                                                                counter[0]++;
+                                                                System.out.format("Extracting file %s of %s%n", counter[0], rfile.getBody().getFiles().size());
+                                                                rfile.extractFile(f, bundleFolder, fileFolder);
+                                                            })).get();
+                } catch (InterruptedException | ExecutionException e)
+                {
+                    e.printStackTrace();
+                }
+            });
+            
             forkJoinPool.shutdown();
+            forkJoinPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         }
         
         TestWAD tw = new TestWAD();
@@ -74,10 +85,9 @@ public class TestRMAN
         langFiles.forEach(f -> file.extractFile(f, bundleFolder, outputFolder));
     }
     
-    private List<String> getRemovedBundleIds(RMANFile data) throws IOException
+    private List<String> getRemovedBundleIds(Collection<RMANFile> datas, Path bundleFolder) throws IOException
     {
-        Path        bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-        Set<String> keep         = data.getBundleMap().keySet();
+        Set<String> keep = datas.stream().map(RMANFile::getBundleMap).flatMap(a -> a.keySet().stream()).collect(Collectors.toSet());
         List<String> has = Files.walk(bundleFolder)
                                 .map(Path::getFileName)
                                 .map(Path::toString)
@@ -89,10 +99,9 @@ public class TestRMAN
         return has;
     }
     
-    private List<String> getNewBundleIds(RMANFile data) throws IOException
+    private List<String> getNewBundleIds(RMANFile data, Path bundleFolder) throws IOException
     {
-        Path        bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-        Set<String> keep         = data.getBundleMap().keySet();
+        Set<String> keep = data.getBundleMap().keySet();
         List<String> has = Files.walk(bundleFolder)
                                 .map(Path::getFileName)
                                 .map(Path::toString)
@@ -104,10 +113,9 @@ public class TestRMAN
         return new ArrayList<>(keep);
     }
     
-    public void removeOldBundles(List<String> bundleIds)
+    public void removeOldBundles(List<String> bundleIds, Path bundleFolder)
     {
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-        System.out.println(bundleIds.size() + " are not used in the current version, so we delete them");
+        System.out.println("Found " + bundleIds.size() + " bundles that are not used in this version, deleting...");
         bundleIds.stream()
                  .map(s -> s.toUpperCase(Locale.ENGLISH))
                  .map(s -> s + ".bundle")
@@ -122,19 +130,14 @@ public class TestRMAN
                  });
     }
     
-    private void downloadAllBundles(RMANFile manifest) throws IOException
+    private void downloadAllBundles(Collection<RMANFile> datas, Path bundleFolder) throws IOException
     {
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
         Files.createDirectories(bundleFolder);
-        
-        manifest.downloadBundles(manifest.getBody().getBundles(), bundleFolder);
+        datas.forEach(f -> f.downloadBundles(f.getBody().getBundles(), bundleFolder));
     }
     
-    private void downloadFileBundles(RMANFile manifest, RMANFileBodyFile file) throws IOException
+    private void downloadFileBundles(RMANFile manifest, RMANFileBodyFile file, Path bundleFolder)
     {
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\bundles");
-        Files.createDirectories(bundleFolder);
-        
         Map<String, RMANFileBodyBundleChunkInfo> chunksById = manifest.getChunkMap();
         Set<RMANFileBodyBundle> bundles = file.getChunkIds()
                                               .stream()

@@ -7,6 +7,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
+import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
@@ -14,20 +15,69 @@ import java.util.*;
 public class RMANParser implements Parseable<RMANFile>
 {
     
-    public static RMANFile loadFromPBE()
+    public enum RMANFileType
     {
-        String patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-        String patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
-        
-        JsonObject obj     = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
-        int        version = obj.get("version").getAsInt();
-        System.out.println("Found patch version " + version);
-        
-        System.out.println("Downloading bundle manifest");
-        String manifestUrl = obj.get("game_patch_url").getAsString();
-        
-        System.out.println("Parsing Manifest");
-        return new RMANParser().parse(WebHandler.readBytes(manifestUrl));
+        GAME, LCU
+    }
+    
+    public static RMANFile loadFromPBE(RMANFileType type)
+    {
+        try
+        {
+            Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
+            Files.createDirectories(downloadPath.getParent());
+            
+            System.out.println("Downloading patcher manifest");
+            String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            WebHandler.downloadFile(downloadPath, patcherUrl);
+            
+            String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
+            JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+            int        version       = obj.get("version").getAsInt();
+            System.out.println("Found patch version " + version);
+            
+            Path realPath = downloadPath.resolveSibling(version + ".json");
+            if (Files.exists(realPath))
+            {
+                System.out.println("Manifest already saved!");
+                Files.deleteIfExists(downloadPath);
+            } else
+            {
+                System.out.println("Saving file");
+                Files.move(downloadPath, realPath);
+            }
+            
+            Path usedManfest = null;
+            switch (type)
+            {
+                case GAME:
+                {
+                    System.out.println("Downloading game manifest");
+                    String url = obj.get("game_patch_url").getAsString();
+                    usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
+                    WebHandler.downloadFile(usedManfest, url);
+                    break;
+                }
+                
+                case LCU:
+                {
+                    System.out.println("Downloading lcu manifest");
+                    String url = obj.get("client_patch_url").getAsString();
+                    usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
+                    WebHandler.downloadFile(usedManfest, url);
+                    
+                    break;
+                }
+            }
+            
+            System.out.println("Parsing...");
+            return new RMANParser().parse(usedManfest);
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     @Override
@@ -72,8 +122,10 @@ public class RMANParser implements Parseable<RMANFile>
         
         RMANFileBodyHeader header = new RMANFileBodyHeader();
         header.setOffsetTableOffset(raf.readInt());
+        int lastRead = 0;
         
         int offset = raf.readInt();
+        lastRead = offset;
         raf.seek(raf.pos() + offset);
         header.setBundleListOffset(raf.pos() - 4);
         raf.seek(raf.pos() - offset);
@@ -104,8 +156,6 @@ public class RMANParser implements Parseable<RMANFile>
         raf.seek(raf.pos() - offset);
         
         body.setHeader(header);
-        
-        
         body.setBundles(parseBundles(raf, header));
         body.setLanguages(parseLanguages(raf, header));
         body.setFiles(parseFiles(raf, header));
@@ -171,16 +221,32 @@ public class RMANParser implements Parseable<RMANFile>
             raf.seek(nextFileOffset + bfile.getOffset() - 4);
             
             bfile.setOffsetTableOffset(raf.readInt());
-            bfile.setUnknown1(raf.readInt());
-            bfile.setNameOffset(raf.readInt());
+            
+            int tempA         = raf.readInt();
+            int restoreOffset = 4;
+            
+            bfile.setCustomNameOffset(tempA & 0x00FFFFFF);
+            bfile.setFiletypeFlag(tempA >> 24);
+            if (bfile.getCustomNameOffset() > 0 && bfile.getCustomNameOffset() != 0x10200)
+            {
+                bfile.setNameOffset(bfile.getCustomNameOffset());
+            } else
+            {
+                bfile.setNameOffset(raf.readInt());
+                restoreOffset = 8;
+            }
+            
             raf.seek(raf.pos() + bfile.getNameOffset() - 4);
             bfile.setName(raf.readString(raf.readInt()));
-            raf.seek(nextFileOffset + bfile.getOffset() + 8);
+            raf.seek(nextFileOffset + bfile.getOffset() + restoreOffset);
+            
             bfile.setStructSize(raf.readInt());
+            
             bfile.setSymlinkOffset(raf.readInt());
             raf.seek(raf.pos() + bfile.getSymlinkOffset() - 4);
             bfile.setSymlink(raf.readString(raf.readInt()));
-            raf.seek(nextFileOffset + bfile.getOffset() + 16);
+            raf.seek(nextFileOffset + bfile.getOffset() + 8 + restoreOffset);
+            
             bfile.setFileId(raf.readLong());
             
             if (bfile.getStructSize() > 28)
@@ -196,8 +262,17 @@ public class RMANParser implements Parseable<RMANFile>
                 bfile.setLanguageId(raf.readInt());
                 bfile.setUnknown2(raf.readInt());
             }
-            bfile.setUnknown3(raf.readInt());
-            bfile.setChunkIds(raf.readLongs(raf.readInt()));
+            
+            
+            bfile.setSingleChunk(raf.readInt());
+            if (!bfile.isSingleChunk())
+            {
+                bfile.setChunkIds(raf.readLongs(raf.readInt()));
+            } else
+            {
+                bfile.setChunkIds(Collections.singletonList(raf.readLong()));
+                bfile.setUnknown3(raf.readInt());
+            }
             
             raf.seek(nextFileOffset);
             data.add(bfile);

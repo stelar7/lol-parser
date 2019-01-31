@@ -8,7 +8,8 @@ public class RMANFileBodyFile
 {
     private int          offset;
     private int          offsetTableOffset;
-    private int          unknown1;
+    private int          customNameOffset;
+    private int          filetypeFlag;
     private int          nameOffset;
     private String       name;
     private int          structSize;
@@ -21,22 +22,30 @@ public class RMANFileBodyFile
     private int          languageId;
     private int          unknown2;
     private int          unknown3;
+    private boolean      isSingleChunk;
     private List<String> chunkIds;
+    
     
     public String getFullFilepath(RMANFile manifest)
     {
-        StringBuilder         output = new StringBuilder(getName());
-        RMANFileBodyDirectory dir    = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == getDirectoryId()).findAny().get();
-        
-        while (dir.getDirectoryId() != 0)
+        StringBuilder                   output = new StringBuilder(getName());
+        Optional<RMANFileBodyDirectory> odir   = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == getDirectoryId()).findAny();
+        if (odir.isPresent())
         {
-            output.insert(0, dir.getName() + "/");
-            
-            RMANFileBodyDirectory finalDir = dir;
-            dir = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == finalDir.getParentId()).findAny().get();
+            RMANFileBodyDirectory dir = odir.get();
+            while (dir.getDirectoryId() != 0)
+            {
+                output.insert(0, dir.getName() + "/");
+                
+                RMANFileBodyDirectory finalDir = dir;
+                dir = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == finalDir.getParentId()).findAny().get();
+            }
+            return output.toString();
         }
         
-        return output.toString();
+        System.out.println("Invalid directory id found!");
+        return "";
+        
     }
     
     public int getOffset()
@@ -59,16 +68,6 @@ public class RMANFileBodyFile
         this.offsetTableOffset = offsetTableOffset;
     }
     
-    public int getUnknown1()
-    {
-        return unknown1;
-    }
-    
-    public void setUnknown1(int unknown1)
-    {
-        this.unknown1 = unknown1;
-    }
-    
     public int getNameOffset()
     {
         return nameOffset;
@@ -77,6 +76,26 @@ public class RMANFileBodyFile
     public void setNameOffset(int nameOffset)
     {
         this.nameOffset = nameOffset;
+    }
+    
+    public int getCustomNameOffset()
+    {
+        return customNameOffset;
+    }
+    
+    public void setCustomNameOffset(int customNameOffset)
+    {
+        this.customNameOffset = customNameOffset;
+    }
+    
+    public int getFiletypeFlag()
+    {
+        return filetypeFlag;
+    }
+    
+    public void setFiletypeFlag(int filetypeFlag)
+    {
+        this.filetypeFlag = filetypeFlag;
     }
     
     public String getName()
@@ -189,6 +208,16 @@ public class RMANFileBodyFile
         this.unknown3 = unknown3;
     }
     
+    public boolean isSingleChunk()
+    {
+        return isSingleChunk;
+    }
+    
+    public void setSingleChunk(int singleChunk)
+    {
+        isSingleChunk = singleChunk > 0;
+    }
+    
     public List<String> getChunkIds()
     {
         return chunkIds;
@@ -218,7 +247,8 @@ public class RMANFileBodyFile
         RMANFileBodyFile that = (RMANFileBodyFile) o;
         return offset == that.offset &&
                offsetTableOffset == that.offsetTableOffset &&
-               unknown1 == that.unknown1 &&
+               customNameOffset == that.customNameOffset &&
+               filetypeFlag == that.filetypeFlag &&
                nameOffset == that.nameOffset &&
                structSize == that.structSize &&
                symlinkOffset == that.symlinkOffset &&
@@ -229,6 +259,7 @@ public class RMANFileBodyFile
                languageId == that.languageId &&
                unknown2 == that.unknown2 &&
                unknown3 == that.unknown3 &&
+               isSingleChunk == that.isSingleChunk &&
                Objects.equals(name, that.name) &&
                Objects.equals(symlink, that.symlink) &&
                Objects.equals(chunkIds, that.chunkIds);
@@ -238,8 +269,9 @@ public class RMANFileBodyFile
     @Override
     public int hashCode()
     {
-        return Objects.hash(offset, offsetTableOffset, unknown1, nameOffset, name, structSize, symlinkOffset, symlink, fileId, directoryId, fileSize, permissions, languageId, unknown2, unknown3, chunkIds);
+        return Objects.hash(offset, offsetTableOffset, customNameOffset, filetypeFlag, nameOffset, name, structSize, symlinkOffset, symlink, fileId, directoryId, fileSize, permissions, languageId, unknown2, unknown3, isSingleChunk, chunkIds);
     }
+    
     @Override
     public String toString()
     {
