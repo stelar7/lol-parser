@@ -112,9 +112,6 @@ public class RMANFile
     {
         try
         {
-            Path outputName = outputFolder.resolve(file.getFullFilepath(this));
-            Files.createDirectories(outputName.getParent());
-            
             System.out.println("Loading bundles needed for " + file.getName());
             
             List<String>                chunkIds = file.getChunkIds();
@@ -141,6 +138,9 @@ public class RMANFile
                 
                 current = next;
             }
+            
+            Path outputName = outputFolder.resolve(file.getFullFilepath(this));
+            Files.createDirectories(outputName.getParent());
             Files.write(outputName, bos.toByteArray());
             
         } catch (IOException e1)

@@ -19,7 +19,7 @@ public class TestRMAN
     public void testRMAN() throws Exception
     {
         List<RMANFile> files = new ArrayList<>();
-        //files.add(RMANParser.loadFromPBE(RMANFileType.GAME));
+        files.add(RMANParser.loadFromPBE(RMANFileType.GAME));
         files.add(RMANParser.loadFromPBE(RMANFileType.LCU));
         
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
@@ -36,6 +36,8 @@ public class TestRMAN
         {
             long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
+            
+            // calculate the max filesize here, to replace 500_000_000
             int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
             
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
