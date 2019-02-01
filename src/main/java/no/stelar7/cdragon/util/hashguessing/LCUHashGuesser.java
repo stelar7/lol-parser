@@ -52,11 +52,6 @@ public class LCUHashGuesser extends HashGuesser
     
     public void substituteBasenameWords(String plugin, String ext, Set<String> words, int amount)
     {
-        if (words == null)
-        {
-            words = this.buildWordlist();
-        }
-        
         Set<String> paths = new HashSet<>(this.known.values());
         if (plugin != null)
         {
@@ -78,6 +73,11 @@ public class LCUHashGuesser extends HashGuesser
                     paths.remove(path);
                 }
             }
+        }
+    
+        if (words == null)
+        {
+            words = this.buildWordlist();
         }
         
         super.substituteBasenameWords(paths, words, amount);

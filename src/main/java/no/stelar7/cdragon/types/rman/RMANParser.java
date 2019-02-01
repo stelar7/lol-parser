@@ -20,6 +20,54 @@ public class RMANParser implements Parseable<RMANFile>
         GAME, LCU
     }
     
+    public static RMANFile loadFromCache(int version, RMANFileType type)
+    {
+        try
+        {
+            Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
+            Path realPath     = downloadPath.resolveSibling(version + ".json");
+            if (!Files.exists(realPath))
+            {
+                System.out.println("Manifest not in cache!!");
+                return null;
+            }
+            
+            String     patchManifest = String.join("\n", Files.readAllLines(realPath));
+            JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+            
+            Path usedManfest = null;
+            switch (type)
+            {
+                case GAME:
+                {
+                    System.out.println("Downloading game manifest");
+                    String url = obj.get("game_patch_url").getAsString();
+                    usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
+                    WebHandler.downloadFile(usedManfest, url);
+                    break;
+                }
+                
+                case LCU:
+                {
+                    System.out.println("Downloading lcu manifest");
+                    String url = obj.get("client_patch_url").getAsString();
+                    usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
+                    WebHandler.downloadFile(usedManfest, url);
+                    
+                    break;
+                }
+            }
+            
+            System.out.println("Parsing...");
+            return new RMANParser().parse(usedManfest);
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public static RMANFile loadFromPBE(RMANFileType type)
     {
         try
@@ -72,6 +120,74 @@ public class RMANParser implements Parseable<RMANFile>
             
             System.out.println("Parsing...");
             return new RMANParser().parse(usedManfest);
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    /**
+     * the files list on this object only contains the files that have changed between this and last patch
+     */
+    public static RMANFile loadFromPBEIgnoreOld(RMANFileType type)
+    {
+        try
+        {
+            Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
+            
+            System.out.println("Downloading patcher manifest");
+            String     patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            String     patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
+            JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+            int        version       = obj.get("version").getAsInt();
+            System.out.println("Found patch version " + version);
+            
+            Path realPath = downloadPath.resolveSibling(version + ".json");
+            if (Files.exists(realPath))
+            {
+                System.out.println("Manifest already saved!");
+                Files.deleteIfExists(downloadPath);
+            } else
+            {
+                System.out.println("Saving file");
+                Files.move(downloadPath, realPath);
+            }
+            
+            Path usedManfest = null;
+            switch (type)
+            {
+                case GAME:
+                {
+                    System.out.println("Downloading game manifest");
+                    String url = obj.get("game_patch_url").getAsString();
+                    usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
+                    WebHandler.downloadFile(usedManfest, url);
+                    break;
+                }
+                
+                case LCU:
+                {
+                    System.out.println("Downloading lcu manifest");
+                    String url = obj.get("client_patch_url").getAsString();
+                    usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
+                    WebHandler.downloadFile(usedManfest, url);
+                    break;
+                }
+            }
+            
+            System.out.println("Parsing...");
+            RMANFile newFile = new RMANParser().parse(usedManfest);
+            RMANFile oldFile = RMANParser.loadFromCache(version - 1, type);
+            if (oldFile != null)
+            {
+                List<RMANFileBodyFile> oldFiles = newFile.getUnchangedFiles(oldFile);
+                newFile.getBody().getFiles().removeIf(nfif -> oldFiles.stream().map(RMANFileBodyFile::getFileId).anyMatch(i -> nfif.getFileId() == i));
+                System.out.println();
+            }
+            
+            return newFile;
             
         } catch (IOException e)
         {

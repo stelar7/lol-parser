@@ -9,7 +9,7 @@ public class TestCDTBHashGuessing
     @Test
     public void doTest()
     {
-        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon")));
+        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe")));
         guesser.substituteRegionLang();
         guesser.substitutePlugin();
         guesser.substituteBasenames();

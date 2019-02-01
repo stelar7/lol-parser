@@ -327,15 +327,17 @@ public class TestWAD
                 long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
                 if (endsCount != 0)
                 {
-                    WADFile parsed = parser.parse(file);
-                    parsed.printUnknownFiles(UtilHandler.pathToFilename(file));
+                    WADFile parsed   = parser.parse(file);
+                    String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
+                    parsed.printUnknownFiles(filename);
                     return FileVisitResult.CONTINUE;
                 }
                 
                 if (endscCount != 0)
                 {
-                    WADFile parsed = parser.parseCompressed(file);
-                    parsed.printUnknownFiles(UtilHandler.pathToFilename(file));
+                    WADFile parsed   = parser.parseCompressed(file);
+                    String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
+                    parsed.printUnknownFiles(filename);
                 }
                 return FileVisitResult.CONTINUE;
             }

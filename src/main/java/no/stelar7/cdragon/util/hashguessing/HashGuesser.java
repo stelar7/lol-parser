@@ -8,6 +8,7 @@ import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
 import java.nio.file.*;
+import java.text.DateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.*;
@@ -22,10 +23,7 @@ public class HashGuesser
                                                                 "lan", "las", "na", "oc", "oc1", "oce", "pbe", "ph", "ru", "sg", "tencent", "th", "tr", "tw",
                                                                 "vn"));
     
-    protected Set<String> LANGUAGES = new HashSet<>(Arrays.asList("default", "ar_eg", "cs_cz", "de_de", "el_gr", "en_au", "en_gb", "en_ph", "en_pl", "en_sg", "en_us",
-                                                                  "es_ar", "es_es", "es_mx", "fr_fr", "hu_hu", "id_id", "it_it", "ja_jp", "ko_kr", "ms_my",
-                                                                  "pl_pl", "pt_br", "ro_ro", "ru_ru", "th_th", "tr_tr", "vi_vn", "vn_vn", "zh_cn", "zh_my",
-                                                                  "zh_tw"));
+    protected Set<String> LANGUAGES = new HashSet<>(Arrays.stream(DateFormat.getAvailableLocales()).map(l -> l.toString().toLowerCase(Locale.ENGLISH)).collect(Collectors.toSet()));
     
     
     protected Set<String> hashes;
@@ -65,7 +63,7 @@ public class HashGuesser
         try
         {
             Set<String> unknowns     = new HashSet<>();
-            List<Path>  unknownFiles = Files.walk(baseSearchPath).filter(p -> p.getFileName().toString().contains(".unknown.txt")).collect(Collectors.toList());
+            List<Path>  unknownFiles = Files.walk(baseSearchPath).filter(p -> p.getFileName().toString().contains("unknown.json")).collect(Collectors.toList());
             for (Path unk : unknownFiles)
             {
                 unknowns.addAll(Files.readAllLines(unk));

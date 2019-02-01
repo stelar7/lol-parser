@@ -23,8 +23,11 @@ public final class FileTypeHandler
         
         if (!(magic.getData().length > 3))
         {
-            // wtf??
-            System.out.println(magic);
+            if (isProbableJSON(magic))
+            {
+                return "json";
+            }
+            
             return "txt";
         }
         

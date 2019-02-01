@@ -31,14 +31,14 @@ public class TestRMAN
         removeOldBundles(removedBundles, bundleFolder);
         downloadAllBundles(files, bundleFolder);
         
-        boolean shouldExport = true;
+        boolean shouldExport = false;
         if (shouldExport)
         {
+            long maxFileSize = files.stream().flatMap(f -> f.getBody().getFiles().stream()).mapToLong(RMANFileBodyFile::getFileSize).max().getAsLong();
+            
             long allocatedMemory      = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
             long presumableFreeMemory = Runtime.getRuntime().maxMemory() - allocatedMemory;
-            
-            // calculate the max filesize here, to replace 500_000_000
-            int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, 500_000_000) / 4);
+            int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, maxFileSize));
             
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
             int[]        counter      = {0};

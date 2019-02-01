@@ -206,6 +206,23 @@ public class RMANFile
         return files.stream().collect(Collectors.groupingBy(f -> fixName.apply(f.getName()), Collectors.mapping(f -> f, Collectors.toList())));
     }
     
+    public List<RMANFileBodyFile> getUnchangedFiles(RMANFile oldM)
+    {
+        List<RMANFileBodyFile> ignored = new ArrayList<>();
+        oldM.getBody().getFiles().forEach(oldFile -> {
+            
+            Optional<RMANFileBodyFile> optf = getBody().getFiles().stream().filter(n -> n.getName().equalsIgnoreCase(oldFile.getName())).findAny();
+            optf.ifPresent(newFile -> {
+                if (oldFile.getChunkIds().equals(newFile.getChunkIds()))
+                {
+                    ignored.add(oldFile);
+                }
+            });
+        });
+        
+        return ignored;
+    }
+    
     
     @Override
     public boolean equals(Object o)
