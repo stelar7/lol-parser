@@ -31,7 +31,7 @@ public class TestRMAN
         removeOldBundles(removedBundles, bundleFolder);
         downloadAllBundles(files, bundleFolder);
         
-        boolean shouldExport = false;
+        boolean shouldExport = true;
         if (shouldExport)
         {
             long maxFileSize = files.stream().flatMap(f -> f.getBody().getFiles().stream()).mapToLong(RMANFileBodyFile::getFileSize).max().getAsLong();
@@ -43,23 +43,11 @@ public class TestRMAN
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
             int[]        counter      = {0};
             ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
-            files.forEach(rfile -> {
-                try
-                {
-                    forkJoinPool.submit(() -> rfile.getBody()
-                                                   .getFiles()
-                                                   .parallelStream()
-                                                   .forEach(f ->
-                                                            {
-                                                                counter[0]++;
-                                                                System.out.format("Extracting file %s of %s%n", counter[0], rfile.getBody().getFiles().size());
-                                                                rfile.extractFile(f, bundleFolder, fileFolder);
-                                                            })).get();
-                } catch (InterruptedException | ExecutionException e)
-                {
-                    e.printStackTrace();
-                }
-            });
+            files.forEach(rfile -> rfile.getBody().getFiles().forEach(f -> forkJoinPool.submit(() -> {
+                counter[0]++;
+                System.out.format("Extracting file %s of %s%n", counter[0], rfile.getBody().getFiles().size());
+                rfile.extractFile(f, bundleFolder, fileFolder);
+            })));
             
             forkJoinPool.shutdown();
             forkJoinPool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);

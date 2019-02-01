@@ -138,8 +138,10 @@ public class RMANParser implements Parseable<RMANFile>
             Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
             
             System.out.println("Downloading patcher manifest");
-            String     patcherUrl    = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-            String     patchManifest = String.join("\n", WebHandler.readWeb(patcherUrl));
+            String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            WebHandler.downloadFile(downloadPath, patcherUrl);
+            
+            String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
             JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
             int        version       = obj.get("version").getAsInt();
             System.out.println("Found patch version " + version);
