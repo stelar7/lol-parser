@@ -23,7 +23,10 @@ public class HashGuesser
                                                                 "lan", "las", "na", "oc", "oc1", "oce", "pbe", "ph", "ru", "sg", "tencent", "th", "tr", "tw",
                                                                 "vn"));
     
-    protected Set<String> LANGUAGES = new HashSet<>(Arrays.stream(DateFormat.getAvailableLocales()).map(l -> l.toString().toLowerCase(Locale.ENGLISH)).collect(Collectors.toSet()));
+    protected Set<String> LANGUAGES = new HashSet<>(Arrays.stream(DateFormat.getAvailableLocales())
+                                                          .map(l -> l.toString().toLowerCase(Locale.ENGLISH))
+                                                          .filter(s -> s.contains("_"))
+                                                          .collect(Collectors.toSet()));
     
     
     protected Set<String> hashes;

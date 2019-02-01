@@ -10,6 +10,7 @@ import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.util.hashguessing.HashGuesser;
 import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
@@ -344,6 +345,17 @@ public class TestWAD
         });
     }
     
+    private final Function<Vector2, String> findPlugin = s -> {
+        String prePre = (String) s.getSecond();
+        if (prePre.startsWith("plugins/"))
+        {
+            return "lcu";
+        }
+        
+        return "game";
+    };
+    
+    
     @Test
     public void testPullCDTB()
     {
@@ -353,19 +365,8 @@ public class TestWAD
         String hashC = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.game.txt";
         String hashD = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.lcu.txt";
         
-        Set<String> changedPlugins = new HashSet<>();
-        
-        Function<Vector2, String> findPlugin = s -> {
-            String prePre = (String) s.getSecond();
-            if (prePre.startsWith("plugins/"))
-            {
-                return "lcu";
-            }
-            
-            return "game";
-        };
-        
-        List<String> data = WebHandler.readWeb(hashA);
+        Set<String>  changedPlugins = new HashSet<>();
+        List<String> data           = WebHandler.readWeb(hashA);
         data.addAll(WebHandler.readWeb(hashB));
         data.addAll(WebHandler.readWeb(hashC));
         data.addAll(WebHandler.readWeb(hashD));
@@ -374,12 +375,45 @@ public class TestWAD
                                                .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
                                                .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
         
+        updateLocalHashList(hashes);
+    }
+    
+    @Test
+    public void mergeHashHandlerFiles()
+    {
+        Map<String, Set<Vector2>> lcuHash = HashGuesser.hashFileLCU.load(true)
+                                                                   .values()
+                                                                   .stream()
+                                                                   .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
+                                                                   .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
+        
+        Map<String, Set<Vector2>> gameHash = HashGuesser.hashFileGAME.load(true)
+                                                                     .values()
+                                                                     .stream()
+                                                                     .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
+                                                                     .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
+        
+        updateLocalHashList(lcuHash);
+        updateLocalHashList(gameHash);
+    }
+    
+    public void updateLocalHashList(Map<String, Set<Vector2>> hashes)
+    {
+        Map<String, Set<Vector2>> selfHashes = HashHandler.getWADHashes()
+                                                          .values()
+                                                          .stream()
+                                                          .map(pre -> new Vector2(HashHandler.computeXXHash64(pre), pre))
+                                                          .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
         
         System.out.println("Updating local hashlists");
         hashes.forEach((k, v) -> {
             try
             {
-                List<Vector2> foundHashes = new ArrayList<>(v);
+                
+                Set<Vector2> allHashes = new HashSet<>(v);
+                allHashes.addAll(selfHashes.get(k));
+                
+                List<Vector2> foundHashes = new ArrayList<>(allHashes);
                 foundHashes.sort(Comparator.comparing(Vector2::getSecond, new NaturalOrderComparator()));
                 
                 JsonWriterWrapper jsonWriter = new JsonWriterWrapper();

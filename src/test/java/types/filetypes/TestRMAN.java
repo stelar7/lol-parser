@@ -19,8 +19,8 @@ public class TestRMAN
     public void testRMAN() throws Exception
     {
         List<RMANFile> files = new ArrayList<>();
-        files.add(RMANParser.loadFromPBE(RMANFileType.GAME));
-        files.add(RMANParser.loadFromPBE(RMANFileType.LCU));
+        files.add(RMANParser.loadFromPBEIgnoreOld(RMANFileType.GAME));
+        files.add(RMANParser.loadFromPBEIgnoreOld(RMANFileType.LCU));
         
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
         Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");

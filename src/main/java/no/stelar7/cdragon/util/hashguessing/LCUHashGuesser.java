@@ -42,7 +42,7 @@ public class LCUHashGuesser extends HashGuesser
         for (String s : regionLang)
         {
             String replacement = "plugins/$1/" + s + "/";
-            for (String value : this.known.values())
+            for (String value : new ArrayList<>(this.known.values()))
             {
                 String toCheck = regex.matcher(value).replaceFirst(replacement);
                 check(toCheck);
@@ -74,7 +74,7 @@ public class LCUHashGuesser extends HashGuesser
                 }
             }
         }
-    
+        
         if (words == null)
         {
             words = this.buildWordlist();
@@ -128,7 +128,7 @@ public class LCUHashGuesser extends HashGuesser
                                          ")");
         
         Set<String> paths = new HashSet<>();
-        for (String value : this.known.values())
+        for (String value : new ArrayList<>(this.known.values()))
         {
             if (!filter.matcher(value).find())
             {
@@ -412,7 +412,7 @@ public class LCUHashGuesser extends HashGuesser
         }
         
         
-        for (String p : this.known.values())
+        for (String p : new ArrayList<>(this.known.values()))
         {
             if (p.startsWith("plugins/rcp-fe-lol-loot/global/default/assets/loot_item_icons/"))
             {
