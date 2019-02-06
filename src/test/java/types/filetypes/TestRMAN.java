@@ -43,10 +43,10 @@ public class TestRMAN
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
             int[]        counter      = {0};
             ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
-            files.forEach(rfile -> rfile.getBody().getFiles().forEach(f -> forkJoinPool.submit(() -> {
+            files.forEach(manifest -> manifest.getBody().getFiles().forEach(f -> forkJoinPool.submit(() -> {
                 counter[0]++;
-                System.out.format("Extracting file %s of %s%n", counter[0], rfile.getBody().getFiles().size());
-                rfile.extractFile(f, bundleFolder, fileFolder);
+                System.out.format("Extracting file %s of %s%n", counter[0], manifest.getBody().getFiles().size());
+                manifest.extractFile(f, bundleFolder, fileFolder);
             })));
             
             forkJoinPool.shutdown();

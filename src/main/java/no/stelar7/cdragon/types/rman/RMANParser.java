@@ -184,6 +184,7 @@ public class RMANParser implements Parseable<RMANFile>
             RMANFile oldFile = RMANParser.loadFromCache(version - 1, type);
             if (oldFile != null)
             {
+                System.out.println("Found version " + (version - 1) + " in cache");
                 List<RMANFileBodyFile> oldFiles = newFile.getUnchangedFiles(oldFile);
                 newFile.getBody().getFiles().removeIf(nfif -> oldFiles.stream().map(RMANFileBodyFile::getFileId).anyMatch(i -> nfif.getFileId() == i));
                 System.out.println();
