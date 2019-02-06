@@ -138,7 +138,7 @@ public class RMANFile
             {
                 raf.seek(current.getOffsetToChunk());
                 byte[] compressedChunkData = raf.readBytes(current.getCompressedSize());
-                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData, current.getCompressedSize() * 2);
+                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData, (1024 * 1024 * 10));
                 bos.write(uncompressedData);
                 
                 if (i + 1 >= chunkIdsSize)
@@ -162,6 +162,7 @@ public class RMANFile
         } catch (IOException e1)
         {
             e1.printStackTrace();
+            System.err.println(e1.getMessage());
         }
     }
     

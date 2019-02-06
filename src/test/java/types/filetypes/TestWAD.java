@@ -184,29 +184,17 @@ public class TestWAD
         
         HashHandler.unloadWadHashes();
         generateUnknownFileList(rito);
+        
         extractWads(rito, extractPath);
-        
-        final BINParser bp = new BINParser();
-        final DDSParser dp = new DDSParser();
-        
-        System.out.println("Transforming bin files to json");
-        Files.walk(extractPath)
-             .parallel()
-             .filter(a -> a.getFileName().toString().endsWith(".bin"))
-             .forEach(file -> {
-                 try
-                 {
-                     BINFile parsed = bp.parse(file);
-                     Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
-                     Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
-                     //file.toFile().deleteOnExit();
-                 } catch (IOException e)
-                 {
-                     e.printStackTrace();
-                 }
-             });
-        
+        transformBins(extractPath);
+        transformDds(extractPath);
+    }
+    
+    private void transformDds(Path extractPath) throws IOException
+    {
         System.out.println("Transforming dds files to png");
+        
+        final DDSParser dp = new DDSParser();
         Files.walk(extractPath)
              .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".dds"))
@@ -224,36 +212,56 @@ public class TestWAD
              });
     }
     
+    private void transformBins(Path extractPath) throws IOException
+    {
+        System.out.println("Transforming bin files to json");
+        
+        final BINParser bp = new BINParser();
+        Files.walk(extractPath)
+             .parallel()
+             .filter(a -> a.getFileName().toString().endsWith(".bin"))
+             .forEach(file -> {
+                 try
+                 {
+                     BINFile parsed = bp.parse(file);
+                     Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                     Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
+                     //file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     e.printStackTrace();
+                 }
+             });
+    }
+    
     private void extractWads(Path from, Path to) throws IOException
     {
+        List<String> ends  = Arrays.asList(".wad", ".wad.client");
+        List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+        
         WADParser parser = new WADParser();
-        Files.walkFileTree(from, new SimpleFileVisitor<>()
-        {
-            List<String> ends = Arrays.asList(".wad", ".wad.client");
-            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+        Files.walk(from)
+             .parallel()
+             .forEach(file -> {
+                 if (Files.isDirectory(file))
+                 {
+                     return;
+                 }
             
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-            {
-                long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
-                long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
-                if (endsCount != 0)
-                {
-                    System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
-                    WADFile parsed = parser.parse(file);
-                    parsed.extractFiles(to);
-                    return FileVisitResult.CONTINUE;
-                }
-                
-                if (endscCount != 0)
-                {
-                    System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
-                    WADFile parsed = parser.parseCompressed(file);
-                    parsed.extractFiles(to);
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
+                 if (ends.stream().anyMatch(a -> file.getFileName().toString().endsWith(a)))
+                 {
+                     System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
+                     WADFile parsed = parser.parse(file);
+                     parsed.extractFiles(to);
+                 }
+            
+                 if (endsc.stream().anyMatch(a -> file.getFileName().toString().endsWith(a)))
+                 {
+                     System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
+                     WADFile parsed = parser.parseCompressed(file);
+                     parsed.extractFiles(to);
+                 }
+             });
     }
     
     @Test
@@ -430,5 +438,7 @@ public class TestWAD
                 e.printStackTrace();
             }
         });
+        
+        HashHandler.unloadWadHashes();
     }
 }

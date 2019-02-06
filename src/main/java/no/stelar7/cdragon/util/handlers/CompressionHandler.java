@@ -77,7 +77,14 @@ public final class CompressionHandler
     
     public static byte[] uncompressZSTD(byte[] fileBytes, int originalSize)
     {
-        return Zstd.decompress(fileBytes, originalSize);
+        try
+        {
+            return Zstd.decompress(fileBytes, originalSize);
+        } catch (RuntimeException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public static byte[] uncompress(byte[] bytes)
