@@ -80,11 +80,6 @@ public final class CompressionHandler
         return Zstd.decompress(fileBytes, originalSize);
     }
     
-    public static byte[] uncompressZSTD(byte[] fileBytes)
-    {
-        return Zstd.decompress(fileBytes, 1024 * 1024 * 1024);
-    }
-    
     public static byte[] uncompress(byte[] bytes)
     {
         if (FileTypeHandler.isProbableGZIP(bytes))
@@ -94,7 +89,7 @@ public final class CompressionHandler
         
         if (FileTypeHandler.isProbableZSTD(bytes))
         {
-            return uncompressZSTD(bytes);
+            return uncompressZSTD(bytes, bytes.length * 6);
         }
         
         if (FileTypeHandler.isProbableDEFLATE(bytes))

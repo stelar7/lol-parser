@@ -6,6 +6,7 @@ import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.io.*;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -56,6 +57,21 @@ public class RMANFile
                    .map(RMANFileBodyBundleChunkInfo::getBundleId)
                    .map(getBundleMap()::get)
                    .collect(Collectors.toSet());
+    }
+    
+    public void printFileList()
+    {
+        StandardOpenOption[] options = {StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE};
+        body.getFiles().forEach(f -> {
+            try
+            {
+                String path = f.getFullFilepath(this) + "\n";
+                Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("FILELIST.txt"), path.getBytes(StandardCharsets.UTF_8), options);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
     }
     
     public RMANFileHeader getHeader()
@@ -115,14 +131,14 @@ public class RMANFile
             System.out.println("Loading bundles needed for " + file.getName());
             
             List<String>                chunkIds = file.getChunkIds();
-            ByteArrayOutputStream       bos      = new ByteArrayOutputStream();
+            ByteArrayOutputStream       bos      = new ByteArrayOutputStream(file.getFileSize());
             RMANFileBodyBundleChunkInfo current  = getChunkMap().get(chunkIds.get(0));
             RandomAccessReader          raf      = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
             for (int i = 0, chunkIdsSize = chunkIds.size(); i < chunkIdsSize; i++)
             {
                 raf.seek(current.getOffsetToChunk());
                 byte[] compressedChunkData = raf.readBytes(current.getCompressedSize());
-                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData);
+                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData, current.getCompressedSize() * 2);
                 bos.write(uncompressedData);
                 
                 if (i + 1 >= chunkIdsSize)
@@ -218,6 +234,24 @@ public class RMANFile
                     ignored.add(oldFile);
                 }
             });
+        });
+        
+        return ignored;
+    }
+    
+    
+    public List<RMANFileBodyFile> getChangedFiles(RMANFile oldM)
+    {
+        List<RMANFileBodyFile> ignored = new ArrayList<>();
+        oldM.getBody().getFiles().forEach(oldFile -> {
+            
+            Optional<RMANFileBodyFile> optf = getBody().getFiles().stream().filter(n -> n.getName().equalsIgnoreCase(oldFile.getName())).findAny();
+            optf.ifPresentOrElse(newFile -> {
+                if (!oldFile.getChunkIds().equals(newFile.getChunkIds()))
+                {
+                    ignored.add(oldFile);
+                }
+            }, () -> ignored.add(oldFile));
         });
         
         return ignored;

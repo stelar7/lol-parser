@@ -10,6 +10,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -19,8 +20,9 @@ public class TestRMAN
     public void testRMAN() throws Exception
     {
         List<RMANFile> files = new ArrayList<>();
-        files.add(RMANParser.loadFromPBEIgnoreOld(RMANFileType.GAME));
-        files.add(RMANParser.loadFromPBEIgnoreOld(RMANFileType.LCU));
+        files.add(RMANParser.loadFromPBE(RMANFileType.GAME));
+        files.add(RMANParser.loadFromPBE(RMANFileType.LCU));
+        files.forEach(RMANFile::printFileList);
         
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
         Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
@@ -41,11 +43,12 @@ public class TestRMAN
             int  suggestedThreadCount = (int) (Math.floorDiv(presumableFreeMemory, maxFileSize));
             
             // This is ran in a pool to limit the memory usage (sets the concurrent threads to suggestedThreadCount, instead of core count (12 in my case))
-            int[]        counter      = {0};
-            ForkJoinPool forkJoinPool = new ForkJoinPool(Math.max(suggestedThreadCount, 1));
+            // well, it was, but not all files got extracted
+            AtomicInteger counter      = new AtomicInteger(0);
+            ForkJoinPool  forkJoinPool = new ForkJoinPool(5);
+            
             files.forEach(manifest -> manifest.getBody().getFiles().forEach(f -> forkJoinPool.submit(() -> {
-                counter[0]++;
-                System.out.format("Extracting file %s of %s%n", counter[0], manifest.getBody().getFiles().size());
+                System.out.format("Extracting file %s of %s%n", counter.incrementAndGet(), manifest.getBody().getFiles().size());
                 manifest.extractFile(f, bundleFolder, fileFolder);
             })));
             
