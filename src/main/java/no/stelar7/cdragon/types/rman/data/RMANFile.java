@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.rman.data;
 
+import com.github.luben.zstd.ZstdInputStream;
 import com.google.gson.JsonElement;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -129,17 +130,21 @@ public class RMANFile
         try
         {
             System.out.println("Loading bundles needed for " + file.getName());
+            Path outputName = outputFolder.resolve(file.getFullFilepath(this));
+            Files.createDirectories(outputName.getParent());
+            
             
             List<String>                chunkIds = file.getChunkIds();
-            ByteArrayOutputStream       bos      = new ByteArrayOutputStream(file.getFileSize());
             RMANFileBodyBundleChunkInfo current  = getChunkMap().get(chunkIds.get(0));
-            RandomAccessReader          raf      = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
+            
+            FileOutputStream   fos = new FileOutputStream(outputName.toFile());
+            RandomAccessReader raf = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
             for (int i = 0, chunkIdsSize = chunkIds.size(); i < chunkIdsSize; i++)
             {
                 raf.seek(current.getOffsetToChunk());
-                byte[] compressedChunkData = raf.readBytes(current.getCompressedSize());
-                byte[] uncompressedData    = CompressionHandler.uncompressZSTD(compressedChunkData, (1024 * 1024 * 10));
-                bos.write(uncompressedData);
+                byte[]          compressedChunkData = raf.readBytes(current.getCompressedSize());
+                ZstdInputStream is                  = new ZstdInputStream(new ByteArrayInputStream(compressedChunkData));
+                is.transferTo(fos);
                 
                 if (i + 1 >= chunkIdsSize)
                 {
@@ -155,14 +160,9 @@ public class RMANFile
                 current = next;
             }
             
-            Path outputName = outputFolder.resolve(file.getFullFilepath(this));
-            Files.createDirectories(outputName.getParent());
-            Files.write(outputName, bos.toByteArray());
-            
         } catch (IOException e1)
         {
             e1.printStackTrace();
-            System.err.println(e1.getMessage());
         }
     }
     

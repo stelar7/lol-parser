@@ -186,11 +186,11 @@ public class TestWAD
         generateUnknownFileList(rito);
         
         extractWads(rito, extractPath);
-        transformBins(extractPath);
-        transformDds(extractPath);
+        transformBIN(extractPath);
+        transformDDS(extractPath);
     }
     
-    private void transformDds(Path extractPath) throws IOException
+    private void transformDDS(Path extractPath) throws IOException
     {
         System.out.println("Transforming dds files to png");
         
@@ -212,7 +212,7 @@ public class TestWAD
              });
     }
     
-    private void transformBins(Path extractPath) throws IOException
+    private void transformBIN(Path extractPath) throws IOException
     {
         System.out.println("Transforming bin files to json");
         

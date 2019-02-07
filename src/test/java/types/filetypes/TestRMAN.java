@@ -31,7 +31,7 @@ public class TestRMAN
         removeOldBundles(removedBundles, bundleFolder);
         downloadAllBundles(files, bundleFolder);
         
-        boolean shouldExport = false;
+        boolean shouldExport = true;
         if (shouldExport)
         {
             files.forEach(manifest -> manifest.getBody()
