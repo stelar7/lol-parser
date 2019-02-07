@@ -15,9 +15,9 @@ import java.util.function.Consumer;
 public class LCUSocketReader
 {
     
-    private WebSocket                     socket;
-    private Lockfile                      lockfile;
-    private Map<String, Consumer<String>> handlers = new HashMap<>();
+    private WebSocket                           socket;
+    private Lockfile                            lockfile;
+    private Map<String, List<Consumer<String>>> handlers = new HashMap<>();
     
     
     public LCUSocketReader(Pair<String, String> params)
@@ -53,7 +53,7 @@ public class LCUSocketReader
                     String event   = data.get(1).getAsString();
                     String content = data.get(2).getAsJsonObject().toString();
                     
-                    Consumer<String> consumer = handlers.get(event);
+                    List<Consumer<String>> consumers = handlers.get(event);
                     try
                     {
                         StringWriter holder = new StringWriter();
@@ -64,7 +64,7 @@ public class LCUSocketReader
                         jw.flush();
                         jw.close();
                         
-                        consumer.accept(holder.toString());
+                        consumers.forEach(c -> c.accept(holder.toString()));
                     } catch (IOException e)
                     {
                         e.printStackTrace();
@@ -103,7 +103,7 @@ public class LCUSocketReader
     public void subscribe(String event, Consumer<String> consumer)
     {
         sendMessage(5, event);
-        handlers.put(event, consumer);
+        handlers.get(event).add(consumer);
         System.out.println("Subscribed to " + event);
     }
     
