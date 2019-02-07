@@ -5,6 +5,7 @@ import com.google.gson.stream.JsonWriter;
 import com.neovisionaries.ws.client.*;
 import no.stelar7.cdragon.types.lockfile.data.Lockfile;
 import no.stelar7.cdragon.util.SimpleSSLContext;
+import no.stelar7.cdragon.util.types.Pair;
 
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
@@ -18,17 +19,28 @@ public class LCUSocketReader
     private Lockfile                      lockfile;
     private Map<String, Consumer<String>> handlers = new HashMap<>();
     
+    
+    public LCUSocketReader(Pair<String, String> params)
+    {
+        setupConnection(params.getA(), params.getB());
+    }
+    
     public LCUSocketReader(Lockfile lock)
+    {
+        setupConnection(lock.getPassword(), String.valueOf(lock.getPort()));
+    }
+    
+    private void setupConnection(String password, String port)
     {
         try
         {
-            String           url     = String.format("wss://localhost:%s/", lock.getPort());
+            String           url     = String.format("wss://localhost:%s/", port);
             WebSocketFactory factory = new WebSocketFactory();
             factory.setSSLContext(SimpleSSLContext.getInstance("TLS"));
             factory.setVerifyHostname(false);
             
             socket = factory.createSocket(url);
-            socket.setUserInfo("riot", lock.getPassword());
+            socket.setUserInfo("riot", password);
             socket.addListener(new WebSocketAdapter()
             {
                 @Override
@@ -64,6 +76,7 @@ public class LCUSocketReader
             e.printStackTrace();
         }
     }
+    
     
     public void connect()
     {

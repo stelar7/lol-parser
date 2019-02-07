@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.prefs.Preferences;
+import java.util.regex.*;
 import java.util.stream.Collectors;
 
 public final class UtilHandler
@@ -418,6 +419,70 @@ public final class UtilHandler
             e.printStackTrace();
             return input;
         }
+    }
+    
+    public static Map<String, String> extractRegex(String input, String regex, String... vars)
+    {
+        Map<String, String> matches = new HashMap<>();
+        
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(input);
+        if (!m.find())
+        {
+            return Collections.emptyMap();
+        }
+        
+        Arrays.stream(vars).forEach(v -> matches.put(v, m.group(v)));
+        
+        return matches;
+    }
+    
+    public static String extractRegex(String input, String regex, String var)
+    {
+        return extractRegex(input, regex, new String[]{var}).getOrDefault(var, null);
+    }
+    
+    public static Pair<String, String> getLCUConnectionData()
+    {
+        boolean      isWindows      = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).contains("win");
+        List<String> windowsCommand = Arrays.asList("WMIC", "process", "where", "name='LeagueClientUx.exe'", "get", "commandLine");
+        List<String> macCommand     = Arrays.asList("ps", "x", "|", "grep", "'LeagueClientUx.exe'");
+        
+        String passwordRegex = "--remoting-auth-token=(?<password>[^ \\\"]+)";
+        String portRegex     = "--app-port=(?<port>\\d+)";
+        
+        try
+        {
+            ProcessBuilder builder = new ProcessBuilder(isWindows ? windowsCommand : macCommand);
+            Process        process = builder.start();
+            BufferedReader br      = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String         line    = br.lines().collect(Collectors.joining());
+            
+            String password = extractRegex(line, passwordRegex, "password");
+            String port     = extractRegex(line, portRegex, "port");
+            
+            if (password == null || port == null)
+            {
+                System.err.println("The league client does not appear to be running!");
+                return null;
+            }
+            
+            return new Pair<>(password, port);
+            
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public static Map<String, String> getLCUAuthorizationHeader()
+    {
+        Pair<String, String> info    = getLCUConnectionData();
+        String               val     = "riot:" + info.getA();
+        String               encoded = new String(Base64.getEncoder().encode(val.getBytes(StandardCharsets.UTF_8)), StandardCharsets.UTF_8);
+        
+        return Map.of("Authorization", "Basic " + encoded);
     }
     
 }

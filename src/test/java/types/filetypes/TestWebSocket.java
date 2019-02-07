@@ -6,6 +6,7 @@ import no.stelar7.cdragon.types.lockfile.data.Lockfile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.LCUSocketReader;
 import org.junit.Test;
+import org.slf4j.helpers.Util;
 
 import java.io.*;
 import java.nio.file.*;
@@ -15,16 +16,11 @@ public class TestWebSocket
     @Test
     public void testWebSocket() throws InterruptedException, IOException
     {
-        LockfileParser parser = new LockfileParser();
-        Path           file   = Paths.get("C:\\Riot Games\\League of Legends\\lockfile");
-        Lockfile       parsed = parser.parse(file);
-        
         String    data   = String.join("", Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/events.json")));
         JsonArray events = new JsonParser().parse(data).getAsJsonObject().get("events").getAsJsonArray();
         
-        
         Thread th = new Thread(() -> {
-            LCUSocketReader reader = new LCUSocketReader(parsed);
+            LCUSocketReader reader = new LCUSocketReader(UtilHandler.getLCUConnectionData());
             reader.connect();
             for (JsonElement event : events)
             {
