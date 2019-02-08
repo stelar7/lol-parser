@@ -180,11 +180,9 @@ public class TestWAD
     public void testCDragonWAD() throws Exception
     {
         Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
-        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
+        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
         
-        HashHandler.unloadWadHashes();
         generateUnknownFileList(rito);
-        
         extractWads(rito, extractPath);
         transformBIN(extractPath);
         transformDDS(extractPath);
@@ -336,7 +334,7 @@ public class TestWAD
                 long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
                 if (endsCount != 0)
                 {
-                    WADFile parsed   = parser.parse(file);
+                    WADFile parsed   = parser.parseReadOnly(file);
                     String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
                     parsed.printUnknownFiles(filename);
                     return FileVisitResult.CONTINUE;
@@ -384,6 +382,7 @@ public class TestWAD
                                                .collect(Collectors.groupingBy(findPlugin, Collectors.toSet()));
         
         updateLocalHashList(hashes);
+        System.out.println("Hash loading finished");
     }
     
     @Test

@@ -154,12 +154,13 @@ public class RMANFile
                 RMANFileBodyBundleChunkInfo next = getChunkMap().get(chunkIds.get(i + 1));
                 if (!current.getBundleId().equals(next.getBundleId()))
                 {
+                    raf.close();
                     raf = new RandomAccessReader(bundleFolder.resolve(next.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
                 }
                 
                 current = next;
             }
-            
+            raf.close();
         } catch (IOException e1)
         {
             e1.printStackTrace();
@@ -183,11 +184,7 @@ public class RMANFile
                 return;
             }
             
-            if (Files.exists(bundlePath))
-            {
-                bundlePath.toFile().delete();
-            }
-            
+            bundlePath.toFile().delete();
             System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
             WebHandler.downloadBundle(bundleId, bundlePath);
         });

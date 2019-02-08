@@ -15,13 +15,19 @@ public class RBUNParser implements Parseable<RBUNFile>
     @Override
     public RBUNFile parse(Path path)
     {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN))
+        {
+            return parse(raf);
+        }
     }
     
     @Override
     public RBUNFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        try (RandomAccessReader raf = new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN))
+        {
+            return parse(raf);
+        }
     }
     
     @Override

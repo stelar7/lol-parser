@@ -1,12 +1,10 @@
 package no.stelar7.cdragon.util.handlers;
 
-import no.stelar7.cdragon.types.rbun.RBUNParser;
 import no.stelar7.cdragon.util.types.*;
 
-import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.*;
-import java.nio.BufferUnderflowException;
+import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -35,10 +33,16 @@ public class WebHandler
     
     public static boolean shouldDownloadBundle(String bundleId, Path output, long bundleSize)
     {
-        try
+        if (Files.exists(output))
         {
-            if (Files.exists(output))
+            return false;
+            
+            /*
+            
+            Add this code back to force-check each file for validity, but it makes loading _much_ slower
+            try
             {
+                
                 try
                 {
                     RBUNParser parser   = new RBUNParser();
@@ -52,10 +56,11 @@ public class WebHandler
                 {
                     return true;
                 }
+            } catch (IOException e)
+            {
+                e.printStackTrace();
             }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+            */
         }
         
         return true;
@@ -74,42 +79,14 @@ public class WebHandler
         try
         {
             Files.createDirectories(output.getParent());
-            
-            int                 read;
-            final byte[]        buffer = new byte[4096];
-            final URLConnection uc     = new URL(url.replace(" ", "%20")).openConnection();
-            try (InputStream in = uc.getInputStream();
-                 ByteArrayOutputStream out = new ByteArrayOutputStream())
+            URL u = new URL(url);
+            try (InputStream is = u.openStream();
+                 ReadableByteChannel rbc = Channels.newChannel(is);
+                 FileOutputStream fos = new FileOutputStream(output.toFile()))
             {
-                while ((read = in.read(buffer)) != -1)
-                {
-                    out.write(buffer, 0, read);
-                }
-                out.flush();
-                Files.write(output, out.toByteArray());
-            } catch (SSLException e)
-            {
-                System.out.println("SSL Connection error, retrying " + url);
-                output.toFile().delete();
-                Thread.sleep((new Random().nextInt(10) + 1) * 100);
-                downloadFile(output, url);
-            } catch (IOException e)
-            {
-                if (e.getMessage().contains("504"))
-                {
-                    System.out.println("Connection error, retrying " + url);
-                    output.toFile().delete();
-                    Thread.sleep((new Random().nextInt(10) + 1) * 100);
-                    downloadFile(output, url);
-                }
-            } catch (Exception e)
-            {
-                e.printStackTrace();
-                output.toFile().delete();
-                System.err.println("Failed to download file! Please delete the file if it exists!");
-                System.exit(0);
+                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
-        } catch (IOException | InterruptedException e)
+        } catch (IOException e)
         {
             e.printStackTrace();
         }

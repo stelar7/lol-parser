@@ -151,7 +151,25 @@ public class WADParser implements Parseable<WADFile>
     @Override
     public WADFile parse(Path path)
     {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN))
+        {
+            return parse(raf);
+        }
+    }
+    
+    /**
+     * Parses the specified WAD, locking it for writing.
+     * This is much faster than the other options, but blocks the file from being written to, deleted, and moved.
+     *
+     * @param path path to the file
+     * @return WADFile
+     */
+    public WADFile parseReadOnly(Path path)
+    {
+        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN, false))
+        {
+            return parse(raf);
+        }
     }
     
     public WADFile parseCompressed(Path path)
@@ -170,7 +188,10 @@ public class WADParser implements Parseable<WADFile>
     @Override
     public WADFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        try (RandomAccessReader raf = new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN))
+        {
+            return parse(raf);
+        }
     }
     
     @Override

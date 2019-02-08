@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -23,7 +24,7 @@ public class TestRMAN
         files.forEach(RMANFile::printFileList);
         
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
-        Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles");
+        Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
         Files.createDirectories(bundleFolder);
         Files.createDirectories(fileFolder);
         
@@ -31,13 +32,16 @@ public class TestRMAN
         removeOldBundles(removedBundles, bundleFolder);
         downloadAllBundles(files, bundleFolder);
         
-        boolean shouldExport = true;
+        boolean shouldExport = false;
         if (shouldExport)
         {
+            // use one thread per core, and leave one free for the OS
+            ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             files.forEach(manifest -> manifest.getBody()
                                               .getFiles()
-                                              .parallelStream()
-                                              .forEach(f -> manifest.extractFile(f, bundleFolder, fileFolder)));
+                                              .forEach(f -> service.submit(() -> manifest.extractFile(f, bundleFolder, fileFolder))));
+            service.shutdown();
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         }
         
         TestWAD tw = new TestWAD();

@@ -7,6 +7,7 @@ import no.stelar7.cdragon.util.types.math.*;
 import org.joml.Quaternionf;
 
 import java.io.*;
+import java.lang.reflect.*;
 import java.nio.*;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.*;
@@ -15,7 +16,9 @@ import java.util.*;
 
 public class RandomAccessReader implements AutoCloseable
 {
-    private ByteBuffer buffer;
+    private ByteBuffer       buffer;
+    private MappedByteBuffer mappedBuffer;
+    private boolean          preventLockedFile = false;
     
     private Path      path;
     private byte[]    rawBytes;
@@ -37,16 +40,66 @@ public class RandomAccessReader implements AutoCloseable
         return new RandomAccessReader(file.toPath(), order);
     }
     
+    
+    public RandomAccessReader(Path path, ByteOrder order, boolean preventLockedFile)
+    {
+        this.path = path;
+        this.preventLockedFile = preventLockedFile;
+        
+        try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r"))
+        {
+            if (this.preventLockedFile)
+            {
+                this.mappedBuffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
+                this.mappedBuffer.order(order);
+                if (this.mappedBuffer.isDirect())
+                {
+                    this.buffer = ByteBuffer.allocateDirect(this.mappedBuffer.capacity());
+                } else
+                {
+                    this.buffer = ByteBuffer.allocate(this.mappedBuffer.capacity());
+                }
+                
+                this.buffer.order(this.mappedBuffer.order());
+                
+                this.mappedBuffer.position(0);
+                this.buffer.put(this.mappedBuffer);
+                this.buffer.position(0);
+            } else
+            {
+                this.buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
+                this.buffer.order(order);
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            throw new RuntimeException("Invalid file?");
+        }
+    }
+    
     public RandomAccessReader(Path path, ByteOrder order)
     {
-        try
+        this.path = path;
+        
+        try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r"))
         {
-            this.path = path;
-            RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r");
+            this.mappedBuffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
+            this.mappedBuffer.order(order);
             
-            this.buffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
-            this.buffer.order(order);
-            raf.close();
+            if (this.mappedBuffer.isDirect())
+            {
+                this.buffer = ByteBuffer.allocateDirect(this.mappedBuffer.capacity());
+            } else
+            {
+                this.buffer = ByteBuffer.allocate(this.mappedBuffer.capacity());
+            }
+            
+            this.buffer.order(this.mappedBuffer.order());
+            
+            this.mappedBuffer.position(0);
+            this.buffer.put(this.mappedBuffer);
+            this.buffer.position(0);
+            
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -69,12 +122,29 @@ public class RandomAccessReader implements AutoCloseable
     @Override
     public void close()
     {
-        /*
-         This is not ideal, but its a workaround to http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4469299
-         and Java9 made it even worse...
-         */
-        
-        buffer = null;
+        if (this.preventLockedFile)
+        {
+            try
+            {
+                Class unsafeClass;
+                try
+                {
+                    unsafeClass = Class.forName("sun.misc.Unsafe");
+                } catch (Exception ex)
+                {
+                    unsafeClass = Class.forName("jdk.internal.misc.Unsafe");
+                }
+                Method clean = unsafeClass.getMethod("invokeCleaner", ByteBuffer.class);
+                clean.setAccessible(true);
+                Field theUnsafeField = unsafeClass.getDeclaredField("theUnsafe");
+                theUnsafeField.setAccessible(true);
+                Object theUnsafe = theUnsafeField.get(null);
+                clean.invoke(theUnsafe, this.mappedBuffer);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | NoSuchFieldException | ClassNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+        }
     }
     
     public int pos()
