@@ -103,7 +103,7 @@ public class LCUSocketReader
     public void subscribe(String event, Consumer<String> consumer)
     {
         sendMessage(5, event);
-        handlers.get(event).add(consumer);
+        handlers.computeIfAbsent(event, (key) -> new ArrayList<>()).add(consumer);
         System.out.println("Subscribed to " + event);
     }
     

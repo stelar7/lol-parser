@@ -249,7 +249,7 @@ public class TestWAD
                  if (ends.stream().anyMatch(a -> file.getFileName().toString().endsWith(a)))
                  {
                      System.out.println("Extracting from " + UtilHandler.pathToFilename(file));
-                     WADFile parsed = parser.parse(file);
+                     WADFile parsed = parser.parseReadOnly(file);
                      parsed.extractFiles(to);
                  }
             
