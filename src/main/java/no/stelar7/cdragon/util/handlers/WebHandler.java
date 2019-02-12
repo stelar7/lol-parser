@@ -1,9 +1,11 @@
 package no.stelar7.cdragon.util.handlers;
 
+import no.stelar7.cdragon.types.rbun.RBUNParser;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
 import java.net.*;
+import java.nio.BufferUnderflowException;
 import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -35,11 +37,6 @@ public class WebHandler
     {
         if (Files.exists(output))
         {
-            return false;
-            
-            /*
-            
-            Add this code back to force-check each file for validity, but it makes loading _much_ slower
             try
             {
                 
@@ -60,7 +57,7 @@ public class WebHandler
             {
                 e.printStackTrace();
             }
-            */
+            
         }
         
         return true;

@@ -155,7 +155,9 @@ public class RMANFile
                 if (!current.getBundleId().equals(next.getBundleId()))
                 {
                     raf.close();
-                    raf = new RandomAccessReader(bundleFolder.resolve(next.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
+                    
+                    Path nextBundle = bundleFolder.resolve(next.getBundleId() + ".bundle");
+                    raf = new RandomAccessReader(nextBundle, ByteOrder.LITTLE_ENDIAN);
                 }
                 
                 current = next;

@@ -91,6 +91,12 @@ public class RMANFileBodyBundle
                Objects.equals(chunks, that.chunks);
     }
     
+    @Override
+    public String toString()
+    {
+        return bundleId;
+    }
+    
     /*
     @Override
     public int hashCode()

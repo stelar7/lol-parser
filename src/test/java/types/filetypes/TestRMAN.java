@@ -32,7 +32,7 @@ public class TestRMAN
         removeOldBundles(removedBundles, bundleFolder);
         downloadAllBundles(files, bundleFolder);
         
-        boolean shouldExport = false;
+        boolean shouldExport = true;
         if (shouldExport)
         {
             // use one thread per core, and leave one free for the OS

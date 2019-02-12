@@ -28,16 +28,16 @@ public class RandomAccessReader implements AutoCloseable
     {
         if (raf.getPath() != null)
         {
-            return new RandomAccessReader(raf.getPath(), raf.byteOrder);
+            return new RandomAccessReader(raf.getPath(), raf.byteOrder, raf.preventLockedFile);
         } else
         {
             return new RandomAccessReader(raf.getRawBytes(), raf.byteOrder);
         }
     }
     
-    public static RandomAccessReader create(File file, ByteOrder order)
+    public static RandomAccessReader create(File file, ByteOrder order, boolean preventLockedFile)
     {
-        return new RandomAccessReader(file.toPath(), order);
+        return new RandomAccessReader(file.toPath(), order, preventLockedFile);
     }
     
     
@@ -79,32 +79,12 @@ public class RandomAccessReader implements AutoCloseable
     
     public RandomAccessReader(Path path, ByteOrder order)
     {
-        this.path = path;
-        
-        try (RandomAccessFile raf = new RandomAccessFile(path.toFile(), "r"))
-        {
-            this.mappedBuffer = raf.getChannel().map(MapMode.READ_ONLY, 0, raf.getChannel().size());
-            this.mappedBuffer.order(order);
-            
-            if (this.mappedBuffer.isDirect())
-            {
-                this.buffer = ByteBuffer.allocateDirect(this.mappedBuffer.capacity());
-            } else
-            {
-                this.buffer = ByteBuffer.allocate(this.mappedBuffer.capacity());
-            }
-            
-            this.buffer.order(this.mappedBuffer.order());
-            
-            this.mappedBuffer.position(0);
-            this.buffer.put(this.mappedBuffer);
-            this.buffer.position(0);
-            
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-            throw new RuntimeException("Invalid file?");
-        }
+        this(path, order, true);
+    }
+    
+    public RandomAccessReader(Path path)
+    {
+        this(path, ByteOrder.LITTLE_ENDIAN, true);
     }
     
     public RandomAccessReader(byte[] dataBytes, ByteOrder order)
@@ -112,6 +92,13 @@ public class RandomAccessReader implements AutoCloseable
         this.rawBytes = dataBytes;
         this.buffer = ByteBuffer.wrap(dataBytes);
         this.buffer.order(order);
+    }
+    
+    public RandomAccessReader(byte[] dataBytes)
+    {
+        this.rawBytes = dataBytes;
+        this.buffer = ByteBuffer.wrap(dataBytes);
+        this.buffer.order(ByteOrder.LITTLE_ENDIAN);
     }
     
     public byte[] getRawBytes()

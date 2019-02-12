@@ -19,7 +19,7 @@ public class CodebookLibrary
         String codebook     = getClass().getClassLoader().getResource("codebook/packed_codebooks_aoTuV_603.bin").getFile();
         File   codebookFile = new File(codebook);
         
-        RandomAccessReader raf = RandomAccessReader.create(codebookFile, ByteOrder.LITTLE_ENDIAN);
+        RandomAccessReader raf = RandomAccessReader.create(codebookFile, ByteOrder.LITTLE_ENDIAN, false);
         
         int streamSize = raf.remaining();
         

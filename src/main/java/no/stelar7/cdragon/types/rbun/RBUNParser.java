@@ -21,6 +21,14 @@ public class RBUNParser implements Parseable<RBUNFile>
         }
     }
     
+    public RBUNFile parseReadOnly(Path path)
+    {
+        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN, false))
+        {
+            return parse(raf);
+        }
+    }
+    
     @Override
     public RBUNFile parse(ByteArray data)
     {

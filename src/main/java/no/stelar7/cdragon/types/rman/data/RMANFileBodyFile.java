@@ -265,6 +265,11 @@ public class RMANFileBodyFile
                Objects.equals(chunkIds, that.chunkIds);
     }
     
+    @Override
+    public String toString()
+    {
+        return name;
+    }
     
     /*
     @Override
