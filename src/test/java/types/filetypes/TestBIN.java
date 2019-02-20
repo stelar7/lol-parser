@@ -484,9 +484,9 @@ public class TestBIN
     @Test
     public void tryGenerateCharList()
     {
-        List<String> tals = Arrays.asList("taliyah_", "taliyahwallchunk_");
-        List<String> words = Arrays.asList("", "skins_", "root_", "skin0_", "skin1_", "skin2_", "skin3_",
-                                           "skins", "root", "skin0", "skin1", "skin2", "skin3");
+        List<String> tals  = Collections.singletonList("brand");
+        List<String> words = Arrays.asList("", "skins_", "root_", "skin0_", "skin1_", "skin2_", "skin3_", "skin4_", "skin5_", "skin6_", "skin7_", "skin8_", "skin9_", "skin10_", "skin11_", "skin12_");
+        List<String> ends  = Arrays.asList("skins", "root", "skin0", "skin1", "skin2", "skin3", "skin4", "skin5", "skin6", "skin7", "skin8", "skin9", "skin10", "skin11", "skin12");
         
         
         for (String a : tals)
@@ -521,12 +521,12 @@ public class TestBIN
                                                                 {
                                                                     for (String p : words)
                                                                     {
-                                                                        for (String q : words)
+                                                                        for (String q : ends)
                                                                         {
                                                                             String combination = a + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q;
                                                                             String test        = "data/" + combination + ".bin";
                                                                             String hash        = HashHandler.computeXXHash64(test);
-                                                                            if (hash.toUpperCase(Locale.ENGLISH).startsWith("02C9C0DAF"))
+                                                                            if (hash.toUpperCase(Locale.ENGLISH).startsWith("C585052C8"))
                                                                             {
                                                                                 System.out.println(test);
                                                                             }

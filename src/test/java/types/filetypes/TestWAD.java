@@ -161,7 +161,7 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        Path      path   = UtilHandler.DOWNLOADS_FOLDER.resolve("Kaisa.es_MX.wad.client");
+        Path      path   = Paths.get("C:\\Users\\Steffen\\Downloads\\cdragon\\FiddleSticks.wad.client");//UtilHandler.DOWNLOADS_FOLDER.resolve("Kaisa.es_MX.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
         parsed.extractFiles(path.resolveSibling("blitz"));
@@ -239,14 +239,14 @@ public class TestWAD
         
         WADParser parser = new WADParser();
         Files.walk(from)
-             //.parallel()
+             .parallel()
              .forEach(file -> {
                  if (Files.isDirectory(file))
                  {
                      return;
                  }
             
-                 String filename = file.getParent().getFileName().toString() + "/" + UtilHandler.pathToFilename(file);
+                 String filename = file.getParent().getFileName().toString() + "/" + file.getFileName().toString();
             
                  if (ends.stream().anyMatch(a -> file.getFileName().toString().endsWith(a)))
                  {

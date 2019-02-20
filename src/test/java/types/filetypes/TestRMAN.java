@@ -30,9 +30,9 @@ public class TestRMAN
         
         List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
         removeOldBundles(removedBundles, bundleFolder);
-        downloadAllBundles(files, bundleFolder);
+        //downloadAllBundles(files, bundleFolder);
         
-        boolean shouldExport = true;
+        boolean shouldExport = false;
         if (shouldExport)
         {
             // use one thread per core, and leave one free for the OS
