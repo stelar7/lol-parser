@@ -39,7 +39,7 @@ public class TestWAD
         
         if (parsed != null)
         {
-            parsed.extractFiles(extractPath);
+            parsed.extractFiles(extractPath, pluginName);
         }
     }
     
@@ -164,7 +164,7 @@ public class TestWAD
         Path      path   = Paths.get("C:\\Users\\Steffen\\Downloads\\cdragon\\FiddleSticks.wad.client");//UtilHandler.DOWNLOADS_FOLDER.resolve("Kaisa.es_MX.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
-        parsed.extractFiles(path.resolveSibling("blitz"));
+        parsed.extractFiles(path.resolveSibling("blitz"), "FiddleSticks");
     }
     
     @Test
@@ -246,20 +246,22 @@ public class TestWAD
                      return;
                  }
             
-                 String filename = file.getParent().getFileName().toString() + "/" + file.getFileName().toString();
+                 String parent   = file.getParent().getFileName().toString();
+                 String child    = file.getFileName().toString();
+                 String filename = parent + "/" + child;
             
-                 if (ends.stream().anyMatch(a -> file.getFileName().toString().endsWith(a)))
+                 if (ends.stream().anyMatch(child::endsWith))
                  {
                      System.out.println("Extracting from " + filename);
                      WADFile parsed = parser.parseReadOnly(file);
-                     parsed.extractFiles(to);
+                     parsed.extractFiles(to, parent);
                  }
             
-                 if (endsc.stream().anyMatch(a -> file.getFileName().toString().endsWith(a)))
+                 if (endsc.stream().anyMatch(child::endsWith))
                  {
                      System.out.println("Extracting from " + filename);
                      WADFile parsed = parser.parseCompressed(file);
-                     parsed.extractFiles(to);
+                     parsed.extractFiles(to, parent);
                  }
              });
     }
@@ -440,6 +442,6 @@ public class TestWAD
             }
         });
         
-        HashHandler.unloadWadHashes();
+        HashHandler.reloadWadHashes();
     }
 }

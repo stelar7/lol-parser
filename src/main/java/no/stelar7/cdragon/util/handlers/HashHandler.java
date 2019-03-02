@@ -335,8 +335,9 @@ public class HashHandler
         return wadHashNames;
     }
     
-    public static void unloadWadHashes()
+    public static void reloadWadHashes()
     {
         wadHashNames = null;
+        getWADHashes();
     }
 }

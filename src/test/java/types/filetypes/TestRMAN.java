@@ -28,9 +28,13 @@ public class TestRMAN
         Files.createDirectories(bundleFolder);
         Files.createDirectories(fileFolder);
         
-        List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
-        removeOldBundles(removedBundles, bundleFolder);
-        //downloadAllBundles(files, bundleFolder);
+        boolean shouldDownload = false;
+        if(shouldDownload)
+        {
+            List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
+            removeOldBundles(removedBundles, bundleFolder);
+            downloadAllBundles(files, bundleFolder);
+        }
         
         boolean shouldExport = false;
         if (shouldExport)

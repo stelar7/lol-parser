@@ -13,8 +13,6 @@ import java.util.*;
 
 public class WADFile
 {
-    private String unknownHashContainer = "unknown.json";
-    
     private final RandomAccessReader fileReader;
     private       WADHeaderBase      header;
     
@@ -50,21 +48,8 @@ public class WADFile
         this.contentHeaders = contentHeaders;
     }
     
-    public void extractFiles(Path path)
+    public void extractFiles(Path path, String wadName)
     {
-        Path ukp = path.resolve(unknownHashContainer);
-        try
-        {
-            if (!Files.exists(ukp))
-            {
-                Files.createDirectories(ukp.getParent());
-                Files.createFile(ukp);
-            }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        
         final int interval = (int) Math.floor(getContentHeaders().size() / 10f);
         for (int index = 0; index < getContentHeaders().size(); index++)
         {
@@ -78,16 +63,16 @@ public class WADFile
                 }
             }
             
-            saveFile(fileHeader, path);
+            saveFile(fileHeader, path, wadName);
         }
         
         fileReader.close();
     }
     
-    public void saveFile(WADContentHeaderV1 header, Path savePath)
+    public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName)
     {
         String unhashed = HashHandler.getWadHash(header.getPathHash());
-        String filename = unhashed.equals(header.getPathHash()) ? "unknown\\" + header.getPathHash() : unhashed;
+        String filename = unhashed.equals(header.getPathHash()) ?  header.getPathHash() : unhashed;
         Path   self     = savePath.resolve(filename);
         
         if (self.toString().length() > 255)
@@ -119,10 +104,9 @@ public class WADFile
                 }
             }
             
-            if ("unknown".equals(parentName))
+            if (header.getPathHash().equals(filename))
             {
-                Files.write(savePath.resolve(unknownHashContainer), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-                findFileTypeAndRename(data, filename, savePath);
+                findFileTypeAndRename(data, filename, savePath, wadName);
             } else
             {
                 Files.write(self, data);
@@ -154,7 +138,7 @@ public class WADFile
     }
     
     
-    private void findFileTypeAndRename(byte[] data, String filename, Path parent) throws IOException
+    private void findFileTypeAndRename(byte[] data, String filename, Path parent, String wadName) throws IOException
     {
         ByteArray magic    = new ByteArray(Arrays.copyOf(data, data.length));
         String    fileType = FileTypeHandler.findFileType(magic);
@@ -165,7 +149,7 @@ public class WADFile
         }
         
         StringBuilder sb    = new StringBuilder(filename).append(".").append(fileType);
-        Path          other = parent.resolve(sb.toString());
+        Path          other = parent.resolve("unknown").resolve(wadName).resolve(sb.toString());
         
         if ("json".equals(fileType))
         {
@@ -177,6 +161,7 @@ public class WADFile
             data = UtilHandler.beautifyJS(new String(data, StandardCharsets.UTF_8)).getBytes(StandardCharsets.UTF_8);
         }
         
+        Files.createDirectories(other.getParent());
         Files.write(other, data);
     }
     

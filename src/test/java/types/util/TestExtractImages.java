@@ -36,7 +36,7 @@ public class TestExtractImages
         Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
-        parsed.extractFiles(extractPath);
+        parsed.extractFiles(extractPath, pluginName);
     }
     
     private final List<String> img_exts = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
@@ -232,7 +232,7 @@ public class TestExtractImages
         try
         {
             WADFile parsed = parser.parseLatest(pluginName, extractPath, false);
-            parsed.extractFiles(extractPath);
+            parsed.extractFiles(extractPath, pluginName);
         } catch (Exception e)
         {
             e.printStackTrace();
