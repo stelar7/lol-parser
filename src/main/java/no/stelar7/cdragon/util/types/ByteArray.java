@@ -99,4 +99,9 @@ public final class ByteArray
         ByteArray last = copyOfRange(this.data.length - bytes.data.length, this.data.length);
         return Arrays.equals(last.data, bytes.data);
     }
+    
+    public boolean startsWith(ByteArray bytes)
+    {
+        return this.equals(bytes);
+    }
 }

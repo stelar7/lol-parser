@@ -498,7 +498,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableSKL(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8))) || (wrapper.indexMatch(2, (byte) 0x00) && wrapper.indexMatch(3, (byte) 0x00));
+        return wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
     }
     
     public static boolean isProbableANM(ByteArray wrapper)
