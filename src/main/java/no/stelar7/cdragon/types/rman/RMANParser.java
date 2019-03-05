@@ -77,6 +77,7 @@ public class RMANParser implements Parseable<RMANFile>
             
             System.out.println("Downloading patcher manifest");
             String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            //String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/macpbe-pbe-mac.json";
             WebHandler.downloadFile(downloadPath, patcherUrl);
             
             String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
@@ -342,9 +343,11 @@ public class RMANParser implements Parseable<RMANFile>
             int tempA         = raf.readInt();
             int restoreOffset = 4;
             
-            bfile.setCustomNameOffset(tempA & 0x00FFFFFF);
+            bfile.setCustomNameOffset(tempA & 0xFFFFFF);
             bfile.setFiletypeFlag(tempA >> 24);
-            if (bfile.getCustomNameOffset() > 0 && bfile.getCustomNameOffset() != 0x10200)
+            boolean hasInlineName = raf.readInt() < 100;
+            raf.seek(raf.pos() - 4);
+            if (hasInlineName)
             {
                 bfile.setNameOffset(bfile.getCustomNameOffset());
             } else

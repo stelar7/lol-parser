@@ -485,4 +485,8 @@ public final class UtilHandler
         return Map.of("Authorization", "Basic " + encoded);
     }
     
+    public static boolean isBitflagSet(int value, int flag)
+    {
+        return (value & flag) == flag;
+    }
 }

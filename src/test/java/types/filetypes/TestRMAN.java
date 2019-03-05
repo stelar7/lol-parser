@@ -28,7 +28,7 @@ public class TestRMAN
         Files.createDirectories(bundleFolder);
         Files.createDirectories(fileFolder);
         
-        boolean shouldDownload = false;
+        boolean shouldDownload = true;
         if(shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
@@ -36,7 +36,7 @@ public class TestRMAN
             downloadAllBundles(files, bundleFolder);
         }
         
-        boolean shouldExport = false;
+        boolean shouldExport = true;
         if (shouldExport)
         {
             // use one thread per core, and leave one free for the OS
