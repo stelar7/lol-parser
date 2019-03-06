@@ -90,12 +90,12 @@ public final class FileTypeHandler
         {
             return "glslf";
         }
-        
-        if (FileTypeHandler.isProbableIDX(magic))
+    
+        if (FileTypeHandler.isProbableGLSLV(magic))
         {
-            return "idx";
+            return "glslv";
         }
-        
+    
         if (FileTypeHandler.isProbableWPK(magic))
         {
             return "wpk";
@@ -148,6 +148,11 @@ public final class FileTypeHandler
         }
         
         return "unknown";
+    }
+    
+    private static boolean isProbableGLSLV(ByteArray magic)
+    {
+        return new String(magic.getData()).contains("// glslv output by Cg compiler");
     }
     
     private static boolean isProbableGLSLF(ByteArray magic)
@@ -489,12 +494,6 @@ public final class FileTypeHandler
         }
         
         return list;
-    }
-    
-    public static boolean isProbableIDX(ByteArray wrapper)
-    {
-        byte[] data = wrapper.getData();
-        return !isSame(data[0], (byte) 0x00) && isSame(data[1], (byte) 0x00) && isSame(data[2], (byte) 0x00) && isSame(data[3], (byte) 0x00);
     }
     
     public static boolean isProbable3DModelStuff(ByteArray wrapper)

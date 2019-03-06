@@ -39,25 +39,17 @@ public class WebHandler
         {
             try
             {
-                
-                try
+                RBUNParser parser   = new RBUNParser();
+                int        metaSize = parser.parse(output).getMetadataSize();
+                if (Files.size(output) == (bundleSize + metaSize))
                 {
-                    RBUNParser parser   = new RBUNParser();
-                    int        metaSize = parser.parse(output).getMetadataSize();
-                    if (Files.size(output) == (bundleSize + metaSize))
-                    {
-                        //System.out.println("Bundle " + bundleId + " already exists");
-                        return false;
-                    }
-                } catch (BufferUnderflowException b)
-                {
-                    return true;
+                    //System.out.println("Bundle " + bundleId + " already exists");
+                    return false;
                 }
-            } catch (IOException e)
+            } catch (BufferUnderflowException | IOException b)
             {
-                e.printStackTrace();
+                return true;
             }
-            
         }
         
         return true;

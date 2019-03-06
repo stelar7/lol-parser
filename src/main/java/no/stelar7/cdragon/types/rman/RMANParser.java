@@ -229,6 +229,7 @@ public class RMANParser implements Parseable<RMANFile>
         file.setBody(parseCompressedBody(file));
         file.buildChunkMap();
         file.buildBundleMap();
+        
         return file;
     }
     
