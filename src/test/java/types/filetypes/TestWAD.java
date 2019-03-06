@@ -161,7 +161,7 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        Path      path   = Paths.get("C:\\Users\\Steffen\\Downloads\\cdragon\\FiddleSticks.wad.client");//UtilHandler.DOWNLOADS_FOLDER.resolve("Kaisa.es_MX.wad.client");
+        Path      path   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2\\DATA\\FINAL\\Champions\\Corki.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
         parsed.extractFiles(path.resolveSibling("blitz"), "FiddleSticks");

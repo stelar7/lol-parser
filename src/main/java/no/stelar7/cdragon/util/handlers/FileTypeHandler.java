@@ -3,6 +3,7 @@ package no.stelar7.cdragon.util.handlers;
 import com.google.gson.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
+import java.nio.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -85,6 +86,11 @@ public final class FileTypeHandler
             return "preload";
         }
         
+        if (FileTypeHandler.isProbableGLSLF(magic))
+        {
+            return "glslf";
+        }
+        
         if (FileTypeHandler.isProbableIDX(magic))
         {
             return "idx";
@@ -142,6 +148,11 @@ public final class FileTypeHandler
         }
         
         return "unknown";
+    }
+    
+    private static boolean isProbableGLSLF(ByteArray magic)
+    {
+        return new String(magic.getData()).contains("// glslf output by Cg compiler");
     }
     
     
@@ -498,7 +509,19 @@ public final class FileTypeHandler
     
     public static boolean isProbableSKL(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
+        boolean isSKL = wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
+        if (!isSKL)
+        {
+            // edge case where the filetype is determined by the first bytes being equal to the filesize
+            ByteBuffer b = ByteBuffer.wrap(wrapper.copyOfRange(0, 4).getData()).order(ByteOrder.LITTLE_ENDIAN);
+            int guess = b.getInt();
+            if (guess == wrapper.getData().length)
+            {
+                return true;
+            }
+        }
+        
+        return isSKL;
     }
     
     public static boolean isProbableANM(ByteArray wrapper)
