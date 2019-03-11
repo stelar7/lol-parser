@@ -487,6 +487,6 @@ public final class UtilHandler
     
     public static boolean isBitflagSet(int value, int flag)
     {
-        return (value & flag) == flag;
+        return (value | flag) == value;
     }
 }
