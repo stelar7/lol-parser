@@ -142,12 +142,27 @@ public final class FileTypeHandler
             return "json";
         }
         
+        if(FileTypeHandler.isProbableHLS(magic)) {
+            return "hls";
+        }
+        
         if (FileTypeHandler.isProbableTXT(magic))
         {
             return "txt";
         }
         
         return "unknown";
+    }
+    
+    private static boolean isProbableHLS(ByteArray magic)
+    {
+        boolean probableShader = false;
+        String content = new String(magic.getData());
+        probableShader |= content.contains("#include ");
+        probableShader |= content.contains("void main(VERTEX");
+        probableShader |= content.contains("// Shader");
+        
+        return probableShader;
     }
     
     private static boolean isProbableGLSLV(ByteArray magic)

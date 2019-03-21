@@ -24,11 +24,9 @@ public class TestRMAN
         files.forEach(RMANFile::printFileList);
         
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
-        Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
         Files.createDirectories(bundleFolder);
-        Files.createDirectories(fileFolder);
         
-        boolean shouldDownload = true;
+        boolean shouldDownload = false;
         if(shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
@@ -36,9 +34,12 @@ public class TestRMAN
             downloadAllBundles(files, bundleFolder);
         }
         
-        boolean shouldExport = true;
+        boolean shouldExport = false;
         if (shouldExport)
         {
+            Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
+            Files.createDirectories(fileFolder);
+            
             // use one thread per core, and leave one free for the OS
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             files.forEach(manifest -> manifest.getBody()
