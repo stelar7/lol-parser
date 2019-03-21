@@ -3,17 +3,58 @@ package no.stelar7.cdragon.util.handlers;
 import no.stelar7.cdragon.types.rbun.RBUNParser;
 import no.stelar7.cdragon.util.types.*;
 
+import javax.net.ssl.*;
 import java.io.*;
 import java.net.*;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.*;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class WebHandler
 {
+    
+    static
+    {
+        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager()
+        {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers()
+            {
+                return null;
+            }
+            
+            public void checkClientTrusted(X509Certificate[] certs, String authType)
+            {
+            }
+            
+            public void checkServerTrusted(X509Certificate[] certs, String authType)
+            {
+            }
+        }
+        };
+        
+        try
+        {
+            // Install the all-trusting trust manager
+            SSLContext sc = SSLContext.getInstance("SSL");
+            sc.init(null, trustAllCerts, new java.security.SecureRandom());
+            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+            
+            // Create all-trusting host name verifier
+            HostnameVerifier allHostsValid = (hostname, session) -> true;
+            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+        } catch (NoSuchAlgorithmException | KeyManagementException e)
+        {
+            e.printStackTrace();
+        }
+        
+    }
+    
+    
     public static boolean checkIfURLExists(String finalUrl)
     {
         try
@@ -61,7 +102,6 @@ public class WebHandler
         //System.out.println("Downloading bundle " + bundleId);
         downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
-    
     
     public static void downloadFile(Path output, String url)
     {
