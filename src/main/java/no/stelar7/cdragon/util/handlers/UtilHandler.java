@@ -485,8 +485,26 @@ public final class UtilHandler
         return Map.of("Authorization", "Basic " + encoded);
     }
     
-    public static boolean isBitflagSet(int value, int flag)
+    /**
+     * returns true if the Nth bit is set, with 1 being the first bit.
+     * (passing in 0,0 as the argument also returns true)
+     *
+     * @param value
+     * @param bit
+     * @return
+     */
+    public static boolean isBitflagSet(int value, int bit)
     {
-        return (value | flag) == value;
+        if (value == bit)
+        {
+            return true;
+        }
+        
+        if (bit == 0)
+        {
+            return false;
+        }
+        
+        return (value & (1L << bit)) != 0;
     }
 }

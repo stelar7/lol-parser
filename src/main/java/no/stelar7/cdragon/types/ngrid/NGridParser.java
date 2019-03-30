@@ -93,7 +93,7 @@ public class NGridParser implements Parseable<NGridFile>
         file.setHeightSampleOffsetX(raf.readFloat());
         file.setHeightSampleOffsetZ(raf.readFloat());
         
-        int totalCount = file.getCountX() * file.getCountZ();
+        int totalCount = file.getHeightSamplesX() * file.getHeightSamplesZ();
         for (int i = 0; i < totalCount; i++)
         {
             float sample = raf.readFloat();
