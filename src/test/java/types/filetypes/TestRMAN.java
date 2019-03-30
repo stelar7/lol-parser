@@ -26,7 +26,7 @@ public class TestRMAN
         Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
         Files.createDirectories(bundleFolder);
         
-        boolean shouldDownload = false;
+        boolean shouldDownload = true;
         if(shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
@@ -34,7 +34,7 @@ public class TestRMAN
             downloadAllBundles(files, bundleFolder);
         }
         
-        boolean shouldExport = false;
+        boolean shouldExport = true;
         if (shouldExport)
         {
             Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
