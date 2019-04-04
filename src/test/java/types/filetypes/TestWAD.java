@@ -240,6 +240,7 @@ public class TestWAD
         WADParser parser = new WADParser();
         Files.walk(from)
              .parallel()
+            // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
              .forEach(file -> {
                  if (Files.isDirectory(file))
                  {
