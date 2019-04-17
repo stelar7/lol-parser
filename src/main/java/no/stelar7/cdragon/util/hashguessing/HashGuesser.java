@@ -15,8 +15,8 @@ import java.util.stream.*;
 
 public class HashGuesser
 {
-    public static HashFile hashFileLCU  = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.lcu.txt"));
-    public static HashFile hashFileGAME = new HashFile(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/hashes.game.txt"));
+    public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/hashes.lcu.txt"));
+    public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/hashes.game.txt"));
     
     
     protected Set<String> REGIONS = new HashSet<>(Arrays.asList("global", "br", "cn", "eun", "eune", "euw", "garena2", "garena3", "id", "jp", "kr", "la", "la1", "la2",

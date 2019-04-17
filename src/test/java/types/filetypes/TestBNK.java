@@ -22,7 +22,7 @@ public class TestBNK
     {
         BNKParser parser = new BNKParser();
         
-        Path file = DOWNLOADS_FOLDER.resolve("Ashe\\levels\\unknown\\e42848c953b2e155.bnk");
+        Path file = CDRAGON_FOLDER.resolve("Ashe\\levels\\unknown\\e42848c953b2e155.bnk");
         System.out.println("Parsing: " + file.toString());
         
         BNKFile data = parser.parse(file);
@@ -33,7 +33,7 @@ public class TestBNK
             if (wemFile.getData() != null)
             {
                 OGGStream oggStream = new OGGParser().parse(wemFile.getData());
-                Files.write(DOWNLOADS_FOLDER.resolve("9e2a3b17be356ffc" + i++ + ".ogg"), oggStream.getData().toByteArray());
+                Files.write(CDRAGON_FOLDER.resolve("9e2a3b17be356ffc" + i++ + ".ogg"), oggStream.getData().toByteArray());
             }
         }
     }

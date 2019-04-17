@@ -15,7 +15,7 @@ public class TestANM
     {
         ANMParser parser = new ANMParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\Aatrox_Attack1.anm");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\Aatrox_Attack1.anm");
         System.out.println("Parsing: " + file.toString());
     
         ANMFile data = parser.parse(file);

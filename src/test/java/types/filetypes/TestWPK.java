@@ -23,7 +23,7 @@ public class TestWPK
         WPKParser parser = new WPKParser();
         
         String filename = "AEF3226985BC3681.wpk";
-        Path   file     = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\" + filename);
+        Path   file     = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\" + filename);
         System.out.println("Parsing: " + file.toString());
         
         WPKFile   data = parser.parse(file);
@@ -44,7 +44,7 @@ public class TestWPK
     public void getFilenames() throws IOException
     {
         WPKParser    parser = new WPKParser();
-        Path         from   = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
+        Path         from   = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
         List<String> names  = new ArrayList<>();
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {

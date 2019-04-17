@@ -1,10 +1,7 @@
 package types.util;
 
-import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
-import no.stelar7.cdragon.util.types.math.Vector2;
-import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,18 +25,18 @@ public class TestFindHashStuff
                                    .collect(Collectors.joining("\n"));
         
         List<String> lines = Arrays.stream(jsonStrings.split("\n")).collect(Collectors.toList());
-        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("bins.txt"), jsonStrings.getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("bins.txt"), jsonStrings.getBytes(StandardCharsets.UTF_8));
         System.out.println();
     }
     
     @Test
     public void checkNewFiles() throws IOException
     {
-        Path binPath      = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
-        Path hashFile     = UtilHandler.DOWNLOADS_FOLDER.resolve("hashFile.txt");
-        Path unknownFiles = UtilHandler.DOWNLOADS_FOLDER.resolve("unknownFiles.txt");
-        Path newHashes    = UtilHandler.DOWNLOADS_FOLDER.resolve("newHashes.txt");
-        Path fixedHashes  = UtilHandler.DOWNLOADS_FOLDER.resolve("fixedHashes.json");
+        Path binPath      = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+        Path hashFile     = UtilHandler.CDRAGON_FOLDER.resolve("hashFile.txt");
+        Path unknownFiles = UtilHandler.CDRAGON_FOLDER.resolve("unknownFiles.txt");
+        Path newHashes    = UtilHandler.CDRAGON_FOLDER.resolve("newHashes.txt");
+        Path fixedHashes  = UtilHandler.CDRAGON_FOLDER.resolve("fixedHashes.json");
         
         System.out.println("Checking bin files for strings");
         grepFiles(hashFile, binPath);

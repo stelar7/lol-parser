@@ -14,7 +14,7 @@ public class TestWEM
     {
         WEMParser parser = new WEMParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\24635440.wem");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\24635440.wem");
         System.out.println("Parsing: " + file.toString());
         
         WEMFile data = parser.parse(file);

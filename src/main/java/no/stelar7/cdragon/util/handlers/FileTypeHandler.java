@@ -1,6 +1,8 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
+import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
+import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.*;
@@ -88,14 +90,22 @@ public final class FileTypeHandler
         
         if (FileTypeHandler.isProbableGLSLF(magic))
         {
+            //  OpenGL fragment profile
             return "glslf";
         }
-    
+        
         if (FileTypeHandler.isProbableGLSLV(magic))
         {
+            // OpenGL vertex profile
             return "glslv";
         }
     
+        if (FileTypeHandler.isProbableCSO(magic))
+        {
+            // Compiled Shader Object
+            return "cso";
+        }
+        
         if (FileTypeHandler.isProbableWPK(magic))
         {
             return "wpk";
@@ -142,8 +152,19 @@ public final class FileTypeHandler
             return "json";
         }
         
-        if(FileTypeHandler.isProbableHLS(magic)) {
+        if (FileTypeHandler.isProbableHLS(magic))
+        {
             return "hls";
+        }
+        
+        if (FileTypeHandler.isProbableManifestV1(magic))
+        {
+            return "manifestv1";
+        }
+    
+        if (FileTypeHandler.isProbableManifestV2(magic))
+        {
+            return "manifestv2";
         }
         
         if (FileTypeHandler.isProbableTXT(magic))
@@ -154,10 +175,44 @@ public final class FileTypeHandler
         return "unknown";
     }
     
+    private static boolean isProbableManifestV1(ByteArray magic)
+    {
+        if (magic.size() > 4)
+        {
+            try
+            {
+                new ManifestContentParser().parseV1(magic);
+                return true;
+            } catch (Exception e)
+            {
+                return false;
+            }
+        }
+        
+        return false;
+    }
+    
+    private static boolean isProbableManifestV2(ByteArray magic)
+    {
+        if (magic.size() > 4)
+        {
+            try
+            {
+                new ManifestContentParser().parseV2(magic);
+                return true;
+            } catch (Exception e)
+            {
+                return false;
+            }
+        }
+        
+        return false;
+    }
+    
     private static boolean isProbableHLS(ByteArray magic)
     {
         boolean probableShader = false;
-        String content = new String(magic.getData());
+        String  content        = new String(magic.getData());
         probableShader |= content.contains("#include ");
         probableShader |= content.contains("void main(VERTEX");
         probableShader |= content.contains("// Shader");
@@ -173,6 +228,11 @@ public final class FileTypeHandler
     private static boolean isProbableGLSLF(ByteArray magic)
     {
         return new String(magic.getData()).contains("// glslf output by Cg compiler");
+    }
+    
+    private static boolean isProbableCSO(ByteArray magic)
+    {
+        return new String(magic.getData()).contains("Microsoft (R) HLSL Shader Compiler");
     }
     
     
@@ -219,7 +279,7 @@ public final class FileTypeHandler
             ByteArray jpg3Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
             ByteArray jpg4Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
             ByteArray bnkMagic  = new ByteArray(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
-            ByteArray cgcMagic  = new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});
+            ByteArray cgcMagic  = new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});// some sort of shader related file
             ByteArray binMagic  = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
             ByteArray lcovMagic = new ByteArray(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
             ByteArray gifMagic  = new ByteArray(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
@@ -527,8 +587,8 @@ public final class FileTypeHandler
         if (!isSKL)
         {
             // edge case where the filetype is determined by the first bytes being equal to the filesize
-            ByteBuffer b = ByteBuffer.wrap(wrapper.copyOfRange(0, 4).getData()).order(ByteOrder.LITTLE_ENDIAN);
-            int guess = b.getInt();
+            ByteBuffer b     = ByteBuffer.wrap(wrapper.copyOfRange(0, 4).getData()).order(ByteOrder.LITTLE_ENDIAN);
+            int        guess = b.getInt();
             if (guess == wrapper.getData().length)
             {
                 return true;

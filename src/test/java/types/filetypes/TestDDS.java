@@ -20,7 +20,7 @@ public class TestDDS
         {
             DDSParser parser = new DDSParser();
             
-            Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+            Path file = UtilHandler.CDRAGON_FOLDER.resolve("temp");
             
             Files.walkFileTree(file, new SimpleFileVisitor<>()
             {
@@ -41,7 +41,7 @@ public class TestDDS
                         return FileVisitResult.CONTINUE;
                     }
                     
-                    Path output = UtilHandler.DOWNLOADS_FOLDER.resolve("png/" + UtilHandler.pathToFilename(file) + ".png");
+                    Path output = UtilHandler.CDRAGON_FOLDER.resolve("png/" + UtilHandler.pathToFilename(file) + ".png");
                     Files.createDirectories(output.getParent());
                     
                     ImageIO.write(img, "png", output.toFile());
@@ -59,7 +59,7 @@ public class TestDDS
     public void testSingle() throws IOException
     {
         DDSParser     parser = new DDSParser();
-        Path          file   = UtilHandler.DOWNLOADS_FOLDER.resolve("Baron_Minimap_Icon.DDS.compressed");
+        Path          file   = UtilHandler.CDRAGON_FOLDER.resolve("Baron_Minimap_Icon.DDS.compressed");
         BufferedImage img    = parser.parseCompressed(file);
         ImageIO.write(img, "png", file.resolveSibling("Baron_Minimap_Icon.png").toFile());
     }

@@ -115,6 +115,10 @@ public class WebHandler
             {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
+        } catch (SSLException e)
+        {
+            // try again
+            downloadFile(output, url);
         } catch (IOException e)
         {
             e.printStackTrace();

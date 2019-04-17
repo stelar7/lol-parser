@@ -100,6 +100,11 @@ public final class ByteArray
         return Arrays.equals(last.data, bytes.data);
     }
     
+    public int size()
+    {
+        return this.getData().length;
+    }
+    
     public boolean startsWith(ByteArray bytes)
     {
         return this.equals(bytes);

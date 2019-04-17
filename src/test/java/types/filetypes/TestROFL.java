@@ -13,7 +13,7 @@ public class TestROFL
     @Test
     public void testROFL()
     {
-        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\EUW1-3541345046.rofl");
+        Path path = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\EUW1-3541345046.rofl");
         
         ROFLParser parser = new ROFLParser();
         ROFLFile   file   = parser.parse(path);

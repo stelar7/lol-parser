@@ -33,7 +33,7 @@ public class TestExtractImages
         WADParser parser = new WADParser();
         
         String pluginName  = "rcp-be-lol-game-data";
-        Path   extractPath = UtilHandler.DOWNLOADS_FOLDER;
+        Path   extractPath = UtilHandler.CDRAGON_FOLDER;
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
         parsed.extractFiles(extractPath, pluginName);
@@ -107,8 +107,8 @@ public class TestExtractImages
     
     private void img_createTARGZ() throws IOException
     {
-        Path base         = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
-        Path outputFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
+        Path base         = UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
+        Path outputFolder = UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
         Files.createDirectories(outputFolder);
         
         Files.walkFileTree(base, new SimpleFileVisitor<>()
@@ -116,11 +116,11 @@ public class TestExtractImages
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
             {
-                if (dir.equals(UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty")))
+                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty")))
                 {
                     return FileVisitResult.CONTINUE;
                 }
-                if (dir.equals(UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders")))
+                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders")))
                 {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
@@ -182,7 +182,7 @@ public class TestExtractImages
     {
         Path                inputFile = Paths.get("filenames.json");
         Map<String, String> files     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
-        Path                baseTo    = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
+        Path                baseTo    = UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
         
         try
         {
@@ -238,7 +238,7 @@ public class TestExtractImages
             e.printStackTrace();
         }
         
-        Path                possibleTech = UtilHandler.DOWNLOADS_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
+        Path                possibleTech = UtilHandler.CDRAGON_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
         Map<String, String> data         = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
         return img_transmute(data.keySet());
     }

@@ -67,7 +67,7 @@ public class RMANFile
             try
             {
                 String path = f.getFullFilepath(this) + "\n";
-                Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("FILELIST.txt"), path.getBytes(StandardCharsets.UTF_8), options);
+                Files.write(UtilHandler.CDRAGON_FOLDER.resolve("FILELIST.txt"), path.getBytes(StandardCharsets.UTF_8), options);
             } catch (IOException e)
             {
                 e.printStackTrace();

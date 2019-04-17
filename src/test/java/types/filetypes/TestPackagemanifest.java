@@ -3,11 +3,8 @@ package types.filetypes;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
-import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
-import no.stelar7.cdragon.util.types.math.Vector2;
-import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.junit.Test;
 
 import javax.imageio.ImageIO;
@@ -36,9 +33,9 @@ public class TestPackagemanifest
                                  //.filter(p -> p.toLowerCase().contains("inhib"))
                                  .collect(Collectors.toList());
         
-        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("all.log"), String.join("\n", files).getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("all.log"), String.join("\n", files).getBytes(StandardCharsets.UTF_8));
         
-        Path folder = UtilHandler.DOWNLOADS_FOLDER.resolve("icons");
+        Path folder = UtilHandler.CDRAGON_FOLDER.resolve("icons");
         files.forEach(f -> WebHandler.downloadFile(folder.resolve(UtilHandler.getFilename(f)), f));
         
         Files.walkFileTree(folder, new SimpleFileVisitor<>()

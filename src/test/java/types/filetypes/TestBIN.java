@@ -26,7 +26,7 @@ public class TestBIN
     @Test
     public void testBIN()
     {
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/skin14.bin");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("cdragon/skin14.bin");
         /*
         Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
         
@@ -49,9 +49,9 @@ public class TestBIN
     @Test
     public void testBINCompare()
     {
-        Path file  = UtilHandler.DOWNLOADS_FOLDER.resolve("anivia.bin");
-        Path file2 = UtilHandler.DOWNLOADS_FOLDER.resolve("ashe.bin");
-        Path file3 = UtilHandler.DOWNLOADS_FOLDER.resolve("aatrox.bin");
+        Path file  = UtilHandler.CDRAGON_FOLDER.resolve("anivia.bin");
+        Path file2 = UtilHandler.CDRAGON_FOLDER.resolve("ashe.bin");
+        Path file3 = UtilHandler.CDRAGON_FOLDER.resolve("aatrox.bin");
         
         BINFile data  = parser.parse(file);
         BINFile data2 = parser.parse(file2);
@@ -72,7 +72,7 @@ public class TestBIN
     @Test
     public void testBINLinkedFileHash() throws IOException
     {
-        Path                         file       = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
+        Path                         file       = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
         Set<Vector2<String, String>> dupRemover = new HashSet<>();
         Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
@@ -144,8 +144,8 @@ public class TestBIN
     @Test
     public void testWriteBin()
     {
-        Path file  = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
-        Path file2 = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\bintest.bin");
+        Path file  = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\611d601b17222a88.bin");
+        Path file2 = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\bintest.bin");
         
         BINFile data = parser.parse(file);
         data.write(file2);
@@ -159,7 +159,7 @@ public class TestBIN
     @Test
     public void testWEB() throws IOException
     {
-        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("decompressed\\Zoe");
+        Path path = UtilHandler.CDRAGON_FOLDER.resolve("decompressed\\Zoe");
         Files.walkFileTree(path, new SimpleFileVisitor<>()
         {
             @Override
@@ -180,7 +180,7 @@ public class TestBIN
     @Test
     public void testGenerateBINHash() throws IOException
     {
-        Path path = UtilHandler.DOWNLOADS_FOLDER.resolve("grep.log");
+        Path path = UtilHandler.CDRAGON_FOLDER.resolve("grep.log");
         list = new HashSet<>(Files.readAllLines(path, StandardCharsets.UTF_8));
         buildStrings(pool, 50);
     }
@@ -242,14 +242,14 @@ public class TestBIN
         if (list.contains(hash))
         {
             String out = String.format("\"%s\": \"%s\"%n", hash, prefix);
-            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("grep.res"), out.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("grep.res"), out.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
         }
     }
     
     @Test
     public void testAddFromFile() throws IOException
     {
-        List<String> names = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("BinHashes.txt"));
+        List<String> names = Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("BinHashes.txt"));
         System.out.println(HashHandler.getBinHashes().size());
         names.forEach(n -> {
             String hash = HashHandler.getBINHash(n);
@@ -287,7 +287,7 @@ public class TestBIN
     public void splitResultToFile() throws IOException
     {
         
-        Path          newHashStore = UtilHandler.DOWNLOADS_FOLDER.resolve("grep - kopi.res");
+        Path          newHashStore = UtilHandler.CDRAGON_FOLDER.resolve("grep - kopi.res");
         List<String>  lines        = Files.readAllLines(newHashStore);
         StringBuilder sb           = new StringBuilder("{\n");
         
@@ -306,19 +306,19 @@ public class TestBIN
         sb.reverse().deleteCharAt(1).reverse();
         sb.append("}");
         
-        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("words_fixed.log"), sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     @Test
     public void testForWords() throws IOException
     {
-        String text = UtilHandler.readAsString(UtilHandler.DOWNLOADS_FOLDER.resolve("words_fixed.log"));
+        String text = UtilHandler.readAsString(UtilHandler.CDRAGON_FOLDER.resolve("words_fixed.log"));
         Type   type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
         
         Map<String, String>          hashes = UtilHandler.getGson().fromJson(text, type);
         Queue<Entry<String, String>> toRead = new ArrayDeque<>(hashes.entrySet());
         
-        BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve("output.log").toFile(), true));
+        BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.CDRAGON_FOLDER.resolve("output.log").toFile(), true));
         
         while (true)
         {
@@ -346,7 +346,7 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path rito = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+        Path rito = UtilHandler.CDRAGON_FOLDER.resolve("temp");
         
         List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -377,7 +377,7 @@ public class TestBIN
     @Test
     public void testBinForARType() throws IOException
     {
-        Path folder = UtilHandler.DOWNLOADS_FOLDER.resolve("binfiles");
+        Path folder = UtilHandler.CDRAGON_FOLDER.resolve("binfiles");
         
         Map<String, List<String>> typeMap = new HashMap<>();
         
@@ -438,7 +438,7 @@ public class TestBIN
     public void generateUnknownBinhashList() throws IOException
     {
         final BINParser bp = new BINParser();
-        Files.walk(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe"))
+        Files.walk(UtilHandler.CDRAGON_FOLDER.resolve("pbe"))
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(bp::parse);
         
@@ -446,17 +446,17 @@ public class TestBIN
         Collections.sort(sortedHashes);
         
         String output = String.join("\n", sortedHashes);
-        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("binHashes.txt"), output.getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("binHashes.txt"), output.getBytes(StandardCharsets.UTF_8));
     }
     
     @Test
     public void compareUnknownHashes() throws IOException
     {
         System.out.println("Loading unknown hash list");
-        Set<String> hashes = new HashSet<>(Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("binHashes.txt")));
+        Set<String> hashes = new HashSet<>(Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("binHashes.txt")));
         
         System.out.println("Loading test words");
-        List<String> wordsToTest = Files.readAllLines(UtilHandler.DOWNLOADS_FOLDER.resolve("wordsToTest.txt"));
+        List<String> wordsToTest = Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("wordsToTest.txt"));
         
         System.out.println("Starting tests...");
         Set<String> outputHashes = new HashSet<>();
@@ -477,7 +477,7 @@ public class TestBIN
         sb.reverse().deleteCharAt(1).reverse();
         sb.append("}");
         
-        Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("newBinHashes.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("newBinHashes.json"), sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     
     

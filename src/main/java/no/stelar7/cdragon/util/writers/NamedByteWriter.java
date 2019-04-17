@@ -23,7 +23,7 @@ public class NamedByteWriter extends ByteWriter implements AutoCloseable
     {
         try
         {
-            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("_" + name), toByteArray());
+            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("_" + name), toByteArray());
         } catch (IOException e)
         {
             e.printStackTrace();

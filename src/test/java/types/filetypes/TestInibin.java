@@ -19,8 +19,8 @@ public class TestInibin
     {
         InibinParser parser = new InibinParser();
         
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("inibin");
-        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("raf");
+        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("inibin");
+        Path rito        = UtilHandler.CDRAGON_FOLDER.resolve("raf");
         
         List<Path> paths = new ArrayList<>();
         
@@ -51,7 +51,7 @@ public class TestInibin
     public void testDownloadedInibin() throws IOException
     {
         InibinParser parser = new InibinParser();
-        Path         file   = UtilHandler.DOWNLOADS_FOLDER.resolve("pman_inibin");
+        Path         file   = UtilHandler.CDRAGON_FOLDER.resolve("pman_inibin");
         Files.walkFileTree(file, new SimpleFileVisitor<>()
         {
             @Override
@@ -74,7 +74,7 @@ public class TestInibin
     {
         InibinParser parser = new InibinParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("JannaUpgradeActive.inibin");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("JannaUpgradeActive.inibin");
         
         System.out.println("Parsing: " + file.toString());
         InibinFile parsed = parser.parse(file);

@@ -180,8 +180,8 @@ public class WADFile
                 
                 byte[] data     = readContentFromHeaderData(header);
                 String filetype = FileTypeHandler.findFileType(new ByteArray(data));
-                String output   = String.format("%s : %-7s : %s%n", filename, filetype, wadfilename);
-                Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("unknownsSorted.txt"), output.getBytes(StandardCharsets.UTF_8), flags);
+                String output   = String.format("%s : %-10s : %s%n", filename, filetype, wadfilename);
+                Files.write(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt"), output.getBytes(StandardCharsets.UTF_8), flags);
             }
         } catch (IOException e)
         {

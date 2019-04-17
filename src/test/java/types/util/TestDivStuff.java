@@ -12,7 +12,7 @@ public class TestDivStuff
     public void testStuff()
     {
         //RandomAccessReader r           = new RandomAccessReader(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe/unknown/final/9292a9c26c1abd6b.unknown"));
-        RandomAccessReader r           = new RandomAccessReader(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe/unknown/final/1DE85B3040E21426.unknown"));
+        RandomAccessReader r           = new RandomAccessReader(UtilHandler.CDRAGON_FOLDER.resolve("pbe/unknown/final/1DE85B3040E21426.unknown"));
         int                stringCount = r.readInt();
         List<String>       lines       = new ArrayList<>();
         while (r.remaining() > 0)

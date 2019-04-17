@@ -17,7 +17,7 @@ public class TestRAF
     {
         RAFParser parser = new RAFParser();
         
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("raf2");
+        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("raf2");
         Path rito        = Paths.get("C:\\Riot Games");
         
         List<Path> paths = new ArrayList<>();
@@ -48,7 +48,7 @@ public class TestRAF
     @Test
     public void testRAF()
     {
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48");
+        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("lolmodelviewer\\SampleModels\\filearchives\\0.0.0.48");
         
         RAFParser parser = new RAFParser();
         RAFFile   parsed = parser.parse(extractPath.resolve("Archive_114251952.raf"));

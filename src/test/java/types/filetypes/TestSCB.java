@@ -13,7 +13,7 @@ public class TestSCB
     public void testSCB() {
         SCBParser parser = new SCBParser();
     
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\00a356da16b6715f.scb");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\00a356da16b6715f.scb");
         System.out.println("Parsing: " + file.toString());
     
         SCBFile data = parser.parse(file);

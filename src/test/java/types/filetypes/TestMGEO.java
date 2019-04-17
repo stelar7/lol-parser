@@ -15,7 +15,7 @@ public class TestMGEO
         MGEOParser parser = new MGEOParser();
         
         // v5 file
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\74517e3dd13f5d7f.mapgeo");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\74517e3dd13f5d7f.mapgeo");
         
         // v6 file
         // Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\9a61cbe95992f8ce.mapgeo");

@@ -23,10 +23,10 @@ public class TestRMAN
         files.add(RMANParser.loadFromPBE(RMANFileType.LCU));
         files.forEach(RMANFile::printFileList);
         
-        Path bundleFolder = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\bundles");
+        Path bundleFolder = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\bundles");
         Files.createDirectories(bundleFolder);
         
-        boolean shouldDownload = true;
+        boolean shouldDownload = false;
         if(shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
@@ -34,10 +34,10 @@ public class TestRMAN
             downloadAllBundles(files, bundleFolder);
         }
         
-        boolean shouldExport = true;
+        boolean shouldExport = false;
         if (shouldExport)
         {
-            Path fileFolder   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
+            Path fileFolder   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
             Files.createDirectories(fileFolder);
             
             // use one thread per core, and leave one free for the OS

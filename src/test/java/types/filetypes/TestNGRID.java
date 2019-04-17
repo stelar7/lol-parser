@@ -12,7 +12,7 @@ public class TestNGRID
     @Test
     public void testLocal()
     {
-        Path        path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\aipath.aimesh_ngrid");
+        Path        path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\aipath.aimesh_ngrid");
         NGridParser parser = new NGridParser();
         NGridFile   parsed = parser.parse(path);
         System.out.println();

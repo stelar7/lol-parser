@@ -24,7 +24,7 @@ public class RMANParser implements Parseable<RMANFile>
     {
         try
         {
-            Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
+            Path downloadPath = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
             Path realPath     = downloadPath.resolveSibling(version + ".json");
             if (!Files.exists(realPath))
             {
@@ -72,7 +72,7 @@ public class RMANParser implements Parseable<RMANFile>
     {
         try
         {
-            Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
+            Path downloadPath = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
             Files.createDirectories(downloadPath.getParent());
             
             System.out.println("Downloading patcher manifest");
@@ -136,7 +136,7 @@ public class RMANParser implements Parseable<RMANFile>
     {
         try
         {
-            Path downloadPath = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
+            Path downloadPath = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
             
             System.out.println("Downloading patcher manifest");
             String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";

@@ -17,7 +17,7 @@ public class TestSKN
     {
         SKNParser parser = new SKNParser();
         
-        Path    path = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon");
+        Path    path = UtilHandler.CDRAGON_FOLDER.resolve("cdragon");
         SKNFile skn  = parser.parse(path.resolve("illaoi.skn"));
         
         for (int i = 0; i < skn.getMaterials().size(); i++)

@@ -13,7 +13,7 @@ public class TestCRID
     public void testCRID()
     {
         CRIDParser p    = new CRIDParser();
-        CRIDFile   crid = p.parse(UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon/9fbb7f50baf65f23.crid"));
-        crid.extractStreams(UtilHandler.DOWNLOADS_FOLDER);
+        CRIDFile   crid = p.parse(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/9fbb7f50baf65f23.crid"));
+        crid.extractStreams(UtilHandler.CDRAGON_FOLDER);
     }
 }

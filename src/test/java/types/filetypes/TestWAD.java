@@ -3,6 +3,7 @@ package types.filetypes;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
+import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
@@ -33,7 +34,7 @@ public class TestWAD
     {
         WADParser parser      = new WADParser();
         String    pluginName  = "rcp-be-lol-game-data";
-        Path      extractPath = UtilHandler.DOWNLOADS_FOLDER;
+        Path      extractPath = UtilHandler.CDRAGON_FOLDER;
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
         
@@ -49,7 +50,7 @@ public class TestWAD
         final BINParser bp = new BINParser();
         final DDSParser dp = new DDSParser();
         
-        Path from = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
+        Path from = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
         Path to   = from.resolve("extracted");
         
         /*
@@ -135,7 +136,7 @@ public class TestWAD
         PackagemanifestFile gfile     = pparser.parse(gdata);
         
         System.out.println("Downloading game files");
-        Path gameOutput = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("game").resolve(gversions.get(0));
+        Path gameOutput = UtilHandler.CDRAGON_FOLDER.resolve("pbe").resolve("game").resolve(gversions.get(0));
         gfile.getFiles().parallelStream().forEach(s -> {
             String output   = s.getFilePath().substring(s.getFilePath().indexOf("files") + "files".length() + 1);
             String filename = UtilHandler.getFilename(s.getFilePath());
@@ -149,7 +150,7 @@ public class TestWAD
         PackagemanifestFile cfile     = pparser.parse(cdata);
         
         System.out.println("Downloading client files");
-        Path clientOutput = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe").resolve("client").resolve(cversions.get(0));
+        Path clientOutput = UtilHandler.CDRAGON_FOLDER.resolve("pbe").resolve("client").resolve(cversions.get(0));
         cfile.getFiles().parallelStream().forEach(s -> {
             String output   = s.getFilePath().substring(s.getFilePath().indexOf("files") + "files".length() + 1);
             String filename = UtilHandler.getFilename(s.getFilePath());
@@ -161,7 +162,7 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        Path      path   = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2\\DATA\\FINAL\\Champions\\Corki.wad.client");
+        Path      path   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles2\\DATA\\FINAL\\Champions\\Corki.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
         parsed.extractFiles(path.resolveSibling("blitz"), "FiddleSticks");
@@ -170,7 +171,7 @@ public class TestWAD
     @Test
     public void testClientWAD() throws Exception
     {
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("temp");
+        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
         extractWads(rito, extractPath);
@@ -179,13 +180,54 @@ public class TestWAD
     @Test
     public void testCDragonWAD() throws Exception
     {
-        Path extractPath = UtilHandler.DOWNLOADS_FOLDER.resolve("pbe");
-        Path rito        = UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles2");
+        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+        Path rito        = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
         
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
+        transformManifest(extractPath);
         transformBIN(extractPath);
         transformDDS(extractPath);
+    }
+    
+    private void transformManifest(Path extractPath) throws IOException
+    {
+        System.out.println("Transforming manifests to readable format");
+        
+        final ManifestContentParser dp = new ManifestContentParser();
+        Files.walk(extractPath)
+             .parallel()
+             .filter(a -> a.getFileName().toString().endsWith(".manifestv1"))
+             .forEach(file -> {
+                 try
+                 {
+                     Path               output  = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                     Collection<String> content = dp.parseV1(file).getItems();
+                     Files.write(output, UtilHandler.getGson().toJson(content).getBytes(StandardCharsets.UTF_8));
+                     //file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     System.out.println(file);
+                     e.printStackTrace();
+                 }
+             });
+        
+        Files.walk(extractPath)
+             .parallel()
+             .filter(a -> a.getFileName().toString().endsWith(".manifestv2"))
+             .forEach(file -> {
+                 try
+                 {
+                     Path                      output  = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                     Map<String, List<String>> content = dp.parseV2(file).getItems();
+                     Files.write(output, UtilHandler.getGson().toJson(content).getBytes(StandardCharsets.UTF_8));
+                     //file.toFile().deleteOnExit();
+                 } catch (IOException e)
+                 {
+                     System.out.println(file);
+                     e.printStackTrace();
+                 }
+             });
     }
     
     private void transformDDS(Path extractPath) throws IOException
@@ -240,7 +282,7 @@ public class TestWAD
         WADParser parser = new WADParser();
         Files.walk(from)
              .parallel()
-            // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
+             // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
              .forEach(file -> {
                  if (Files.isDirectory(file))
                  {
@@ -264,6 +306,8 @@ public class TestWAD
                      WADFile parsed = parser.parseCompressed(file);
                      parsed.extractFiles(to, parent);
                  }
+            
+                 file.toFile().delete();
              });
     }
     
@@ -273,8 +317,8 @@ public class TestWAD
         System.out.println("Generating hashfile list");
         
         WADParser parser = new WADParser();
-        UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt").toFile().delete();
-        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("extractedFiles"), new SimpleFileVisitor<>()
+        UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt").toFile().delete();
+        Files.walkFileTree(UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles"), new SimpleFileVisitor<>()
         {
             List<String> ends = Arrays.asList(".wad", ".wad.client");
             List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
@@ -292,7 +336,7 @@ public class TestWAD
                         StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
                         for (WADContentHeaderV1 header : parsed.getContentHeaders())
                         {
-                            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
+                            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
                         }
                     } catch (IOException e)
                     {
@@ -308,7 +352,7 @@ public class TestWAD
                         StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
                         for (WADContentHeaderV1 header : parsed.getContentHeaders())
                         {
-                            Files.write(UtilHandler.DOWNLOADS_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
+                            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
                         }
                     } catch (IOException e)
                     {
@@ -326,7 +370,7 @@ public class TestWAD
         System.out.println("Generating unknown files list");
         
         WADParser parser = new WADParser();
-        UtilHandler.DOWNLOADS_FOLDER.resolve("unknownsSorted.txt").toFile().delete();
+        UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt").toFile().delete();
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
             List<String> ends = Arrays.asList(".wad", ".wad.client");

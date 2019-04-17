@@ -13,7 +13,7 @@ public class TestRBUN
     public void testRBUN()
     {
         RBUNParser parser = new RBUNParser();
-        Path       path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\FD00F82B0CACEEF5.bundle");
+        Path       path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\FD00F82B0CACEEF5.bundle");
         RBUNFile   data   = parser.parse(path);
         System.out.println();
     }

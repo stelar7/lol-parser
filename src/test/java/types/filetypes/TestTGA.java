@@ -13,7 +13,7 @@ public class TestTGA
     @Test
     public void testTGA()
     {
-        Path      path = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\8d60a44bb6212a0d.tga");
+        Path      path = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\8d60a44bb6212a0d.tga");
         ByteArray data = new ByteArray(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN).readRemaining());
         System.out.println(FileTypeHandler.isProbableTGA(data));
     }

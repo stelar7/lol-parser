@@ -16,7 +16,7 @@ public class TestCAC
     {
         CACParser parser = new CACParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("Yasuo_Base.cac");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("Yasuo_Base.cac");
         System.out.println("Parsing: " + file.toString());
         
         CACFile data = parser.parse(file);

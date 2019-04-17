@@ -6,6 +6,7 @@ import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.io.*;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -33,7 +34,7 @@ public final class UtilHandler
     private static Preferences preferences;
     private static JSPrettier  jsPretty;
     
-    public static final Path DOWNLOADS_FOLDER = Paths.get(System.getProperty("user.home"), "Downloads");
+    public static Path CDRAGON_FOLDER = new File("D:\\").toPath();
     
     public static String pathToFilename(Path path)
     {
@@ -271,7 +272,7 @@ public final class UtilHandler
     {
         if (debug)
         {
-            try (BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.DOWNLOADS_FOLDER.resolve(file).toFile(), true)))
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.CDRAGON_FOLDER.resolve(file).toFile(), true)))
             {
                 bw.append(text);
                 bw.newLine();

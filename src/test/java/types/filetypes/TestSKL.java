@@ -15,7 +15,7 @@ public class TestSKL
     {
         SKLParser parser = new SKLParser();
         
-        Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("parser_test\\cc1796644bc53b73.skl");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("parser_test\\cc1796644bc53b73.skl");
         System.out.println("Parsing: " + file.toString());
     
         SKLFile data = parser.parse(file);

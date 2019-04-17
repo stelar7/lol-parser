@@ -46,7 +46,7 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path               path   = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon");
+        Path               path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon");
         SKNFile            skn    = new SKNParser().parse(path.resolve("illaoi_skin01.skn"));
         SKLFile            skl    = new SKLParser().parse(path.resolve("illaoi_skin01.skl"));
         List<ReadableBone> bones  = skl.toReadableBones();
