@@ -23,6 +23,11 @@ public class ManifestContentParser
         ManifestContentFileV1 file = new ManifestContentFileV1();
         
         int count = raf.readInt();
+        if (count < 0)
+        {
+            throw new RuntimeException("Invalid content");
+        }
+        
         for (int i = 0; i < count; i++)
         {
             String data = raf.readString(raf.readInt());
@@ -47,6 +52,11 @@ public class ManifestContentParser
         ManifestContentFileV2 file = new ManifestContentFileV2();
         
         int count = raf.readInt();
+        if (count < 0)
+        {
+            throw new RuntimeException("Invalid content");
+        }
+        
         for (int i = 0; i < count; i++)
         {
             String header     = raf.readString(raf.readInt());
