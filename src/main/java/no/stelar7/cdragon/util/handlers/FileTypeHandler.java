@@ -99,7 +99,7 @@ public final class FileTypeHandler
             // OpenGL vertex profile
             return "glslv";
         }
-    
+        
         if (FileTypeHandler.isProbableCSO(magic))
         {
             // Compiled Shader Object
@@ -157,11 +157,16 @@ public final class FileTypeHandler
             return "hls";
         }
         
+        if (FileTypeHandler.isProbableManifestV0(magic))
+        {
+            return "manifestv0";
+        }
+        
         if (FileTypeHandler.isProbableManifestV1(magic))
         {
             return "manifestv1";
         }
-    
+        
         if (FileTypeHandler.isProbableManifestV2(magic))
         {
             return "manifestv2";
@@ -173,6 +178,23 @@ public final class FileTypeHandler
         }
         
         return "unknown";
+    }
+    
+    private static boolean isProbableManifestV0(ByteArray magic)
+    {
+        if (magic.size() > 4)
+        {
+            try
+            {
+                new ManifestContentParser().parseV0(magic);
+                return true;
+            } catch (Exception e)
+            {
+                return false;
+            }
+        }
+        
+        return false;
     }
     
     private static boolean isProbableManifestV1(ByteArray magic)

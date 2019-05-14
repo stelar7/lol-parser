@@ -8,6 +8,36 @@ import java.nio.file.Path;
 
 public class ManifestContentParser
 {
+    public ManifestContentFileV0 parseV0(Path path)
+    {
+        return parseV0(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    public ManifestContentFileV0 parseV0(ByteArray data)
+    {
+        return parseV0(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    public ManifestContentFileV0 parseV0(RandomAccessReader raf)
+    {
+        ManifestContentFileV0 file = new ManifestContentFileV0();
+        
+        int count = raf.readInt();
+        if (count < 0)
+        {
+            throw new RuntimeException("Invalid content");
+        }
+        
+        for (int i = 0; i < count; i++)
+        {
+            int data = raf.readInt();
+            file.addItem(data);
+        }
+        
+        return file;
+    }
+    
+    
     public ManifestContentFileV1 parseV1(Path path)
     {
         return parseV1(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
