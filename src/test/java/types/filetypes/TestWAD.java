@@ -6,6 +6,8 @@ import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
+import no.stelar7.cdragon.types.skn.SKNParser;
+import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
@@ -174,7 +176,16 @@ public class TestWAD
         Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         
-        extractWads(rito, extractPath);
+        Path single = Paths.get("D:\\extractedFiles\\DATA\\FINAL\\Champions\\Zoe.wad.client");
+        extractWad(single, extractPath);
+        Files.walk(extractPath).filter(a -> a.getFileName().toString().endsWith(".skn")).forEach(f -> {
+            System.out.println(f);
+            SKNParser p   = new SKNParser();
+            SKNFile   skn = p.parse(f);
+            System.out.println(skn.toOBJ(skn.getMaterials().get(0)));
+        });
+        
+        //extractWads(rito, extractPath);
     }
     
     @Test
@@ -273,6 +284,23 @@ public class TestWAD
                  }
              });
     }
+    
+    private void extractWad(Path file, Path to)
+    {
+        if (Files.isDirectory(file))
+        {
+            return;
+        }
+        
+        String parent   = file.getParent().getFileName().toString();
+        String child    = file.getFileName().toString();
+        String filename = parent + "/" + child;
+        
+        System.out.println("Extracting from " + filename);
+        WADFile parsed = new WADParser().parse(file);
+        parsed.extractFiles(to, parent);
+    }
+    
     
     private void extractWads(Path from, Path to) throws IOException
     {

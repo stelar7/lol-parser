@@ -17,12 +17,12 @@ public class TestSKN
     {
         SKNParser parser = new SKNParser();
         
-        Path    path = UtilHandler.CDRAGON_FOLDER.resolve("cdragon");
-        SKNFile skn  = parser.parse(path.resolve("illaoi.skn"));
+        Path    path = UtilHandler.CDRAGON_FOLDER.resolve("../");
+        SKNFile skn  = parser.parse(path.resolve("temp.skn"));
         
         for (int i = 0; i < skn.getMaterials().size(); i++)
         {
-            Files.write(path.resolve("illaoi" + i + ".obj"), skn.toOBJ(skn.getMaterials().get(i)).getBytes(StandardCharsets.UTF_8));
+            Files.write(path.resolve("temp" + i + ".obj"), skn.toOBJ(skn.getMaterials().get(i)).getBytes(StandardCharsets.UTF_8));
         }
         
         System.out.println();

@@ -210,18 +210,28 @@ public class WebHandler
     
     public static List<String> readWeb(String url)
     {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openConnection().getInputStream(), StandardCharsets.UTF_8)))
+        try
         {
-            
-            StringBuilder response = new StringBuilder();
-            String        inputLine;
-            
-            while ((inputLine = in.readLine()) != null)
+            HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+            if (con.getResponseCode() == 503)
             {
-                response.append(inputLine).append("\n");
+                Thread.sleep(500);
+                return readWeb(url);
             }
-            return Arrays.stream(response.toString().split("\n")).collect(Collectors.toList());
-        } catch (IOException e)
+            
+            try (InputStreamReader isr = new InputStreamReader(con.getInputStream());
+                 BufferedReader in = new BufferedReader(isr))
+            {
+                StringBuilder response = new StringBuilder();
+                String        inputLine;
+                
+                while ((inputLine = in.readLine()) != null)
+                {
+                    response.append(inputLine).append("\n");
+                }
+                return Arrays.stream(response.toString().split("\n")).collect(Collectors.toList());
+            }
+        } catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
             return null;

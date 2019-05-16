@@ -26,9 +26,9 @@ public class SKNFile
     private Vector3f boundingSphereLocation;
     private float    boundingSphereRadius;
     
-    private List<Short>       indecies;
-    private List<SKNData>     vertices;
-    private List<SKNMaterial> materials;
+    private List<Short>       indecies  = new ArrayList<>();
+    private List<SKNData>     vertices  = new ArrayList<>();
+    private List<SKNMaterial> materials = new ArrayList<>();
     
     public int getVertexSize()
     {

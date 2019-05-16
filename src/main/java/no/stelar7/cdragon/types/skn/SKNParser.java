@@ -30,8 +30,39 @@ public class SKNParser implements Parseable<SKNFile>
         file.setMagic(raf.readInt());
         file.setMajor(raf.readShort());
         file.setMinor(raf.readShort());
+        
+        if (file.getMajor() == 0)
+        {
+            file.setIndexCount(raf.readInt());
+            file.setVertexCount(raf.readInt());
+            file.setIndecies(raf.readShorts(file.getIndexCount()));
+            file.setVertices(parseVertices(raf, file));
+            
+            SKNMaterial material = new SKNMaterial();
+            material.setName("Unknown");
+            material.setStartVertex(0);
+            material.setNumVertex(file.getVertexCount());
+            material.setStartIndex(0);
+            material.setNumIndex(file.getIndexCount());
+            material.setVertices(file.getVertices());
+            List<Integer> inds    = new ArrayList<>();
+            List<Short>   sublist = file.getIndecies();
+            for (Short sh : sublist)
+            {
+                inds.add(Integer.valueOf(sh));
+            }
+            material.setIndecies(inds);
+            
+            file.getMaterials().add(material);
+            
+            
+            return file;
+        }
+        
+        
         file.setObjectCount(raf.readInt());
-        file.setMaterials((parseMaterials(raf, file.getObjectCount())));
+        file.setMaterials(parseMaterials(raf, file.getObjectCount()));
+        
         
         if (file.getMajor() == 4)
         {
