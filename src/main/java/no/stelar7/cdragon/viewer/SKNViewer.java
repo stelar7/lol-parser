@@ -47,10 +47,10 @@ public class SKNViewer extends Renderer
         }
         
         Path               path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon");
-        SKNFile            skn    = new SKNParser().parse(path.resolve("illaoi_skin01.skn"));
-        SKLFile            skl    = new SKLParser().parse(path.resolve("illaoi_skin01.skl"));
+        SKNFile            skn    = new SKNParser().parse(path.resolve("illaoi.skn"));
+        SKLFile            skl    = new SKLParser().parse(path.resolve("illaoi.skl"));
         List<ReadableBone> bones  = skl.toReadableBones();
-        BufferedImage      texImg = new DDSParser().parse(path.resolve("illaoi_skin01_tx_cm.dds"));
+        BufferedImage      texImg = new DDSParser().parse(path.resolve("illaoi_base_tx_cm.dds"));
         
         for (SKNMaterial submesh : skn.getMaterials())
         {
@@ -58,7 +58,45 @@ public class SKNViewer extends Renderer
             models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
         }
         
-        meshIndex = models.size() - 1;
+        /*
+        use this when bins support linked files!
+        Path       binPath       = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("ahri_skin_14.bin");
+        Path       extractedPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+        JsonObject bin           = new JsonParser().parse(new BINParser().parse(binPath).toJson()).getAsJsonObject();
+        JsonObject skinContainer = bin.getAsJsonObject("SkinCharacterDataProperties");
+        JsonObject skinData      = skinContainer.getAsJsonObject((String) skinContainer.keySet().toArray()[0]).getAsJsonObject();
+        JsonObject meshContainer = skinData.getAsJsonObject("skinMeshProperties");
+        JsonObject meshData      = meshContainer.getAsJsonObject((String) meshContainer.keySet().toArray()[0]).getAsJsonObject();
+        
+        SKNFile            skn        = new SKNParser().parse(extractedPath.resolve(meshData.get("simpleSkin").getAsString()));
+        SKLFile            skl        = new SKLParser().parse(extractedPath.resolve(meshData.get("skeleton").getAsString()));
+        BufferedImage      defaultTex = new DDSParser().parse(extractedPath.resolve(meshData.get("texture").getAsString()));
+        List<ReadableBone> bones      = skl.toReadableBones();
+        
+        outer:
+        for (SKNMaterial submesh : skn.getMaterials())
+        {
+            for (JsonElement override : meshData.getAsJsonArray("materialOverride"))
+            {
+                JsonObject obj = override.getAsJsonObject().get((String) override.getAsJsonObject().keySet().toArray()[0]).getAsJsonObject();
+                if (submesh.getName().equals(obj.get("submesh").getAsString()))
+                {
+                    Texture tex = new Texture(submesh, new DDSParser().parse(extractedPath.resolve(obj.get("texture").getAsString())));
+                    models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
+                    continue outer;
+                }
+            }
+            
+            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), defaultTex, skn.getDataForSubmesh(submesh))));
+        }
+        
+        if (skn.getMaterials().size() != models.size())
+        {
+            System.out.println();
+        }
+        */
+        
+        meshIndex = 0;
         model = models.get(meshIndex).getSecond();
         
         Shader vert = new Shader("shaders/basic.vert");
@@ -78,7 +116,7 @@ public class SKNViewer extends Renderer
     
     float   x;
     float   z;
-    float   time  = 10;
+    float   time  = -1;
     boolean dirty = true;
     
     private void updateMVP()
@@ -149,27 +187,25 @@ public class SKNViewer extends Renderer
         {
             if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT)
             {
-                if (key == GLFW.GLFW_KEY_LEFT)
+                int index = meshIndex + ((key == GLFW.GLFW_KEY_LEFT) ? -1 : 1);
+                index = (index >= 0) ? index : (models.size() - 1);
+                index = (index >= models.size()) ? (index % models.size()) : index;
+                
+                Vector2<String, Model> data = models.get(index);
+                if (model == data.getSecond())
                 {
-                    int newIndex = meshIndex - 1;
-                    meshIndex = (newIndex >= 0) ? newIndex : models.size() - 1;
+                    System.out.println("Only one model present!");
+                    return;
                 }
-                if (key == GLFW.GLFW_KEY_RIGHT)
-                {
-                    meshIndex = (meshIndex + 1) % models.size();
-                }
-                Vector2<String, Model> data = models.get(meshIndex);
+                
                 System.out.println(data.getFirst());
                 model = data.getSecond();
+                meshIndex = index;
             }
             
-            if (key == GLFW.GLFW_KEY_UP)
+            if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN)
             {
-                distance--;
-            }
-            if (key == GLFW.GLFW_KEY_DOWN)
-            {
-                distance++;
+                distance += (key == GLFW.GLFW_KEY_UP ? 1 : -1);
             }
         }
     }

@@ -6,6 +6,7 @@ import no.stelar7.cdragon.viewer.rendering.buffers.VAO;
 
 import java.util.List;
 
+
 public class Model implements AutoCloseable
 {
     private static final int VERTEX_SIZE  = 3;
@@ -26,10 +27,13 @@ public class Model implements AutoCloseable
     public Model(Mesh mesh)
     {
         this();
-        
         this.mesh = mesh;
-        mesh.bindForVAO();
-        vao.setPointer(0, VERTEX_SIZE);
+        
+        mesh.bindVBO();
+        setPointer(0, VERTEX_SIZE);
+        
+        mesh.bindNBO();
+        setPointer(1, NORMAL_SIZE);
     }
     
     public Model(Mesh mesh, Texture texture)
@@ -38,27 +42,29 @@ public class Model implements AutoCloseable
         
         this.texture = texture;
         texture.bind();
-        vao.setPointer(1, TEXTURE_SIZE);
+        setPointer(2, TEXTURE_SIZE);
     }
     
-    public Model(Mesh mesh, Texture texture, List<SKNData> extra)
+    public Model(Mesh mesh, Texture texture, List<SKNData> modelData)
     {
         this(mesh, texture);
-        vao.setPointer(2, NORMAL_SIZE);
-        
-        
+    }
+    
+    public void setPointer(int index, int size)
+    {
+        vao.setPointer(index, size);
     }
     
     public void bind()
     {
         vao.bind();
-        mesh.bindForDraw();
+        mesh.bindIBO();
     }
     
     public void unbind()
     {
         vao.unbind();
-        mesh.unbindForDraw();
+        mesh.unbindIBO();
     }
     
     public Mesh getMesh()
@@ -78,7 +84,7 @@ public class Model implements AutoCloseable
     {
         this.bind();
         this.mesh = mesh;
-        mesh.bindForVAO();
+        mesh.bindVBO();
         vao.setPointer(0, VERTEX_SIZE);
     }
 }

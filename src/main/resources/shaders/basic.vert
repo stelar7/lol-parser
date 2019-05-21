@@ -1,9 +1,10 @@
-#version 150 core
+#version 330 core
 
 uniform mat4 mvp;
 
-in vec3 position;
-in vec2 vertexUV;
+layout(location = 0) in vec3 position;
+layout(location = 1) in vec3 normals;
+layout(location = 2) in vec2 vertexUV;
 
 out vec3 pos;
 out vec2 uv;

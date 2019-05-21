@@ -255,7 +255,7 @@ public class TestWAD
                      BufferedImage img    = dp.parse(file);
                      Path          output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".png");
                      ImageIO.write(img, "png", output.toFile());
-                     file.toFile().deleteOnExit();
+                     //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
                      e.printStackTrace();
@@ -335,7 +335,7 @@ public class TestWAD
                      parsed.extractFiles(to, parent);
                  }
             
-                 file.toFile().delete();
+                 //file.toFile().delete();
              });
     }
     

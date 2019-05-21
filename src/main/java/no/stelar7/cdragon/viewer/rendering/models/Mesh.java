@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL15.*;
 public class Mesh implements AutoCloseable
 {
     private VBO vbo;
+    private VBO nbo;
     private VBO ibo;
     
     public int indexCount;
@@ -19,6 +20,7 @@ public class Mesh implements AutoCloseable
     public Mesh()
     {
         vbo = new VBO(GL_ARRAY_BUFFER);
+        nbo = new VBO(GL_ARRAY_BUFFER);
         ibo = new VBO(GL_ELEMENT_ARRAY_BUFFER);
     }
     
@@ -37,6 +39,15 @@ public class Mesh implements AutoCloseable
             verts[(i * 3) + 2] = pos.z;
         }
         
+        float[] norms = new float[submesh.getNumVertex() * 3];
+        for (int i = 0; i < submesh.getVertices().size(); i++)
+        {
+            Vector3f norm = submesh.getVertices().get(i).getNormals();
+            norms[(i * 3) + 0] = norm.x;
+            norms[(i * 3) + 1] = norm.y;
+            norms[(i * 3) + 2] = norm.z;
+        }
+        
         // load indecies
         int[] inds = new int[submesh.getNumIndex()];
         for (int i = 0; i < submesh.getIndecies().size(); i++)
@@ -45,35 +56,7 @@ public class Mesh implements AutoCloseable
         }
         
         setVertices(verts);
-        setIndecies(inds);
-    }
-    
-    public Mesh(SKNFile data)
-    {
-        this();
-        
-        float[]        verts          = new float[data.getVertexCount() * 3];
-        List<Vector3f> scaledVertices = ModelHandler.getScaledVertices(data.getVertexPositions());
-        for (int i = 0; i < scaledVertices.size(); i++)
-        {
-            Vector3f pos = scaledVertices.get(i);
-            
-            verts[(i * 3) + 0] = pos.x;
-            verts[(i * 3) + 1] = pos.y;
-            verts[(i * 3) + 2] = pos.z;
-        }
-        
-        
-        // load indecies
-        int[]         inds                  = new int[data.getIndexCount()];
-        List<Integer> indeciesAsIntegerList = ModelHandler.getIndeciesAsIntegerList(data.getIndecies());
-        for (int i = 0; i < indeciesAsIntegerList.size(); i++)
-        {
-            inds[i] = indeciesAsIntegerList.get(i);
-        }
-        
-        
-        setVertices(verts);
+        setNormals(norms);
         setIndecies(inds);
     }
     
@@ -83,6 +66,13 @@ public class Mesh implements AutoCloseable
         vbo.setData(vertices);
     }
     
+    
+    public void setNormals(float[] vertices)
+    {
+        nbo.bind();
+        nbo.setData(vertices);
+    }
+    
     public void setIndecies(int[] indecies)
     {
         ibo.bind();
@@ -90,17 +80,27 @@ public class Mesh implements AutoCloseable
         indexCount = indecies.length;
     }
     
-    public void bindForDraw()
+    public void bindIBO()
     {
         ibo.bind();
     }
     
-    public void unbindForDraw()
+    public void bindVBO()
+    {
+        vbo.bind();
+    }
+    
+    public void bindNBO()
+    {
+        nbo.bind();
+    }
+    
+    public void unbindIBO()
     {
         ibo.unbind();
     }
     
-    public void unbindForVAO()
+    public void unbindVAO()
     {
         vbo.unbind();
     }
@@ -116,10 +116,5 @@ public class Mesh implements AutoCloseable
     {
         ibo.close();
         vbo.close();
-    }
-    
-    public void bindForVAO()
-    {
-        vbo.bind();
     }
 }

@@ -210,6 +210,8 @@ public class BINFile
         }
     }
     
+    
+    // TODO: add the linked files to this aswell!
     public String toJson()
     {
         if (json == null)
