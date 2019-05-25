@@ -19,6 +19,11 @@ public final class FileTypeHandler
     
     public static String findFileType(ByteArray magic)
     {
+        if (magic.size() == 0)
+        {
+            return "empty";
+        }
+        
         if (FileTypeHandler.isProbableBOM(magic))
         {
             return findFileType(magic.copyOfRange(3, magic.getData().length));

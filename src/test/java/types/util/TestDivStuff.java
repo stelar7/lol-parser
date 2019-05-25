@@ -21,7 +21,7 @@ public class TestDivStuff
             String data   = r.readString(length);
             lines.add(data);
         }
-    
+        
         for (String line : lines)
         {
             Long   hashNum = HashHandler.computeXXHash64AsLong(line.toLowerCase());
@@ -33,5 +33,15 @@ public class TestDivStuff
                 System.out.println(hash);
             }
         }
+    }
+    
+    @Test
+    public void testBinHash()
+    {
+        String result = "E254F681";
+        String toHash = "-497748351";
+        
+        String output = HashHandler.getBINHash(toHash);
+        System.out.println(output);
     }
 }

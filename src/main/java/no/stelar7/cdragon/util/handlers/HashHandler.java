@@ -93,7 +93,7 @@ public class HashHandler
     }
     
     // FNV-1a
-    private static long computeBINHash(String input)
+    public static long computeBINHash(String input)
     {
         String toHash = input.toLowerCase(Locale.ENGLISH);
         int    hash   = Integer.parseUnsignedInt("2166136261");

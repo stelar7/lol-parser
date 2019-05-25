@@ -225,11 +225,17 @@ public class BINFile
                 {
                     BINEntry entry  = entries.get(i);
                     String   prefix = HashHandler.getBINHash(header.getEntryTypes().get(i));
-                    jw.name(prefix);
-                    jw.beginObject();
-                    printEntry(entry, jw);
+                    jw.name(prefix).beginObject();
+                    entryToJson(entry, jw);
                     jw.endObject();
                 }
+                
+                jw.name("linkedFiles").beginArray();
+                for (String link : this.linkedFiles)
+                {
+                    jw.value(link);
+                }
+                jw.endArray();
                 
                 jw.endObject();
                 
@@ -252,7 +258,7 @@ public class BINFile
         return json;
     }
     
-    private void printEntry(BINEntry entry, JsonWriterWrapper jw) throws IOException
+    private void entryToJson(BINEntry entry, JsonWriterWrapper jw) throws IOException
     {
         jw.name(entry.getHash());
         jw.beginObject();

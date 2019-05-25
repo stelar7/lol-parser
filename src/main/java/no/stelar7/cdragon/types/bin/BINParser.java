@@ -154,7 +154,13 @@ public class BINParser implements Parseable<BINFile>
                 
                 return bs;
             case LINK_OFFSET:
-                return raf.readInt();
+                String hash = HashHandler.toHex((long) raf.readInt(), 8);
+                if (hash.length() > 8)
+                {
+                    hash = hash.substring(8);
+                }
+                
+                return hash;
             case OPTIONAL_DATA:
                 BINData bd = new BINData();
                 
