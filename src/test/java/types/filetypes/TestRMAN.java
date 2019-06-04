@@ -27,7 +27,7 @@ public class TestRMAN
         Files.createDirectories(bundleFolder);
         
         boolean shouldDownload = true;
-        if(shouldDownload)
+        if (shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
             removeOldBundles(removedBundles, bundleFolder);
@@ -37,7 +37,7 @@ public class TestRMAN
         boolean shouldExport = true;
         if (shouldExport)
         {
-            Path fileFolder   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
+            Path fileFolder = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
             Files.createDirectories(fileFolder);
             
             // use one thread per core, and leave one free for the OS

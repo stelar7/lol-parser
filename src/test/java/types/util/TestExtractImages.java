@@ -33,7 +33,7 @@ public class TestExtractImages
         WADParser parser = new WADParser();
         
         String pluginName  = "rcp-be-lol-game-data";
-        Path   extractPath = UtilHandler.CDRAGON_FOLDER;
+        Path   extractPath = UtilHandler.CDRAGON_FOLDER.resolve("images_out");
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
         parsed.extractFiles(extractPath, pluginName);
@@ -63,40 +63,50 @@ public class TestExtractImages
     
     public void extractImages() throws IOException
     {
-        Path file  = Paths.get(System.getProperty("user.home"), "Downloads/plugins/rcp-be-lol-game-data/global/default/v1/");
-        Path file2 = Paths.get(System.getProperty("user.home"), "Downloads/plugins/rcp-be-lol-game-data/global/default/v1/champions");
+        Path file  = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("plugins/rcp-be-lol-game-data/global/default/v1/");
+        Path file2 = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("plugins/rcp-be-lol-game-data/global/default/v1/champions");
         
         JsonWriterWrapper data = new JsonWriterWrapper();
         data.beginObject();
         
-        System.out.println("Parsing icon files");
+        System.out.println("Parsing perk styles");
         img_findIconPathInJsonArrayFile(file, "perkstyles.json", data);
+        System.out.println("Parsing perks");
         img_findIconPathInJsonArrayFile(file, "perks.json", data);
+        System.out.println("Parsing items");
         img_findIconPathInJsonArrayFile(file, "items.json", data);
+        System.out.println("Parsing summoners");
         img_findIconPathInJsonArrayFile(file, "summoner-spells.json", data);
+        System.out.println("Parsing profile icons");
         img_findIconPathInJsonArrayFile(file, "profile-icons.json", data);
         
+        System.out.println("Parsing ward skins");
         img_parseWardSkins(file, "ward-skins.json", data);
+        System.out.println("Parsing masteries");
         img_parseMasteries(file, "summoner-masteries.json", data);
+        System.out.println("Parsing emotes");
         img_parseEmotes(file, "summoner-emotes.json", data);
+        System.out.println("Parsing banner");
         img_parseBanners(file, "summoner-banners.json", data);
+        System.out.println("Parsing map assets");
         img_parseMapAssets(file, "map-assets/map-assets.json", data);
         
-        System.out.println("Parsing champion files");
         for (int i = -1; i < img_championMax; i++)
         {
+            System.out.println("Parsing champion id: " + i);
             img_findInChampionFile(file2, i + ".json", data);
         }
         
         System.out.println("Parsing data from unknown files");
         for (String ext : img_exts)
         {
+            System.out.println("Parsing extension: " + ext);
             img_folderData.forEach((k, v) -> img_generateHashList(k, v, ext, data));
             img_folderData2.forEach((k, v) -> img_generateHashListNested(k, v, ext, data));
         }
         data.endObject();
         
-        Files.write(Paths.get("filenames.json"), data.toString().getBytes(StandardCharsets.UTF_8));
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("filenames.json"), data.toString().getBytes(StandardCharsets.UTF_8));
         
         System.out.println("Copying files");
         img_copyFilesToFolders();
@@ -107,8 +117,8 @@ public class TestExtractImages
     
     private void img_createTARGZ() throws IOException
     {
-        Path base         = UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
-        Path outputFolder = UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
+        Path base         = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty");
+        Path outputFolder = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
         Files.createDirectories(outputFolder);
         
         Files.walkFileTree(base, new SimpleFileVisitor<>()
@@ -116,11 +126,11 @@ public class TestExtractImages
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
             {
-                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty")))
+                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty")))
                 {
                     return FileVisitResult.CONTINUE;
                 }
-                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty\\zipped-folders")))
+                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty\\zipped-folders")))
                 {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
@@ -180,9 +190,9 @@ public class TestExtractImages
     
     private void img_copyFilesToFolders()
     {
-        Path                inputFile = Paths.get("filenames.json");
+        Path                inputFile = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("filenames.json");
         Map<String, String> files     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
-        Path                baseTo    = UtilHandler.CDRAGON_FOLDER.resolve("rcp-be-lol-game-data\\pretty");
+        Path                baseTo    = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty");
         
         try
         {
@@ -227,7 +237,7 @@ public class TestExtractImages
         // check the lol-loot plugin for more... (4c0ce4a49dbc214c)
         WADParser parser      = new WADParser();
         String    pluginName  = "rcp-fe-lol-loot";
-        Path      extractPath = Paths.get(System.getProperty("user.home"), "Downloads");
+        Path      extractPath = UtilHandler.CDRAGON_FOLDER.resolve("images_out");
         
         try
         {
@@ -238,7 +248,7 @@ public class TestExtractImages
             e.printStackTrace();
         }
         
-        Path                possibleTech = UtilHandler.CDRAGON_FOLDER.resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
+        Path                possibleTech = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
         Map<String, String> data         = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
         return img_transmute(data.keySet());
     }
@@ -740,7 +750,7 @@ public class TestExtractImages
     
     private void img_addToSB(JsonWriterWrapper sb, String hashMe, String realPath) throws IOException
     {
-        Path path = Paths.get(System.getProperty("user.home"), "Downloads/").resolve(hashMe.trim());
+        Path path = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve(hashMe.trim());
         if (Files.exists(path))
         {
             if (!sb.toString().contains(realPath.trim()))
