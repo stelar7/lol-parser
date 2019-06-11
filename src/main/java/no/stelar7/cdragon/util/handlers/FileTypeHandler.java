@@ -108,9 +108,15 @@ public final class FileTypeHandler
         if (FileTypeHandler.isProbableCSO(magic))
         {
             // Compiled Shader Object
-            return "cso";
+            return "dx9-cso";
         }
-        
+    
+        if (FileTypeHandler.isProbableCGC(magic))
+        {
+            // Compiled Shader Config
+            return "dx9-cgc";
+        }
+    
         if (FileTypeHandler.isProbableWPK(magic))
         {
             return "wpk";
@@ -257,11 +263,17 @@ public final class FileTypeHandler
         return new String(magic.getData()).contains("// glslf output by Cg compiler");
     }
     
+    // Compiled Shader Object
     private static boolean isProbableCSO(ByteArray magic)
     {
         return new String(magic.getData()).contains("Microsoft (R) HLSL Shader Compiler");
     }
     
+    // Compiled Shader Config
+    private static boolean isProbableCGC(ByteArray magic)
+    {
+        return magic.startsWith(new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00}));
+    }
     
     public static byte[] makePrettyJson(byte[] jsonString)
     {
@@ -306,7 +318,6 @@ public final class FileTypeHandler
             ByteArray jpg3Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
             ByteArray jpg4Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
             ByteArray bnkMagic  = new ByteArray(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
-            ByteArray cgcMagic  = new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00});// some sort of shader related file
             ByteArray binMagic  = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
             ByteArray lcovMagic = new ByteArray(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
             ByteArray gifMagic  = new ByteArray(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
@@ -349,7 +360,6 @@ public final class FileTypeHandler
             // 3D model
             magicNumbers.put(bnkMagic, "bnk");
             magicNumbers.put(ddsMagic, "dds");
-            magicNumbers.put(cgcMagic, "cgc");
             magicNumbers.put(binMagic, "bin");
             magicNumbers.put(lcovMagic, "info");
             magicNumbers.put(sknMagic, "skn");
