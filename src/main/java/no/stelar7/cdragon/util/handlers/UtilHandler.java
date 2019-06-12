@@ -9,7 +9,9 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.prefs.Preferences;
 import java.util.regex.*;
 import java.util.stream.Collectors;
@@ -420,6 +422,39 @@ public final class UtilHandler
         }
     }
     
+    public static Predicate<Path> IS_JSON_PREDICATE = (file) -> {
+        if (Files.isDirectory(file))
+        {
+            return false;
+        }
+        
+        return file.toString().endsWith(".json");
+    };
+    
+    public static List<Path> getFilesMatchingPredicate(Path start, Predicate<Path> check)
+    {
+        List<Path> readMe = new ArrayList<>();
+        try
+        {
+            Files.walkFileTree(start, new SimpleFileVisitor<>()
+            {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+                {
+                    if (check.test(file))
+                    {
+                        readMe.add(file);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return readMe;
+    }
+    
     public static Map<String, String> extractRegex(String input, String regex, String... vars)
     {
         Map<String, String> matches = new HashMap<>();
@@ -489,7 +524,7 @@ public final class UtilHandler
      * (passing in 0,0 as the argument also returns true)
      *
      * @param value value to check
-     * @param bit bit to check
+     * @param bit   bit to check
      * @return true if bit is set
      */
     public static boolean isBitflagSet(int value, int bit)
