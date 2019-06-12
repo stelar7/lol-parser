@@ -44,7 +44,7 @@ public class TestExtractImages
     
     
     final int img_skinMax     = 50;
-    final int img_championMax = 700;
+    final int img_championMax = 1000;
     final int img_iconMax     = 5000;
     
     private final Map<String, Integer> img_folderData = new HashMap<>()
@@ -117,8 +117,8 @@ public class TestExtractImages
     
     private void img_createTARGZ() throws IOException
     {
-        Path base         = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty");
-        Path outputFolder = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty\\zipped-folders");
+        Path base         = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("pretty");
+        Path outputFolder = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("pretty\\zipped-folders");
         Files.createDirectories(outputFolder);
         
         Files.walkFileTree(base, new SimpleFileVisitor<>()
@@ -126,11 +126,11 @@ public class TestExtractImages
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
             {
-                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty")))
+                if (dir.equals(base))
                 {
                     return FileVisitResult.CONTINUE;
                 }
-                if (dir.equals(UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty\\zipped-folders")))
+                if (dir.equals(outputFolder))
                 {
                     return FileVisitResult.SKIP_SUBTREE;
                 }
@@ -192,7 +192,7 @@ public class TestExtractImages
     {
         Path                inputFile = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("filenames.json");
         Map<String, String> files     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
-        Path                baseTo    = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-be-lol-game-data\\pretty");
+        Path                baseTo    = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("pretty");
         
         try
         {
