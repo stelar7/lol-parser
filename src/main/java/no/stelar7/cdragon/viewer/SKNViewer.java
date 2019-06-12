@@ -47,10 +47,10 @@ public class SKNViewer extends Renderer
         }
         
         Path               path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon");
-        SKNFile            skn    = new SKNParser().parse(path.resolve("illaoi.skn"));
-        SKLFile            skl    = new SKLParser().parse(path.resolve("illaoi.skl"));
+        SKNFile            skn    = new SKNParser().parse(path.resolve("ghosty_tier1.companions.skn"));
+        SKLFile            skl    = new SKLParser().parse(path.resolve("ghosty_tier1.companions.skl"));
         List<ReadableBone> bones  = skl.toReadableBones();
-        BufferedImage      texImg = new DDSParser().parse(path.resolve("illaoi_base_tx_cm.dds"));
+        BufferedImage      texImg = new DDSParser().parse(path.resolve("npc_pet_ghosty_fire_tx_cm.dds"));
         
         for (SKNMaterial submesh : skn.getMaterials())
         {

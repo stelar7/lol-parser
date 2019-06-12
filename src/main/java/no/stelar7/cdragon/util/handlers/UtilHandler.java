@@ -455,6 +455,18 @@ public final class UtilHandler
         return readMe;
     }
     
+    public static String readPathAsString(Path path)
+    {
+        try
+        {
+            return Files.readString(path);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    
     public static Map<String, String> extractRegex(String input, String regex, String... vars)
     {
         Map<String, String> matches = new HashMap<>();

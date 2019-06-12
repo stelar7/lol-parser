@@ -23,16 +23,8 @@ public class GameHashGuesser extends HashGuesser
         List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
         
         readMe.stream()
-              .map(p -> {
-                  try
-                  {
-                      return Files.readString(p);
-                  } catch (IOException e)
-                  {
-                      e.printStackTrace();
-                      return "";
-                  }
-              }).filter(s -> s.contains("bankUnits"))
+              .map(UtilHandler::readAsString)
+              .filter(s -> s.contains("bankUnits"))
               .map(s -> UtilHandler.getJsonParser().parse(s))
               .map(JsonElement::getAsJsonObject)
               .forEach(e -> {
@@ -61,16 +53,8 @@ public class GameHashGuesser extends HashGuesser
         List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
         
         readMe.stream()
-              .map(p -> {
-                  try
-                  {
-                      return Files.readString(p);
-                  } catch (IOException e)
-                  {
-                      e.printStackTrace();
-                      return "";
-                  }
-              }).filter(s -> s.contains("linkedFiles"))
+              .map(UtilHandler::readAsString)
+              .filter(s -> s.contains("linkedFiles"))
               .map(s -> UtilHandler.getJsonParser().parse(s))
               .map(JsonElement::getAsJsonObject)
               .forEach(e -> {
