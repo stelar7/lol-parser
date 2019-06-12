@@ -164,10 +164,10 @@ public class TestWAD
     @Test
     public void testLocal()
     {
-        Path      path   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles2\\DATA\\FINAL\\Champions\\Corki.wad.client");
+        Path      path   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles\\DATA\\FINAL\\Champions\\Kaisa.cs_CZ.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
-        parsed.extractFiles(path.resolveSibling("blitz"), "FiddleSticks");
+        parsed.extractFiles(path.resolveSibling("Kaisa"), "Kaisa");
     }
     
     @Test

@@ -6,7 +6,6 @@ import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.io.*;
-import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -205,7 +204,6 @@ public final class UtilHandler
         
         return parser;
     }
-    
     
     public static Gson getGson()
     {
@@ -490,9 +488,9 @@ public final class UtilHandler
      * returns true if the Nth bit is set, with 1 being the first bit.
      * (passing in 0,0 as the argument also returns true)
      *
-     * @param value
-     * @param bit
-     * @return
+     * @param value value to check
+     * @param bit bit to check
+     * @return true if bit is set
      */
     public static boolean isBitflagSet(int value, int bit)
     {

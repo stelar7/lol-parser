@@ -9,7 +9,7 @@ public class TestCDTBHashGuessing
     @Test
     public void doTest()
     {
-        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("pbe")));
+        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.substituteRegionLang();
         guesser.save();
         guesser.substitutePlugin();
@@ -20,5 +20,17 @@ public class TestCDTBHashGuessing
         guesser.save();
         guesser.addBasenameWord();
         guesser.save();
+        
+        guesser.saveAsJson();
+    }
+    
+    @Test
+    public void doGameTest()
+    {
+        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        gguesser.guessVoiceLines(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
+        gguesser.save();
+        
+        gguesser.saveAsJson();
     }
 }

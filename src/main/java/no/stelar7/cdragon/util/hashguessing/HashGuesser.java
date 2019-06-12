@@ -15,8 +15,8 @@ import java.util.stream.*;
 
 public class HashGuesser
 {
-    public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/hashes.lcu.txt"));
-    public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/hashes.game.txt"));
+    public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("lcu.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\lcu.json"));
+    public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("game.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\game.json"));
     
     
     protected Set<String> REGIONS = new HashSet<>(Arrays.asList("global", "br", "cn", "eun", "eune", "euw", "garena2", "garena3", "id", "jp", "kr", "la", "la1", "la2",
@@ -61,18 +61,11 @@ public class HashGuesser
         return this;
     }
     
-    public static Set<String> unknownFromExport(Path baseSearchPath)
+    public static Set<String> unknownFromExport(Path unknownFile)
     {
         try
         {
-            Set<String> unknowns     = new HashSet<>();
-            List<Path>  unknownFiles = Files.walk(baseSearchPath).filter(p -> p.getFileName().toString().contains("unknown.json")).collect(Collectors.toList());
-            for (Path unk : unknownFiles)
-            {
-                unknowns.addAll(Files.readAllLines(unk));
-            }
-            
-            return unknowns;
+            return Files.readAllLines(unknownFile).stream().map(a -> a.substring(0, 16)).collect(Collectors.toSet());
             
         } catch (IOException e)
         {
@@ -84,12 +77,19 @@ public class HashGuesser
     
     public void save()
     {
-        this.hashFile.save();
+        System.out.println("Saving current hashes as CDTB format");
+        this.hashFile.save(this.known);
+    }
+    
+    public void saveAsJson()
+    {
+        System.out.println("Saving current hashes as JSON");
+        this.hashFile.saveAsJson(this.known);
     }
     
     public void addKnown(String hash, String path)
     {
-        System.out.format("%s %s%n", hash, path);
+        System.out.format(hashFile.printFormat, hash, path);
         this.known.put(hash, path);
         this.unknown.remove(hash);
         

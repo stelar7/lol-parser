@@ -72,4 +72,15 @@ public class JsonWriterWrapper
             return null;
         }
     }
+    
+    public void close()
+    {
+        try
+        {
+            jw.close();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
