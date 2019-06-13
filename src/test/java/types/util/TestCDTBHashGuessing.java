@@ -7,7 +7,7 @@ import org.junit.Test;
 public class TestCDTBHashGuessing
 {
     @Test
-    public void doTest()
+    public void doLCUTest()
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.substituteRegionLang();
@@ -24,6 +24,7 @@ public class TestCDTBHashGuessing
     public void doGameTest()
     {
         GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        gguesser.guessAssetsBySearch(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
         gguesser.guessBinByLinkedFiles(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
         gguesser.guessVoiceLines(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
         //gguesser.save();

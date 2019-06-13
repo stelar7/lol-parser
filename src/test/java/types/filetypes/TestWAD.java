@@ -171,6 +171,57 @@ public class TestWAD
     }
     
     @Test
+    public void listAllFilesInAllWads() throws IOException
+    {
+        List<String> ends  = Arrays.asList(".wad", ".wad.client");
+        List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+        Path         from  = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
+        
+        String search = "yuumiloadscreen";
+        
+        WADParser parser = new WADParser();
+        Files.walk(from)
+             .parallel()
+             .forEach(file -> {
+                 if (Files.isDirectory(file))
+                 {
+                     return;
+                 }
+            
+                 String parent   = file.getParent().getFileName().toString();
+                 String child    = file.getFileName().toString();
+                 String filename = parent + "/" + child;
+            
+                 WADFile parsed = null;
+                 if (ends.stream().anyMatch(child::endsWith))
+                 {
+                     parsed = parser.parseReadOnly(file);
+                 }
+            
+                 if (endsc.stream().anyMatch(child::endsWith))
+                 {
+                     parsed = parser.parseCompressed(file);
+                 }
+            
+                 if (parsed == null)
+                 {
+                     return;
+                 }
+            
+                 boolean containsSearch = parsed.getContentHeaders()
+                                                .stream()
+                                                .map(WADContentHeaderV1::getPathHash)
+                                                .map(HashHandler::getWadHash)
+                                                .anyMatch(s -> s.contains(search));
+            
+                 if (containsSearch)
+                 {
+                     System.out.println(filename + " contains a filename containing " + search);
+                 }
+             });
+    }
+    
+    @Test
     public void testClientWAD() throws Exception
     {
         Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("temp");
