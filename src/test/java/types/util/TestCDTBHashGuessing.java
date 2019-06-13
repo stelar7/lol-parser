@@ -16,19 +16,18 @@ public class TestCDTBHashGuessing
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
         //guesser.save();
-        
-        guesser.saveAsJson();
+    
+        guesser.saveToBackup();
     }
     
     @Test
     public void doGameTest()
     {
         GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
-        gguesser.check("assets/Characters/PetGhosty/Skins/Skin12/Particles/PetGhosty_Skin12_Idle_Wisp.dds".toLowerCase());
         gguesser.guessBinByLinkedFiles(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
         gguesser.guessVoiceLines(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
         //gguesser.save();
         
-        gguesser.saveAsJson();
+        gguesser.saveToBackup();
     }
 }

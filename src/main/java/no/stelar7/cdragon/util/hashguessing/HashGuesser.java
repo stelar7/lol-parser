@@ -33,6 +33,7 @@ public class HashGuesser
     protected HashFile    hashFile;
     
     protected Map<String, String> known;
+    protected Map<String, String> newHashes;
     protected Set<String>         unknown;
     protected Set<WADFile>        wads;
     protected Set<String>         dirList;
@@ -41,6 +42,7 @@ public class HashGuesser
     {
         this.hashFile = hashFile;
         this.hashes = hashes;
+        this.newHashes = new HashMap<>();
         
         this.known = this.hashFile.load(true);
         this.unknown = new HashSet<>(hashes);
@@ -81,16 +83,35 @@ public class HashGuesser
         this.hashFile.save(this.known);
     }
     
+    public void saveNew()
+    {
+        System.out.println("Saving new hashes as CDTB format");
+        this.hashFile.saveAsJson(this.newHashes);
+    }
+    
+    public void saveNewAsJson()
+    {
+        System.out.println("Saving new hashes as JSON");
+        this.hashFile.saveAsJson(this.newHashes);
+    }
+    
     public void saveAsJson()
     {
         System.out.println("Saving current hashes as JSON");
         this.hashFile.saveAsJson(this.known);
     }
     
+    public void saveToBackup()
+    {
+        System.out.println("Saving current hashes as JSON");
+        this.hashFile.saveToBackupAsJson(this.known);
+    }
+    
     public void addKnown(String hash, String path)
     {
         System.out.format(hashFile.printFormat, hash, path);
         this.known.put(hash, path);
+        this.newHashes.put(hash, path);
         this.unknown.remove(hash);
         
         if (this.unknown.isEmpty())

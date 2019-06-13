@@ -96,13 +96,13 @@ public final class FileTypeHandler
         if (FileTypeHandler.isProbableGLSLF(magic))
         {
             //  OpenGL fragment profile
-            return "glslf";
+            return "glsl-f";
         }
         
         if (FileTypeHandler.isProbableGLSLV(magic))
         {
             // OpenGL vertex profile
-            return "glslv";
+            return "glsl-v";
         }
         
         if (FileTypeHandler.isProbableCSO(magic))

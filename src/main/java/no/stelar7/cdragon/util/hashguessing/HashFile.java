@@ -102,4 +102,28 @@ public class HashFile
             e.printStackTrace();
         }
     }
+    
+    public void saveToBackupAsJson(Map<String, String> known)
+    {
+        try
+        {
+            NaturalOrderComparator      cmp     = new NaturalOrderComparator();
+            List<Entry<String, String>> entries = new ArrayList<>(known.entrySet());
+            entries.sort((a, b) -> cmp.compare(a.getValue(), b.getValue()));
+            
+            JsonWriterWrapper jw = new JsonWriterWrapper();
+            
+            jw.beginObject();
+            for (Entry<String, String> e : entries)
+            {
+                jw.name(e.getKey()).value(e.getValue());
+            }
+            jw.endObject();
+            
+            Files.write(this.backup, jw.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }
