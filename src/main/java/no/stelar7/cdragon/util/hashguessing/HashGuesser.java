@@ -121,20 +121,26 @@ public class HashGuesser
         }
     }
     
-    public void check(String path)
+    /**
+     * returns false if there are no more hashes
+     */
+    public boolean check(String path)
     {
         Long   hashNum = HashHandler.computeXXHash64AsLong(path);
         String hash    = HashHandler.toHex(hashNum, 16);
         if (this.unknown.contains(hash))
         {
             this.addKnown(hash, path);
+            return true;
         }
         
         if (this.unknown.isEmpty())
         {
             System.out.println("No more unknown hashes!");
-            System.exit(0);
+            return false;
         }
+        
+        return true;
     }
     
     public boolean isKnown(String path)
@@ -187,7 +193,7 @@ public class HashGuesser
         {
             for (String dir : dirs)
             {
-                check(String.format("%s/%s", dir, name));
+                check(dir + "/" + name);
             }
         }
     }
@@ -280,10 +286,15 @@ public class HashGuesser
             if (knownPaths.stream().noneMatch(path::contains))
             {
                 reExtract.matcher(path).results().forEach(m -> {
-                    for (String sep : Arrays.asList("-", "_"))
+                    for (String sep : Arrays.asList("-", "_", "."))
                     {
-                        formats.add(String.format("%s%s%%s%s", path.substring(0, m.start()), sep, path.substring(m.start())));
-                        formats.add(String.format("%s%s%%s%s", path.substring(0, m.end()), sep, path.substring(m.end())));
+                        String pre     = path.substring(0, m.start());
+                        String preEnd  = path.substring(m.start());
+                        String post    = path.substring(0, m.end());
+                        String postEnd = path.substring(m.end());
+                        
+                        formats.add(pre + sep + "%s" + preEnd);
+                        formats.add(post + sep + "%s" + postEnd);
                     }
                 });
             }
@@ -314,7 +325,8 @@ public class HashGuesser
                 {
                     String start = path.substring(0, m.start());
                     String end   = path.substring(m.end());
-                    formats.add(String.format("%s%%s%s%%s%s", start, sep, end));
+                    
+                    formats.add(start + "%s" + sep + "%s" + end);
                 }
             });
         }
@@ -350,28 +362,30 @@ public class HashGuesser
         } else
         {
             fmtTemp = "%0" + numbers.get() + "d";
-            reExtract = Pattern.compile(String.format("([0-9]{%d})(?=[^/]*\\.[^/]+$)", numbers.get()));
+            reExtract = Pattern.compile("([0-9]{" + numbers.get() + "})( ? =[^/]*\\.[^/]+$)");
         }
         
         
         Set<String> formats = new HashSet<>();
-        for (String path : paths)
+        for (
+                String path : paths)
+        
         {
             String finalFmt = fmtTemp;
             reExtract.matcher(path).results().forEach(m -> {
                 String start = path.substring(0, m.start());
                 String end   = path.substring(m.end());
-                formats.add(String.format("%s%s%s", start, finalFmt, end));
+                formats.add(start + finalFmt + end);
             });
         }
         
         
         System.out.format("substitute numbers: %s formats, nmax = %s%n", formats.size(), max);
-        
         for (String fmt : formats)
         {
             IntStream.rangeClosed(0, max).forEach(n -> check(String.format(fmt, n)));
         }
+        
     }
     
     public void substituteExtensions()

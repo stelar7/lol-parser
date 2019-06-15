@@ -69,7 +69,7 @@ public class GameHashGuesser extends HashGuesser
     
     public void guessAssetsBySearch(Path pbe)
     {
-        System.out.println("Guessing assets by searching for assets");
+        System.out.println("Guessing assets by searching strings");
         List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
         
         // need a better regex for this :thinking:
