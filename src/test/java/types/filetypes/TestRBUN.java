@@ -1,8 +1,8 @@
 package types.filetypes;
 
 import no.stelar7.cdragon.types.rbun.*;
-import no.stelar7.cdragon.util.handlers.*;
-import org.junit.Test;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 

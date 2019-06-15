@@ -3,10 +3,10 @@ package types.filetypes;
 import com.google.gson.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.LCUSocketReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.io.*;
-import java.nio.file.*;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public class TestWebSocket
 {

@@ -3,7 +3,7 @@ package types.filetypes;
 import no.stelar7.cdragon.types.skl.SKLParser;
 import no.stelar7.cdragon.types.skl.data.SKLFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 

@@ -2,7 +2,7 @@ package types.util;
 
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 

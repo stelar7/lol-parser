@@ -8,7 +8,7 @@ import no.stelar7.cdragon.types.wpk.WPKParser;
 import no.stelar7.cdragon.types.wpk.data.WPKFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.types.ByteArray;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.*;

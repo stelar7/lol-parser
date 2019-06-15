@@ -4,22 +4,20 @@ import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.*;
-import org.junit.Test;
+import no.stelar7.cdragon.util.types.ByteArray;
+import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TestPackagemanifest
 {
-    
-    
     @Test
     public void testFindFiles() throws IOException
     {

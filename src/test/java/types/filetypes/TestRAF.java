@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.raf.RAFParser;
 import no.stelar7.cdragon.types.raf.data.RAFFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;

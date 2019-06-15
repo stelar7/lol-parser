@@ -3,7 +3,7 @@ package types.filetypes;
 import no.stelar7.cdragon.types.ngrid.NGridParser;
 import no.stelar7.cdragon.types.ngrid.data.NGridFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 

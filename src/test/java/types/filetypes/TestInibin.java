@@ -4,7 +4,7 @@ import no.stelar7.cdragon.types.inibin.InibinParser;
 import no.stelar7.cdragon.types.inibin.data.InibinFile;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.*;

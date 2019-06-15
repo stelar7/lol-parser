@@ -4,12 +4,12 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
-import no.stelar7.cdragon.types.bin.data.*;
+import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.javers.core.*;
-import org.junit.*;
+import org.junit.jupiter.api.*;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -153,7 +153,7 @@ public class TestBIN
         BINFile data2 = parser.parse(file2);
         
         Javers jav = JaversBuilder.javers().build();
-        Assert.assertTrue("Input and output .bin file is different...", jav.compare(data, data2).getChanges().isEmpty());
+        Assertions.assertTrue(jav.compare(data, data2).getChanges().isEmpty(), "Input and output .bin file is different...");
     }
     
     @Test

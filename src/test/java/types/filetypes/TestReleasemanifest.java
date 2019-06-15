@@ -2,17 +2,11 @@ package types.filetypes;
 
 import no.stelar7.cdragon.types.releasemanifest.ReleasemanifestParser;
 import no.stelar7.cdragon.types.releasemanifest.data.ReleasemanifestDirectory;
-import no.stelar7.cdragon.util.NaturalOrderComparator;
-import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.*;
-import no.stelar7.cdragon.util.types.math.Vector2;
-import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
-import org.junit.Test;
+import no.stelar7.cdragon.util.handlers.WebHandler;
+import no.stelar7.cdragon.util.types.ByteArray;
+import org.junit.jupiter.api.Test;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.util.*;
+import java.util.List;
 
 public class TestReleasemanifest
 {

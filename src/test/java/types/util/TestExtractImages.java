@@ -5,11 +5,11 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
-import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.utils.IOUtils;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

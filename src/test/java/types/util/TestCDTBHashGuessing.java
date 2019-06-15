@@ -2,11 +2,31 @@ package types.util;
 
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.hashguessing.*;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
+import java.nio.file.Path;
+
+@TestMethodOrder(OrderAnnotation.class)
 public class TestCDTBHashGuessing
 {
     @Test
+    @Order(1)
+    public void doGameTest()
+    {
+        Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+        
+        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        gguesser.guessAssetsBySearch(dataPath);
+        gguesser.guessBinByLinkedFiles(dataPath);
+        gguesser.guessVoiceLines(dataPath);
+        //gguesser.save();
+        
+        gguesser.saveToBackup();
+    }
+    
+    @Test
+    @Order(2)
     public void doLCUTest()
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
@@ -16,19 +36,7 @@ public class TestCDTBHashGuessing
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
         //guesser.save();
-    
-        guesser.saveToBackup();
-    }
-    
-    @Test
-    public void doGameTest()
-    {
-        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
-        gguesser.guessAssetsBySearch(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
-        gguesser.guessBinByLinkedFiles(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
-        gguesser.guessVoiceLines(UtilHandler.CDRAGON_FOLDER.resolve("pbe"));
-        //gguesser.save();
         
-        gguesser.saveToBackup();
+        guesser.saveToBackup();
     }
 }

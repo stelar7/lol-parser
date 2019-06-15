@@ -7,7 +7,7 @@ import no.stelar7.cdragon.types.ogg.data.OGGStream;
 import no.stelar7.cdragon.types.wem.WEMParser;
 import no.stelar7.cdragon.types.wem.data.WEMFile;
 import no.stelar7.cdragon.util.types.ByteArray;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.*;

@@ -1,12 +1,12 @@
 package types.filetypes;
 
-import no.stelar7.cdragon.types.rman.*;
+import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
-import no.stelar7.cdragon.util.handlers.*;
-import org.junit.Test;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
+import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -34,10 +34,10 @@ public class TestRMAN
             downloadAllBundles(files, bundleFolder);
         }
         
-        boolean shouldExport = true;
-        if (shouldExport)
+        Path    fileFolder   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
+        boolean shouldExport = Files.exists(fileFolder);
+        if (!shouldExport)
         {
-            Path fileFolder = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
             Files.createDirectories(fileFolder);
             
             // use one thread per core, and leave one free for the OS

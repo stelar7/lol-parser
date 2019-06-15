@@ -3,7 +3,7 @@ package types.filetypes;
 import no.stelar7.cdragon.types.mgeo.MGEOParser;
 import no.stelar7.cdragon.types.mgeo.data.MGEOFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 

@@ -3,7 +3,7 @@ package types.filetypes;
 import no.stelar7.cdragon.types.crid.CRIDParser;
 import no.stelar7.cdragon.types.crid.data.CRIDFile;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 
 public class TestCRID

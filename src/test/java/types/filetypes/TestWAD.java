@@ -5,28 +5,28 @@ import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
 import no.stelar7.cdragon.types.packagemanifest.PackagemanifestParser;
-import no.stelar7.cdragon.types.packagemanifest.data.*;
+import no.stelar7.cdragon.types.packagemanifest.data.PackagemanifestFile;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.SKNFile;
+import no.stelar7.cdragon.types.wad.WADParser;
+import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.types.wad.WADParser;
-import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.hashguessing.HashGuesser;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestWAD

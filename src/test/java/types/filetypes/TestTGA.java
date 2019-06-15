@@ -3,10 +3,10 @@ package types.filetypes;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteOrder;
-import java.nio.file.*;
+import java.nio.file.Path;
 
 public class TestTGA
 {

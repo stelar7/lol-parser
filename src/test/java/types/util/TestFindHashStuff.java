@@ -1,8 +1,8 @@
 package types.util;
 
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.*;
-import org.junit.Test;
+import no.stelar7.cdragon.util.types.Pair;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
