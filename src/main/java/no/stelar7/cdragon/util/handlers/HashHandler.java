@@ -73,6 +73,27 @@ public class HashHandler
         return pre.toString();
     }
     
+    public static String toHex(Long str, int minLength, int maxLength)
+    {
+        StringBuilder pre = new StringBuilder(Long.toHexString(str).toUpperCase(Locale.ENGLISH));
+        while (pre.length() > 0 && pre.charAt(0) == '0')
+        {
+            pre.deleteCharAt(0);
+        }
+        
+        while (pre.length() < minLength)
+        {
+            pre.insert(0, "0");
+        }
+        
+        while (pre.length() > maxLength)
+        {
+            pre.deleteCharAt(0);
+        }
+        
+        return pre.toString();
+    }
+    
     private static StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
     
     public static long computeXXHash64AsLong(String text)
