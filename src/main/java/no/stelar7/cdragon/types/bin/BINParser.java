@@ -11,6 +11,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.*;
 
+@SuppressWarnings("ALL")
 public class BINParser implements Parseable<BINFile>
 {
     public static Set<String> hashes = new HashSet<>();

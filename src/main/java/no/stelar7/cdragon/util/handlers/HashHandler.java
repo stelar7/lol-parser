@@ -8,6 +8,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.function.Function;
 
 public class HashHandler
 {
@@ -106,6 +107,69 @@ public class HashHandler
         }
         
         return Integer.toUnsignedLong(hash);
+    }
+    
+    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes)
+    {
+        int[] offsets = new int[20];
+        Arrays.fill(offsets, -1);
+        
+        StringBuilder sb       = new StringBuilder();
+        int           index    = 0;
+        int           maxIndex = 0;
+        
+        try
+        {
+            Path outputFile = UtilHandler.CDRAGON_FOLDER.resolve("bruteforced.txt");
+            if (!Files.exists(outputFile))
+            {
+                Files.createFile(outputFile);
+            }
+            
+            //noinspection InfiniteLoopStatement
+            while (true)
+            {
+                int value = ++offsets[index];
+                
+                while (value >= UtilHandler.ALL.length)
+                {
+                    offsets[index] = 0;
+                    offsets[index + 1]++;
+                    index++;
+                    if (index > maxIndex)
+                    {
+                        maxIndex = index;
+                        System.out.println("Bruteforce currently at length: " + maxIndex);
+                    }
+                    
+                    value = offsets[index];
+                }
+                index = 0;
+                
+                for (int offset : offsets)
+                {
+                    if (offset < 0)
+                    {
+                        break;
+                    }
+                    
+                    sb.append(UtilHandler.ALL[offset]);
+                }
+                
+                String toHash = sb.reverse().toString().replace("\0", "");
+                sb.setLength(0);
+                
+                Long output = hashFunc.apply(toHash);
+                if (hashes.contains(output))
+                {
+                    Files.write(outputFile, (toHash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                    System.out.println(toHash);
+                }
+            }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     public static long computeCCITT32(byte[] buffer, int size)
@@ -217,14 +281,14 @@ public class HashHandler
     {
         long   val = Integer.toUnsignedLong(hash);
         String hex = toHex(val, 8);
-        return getBinHashes().getOrDefault(hex, String.valueOf(hex));
+        return getBinHashes().getOrDefault(hex, hex);
     }
     
     public static String getBINHash(String hash)
     {
         long   hashed = computeBINHash(hash);
         String hex    = toHex(hashed, 8);
-        return getBinHashes().getOrDefault(hex, String.valueOf(hex));
+        return getBinHashes().getOrDefault(hex, hex);
     }
     
     public static boolean hasBINHash(String hash)
@@ -269,7 +333,7 @@ public class HashHandler
         
         try
         {
-            String sb = new String(Files.readAllBytes(INI_HASH_STORE), StandardCharsets.UTF_8);
+            String sb = Files.readString(INI_HASH_STORE);
             iniHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
             System.out.println("Loaded known bin hashes");
         } catch (IOException e)
@@ -306,7 +370,6 @@ public class HashHandler
         return getWADHashes().getOrDefault(hash, hash);
     }
     
-    @SuppressWarnings("unchecked")
     public static Map<String, String> getWADHashes()
     {
         if (wadHashNames == null)

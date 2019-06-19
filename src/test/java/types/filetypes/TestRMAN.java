@@ -1,5 +1,6 @@
 package types.filetypes;
 
+import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
@@ -7,6 +8,7 @@ import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -52,6 +54,13 @@ public class TestRMAN
         TestWAD tw = new TestWAD();
         tw.testPullCDTB();
         tw.testCDragonWAD();
+        
+        Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
+        Files.write(binhash, "".getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+        for (String hash : BINParser.hashes)
+        {
+            Files.write(binhash, (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
     }
     
     /**
