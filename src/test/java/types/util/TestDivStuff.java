@@ -3,6 +3,7 @@ package types.util;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "PercentArmorPen";
+        String toHash = "ChanceToProc";
         String output = HashHandler.getBINHash(toHash);
         System.out.println(output);
         
@@ -64,6 +65,7 @@ public class TestDivStuff
     {
         JsonArray champData = new JsonArray();
         JsonArray traitData = new JsonArray();
+        JsonArray itemData  = new JsonArray();
         
         Path traitFile       = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\unknown\\Shipping\\22E2CF785BAEAC7E.bin");
         Path fontConfig      = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu\\fontconfig_en_us.txt");
@@ -206,10 +208,85 @@ public class TestDivStuff
             champData.add(o);
         }
         
+        String itemContainerKey       = "D186C31A";
+        String itemFromKey            = "8B83BA8A";
+        String itemEffectContainer    = "C13D6D31";
+        String itemDescription        = "765F18DA";
+        String itemEffectVarContainer = "62FF42F4";
+        String itemIcon               = "8BEE2972";
+        
+        Map<String, String> itemLookup = new HashMap<>();
+        
+        JsonArray items = shipping.getAsJsonObject().getAsJsonArray(itemContainerKey);
+        for (JsonElement itemContainer : items)
+        {
+            String     container = itemContainer.getAsJsonObject().keySet().toArray(String[]::new)[0];
+            JsonObject item      = itemContainer.getAsJsonObject().getAsJsonObject(container);
+            
+            String mName = item.get("mName").getAsString();
+            
+            if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
+            {
+                continue;
+            }
+            
+            itemLookup.put(container, item.get("mID").getAsString());
+            
+            JsonObject o = new JsonObject();
+            o.add("id", item.get("mID"));
+            o.add("name", new JsonPrimitive(descs.getOrDefault(item.get(displayName).getAsString(), item.get(displayName).getAsString())));
+            o.add("desc", new JsonPrimitive(descs.getOrDefault(item.get(itemDescription).getAsString(), item.get(itemDescription).getAsString())));
+            o.add("icon", new JsonPrimitive(item.get(itemIcon).getAsString()));
+            o.add("from", item.has(itemFromKey) ? item.get(itemFromKey) : new JsonArray());
+            
+            JsonArray effects    = new JsonArray();
+            JsonArray effectJson = item.has(itemEffectContainer) ? item.getAsJsonArray(itemEffectContainer) : new JsonArray();
+            for (JsonElement effect : effectJson)
+            {
+                JsonObject inner = effect.getAsJsonObject().getAsJsonObject(itemEffectVarContainer);
+                
+                Long          name     = inner.get("name").getAsLong();
+                String        hashKey  = HashHandler.toHex(name, 8, 8);
+                JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashKey, hashKey));
+                JsonElement   value    = inner.get("Value");
+                
+                JsonObject temp = new JsonObject();
+                temp.add("name", realName);
+                temp.add("value", value);
+                effects.add(temp);
+            }
+            
+            o.add("effects", effects);
+            itemData.add(o);
+        }
+        
+        for (JsonElement it : itemData)
+        {
+            JsonArray from    = it.getAsJsonObject().getAsJsonArray("from");
+            JsonArray newFrom = new JsonArray();
+            for (JsonElement element : from)
+            {
+                newFrom.add(itemLookup.get(element.getAsString()));
+            }
+            it.getAsJsonObject().add("from", newFrom);
+        }
+        
+        
+        // sort items by id
+        NaturalOrderComparator noc   = new NaturalOrderComparator();
+        List<JsonElement>      elems = new ArrayList<>();
+        for (JsonElement datum : itemData)
+        {
+            elems.add(datum);
+        }
+        elems.sort(Comparator.comparingInt(a -> a.getAsJsonObject().get("id").getAsInt()));
+        itemData = new JsonArray();
+        elems.forEach(itemData::add);
         
         JsonObject obj = new JsonObject();
         obj.add("champions", champData);
         obj.add("traits", traitData);
+        obj.add("items", itemData);
         String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
         
         Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
