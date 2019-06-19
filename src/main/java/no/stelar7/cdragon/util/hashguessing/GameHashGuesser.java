@@ -54,12 +54,13 @@ public class GameHashGuesser extends HashGuesser
         
         readMe.stream()
               .map(UtilHandler::readAsString)
-              .filter(s -> s.contains("linkedFiles"))
+              .filter(s -> s.contains("linkedBinFiles"))
               .map(s -> UtilHandler.getJsonParser().parse(s))
               .map(JsonElement::getAsJsonObject)
               .forEach(e -> {
-                  for (JsonElement link : e.getAsJsonArray("linkedFiles"))
+                  for (JsonElement link : e.getAsJsonArray("linkedBinFiles"))
                   {
+                      System.out.println(link);
                       String real = link.getAsString().toLowerCase();
                       this.check(real);
                   }

@@ -340,8 +340,14 @@ public final class UtilHandler
                 if (count == 0)
                 {
                     List<JsonElement> list = data.getOrDefault(key, new ArrayList<>());
-                    list.add(getJsonParser().parse(sb.toString()));
-                    data.put(key, list);
+                    if (key.equals("linkedBinFiles"))
+                    {
+                        data.put(key, list);
+                    } else
+                    {
+                        list.add(getJsonParser().parse(sb.toString()));
+                        data.put(key, list);
+                    }
                     
                     sb.setLength(0);
                     json = json.substring(++i);
@@ -351,7 +357,19 @@ public final class UtilHandler
             }
         }
         
-        return getGson().toJson(data);
+        Map<String, Object> returnData = new HashMap<>();
+        data.forEach((k, v) -> {
+            if (v.size() == 1)
+            {
+                returnData.put(k, v.get(0));
+            } else
+            {
+                returnData.put(k, v);
+            }
+        });
+        
+        
+        return getGson().toJson(returnData);
     }
     
     

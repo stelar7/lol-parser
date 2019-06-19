@@ -37,7 +37,7 @@ public class LCUHashGuesser extends HashGuesser
         Pattern     regex      = Pattern.compile("^plugins/([^/]+)/[^/]+/[^/]+/");
         Set<String> regionLang = UtilHandler.product("/", this.REGIONS, this.LANGUAGES);
         
-        System.out.format("Substitute region and lang: %s regions %s languages%n", REGIONS.size(), LANGUAGES.size());
+        System.out.format("Substitute region and lang: %s region/languages %s hashes%n", REGIONS.size() * LANGUAGES.size(), this.known.size());
         
         for (String s : regionLang)
         {

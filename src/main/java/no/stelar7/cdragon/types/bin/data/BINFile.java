@@ -229,7 +229,7 @@ public class BINFile
                     jw.endObject();
                 }
                 
-                jw.name("linkedFiles").beginArray();
+                jw.name("linkedBinFiles").beginArray();
                 for (String link : this.linkedFiles)
                 {
                     jw.value(link);

@@ -26,9 +26,10 @@ public class TestBIN
     @Test
     public void testBIN() throws IOException
     {
-        Path    file = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\unknown\\Shipping\\22E2CF785BAEAC7E.bin");
-        BINFile data = parser.parse(file);
-        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), data.toJson().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
+        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\unknown\\Shipping\\22E2CF785BAEAC7E.bin");
+        BINFile data    = parser.parse(file);
+        String  content = data.toJson();
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
     @Test
