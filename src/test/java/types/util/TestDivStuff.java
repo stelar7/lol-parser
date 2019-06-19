@@ -148,7 +148,7 @@ public class TestDivStuff
                     String     hashKey = HashHandler.toHex(name, 8, 8);
                     
                     JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashKey, hashKey));
-                    JsonElement   value    = var.get("Value");
+                    JsonElement   value    = var.get("value");
                     
                     JsonObject temp = new JsonObject();
                     temp.add("name", realName);
@@ -215,7 +215,7 @@ public class TestDivStuff
         String itemEffectVarContainer = "62FF42F4";
         String itemIcon               = "8BEE2972";
         
-        Map<String, String> itemLookup = new HashMap<>();
+        Map<String, Integer> itemLookup = new HashMap<>();
         
         JsonArray items = shipping.getAsJsonObject().getAsJsonArray(itemContainerKey);
         for (JsonElement itemContainer : items)
@@ -230,7 +230,7 @@ public class TestDivStuff
                 continue;
             }
             
-            itemLookup.put(container, item.get("mID").getAsString());
+            itemLookup.put(container, item.get("mID").getAsInt());
             
             JsonObject o = new JsonObject();
             o.add("id", item.get("mID"));
@@ -248,7 +248,7 @@ public class TestDivStuff
                 Long          name     = inner.get("name").getAsLong();
                 String        hashKey  = HashHandler.toHex(name, 8, 8);
                 JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashKey, hashKey));
-                JsonElement   value    = inner.get("Value");
+                JsonElement   value    = inner.get("value");
                 
                 JsonObject temp = new JsonObject();
                 temp.add("name", realName);
