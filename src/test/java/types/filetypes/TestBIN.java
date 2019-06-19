@@ -24,26 +24,11 @@ public class TestBIN
     BINParser parser = new BINParser();
     
     @Test
-    public void testBIN()
+    public void testBIN() throws IOException
     {
-        Path file = UtilHandler.CDRAGON_FOLDER.resolve("cdragon/skin14.bin");
-        /*
-        Files.walkFileTree(UtilHandler.DOWNLOADS_FOLDER.resolve("bin"), new SimpleFileVisitor<>()
-        
-        {
-            
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-            {
-                System.out.println("Parsing: " + file.toString());
-                BINFile data = parser.parse(file);
-                System.out.println(data.toJson());
-                return FileVisitResult.CONTINUE;
-            }
-        });
-         */
+        Path    file = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\unknown\\Shipping\\22E2CF785BAEAC7E.bin");
         BINFile data = parser.parse(file);
-        System.out.println(data.toJson());
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), data.toJson().getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE);
     }
     
     @Test

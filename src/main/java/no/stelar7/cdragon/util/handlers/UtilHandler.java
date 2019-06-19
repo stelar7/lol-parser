@@ -311,12 +311,13 @@ public final class UtilHandler
         Map<String, List<JsonElement>> data = new HashMap<>();
         json = json.replace("\n", "");
         
-        for (int i = 2; i < json.length(); i++)
+        for (int i = 1; i < json.length(); i++)
         {
-            String key = json.substring(i);
+            i += (json.indexOf('"') + 1);
+            String key = json.substring(json.indexOf('"') + 1);
+            i += (key.indexOf('"'));
             key = key.substring(0, key.indexOf('"'));
-            
-            i += (key.length() + 2);
+            i += 2;
             
             int           count = 0;
             StringBuilder sb    = new StringBuilder();
@@ -324,12 +325,12 @@ public final class UtilHandler
             while (true)
             {
                 char at = json.charAt(i++);
-                if (at == '{')
+                if (at == '{' || at == '[')
                 {
                     count++;
                 }
                 
-                if (at == '}')
+                if (at == '}' || at == ']')
                 {
                     count--;
                 }
@@ -341,7 +342,10 @@ public final class UtilHandler
                     List<JsonElement> list = data.getOrDefault(key, new ArrayList<>());
                     list.add(getJsonParser().parse(sb.toString()));
                     data.put(key, list);
-                    i++;
+                    
+                    sb.setLength(0);
+                    json = json.substring(++i);
+                    i = 0;
                     break;
                 }
             }

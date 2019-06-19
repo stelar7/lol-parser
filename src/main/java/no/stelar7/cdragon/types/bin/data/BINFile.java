@@ -1,9 +1,8 @@
 package no.stelar7.cdragon.types.bin.data;
 
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.writers.ByteWriter;
 import no.stelar7.cdragon.util.types.math.*;
-import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
+import no.stelar7.cdragon.util.writers.*;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -239,15 +238,8 @@ public class BINFile
                 
                 jw.endObject();
                 
-                try
-                {
-                    json = jw.toString();
-                } catch (Exception e)
-                {
-                    json = UtilHandler.mergeTopKeysToArray(jw.toString());
-                }
-                
-                json = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(json));
+                json = UtilHandler.mergeTopKeysToArray(jw.toString());
+                // json = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(json));
             } catch (IOException e)
             {
                 e.printStackTrace();
