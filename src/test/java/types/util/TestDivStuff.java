@@ -12,7 +12,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class TestDivStuff
@@ -72,16 +72,23 @@ public class TestDivStuff
         Path fontConfig      = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu\\fontconfig_en_us.txt");
         Path champFileParent = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\characters");
         
-        String champFileTraitContainer = "1AF7CAAC";
-        String champContainerKey       = "E52B8F5D";
-        String costModifier            = "1F01E303";
-        String champAbilityName        = "87A69A5E";
-        String champSplash             = "8BEE2972";
-        String champAbilityDesc        = "BC4F18B3";
-        String champAbilityIcon        = "63F1FC69";
-        String displayName             = "C3143D66";
-        
         Function<Map<String, String>, Function<JsonObject, Function<String, String>>> getFromMapOrDefault = desc -> obj -> key -> desc.getOrDefault(obj.get(key).getAsString(), obj.get(key).getAsString());
+        
+        Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
+        Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
+        Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
+        Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
+        
+        BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
+        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt   = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
+        
+        BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
+            String     realData = "{" + data.substring(data.indexOf(key) - 1);
+            JsonReader reader   = new JsonReader(new StringReader(realData));
+            reader.setLenient(true);
+            return UtilHandler.getJsonParser().parse(reader).getAsJsonObject();
+        };
+        
         
         Map<String, String> descs = Files.readAllLines(fontConfig)
                                          .stream()
@@ -102,6 +109,8 @@ public class TestDivStuff
         
         BINParser parser = new BINParser();
         
+        String displayName = "C3143D66";
+        
         String traitContainerKey       = "6F870247";
         String traitDescription        = "765F18DA";
         String traitIcon               = "8BEE2972";
@@ -117,8 +126,8 @@ public class TestDivStuff
         JsonArray   traits   = shipping.getAsJsonObject().getAsJsonArray(traitContainerKey);
         for (JsonElement traitContainer : traits)
         {
-            String     container = traitContainer.getAsJsonObject().keySet().toArray(String[]::new)[0];
-            JsonObject trait     = traitContainer.getAsJsonObject().getAsJsonObject(container);
+            String     hashKey = getFirstChildKey.apply(traitContainer);
+            JsonObject trait   = getFirstChildObject.apply(traitContainer);
             
             String mName = trait.get("mName").getAsString();
             
@@ -127,7 +136,7 @@ public class TestDivStuff
                 continue;
             }
             
-            traitLookup.put(container, getFromMapOrDefault.apply(descs).apply(trait).apply(displayName));
+            traitLookup.put(hashKey, getFromMapOrDefault.apply(descs).apply(trait).apply(displayName));
             
             JsonObject o = new JsonObject();
             o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(trait).apply(displayName)));
@@ -143,14 +152,14 @@ public class TestDivStuff
                 JsonObject inner = effect.getAsJsonObject().getAsJsonObject(innerEffectContainer);
                 
                 JsonArray varAdded     = new JsonArray();
-                JsonArray varContainer = inner.has(traitEffectVarContainer) ? inner.getAsJsonArray(traitEffectVarContainer) : new JsonArray();
+                JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitContainerKey);
                 for (JsonElement vars : varContainer)
                 {
-                    JsonObject var     = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
-                    Long       name    = var.get("name").getAsLong();
-                    String     hashKey = HashHandler.toHex(name, 8, 8);
+                    JsonObject var        = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
+                    Long       name       = var.get("name").getAsLong();
+                    String     hashedName = HashHandler.toHex(name, 8, 8);
                     
-                    JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashKey, hashKey));
+                    JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashedName, hashedName));
                     JsonElement   value    = var.get("value");
                     
                     JsonObject temp = new JsonObject();
@@ -169,45 +178,103 @@ public class TestDivStuff
             traitData.add(o);
         }
         
+        String champFileTraitContainer = "1AF7CAAC";
+        String champContainerKey       = "E52B8F5D";
+        String costModifier            = "1F01E303";
+        String champAbilityName        = "87A69A5E";
+        String champSplash             = "8BEE2972";
+        String champAbilityDesc        = "BC4F18B3";
+        String champAbilityIcon        = "63F1FC69";
         
         JsonArray champs = shipping.getAsJsonObject().getAsJsonArray(champContainerKey);
         for (JsonElement champContainer : champs)
         {
-            String     container = champContainer.getAsJsonObject().keySet().toArray(String[]::new)[0];
-            JsonObject champ     = champContainer.getAsJsonObject().getAsJsonObject(container);
-            
-            String mName = champ.get("mName").getAsString();
+            JsonObject champ = getFirstChildObject.apply(champContainer);
+            String     mName = champ.get("mName").getAsString();
             
             if (!mName.startsWith("TFT_") || mName.equals("TFT_Template"))
             {
                 continue;
             }
             
-            JsonObject o = new JsonObject();
+            JsonObject o         = new JsonObject();
+            JsonObject abilities = new JsonObject();
+            
             o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(displayName)));
             o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
             o.add("splash", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champSplash)));
-            o.add("abilityName", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityName)));
-            o.add("abilityDesc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityDesc)));
-            o.add("abilityIcon", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityIcon)));
             
-            String traitContainer = "1AF7CAAC";
-            Path   selfBin        = champFileParent.resolve(mName).resolve(mName + ".bin");
-            String data           = parser.parse(selfBin).toJson();
-            data = data.substring(data.indexOf(traitContainer) - 10);
+            abilities.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityName)));
+            abilities.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityDesc)));
+            abilities.add("icon", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityIcon)));
             
-            JsonReader reader = new JsonReader(new StringReader(data));
-            reader.setLenient(true);
-            JsonObject elem       = UtilHandler.getJsonParser().parse(reader).getAsJsonObject();
-            JsonArray  traitDatas = elem.getAsJsonArray(traitContainer);
             
-            JsonArray addme = new JsonArray();
+            String champDataContainer = "304496F1";
+            String spellDataContainer = "5E7E5A06";
+            String traitContainer     = "1AF7CAAC";
+            
+            String initialSpellValue = "6D3CCFD7";
+            String nextSpellValue    = "E7B832F2";
+            
+            Path   selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
+            String data    = parser.parse(selfBin).toJson();
+            
+            JsonObject elem               = createJsonObject.apply(data, champDataContainer);
+            JsonObject champContainerData = getFirstChildObject.apply(elem);
+            JsonObject champItem          = getFirstChildObject.apply(champContainerData);
+            
+            JsonArray traitDatas = champItem.getAsJsonArray(traitContainer);
+            JsonArray traitArray = new JsonArray();
             for (JsonElement traitDatum : traitDatas)
             {
-                addme.add(new JsonPrimitive(traitLookup.get(traitDatum.getAsString())));
+                traitArray.add(new JsonPrimitive(traitLookup.get(traitDatum.getAsString())));
             }
-            o.add("traits", addme);
             
+            JsonObject stats = new JsonObject();
+            stats.add("hp", champItem.get("baseHP"));
+            stats.add("damage", champItem.get("BaseDamage"));
+            stats.add("armor", champItem.get("baseArmor"));
+            stats.add("magicResist", champItem.get("baseSpellBlock"));
+            stats.add("critMultiplier", champItem.get("critDamageMultiplier"));
+            stats.add("attackSpeed", champItem.get("AttackSpeed"));
+            stats.add("range", new JsonPrimitive(champItem.get("attackRange").getAsInt() / 180));
+            
+            String spellName = champItem.getAsJsonArray("spellNames").get(0).getAsString();
+            if (spellName.contains("/"))
+            {
+                spellName = spellName.substring(spellName.indexOf('/') + 1);
+            }
+            
+            elem = createJsonObject.apply(data, spellDataContainer);
+            JsonArray elems = getFirstChildArray.apply(elem);
+            
+            JsonArray abilityVars = new JsonArray();
+            for (JsonElement elemm : elems)
+            {
+                JsonObject spellContainerData = getFirstChildObject.apply(elemm);
+                if (spellContainerData.get("mScriptName").getAsString().equals(spellName))
+                {
+                    JsonObject spellData = getFirstChildObject.apply(spellContainerData.getAsJsonObject("mSpell"));
+                    JsonArray  variables = getKeyOrDefaultArray.apply(spellData, "mDataValues");
+                    for (JsonElement variable : variables)
+                    {
+                        JsonObject entry = getFirstChildObject.apply(variable);
+                        
+                        JsonObject currentVar = new JsonObject();
+                        currentVar.add("key", entry.get("mName"));
+                        currentVar.add("initialValue", getKeyOrDefaultInt.apply(entry, initialSpellValue));
+                        currentVar.add("nextValue", entry.get(nextSpellValue));
+                        abilityVars.add(currentVar);
+                    }
+                    break;
+                }
+            }
+            abilities.add("variables", abilityVars);
+            
+            
+            o.add("stats", stats);
+            o.add("traits", traitArray);
+            o.add("ability", abilities);
             champData.add(o);
         }
         
@@ -223,8 +290,8 @@ public class TestDivStuff
         JsonArray items = shipping.getAsJsonObject().getAsJsonArray(itemContainerKey);
         for (JsonElement itemContainer : items)
         {
-            String     container = itemContainer.getAsJsonObject().keySet().toArray(String[]::new)[0];
-            JsonObject item      = itemContainer.getAsJsonObject().getAsJsonObject(container);
+            String     hashKey = getFirstChildKey.apply(itemContainer);
+            JsonObject item    = getFirstChildObject.apply(itemContainer);
             
             String mName = item.get("mName").getAsString();
             
@@ -233,25 +300,25 @@ public class TestDivStuff
                 continue;
             }
             
-            itemLookup.put(container, item.get("mID").getAsInt());
+            itemLookup.put(hashKey, item.get("mID").getAsInt());
             
             JsonObject o = new JsonObject();
             o.add("id", item.get("mID"));
             o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(item).apply(displayName)));
             o.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(item).apply(itemDescription)));
             o.add("icon", new JsonPrimitive(item.get(itemIcon).getAsString()));
-            o.add("from", item.has(itemFromKey) ? item.get(itemFromKey) : new JsonArray());
+            o.add("from", getKeyOrDefaultArray.apply(item, itemFromKey));
             
             JsonArray effects    = new JsonArray();
-            JsonArray effectJson = item.has(itemEffectContainer) ? item.getAsJsonArray(itemEffectContainer) : new JsonArray();
+            JsonArray effectJson = getKeyOrDefaultArray.apply(item, itemEffectContainer);
             for (JsonElement effect : effectJson)
             {
                 JsonObject inner = effect.getAsJsonObject().getAsJsonObject(itemEffectVarContainer);
                 
-                Long          name     = inner.get("name").getAsLong();
-                String        hashKey  = HashHandler.toHex(name, 8, 8);
-                JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashKey, hashKey));
-                JsonElement   value    = inner.get("value");
+                Long          name       = inner.get("name").getAsLong();
+                String        hashedName = HashHandler.toHex(name, 8, 8);
+                JsonPrimitive realName   = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashedName, hashedName));
+                JsonElement   value      = inner.get("value");
                 
                 JsonObject temp = new JsonObject();
                 temp.add("name", realName);
@@ -298,35 +365,6 @@ public class TestDivStuff
     @Test
     public void testBinHashBrute()
     {
-        /*
-         * 1AF7CAAC = trait container
-         *
-         * 0C239C49 = robot
-         * 20F51FA6 = glacial
-         * 28905FBE = knight
-         * 2A9ED9A9 = noble
-         * 2E2194DA = exile
-         * 2E77F7A4 = elementalist
-         * 4BFE6252 = demon
-         * 4DEAA8BF = shapeshifter
-         * 4EDC8BF9 = ninja
-         * 4F3CAFAC = dragon
-         * 517AA65D = void
-         * 5377F06E = sorcerer
-         * 549BC8C7 = wild
-         * 59A200C0 = guardian
-         * 6128AB3E = brawler
-         * 6C4915DF = minion
-         * 6F9A9D3E = ranger
-         * 7FAF979E = imperial
-         * 97A1B425 = blademaster
-         * 9C2D43C2 = pirate
-         * AC4E0877 = gunslinger
-         * AED73844 = phantom
-         * B1DA655E = assassin
-         * FC8430DA = yordle
-         */
-        
         List<String> possible = Arrays.asList("1AF7CAAC",
                                               "0C239C49", "20F51FA6", "28905FBE", "2A9ED9A9", "2E2194DA", "2E77F7A4",
                                               "4BFE6252", "4DEAA8BF", "4EDC8BF9", "4F3CAFAC", "517AA65D", "5377F06E",
