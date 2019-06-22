@@ -12,6 +12,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestDivStuff
@@ -80,6 +81,8 @@ public class TestDivStuff
         String champAbilityIcon        = "63F1FC69";
         String displayName             = "C3143D66";
         
+        Function<Map<String, String>, Function<JsonObject, Function<String, String>>> getFromMapOrDefault = desc -> obj -> key -> desc.getOrDefault(obj.get(key).getAsString(), obj.get(key).getAsString());
+        
         Map<String, String> descs = Files.readAllLines(fontConfig)
                                          .stream()
                                          .filter(s -> s.startsWith("tr "))
@@ -124,11 +127,11 @@ public class TestDivStuff
                 continue;
             }
             
-            traitLookup.put(container, descs.getOrDefault(trait.get(displayName).getAsString(), trait.get(displayName).getAsString()));
+            traitLookup.put(container, getFromMapOrDefault.apply(descs).apply(trait).apply(displayName));
             
             JsonObject o = new JsonObject();
-            o.add("name", new JsonPrimitive(descs.getOrDefault(trait.get(displayName).getAsString(), trait.get(displayName).getAsString())));
-            o.add("desc", new JsonPrimitive(descs.getOrDefault(trait.get(traitDescription).getAsString(), trait.get(traitDescription).getAsString())));
+            o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(trait).apply(displayName)));
+            o.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(trait).apply(traitDescription)));
             o.add("icon", new JsonPrimitive(trait.get(traitIcon).getAsString()));
             
             JsonArray effects = new JsonArray();
@@ -181,12 +184,12 @@ public class TestDivStuff
             }
             
             JsonObject o = new JsonObject();
-            o.add("name", new JsonPrimitive(descs.getOrDefault(champ.get(displayName).getAsString(), champ.get(displayName).getAsString())));
+            o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(displayName)));
             o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
-            o.add("splash", new JsonPrimitive(descs.getOrDefault(champ.get(champSplash).getAsString(), champ.get(champSplash).getAsString())));
-            o.add("abilityName", new JsonPrimitive(descs.getOrDefault(champ.get(champAbilityName).getAsString(), champ.get(champAbilityName).getAsString())));
-            o.add("abilityDesc", new JsonPrimitive(descs.getOrDefault(champ.get(champAbilityDesc).getAsString(), champ.get(champAbilityDesc).getAsString())));
-            o.add("abilityIcon", new JsonPrimitive(descs.getOrDefault(champ.get(champAbilityIcon).getAsString(), champ.get(champAbilityIcon).getAsString())));
+            o.add("splash", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champSplash)));
+            o.add("abilityName", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityName)));
+            o.add("abilityDesc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityDesc)));
+            o.add("abilityIcon", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champAbilityIcon)));
             
             String traitContainer = "1AF7CAAC";
             Path   selfBin        = champFileParent.resolve(mName).resolve(mName + ".bin");
@@ -234,8 +237,8 @@ public class TestDivStuff
             
             JsonObject o = new JsonObject();
             o.add("id", item.get("mID"));
-            o.add("name", new JsonPrimitive(descs.getOrDefault(item.get(displayName).getAsString(), item.get(displayName).getAsString())));
-            o.add("desc", new JsonPrimitive(descs.getOrDefault(item.get(itemDescription).getAsString(), item.get(itemDescription).getAsString())));
+            o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(item).apply(displayName)));
+            o.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(item).apply(itemDescription)));
             o.add("icon", new JsonPrimitive(item.get(itemIcon).getAsString()));
             o.add("from", item.has(itemFromKey) ? item.get(itemFromKey) : new JsonArray());
             
@@ -360,5 +363,13 @@ public class TestDivStuff
               });
         
         unique.forEach(System.out::println);
+    }
+    
+    @Test
+    public void readProcessMemory() throws IOException
+    {
+        //String handleName = "League of Legends.exe";
+        String handleName = "notepad++.exe";
+        MemoryHandler.readProcessMemory(handleName);
     }
 }
