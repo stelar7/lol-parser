@@ -10,7 +10,7 @@ import com.sun.jna.ptr.IntByReference;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.*;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -54,17 +54,11 @@ public class MemoryHandler
             pointer = pointer.share(pageSize);
         }
         
+        
         ch.close();
     }
     
     private static int getPageSize()
-    {
-        SYSTEM_INFO si = new SYSTEM_INFO();
-        Kernel32.INSTANCE.GetSystemInfo(si);
-        return si.dwPageSize.intValue();
-    }
-    
-    private static int getRegionSize()
     {
         SYSTEM_INFO si = new SYSTEM_INFO();
         Kernel32.INSTANCE.GetSystemInfo(si);
