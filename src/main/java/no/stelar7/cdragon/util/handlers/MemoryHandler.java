@@ -1,11 +1,12 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.sun.jna.*;
+import com.sun.jna.platform.win32.BaseTSD.SIZE_T;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.Tlhelp32.PROCESSENTRY32.ByReference;
 import com.sun.jna.platform.win32.WinBase.SYSTEM_INFO;
 import com.sun.jna.platform.win32.WinDef.*;
-import com.sun.jna.platform.win32.WinNT.HANDLE;
+import com.sun.jna.platform.win32.WinNT.*;
 import com.sun.jna.ptr.IntByReference;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MemoryHandler
 {
@@ -40,23 +42,40 @@ public class MemoryHandler
         HMODULE processModule = findModule(processHandle, handleName);
         int     pageSize      = getPageSize();
         
+        
         ByteBuffer dst    = ByteBuffer.allocateDirect(pageSize);
         Pointer    dstPtr = Native.getDirectBufferPointer(dst);
         
-        IntByReference bytesRead = new IntByReference(1);
-        Pointer        pointer   = processModule.getPointer();
-        while (bytesRead.getValue() > 0)
+        List<Pointer> pts = scanMemoryPages(processHandle).stream().filter(Objects::nonNull).collect(Collectors.toList());
+        for (Pointer pt : pts)
         {
-            Kernel32.INSTANCE.ReadProcessMemory(processHandle, pointer, dstPtr, pageSize, bytesRead);
-            ch.write(dst);
-            dst.position(0);
-            
-            pointer = pointer.share(pageSize);
+            IntByReference bytesRead = new IntByReference(1);
+            Pointer        pointer   = pt;
+            while (bytesRead.getValue() > 0)
+            {
+                Kernel32.INSTANCE.ReadProcessMemory(processHandle, pointer, dstPtr, pageSize, bytesRead);
+                ch.write(dst);
+                dst.position(0);
+                
+                pointer = pointer.share(pageSize);
+            }
         }
-        
-        
         ch.close();
     }
+    
+    private static List<Pointer> scanMemoryPages(HANDLE handle)
+    {
+        MEMORY_BASIC_INFORMATION info     = new MEMORY_BASIC_INFORMATION();
+        Pointer                  p        = handle.getPointer();
+        List<Pointer>            pointers = new ArrayList<>();
+        for (; Kernel32.INSTANCE.VirtualQueryEx(handle, p, info, new SIZE_T(info.size())).longValue() == info.size(); p = p.share(info.regionSize.longValue()))
+        {
+            pointers.add(info.baseAddress);
+        }
+        
+        return pointers;
+    }
+    
     
     private static int getPageSize()
     {
