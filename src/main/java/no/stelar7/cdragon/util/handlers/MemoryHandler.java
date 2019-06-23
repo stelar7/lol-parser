@@ -18,20 +18,26 @@ public class MemoryHandler
 {
     public static void readProcessMemory(String handleName)
     {
-        int     processId     = findProcessID(handleName);
-        HANDLE  processHandle = openProcess(processId);
-        Pointer memoryPage    = scanMemoryPages(processHandle);
-        readGameObjects(memoryPage);
+        int    processId         = findProcessID(handleName);
+        HANDLE processHandle     = openProcess(processId);
+        long   memoryPagePointer = scanMemoryPages(processHandle);
+        readGameObjects(processHandle, memoryPagePointer);
         
     }
     
-    private static void readGameObjects(Pointer startAddress)
+    private static void readGameObjects(HANDLE processHandle, long startAddress)
     {
+        // startAddress is the start of the pattern
+        // 22 is the pattern length
+        long start = readIntAtPointer(processHandle, Pointer.createConstant(startAddress + 22 + 8));
+        long end   = readIntAtPointer(processHandle, Pointer.createConstant(startAddress + 22 + 2));
+        
+        System.out.println();
+        /*
         // invalid memory access?
         Pointer start = startAddress.getPointer(8);
         Pointer end   = startAddress.getPointer(2);
         
-        /*
         
         for (long i = start; i < end; i += 4)
         {
@@ -43,7 +49,15 @@ public class MemoryHandler
          */
     }
     
-    private static Pointer scanMemoryPages(HANDLE handle)
+    private static int readIntAtPointer(HANDLE handle, Pointer pointer)
+    {
+        ByteBuffer dst    = ByteBuffer.allocateDirect(4);
+        Pointer    dstPtr = Native.getDirectBufferPointer(dst);
+        Kernel32.INSTANCE.ReadProcessMemory(handle, pointer, dstPtr, dst.limit(), null);
+        return dst.getInt();
+    }
+    
+    private static long scanMemoryPages(HANDLE handle)
     {
         byte[] dataPattern = new byte[]{(byte) 0x8B, 0x3D, 0x00, 0x00, 0x00, 0x00, (byte) 0x8B, 0x35, 0x00, 0x00, 0x00, 0x00, 0x3B, (byte) 0xF7, 0x0F, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66};
         byte[] mask        = new byte[]{1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1};
@@ -56,9 +70,10 @@ public class MemoryHandler
             MEMORY_BASIC_INFORMATION info = getMemoryInfo(handle, Pointer.createConstant(scanAddress));
             if (memoryHasFlags(info, PAGE_READWRITE, MEM_COMMIT))
             {
-                if (scanForPattern(handle, info, dataPattern, mask))
+                int patternIndex = scanForPattern(handle, info, dataPattern, mask);
+                if (patternIndex > 0)
                 {
-                    return info.baseAddress;
+                    return Pointer.nativeValue(info.baseAddress) + patternIndex;
                 }
             }
             
@@ -68,10 +83,10 @@ public class MemoryHandler
         System.err.println("Unable to find game objects byte sequence");
         System.exit(0);
         
-        return null;
+        return -1;
     }
     
-    private static boolean scanForPattern(HANDLE processHandle, MEMORY_BASIC_INFORMATION info, byte[] dataPattern, byte[] mask)
+    private static int scanForPattern(HANDLE processHandle, MEMORY_BASIC_INFORMATION info, byte[] dataPattern, byte[] mask)
     {
         int        pageSize = getSystemInfo().dwPageSize.intValue();
         ByteBuffer ret      = ByteBuffer.allocateDirect(info.regionSize.intValue());
@@ -90,7 +105,7 @@ public class MemoryHandler
         }
         
         byte[] data = bytebufferToArray(ret);
-        return indexOf(data, dataPattern, mask) > 0;
+        return indexOf(data, dataPattern, mask);
     }
     
     private static void transferData(ByteBuffer src, ByteBuffer dst)
