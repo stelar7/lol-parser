@@ -255,6 +255,39 @@ public final class UtilHandler
         return sb.toString();
     }
     
+    public static byte[] bytebufferToArray(ByteBuffer buffer)
+    {
+        int oldPos = buffer.position();
+        
+        byte[] data = new byte[buffer.limit()];
+        buffer.position(0);
+        buffer.get(data);
+        
+        buffer.position(oldPos);
+        return data;
+    }
+    
+    public static void printBuffer(ByteBuffer data)
+    {
+        StringBuilder result = new StringBuilder();
+        
+        data.mark();
+        
+        while (data.remaining() > 0)
+        {
+            String hex = Integer.toHexString(Byte.toUnsignedInt(data.get())).toUpperCase(Locale.ENGLISH);
+            if (hex.length() != 2)
+            {
+                hex = "0" + hex;
+            }
+            result.append(hex).append(" ");
+        }
+        
+        data.reset();
+        
+        result.reverse().deleteCharAt(0).reverse();
+        System.out.println(result);
+    }
     
     public static String replaceEnding(String name, String original, String other)
     {
