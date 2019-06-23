@@ -30,19 +30,6 @@ public class MemoryHandler
             System.exit(0);
         }
         
-        int     accessFlags   = 0x0020 + 0x0010 + 0x0008; // PROCESS_VM_WRITE + PROCESS_VM_READ + PROCESS_VM_OPERATION
-        HANDLE  processHandle = Kernel32.INSTANCE.OpenProcess(accessFlags, true, processId);
-        HMODULE processModule = findModule(processHandle, handleName);
-        scanMemoryPages(processHandle);
-    }
-    
-    private static Pointer scanMemoryPages(HANDLE handle)
-    {
-        byte[] dataPattern = new byte[]{(byte) 0x8B, 0x3D, 0x00, 0x00, 0x00, 0x00, (byte) 0x8B, 0x35, 0x00, 0x00, 0x00, 0x00, 0x3B, (byte) 0xF7, 0x0F, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66};
-        
-        SYSTEM_INFO si = new SYSTEM_INFO();
-        Kernel32.INSTANCE.GetSystemInfo(si);
-        
         Path output = UtilHandler.CDRAGON_FOLDER.resolve("processMemory.bin");
         try
         {
@@ -57,6 +44,18 @@ public class MemoryHandler
             e.printStackTrace();
         }
         
+        int     accessFlags   = 0x0020 + 0x0010 + 0x0008; // PROCESS_VM_WRITE + PROCESS_VM_READ + PROCESS_VM_OPERATION
+        HANDLE  processHandle = Kernel32.INSTANCE.OpenProcess(accessFlags, true, processId);
+        HMODULE processModule = findModule(processHandle, handleName);
+        scanMemoryPages(processHandle);
+    }
+    
+    private static Pointer scanMemoryPages(HANDLE handle)
+    {
+        byte[] dataPattern = new byte[]{(byte) 0x8B, 0x3D, 0x00, 0x00, 0x00, 0x00, (byte) 0x8B, 0x35, 0x00, 0x00, 0x00, 0x00, 0x3B, (byte) 0xF7, 0x0F, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66};
+        
+        SYSTEM_INFO si = new SYSTEM_INFO();
+        Kernel32.INSTANCE.GetSystemInfo(si);
         
         MEMORY_BASIC_INFORMATION info = new MEMORY_BASIC_INFORMATION();
         Pointer                  p    = si.lpMinimumApplicationAddress;
