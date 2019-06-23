@@ -58,9 +58,8 @@ public class MemoryHandler
         }
         
         
-        MEMORY_BASIC_INFORMATION info     = new MEMORY_BASIC_INFORMATION();
-        Pointer                  p        = si.lpMinimumApplicationAddress;
-        List<Pointer>            pointers = new ArrayList<>();
+        MEMORY_BASIC_INFORMATION info = new MEMORY_BASIC_INFORMATION();
+        Pointer                  p    = si.lpMinimumApplicationAddress;
         while (Pointer.nativeValue(p) < Pointer.nativeValue(si.lpMaximumApplicationAddress))
         {
             Kernel32.INSTANCE.VirtualQueryEx(handle, p, info, new SIZE_T(info.size()));
@@ -96,6 +95,27 @@ public class MemoryHandler
                 Kernel32.INSTANCE.ReadProcessMemory(processHandle, pointer, dstPtr, pageSize, bytesRead);
                 ch.write(dst);
                 dst.position(0);
+                
+                byte[] data = new byte[pageSize];
+                dst.get(data);
+                dst.position(0);
+                
+                for (int i = 0; i < data.length - dataPattern.length + 1; i++)
+                {
+                    boolean found = true;
+                    for (int j = 0; j < dataPattern.length; j++)
+                    {
+                        if (data[i + j] != dataPattern[j])
+                        {
+                            found = false;
+                            break;
+                        }
+                    }
+                    if (found)
+                    {
+                        return found;
+                    }
+                }
                 
                 pointer = pointer.share(pageSize);
             }
