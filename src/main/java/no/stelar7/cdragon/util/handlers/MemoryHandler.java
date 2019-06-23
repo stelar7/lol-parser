@@ -5,15 +5,11 @@ import com.sun.jna.platform.win32.BaseTSD.SIZE_T;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.Tlhelp32.PROCESSENTRY32.ByReference;
 import com.sun.jna.platform.win32.WinBase.SYSTEM_INFO;
-import com.sun.jna.platform.win32.WinDef.*;
+import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinNT.*;
 import com.sun.jna.ptr.IntByReference;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
 import java.util.*;
 
 import static com.sun.jna.platform.win32.WinNT.*;
@@ -22,142 +18,183 @@ public class MemoryHandler
 {
     public static void readProcessMemory(String handleName)
     {
+        int     processId     = findProcessID(handleName);
+        HANDLE  processHandle = openProcess(processId);
+        Pointer memoryPage    = scanMemoryPages(processHandle);
+        readGameObjects(memoryPage);
         
-        int processId = findProcessID(handleName);
-        if (processId == 0)
+    }
+    
+    private static void readGameObjects(Pointer startAddress)
+    {
+        // invalid memory access?
+        Pointer start = startAddress.getPointer(8);
+        Pointer end   = startAddress.getPointer(2);
+        
+        /*
+        
+        for (long i = start; i < end; i += 4)
         {
-            System.err.println("Unable to find process with name: " + handleName);
-            System.exit(0);
+            Pointer objectPointer = new Pointer(i);
+            String  name          = objectPointer.getString(0x60);
+            System.out.println(name);
         }
         
-        Path output = UtilHandler.CDRAGON_FOLDER.resolve("processMemory.bin");
-        try
-        {
-            if (!Files.exists(output))
-            {
-                Files.createFile(output);
-            }
-            
-            Files.write(output, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        
-        int     accessFlags   = 0x0020 + 0x0010 + 0x0008; // PROCESS_VM_WRITE + PROCESS_VM_READ + PROCESS_VM_OPERATION
-        HANDLE  processHandle = Kernel32.INSTANCE.OpenProcess(accessFlags, true, processId);
-        HMODULE processModule = findModule(processHandle, handleName);
-        scanMemoryPages(processHandle);
+         */
     }
     
     private static Pointer scanMemoryPages(HANDLE handle)
     {
         byte[] dataPattern = new byte[]{(byte) 0x8B, 0x3D, 0x00, 0x00, 0x00, 0x00, (byte) 0x8B, 0x35, 0x00, 0x00, 0x00, 0x00, 0x3B, (byte) 0xF7, 0x0F, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66};
+        byte[] mask        = new byte[]{1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1};
         
-        SYSTEM_INFO si = new SYSTEM_INFO();
-        Kernel32.INSTANCE.GetSystemInfo(si);
-        
-        MEMORY_BASIC_INFORMATION info = new MEMORY_BASIC_INFORMATION();
-        Pointer                  p    = si.lpMinimumApplicationAddress;
-        while (Pointer.nativeValue(p) < Pointer.nativeValue(si.lpMaximumApplicationAddress))
+        SYSTEM_INFO si             = getSystemInfo();
+        long        scanAddress    = Pointer.nativeValue(si.lpMinimumApplicationAddress);
+        long        maxScanAddress = Pointer.nativeValue(si.lpMaximumApplicationAddress);
+        while (scanAddress < maxScanAddress)
         {
-            Kernel32.INSTANCE.VirtualQueryEx(handle, p, info, new SIZE_T(info.size()));
-            if (info.protect.intValue() == PAGE_READWRITE && info.state.intValue() == MEM_COMMIT)
+            MEMORY_BASIC_INFORMATION info = getMemoryInfo(handle, Pointer.createConstant(scanAddress));
+            if (memoryHasFlags(info, PAGE_READWRITE, MEM_COMMIT))
             {
-                if (scanForPattern(handle, info.baseAddress, info.regionSize.intValue(), dataPattern))
+                if (scanForPattern(handle, info, dataPattern, mask))
                 {
-                    return p;
+                    return info.baseAddress;
                 }
             }
             
-            p = p.share(info.regionSize.longValue());
+            scanAddress += info.regionSize.longValue();
         }
         
-        return Pointer.NULL;
-    }
-    
-    private static boolean scanForPattern(HANDLE processHandle, Pointer baseAddress, int regionSize, byte[] dataPattern)
-    {
-        try
-        {
-            Path                output = UtilHandler.CDRAGON_FOLDER.resolve("processMemory.bin");
-            SeekableByteChannel ch     = Files.newByteChannel(output, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
-            
-            int        pageSize = getPageSize();
-            ByteBuffer dst      = ByteBuffer.allocateDirect(pageSize);
-            Pointer    dstPtr   = Native.getDirectBufferPointer(dst);
-            
-            IntByReference bytesRead = new IntByReference(1);
-            Pointer        pointer   = baseAddress;
-            while (bytesRead.getValue() > 0)
-            {
-                Kernel32.INSTANCE.ReadProcessMemory(processHandle, pointer, dstPtr, pageSize, bytesRead);
-                ch.write(dst);
-                dst.position(0);
-                
-                byte[] data = new byte[pageSize];
-                dst.get(data);
-                dst.position(0);
-                
-                for (int i = 0; i < data.length - dataPattern.length + 1; i++)
-                {
-                    boolean found = true;
-                    for (int j = 0; j < dataPattern.length; j++)
-                    {
-                        if (data[i + j] != dataPattern[j])
-                        {
-                            found = false;
-                            break;
-                        }
-                    }
-                    if (found)
-                    {
-                        return found;
-                    }
-                }
-                
-                pointer = pointer.share(pageSize);
-            }
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        
-        return false;
-    }
-    
-    
-    private static int getPageSize()
-    {
-        SYSTEM_INFO si = new SYSTEM_INFO();
-        Kernel32.INSTANCE.GetSystemInfo(si);
-        return si.dwPageSize.intValue();
-    }
-    
-    private static HMODULE findModule(HANDLE processHandle, String processName)
-    {
-        List<HMODULE>  mods     = new ArrayList<>();
-        HMODULE[]      hmodules = new HMODULE[1024 * 4];
-        IntByReference iref     = new IntByReference();
-        if (!Psapi.INSTANCE.EnumProcessModules(processHandle, hmodules, hmodules.length, iref))
-        {
-            System.err.println("Failed to retrive process modules");
-            throw new Win32Exception(Native.getLastError());
-        }
-        
-        for (int i = 0; i < iref.getValue() / 4; i++)
-        {
-            byte[] data = new byte[1024];
-            Psapi.INSTANCE.GetModuleFileNameExA(processHandle, hmodules[i], data, data.length);
-            if (new String(data, StandardCharsets.UTF_8).contains(processName))
-            {
-                return hmodules[i];
-            }
-        }
-        
-        System.err.println("No process module found??");
+        System.err.println("Unable to find game objects byte sequence");
         System.exit(0);
+        
         return null;
+    }
+    
+    private static boolean scanForPattern(HANDLE processHandle, MEMORY_BASIC_INFORMATION info, byte[] dataPattern, byte[] mask)
+    {
+        int        pageSize = getSystemInfo().dwPageSize.intValue();
+        ByteBuffer ret      = ByteBuffer.allocateDirect(info.regionSize.intValue());
+        ByteBuffer dst      = ByteBuffer.allocateDirect(pageSize);
+        Pointer    dstPtr   = Native.getDirectBufferPointer(dst);
+        
+        IntByReference bytesRead   = new IntByReference(1);
+        long           readAddress = Pointer.nativeValue(info.baseAddress);
+        while (bytesRead.getValue() > 0)
+        {
+            Kernel32.INSTANCE.ReadProcessMemory(processHandle, Pointer.createConstant(readAddress), dstPtr, pageSize, bytesRead);
+            transferData(dst, ret);
+            dst.position(0);
+            
+            readAddress += pageSize;
+        }
+        
+        byte[] data = bytebufferToArray(ret);
+        return indexOf(data, dataPattern, mask) > 0;
+    }
+    
+    private static void transferData(ByteBuffer src, ByteBuffer dst)
+    {
+        while (src.remaining() > 0 && dst.remaining() > 0)
+        {
+            dst.put(src.get());
+        }
+    }
+    
+    private static int indexOf(byte[] outer, byte[] inner)
+    {
+        byte[] mask = new byte[inner.length];
+        Arrays.fill(mask, (byte) 1);
+        return indexOf(outer, inner, mask);
+    }
+    
+    private static int indexOf(byte[] outer, byte[] inner, byte[] mask)
+    {
+        for (int i = 0; i < outer.length - inner.length + 1; i++)
+        {
+            boolean found = true;
+            for (int j = 0; j < inner.length; j++)
+            {
+                if (mask[j] == 1 && outer[i + j] != inner[j])
+                {
+                    found = false;
+                    break;
+                }
+            }
+            if (found)
+            {
+                return i;
+            }
+        }
+        
+        return -1;
+    }
+    
+    
+    private static void printBuffer(ByteBuffer data)
+    {
+        StringBuilder result = new StringBuilder();
+        
+        data.mark();
+        
+        while (data.remaining() > 0)
+        {
+            String hex = Integer.toHexString(Byte.toUnsignedInt(data.get())).toUpperCase(Locale.ENGLISH);
+            if (hex.length() != 2)
+            {
+                hex = "0" + hex;
+            }
+            result.append(hex).append(" ");
+        }
+        
+        data.reset();
+        
+        result.reverse().deleteCharAt(0).reverse();
+        System.out.println(result);
+    }
+    
+    private static SYSTEM_INFO getSystemInfo()
+    {
+        SYSTEM_INFO si = new SYSTEM_INFO();
+        Kernel32.INSTANCE.GetSystemInfo(si);
+        return si;
+    }
+    
+    private static MEMORY_BASIC_INFORMATION getMemoryInfo(HANDLE handle, Pointer p)
+    {
+        MEMORY_BASIC_INFORMATION info = new MEMORY_BASIC_INFORMATION();
+        Kernel32.INSTANCE.VirtualQueryEx(handle, p, info, new SIZE_T(info.size()));
+        return info;
+    }
+    
+    private static byte[] bytebufferToArray(ByteBuffer buffer)
+    {
+        int oldPos = buffer.position();
+        
+        byte[] data = new byte[buffer.limit()];
+        buffer.position(0);
+        buffer.get(data);
+        
+        buffer.position(oldPos);
+        return data;
+    }
+    
+    private static boolean memoryHasFlags(MEMORY_BASIC_INFORMATION info, int protect, int state)
+    {
+        return (info.protect.intValue() == protect && info.state.intValue() == state);
+    }
+    
+    private static HANDLE openProcess(int processId)
+    {
+        int    accessFlags   = 0x0020 + 0x0010 + 0x0008; // PROCESS_VM_WRITE + PROCESS_VM_READ + PROCESS_VM_OPERATION
+        HANDLE processHandle = Kernel32.INSTANCE.OpenProcess(accessFlags, true, processId);
+        if (processHandle == null)
+        {
+            System.err.println("Unable to open process with id: " + processHandle);
+            System.exit(0);
+        }
+        
+        return processHandle;
     }
     
     
@@ -182,10 +219,14 @@ public class MemoryHandler
                     return processInfo.th32ProcessID.intValue();
                 }
             }
-            return 0;
+            
+            System.err.println("Unable to find process with name: " + processName);
+            System.exit(0);
         } finally
         {
             Kernel32.INSTANCE.CloseHandle(processSnapshot);
         }
+        
+        return 0;
     }
 }
