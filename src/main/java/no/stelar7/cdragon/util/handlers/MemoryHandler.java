@@ -15,20 +15,13 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static com.sun.jna.platform.win32.WinNT.*;
 
 public class MemoryHandler
 {
-    public static void readProcessMemory(String handleName) throws IOException
+    public static void readProcessMemory(String handleName)
     {
-        Path output = UtilHandler.CDRAGON_FOLDER.resolve("processMemory.bin");
-        if (!Files.exists(output))
-        {
-            Files.createFile(output);
-        }
-        
-        Files.write(output, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
-        SeekableByteChannel ch = Files.newByteChannel(output, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
         
         int processId = findProcessID(handleName);
         if (processId == 0)
@@ -40,17 +33,64 @@ public class MemoryHandler
         int     accessFlags   = 0x0020 + 0x0010 + 0x0008; // PROCESS_VM_WRITE + PROCESS_VM_READ + PROCESS_VM_OPERATION
         HANDLE  processHandle = Kernel32.INSTANCE.OpenProcess(accessFlags, true, processId);
         HMODULE processModule = findModule(processHandle, handleName);
-        int     pageSize      = getPageSize();
+        scanMemoryPages(processHandle);
+    }
+    
+    private static Pointer scanMemoryPages(HANDLE handle)
+    {
+        byte[] dataPattern = new byte[]{(byte) 0x8B, 0x3D, 0x00, 0x00, 0x00, 0x00, (byte) 0x8B, 0x35, 0x00, 0x00, 0x00, 0x00, 0x3B, (byte) 0xF7, 0x0F, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66};
         
+        SYSTEM_INFO si = new SYSTEM_INFO();
+        Kernel32.INSTANCE.GetSystemInfo(si);
         
-        ByteBuffer dst    = ByteBuffer.allocateDirect(pageSize);
-        Pointer    dstPtr = Native.getDirectBufferPointer(dst);
-        
-        List<Pointer> pts = scanMemoryPages(processHandle).stream().filter(Objects::nonNull).collect(Collectors.toList());
-        for (Pointer pt : pts)
+        Path output = UtilHandler.CDRAGON_FOLDER.resolve("processMemory.bin");
+        try
         {
+            if (!Files.exists(output))
+            {
+                Files.createFile(output);
+            }
+            
+            Files.write(output, new byte[0], StandardOpenOption.TRUNCATE_EXISTING);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        
+        MEMORY_BASIC_INFORMATION info     = new MEMORY_BASIC_INFORMATION();
+        Pointer                  p        = si.lpMinimumApplicationAddress;
+        List<Pointer>            pointers = new ArrayList<>();
+        while (Pointer.nativeValue(p) < Pointer.nativeValue(si.lpMaximumApplicationAddress))
+        {
+            Kernel32.INSTANCE.VirtualQueryEx(handle, p, info, new SIZE_T(info.size()));
+            if (info.protect.intValue() == PAGE_READWRITE && info.state.intValue() == MEM_COMMIT)
+            {
+                if (scanForPattern(handle, info.baseAddress, info.regionSize.intValue(), dataPattern))
+                {
+                    return p;
+                }
+            }
+            
+            p = p.share(info.regionSize.longValue());
+        }
+        
+        return Pointer.NULL;
+    }
+    
+    private static boolean scanForPattern(HANDLE processHandle, Pointer baseAddress, int regionSize, byte[] dataPattern)
+    {
+        try
+        {
+            Path                output = UtilHandler.CDRAGON_FOLDER.resolve("processMemory.bin");
+            SeekableByteChannel ch     = Files.newByteChannel(output, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
+            
+            int        pageSize = getPageSize();
+            ByteBuffer dst      = ByteBuffer.allocateDirect(pageSize);
+            Pointer    dstPtr   = Native.getDirectBufferPointer(dst);
+            
             IntByReference bytesRead = new IntByReference(1);
-            Pointer        pointer   = pt;
+            Pointer        pointer   = baseAddress;
             while (bytesRead.getValue() > 0)
             {
                 Kernel32.INSTANCE.ReadProcessMemory(processHandle, pointer, dstPtr, pageSize, bytesRead);
@@ -59,21 +99,12 @@ public class MemoryHandler
                 
                 pointer = pointer.share(pageSize);
             }
-        }
-        ch.close();
-    }
-    
-    private static List<Pointer> scanMemoryPages(HANDLE handle)
-    {
-        MEMORY_BASIC_INFORMATION info     = new MEMORY_BASIC_INFORMATION();
-        Pointer                  p        = handle.getPointer();
-        List<Pointer>            pointers = new ArrayList<>();
-        for (; Kernel32.INSTANCE.VirtualQueryEx(handle, p, info, new SIZE_T(info.size())).longValue() == info.size(); p = p.share(info.regionSize.longValue()))
+        } catch (IOException e)
         {
-            pointers.add(info.baseAddress);
+            e.printStackTrace();
         }
         
-        return pointers;
+        return false;
     }
     
     

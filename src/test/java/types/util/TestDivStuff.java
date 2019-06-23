@@ -404,10 +404,10 @@ public class TestDivStuff
     }
     
     @Test
-    public void readProcessMemory() throws IOException
+    public void readProcessMemory()
     {
-        //String handleName = "League of Legends.exe";
-        String handleName = "notepad++.exe";
+        String handleName = "League of Legends.exe";
+        //String handleName = "notepad++.exe";
         MemoryHandler.readProcessMemory(handleName);
     }
 }
