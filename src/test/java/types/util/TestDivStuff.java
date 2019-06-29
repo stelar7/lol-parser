@@ -68,7 +68,7 @@ public class TestDivStuff
         JsonArray traitData = new JsonArray();
         JsonArray itemData  = new JsonArray();
         
-        Path traitFile       = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\unknown\\Shipping\\22E2CF785BAEAC7E.bin");
+        Path traitFile       = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\maps\\shipping\\map22\\map22.bin");
         Path fontConfig      = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu\\fontconfig_en_us.txt");
         Path champFileParent = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\characters");
         
@@ -200,6 +200,12 @@ public class TestDivStuff
             JsonObject o         = new JsonObject();
             JsonObject abilities = new JsonObject();
             
+            String     realName    = mName.substring(4);
+            Path       selfRealBin = champFileParent.resolve(realName).resolve(realName + ".bin");
+            String     realData    = parser.parse(selfRealBin).toJson();
+            JsonObject realChamp   = createJsonObject.apply(realData, "characterToolData");
+            
+            o.add("id", realChamp.getAsJsonObject("characterToolData").getAsJsonObject("characterToolData").get("championId"));
             o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(displayName)));
             o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
             o.add("splash", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(champ).apply(champSplash)));
@@ -230,8 +236,11 @@ public class TestDivStuff
                 traitArray.add(new JsonPrimitive(traitLookup.get(traitDatum.getAsString())));
             }
             
+            JsonObject manaContainer = getFirstChildObject.apply(champItem.get("PrimaryAbilityResource"));
+            
             JsonObject stats = new JsonObject();
             stats.add("hp", champItem.get("baseHP"));
+            stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
             stats.add("damage", champItem.get("BaseDamage"));
             stats.add("armor", champItem.get("baseArmor"));
             stats.add("magicResist", champItem.get("baseSpellBlock"));

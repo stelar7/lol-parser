@@ -217,7 +217,7 @@ public final class UtilHandler
     {
         if (gson == null)
         {
-            gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+            gson = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().create();
         }
         
         return gson;
