@@ -38,4 +38,14 @@ public enum RingFlag
     {
         return Arrays.stream(RingFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
     }
+    
+    public static int valueFrom(List<RingFlag> flags)
+    {
+        int value = 0;
+        for (RingFlag flag : flags)
+        {
+            value += flag.flag;
+        }
+        return value;
+    }
 }

@@ -44,4 +44,14 @@ public enum NearestLaneFlag
     {
         return Arrays.stream(NearestLaneFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
     }
+    
+    public static int valueFrom(List<NearestLaneFlag> flags)
+    {
+        int value = 0;
+        for (NearestLaneFlag flag : flags)
+        {
+            value += flag.flag;
+        }
+        return value;
+    }
 }

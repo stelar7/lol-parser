@@ -41,4 +41,14 @@ public enum VisionPathFlag
     {
         return Arrays.stream(VisionPathFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
     }
+    
+    public static int valueFrom(List<VisionPathFlag> flags)
+    {
+        int value = 0;
+        for (VisionPathFlag flag : flags)
+        {
+            value += flag.flag;
+        }
+        return value;
+    }
 }

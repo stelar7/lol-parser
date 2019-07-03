@@ -55,8 +55,13 @@ public class MemoryHandler
         {
             Pointer index          = new Pointer(processHandle, i);
             Pointer objectLocation = index.readPointer();
-            String  name           = objectLocation.readAString(0x60);
-            System.out.println(name);
+            
+            int objectNameLocation    = 0x60;
+            int characterNameLocation = 0x32DC;
+            
+            String gameObjName = objectLocation.readAString(objectNameLocation);
+            String charName    = objectLocation.readAString(characterNameLocation);
+            System.out.println(gameObjName + ": " + charName);
         }
     }
     

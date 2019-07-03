@@ -33,4 +33,14 @@ public enum JungleQuadrantFlag
     {
         return Arrays.stream(JungleQuadrantFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
     }
+    
+    public static int valueFrom(List<JungleQuadrantFlag> flags)
+    {
+        int value = 0;
+        for (JungleQuadrantFlag flag : flags)
+        {
+            value += flag.flag;
+        }
+        return value;
+    }
 }

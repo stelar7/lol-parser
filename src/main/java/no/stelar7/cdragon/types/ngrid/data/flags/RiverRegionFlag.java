@@ -35,4 +35,14 @@ public enum RiverRegionFlag
     {
         return Arrays.stream(RiverRegionFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
     }
+    
+    public static int valueFrom(List<RiverRegionFlag> flags)
+    {
+        int value = 0;
+        for (RiverRegionFlag flag : flags)
+        {
+            value += flag.flag;
+        }
+        return value;
+    }
 }

@@ -41,4 +41,14 @@ public enum POIFlag
     {
         return Arrays.stream(POIFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
     }
+    
+    public static int valueFrom(List<POIFlag> flags)
+    {
+        int value = 0;
+        for (POIFlag flag : flags)
+        {
+            value += flag.flag;
+        }
+        return value;
+    }
 }

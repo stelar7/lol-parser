@@ -15,6 +15,6 @@ public class TestNGRID
         Path        path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\aipath.aimesh_ngrid");
         NGridParser parser = new NGridParser();
         NGridFile   parsed = parser.parse(path);
-        System.out.println();
+        parsed.toBMP(path.resolveSibling("visionTest"));
     }
 }

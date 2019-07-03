@@ -4,8 +4,10 @@ import com.google.common.io.LittleEndianDataOutputStream;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.math.*;
 
+import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 
 public class ByteWriter implements AutoCloseable
 {
@@ -77,6 +79,19 @@ public class ByteWriter implements AutoCloseable
         try
         {
             stream.write(s.getBytes(StandardCharsets.UTF_8));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void writeColor(Color c)
+    {
+        try
+        {
+            stream.write(c.getBlue());
+            stream.write(c.getGreen());
+            stream.write(c.getRed());
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -281,6 +296,18 @@ public class ByteWriter implements AutoCloseable
             stream = new LittleEndianDataOutputStream(output);
             stream.write(outputData);
             
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    public void save(Path output)
+    {
+        try
+        {
+            Files.createDirectories(output.getParent());
+            Files.write(output, toByteArray(), StandardOpenOption.CREATE);
         } catch (IOException e)
         {
             e.printStackTrace();

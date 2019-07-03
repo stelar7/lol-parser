@@ -76,8 +76,8 @@ public class RMANParser implements Parseable<RMANFile>
             Files.createDirectories(downloadPath.getParent());
             
             System.out.println("Downloading patcher manifest");
-            String patcherUrl = "https://ks-foundation.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-           // String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            //String patcherUrl = "https://ks-foundation.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
             //String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/macpbe-pbe-mac.json";
             WebHandler.downloadFile(downloadPath, patcherUrl);
             
