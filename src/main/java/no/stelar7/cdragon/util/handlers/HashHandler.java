@@ -130,7 +130,7 @@ public class HashHandler
         return Integer.toUnsignedLong(hash);
     }
     
-    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes)
+    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes, List<String> words)
     {
         int[] offsets = new int[20];
         Arrays.fill(offsets, -1);
@@ -152,7 +152,7 @@ public class HashHandler
             {
                 int value = ++offsets[index];
                 
-                while (value >= UtilHandler.ALL.length)
+                while (value >= words.size())
                 {
                     offsets[index] = 0;
                     offsets[index + 1]++;
@@ -174,7 +174,7 @@ public class HashHandler
                         break;
                     }
                     
-                    sb.append(UtilHandler.ALL[offset]);
+                    sb.append(words.get(offset));
                 }
                 
                 String toHash = sb.reverse().toString().replace("\0", "");
@@ -191,6 +191,11 @@ public class HashHandler
         {
             e.printStackTrace();
         }
+    }
+    
+    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes)
+    {
+        bruteForceHash(hashFunc, hashes, Arrays.asList(UtilHandler.ALL));
     }
     
     public static long computeCCITT32(byte[] buffer, int size)

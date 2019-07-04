@@ -56,8 +56,10 @@ public class TestRMAN
         tw.testCDragonWAD();
         
         Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
-        Files.write(binhash, "".getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        for (String hash : BINParser.hashes)
+        Files.write(binhash, "".getBytes(StandardCharsets.UTF_8));
+        List<String> sortedHashes = new ArrayList<>(BINParser.hashes);
+        Collections.sort(sortedHashes);
+        for (String hash : sortedHashes)
         {
             Files.write(binhash, (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }

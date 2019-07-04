@@ -48,17 +48,9 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "ChanceToProc";
+        String toHash = "mteam";
         String output = HashHandler.getBINHash(toHash);
         System.out.println(output);
-        
-        List<String> possible = Arrays.asList("1AF7CAAC",
-                                              "0C239C49", "20F51FA6", "28905FBE", "2A9ED9A9", "2E2194DA", "2E77F7A4",
-                                              "4BFE6252", "4DEAA8BF", "4EDC8BF9", "4F3CAFAC", "517AA65D", "5377F06E",
-                                              "549BC8C7", "59A200C0", "6128AB3E", "6C4915DF", "6F9A9D3E", "7FAF979E",
-                                              "97A1B425", "9C2D43C2", "AC4E0877", "AED73844", "B1DA655E", "FC8430DA");
-        
-        System.out.println(possible.contains(output));
     }
     
     @Test
@@ -372,14 +364,11 @@ public class TestDivStuff
     }
     
     @Test
-    public void testBinHashBrute()
+    public void testBinHashBrute() throws IOException
     {
-        List<String> possible = Arrays.asList("1AF7CAAC",
-                                              "0C239C49", "20F51FA6", "28905FBE", "2A9ED9A9", "2E2194DA", "2E77F7A4",
-                                              "4BFE6252", "4DEAA8BF", "4EDC8BF9", "4F3CAFAC", "517AA65D", "5377F06E",
-                                              "549BC8C7", "59A200C0", "6128AB3E", "6C4915DF", "6F9A9D3E", "7FAF979E",
-                                              "97A1B425", "9C2D43C2", "AC4E0877", "AED73844", "B1DA655E", "FC8430DA");
+        Path         binhash  = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
         
+        List<String> possible = Files.readAllLines(binhash);
         List<Long> asLong = possible.stream().map(s -> "0x" + s).map(Long::decode).collect(Collectors.toList());
         HashHandler.bruteForceHash(HashHandler::computeBINHash, asLong);
     }
