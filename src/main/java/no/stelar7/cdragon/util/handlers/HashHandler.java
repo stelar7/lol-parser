@@ -130,7 +130,7 @@ public class HashHandler
         return Integer.toUnsignedLong(hash);
     }
     
-    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes, List<String> words)
+    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes, List<String> words, String outputName, boolean reverse)
     {
         int[] offsets = new int[20];
         Arrays.fill(offsets, -1);
@@ -141,7 +141,7 @@ public class HashHandler
         
         try
         {
-            Path outputFile = UtilHandler.CDRAGON_FOLDER.resolve("bruteforced.txt");
+            Path outputFile = UtilHandler.CDRAGON_FOLDER.resolve(outputName);
             if (!Files.exists(outputFile))
             {
                 Files.createFile(outputFile);
@@ -167,17 +167,25 @@ public class HashHandler
                 }
                 index = 0;
                 
-                for (int offset : offsets)
+                for (int j = offsets.length - 1; j >= 0; j--)
                 {
+                    int offset = offsets[j];
                     if (offset < 0)
                     {
-                        break;
+                        continue;
                     }
                     
                     sb.append(words.get(offset));
                 }
                 
-                String toHash = sb.reverse().toString().replace("\0", "");
+                String toHash = "";
+                if (reverse)
+                {
+                    toHash = sb.reverse().toString().replace("\0", "");
+                } else
+                {
+                    toHash = sb.toString().replace("\0", "");
+                }
                 sb.setLength(0);
                 
                 Long output = hashFunc.apply(toHash);
@@ -195,7 +203,7 @@ public class HashHandler
     
     public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes)
     {
-        bruteForceHash(hashFunc, hashes, Arrays.asList(UtilHandler.ALL));
+        bruteForceHash(hashFunc, hashes, Arrays.asList(UtilHandler.ALL), "bruteforced.txt", true);
     }
     
     public static long computeCCITT32(byte[] buffer, int size)

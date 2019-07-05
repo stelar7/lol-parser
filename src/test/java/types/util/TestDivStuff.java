@@ -46,14 +46,6 @@ public class TestDivStuff
     
     
     @Test
-    public void testBinHashSingle()
-    {
-        String toHash = "mteam";
-        String output = HashHandler.getBINHash(toHash);
-        System.out.println(output);
-    }
-    
-    @Test
     public void buildTFTDataFile() throws IOException
     {
         JsonArray champData = new JsonArray();
@@ -366,11 +358,44 @@ public class TestDivStuff
     @Test
     public void testBinHashBrute() throws IOException
     {
-        Path         binhash  = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
+        Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
         
         List<String> possible = Files.readAllLines(binhash);
-        List<Long> asLong = possible.stream().map(s -> "0x" + s).map(Long::decode).collect(Collectors.toList());
+        List<Long>   asLong   = possible.stream().map(s -> "0x" + s).map(Long::decode).collect(Collectors.toList());
         HashHandler.bruteForceHash(HashHandler::computeBINHash, asLong);
+    }
+    
+    @Test
+    public void testBinHashBruteWords() throws IOException
+    {
+        Path         binhash  = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
+        List<String> possible = Files.readAllLines(binhash);
+        List<Long>   asLong   = possible.stream().map(s -> "0x" + s).map(Long::decode).collect(Collectors.toList());
+        
+        List<String> words = new ArrayList<>(UtilHandler.dictionary);
+        words.add(0, "m");
+        
+        HashHandler.bruteForceHash(HashHandler::computeBINHash, asLong, words, "bruteforceWords.txt", false);
+    }
+    
+    @Test
+    public void testBinHashSingle()
+    {
+        String toHash = "dragonslayer";
+        String output = HashHandler.getBINHash(toHash);
+        System.out.println(output);
+    }
+    
+    @Test
+    public void testBinHashFromFile() throws IOException
+    {
+        Path        binhash  = UtilHandler.CDRAGON_FOLDER.resolve("bruteforceWords.txt");
+        Set<String> possible = new HashSet<>(Files.readAllLines(binhash));
+        Map<String, String> hashed = possible.stream()
+                                             .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
+                                             .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
+        
+        hashed.entrySet().forEach(System.out::println);
     }
     
     @Test

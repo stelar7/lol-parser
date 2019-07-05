@@ -407,7 +407,7 @@ public final class UtilHandler
     
     
     private static final String      english    = readInternalAsString("dictionary/english.txt");
-    private static final Set<String> dictionary = new HashSet<>(Arrays.asList(english.split("\n")));
+    public static final  Set<String> dictionary = new HashSet<>(Arrays.asList(english.split("\n")));
     
     public static List<List<String>> searchDictionary(String input)
     {
