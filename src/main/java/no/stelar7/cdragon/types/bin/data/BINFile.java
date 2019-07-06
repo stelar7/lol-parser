@@ -210,7 +210,6 @@ public class BINFile
     }
     
     
-    // TODO: add the linked files to this aswell!
     public String toJson()
     {
         if (json == null)
@@ -305,7 +304,12 @@ public class BINFile
             }
             case STRING_HASH:
             {
-                jw.value("STRING_HASH: " + data.toString());
+                int    other    = Integer.parseInt(data.toString());
+                String hex      = HashHandler.toHex((long) other, 8, 8);
+                String testHash = HashHandler.getBINHash(other);
+                String output   = (hex.equalsIgnoreCase(testHash)) ? "STRING_HASH: " : "";
+                output += testHash;
+                jw.value(output);
                 break;
             }
             default:
@@ -397,7 +401,12 @@ public class BINFile
                 printString(o.toString(), jw);
             } else if (value.getType() == BINValueType.STRING_HASH)
             {
-                jw.value("STRING_HASH: " + HashHandler.getBINHash((Integer) o));
+                int    other  = (Integer) o;
+                String hex    = HashHandler.toHex((long) other, 8, 8);
+                String hash   = HashHandler.getBINHash(other);
+                String output = (hex.equalsIgnoreCase(hash)) ? "STRING_HASH: " : "";
+                output += hash;
+                jw.value(output);
             } else if (value.getType() == BINValueType.LINK_OFFSET)
             {
                 jw.value("LINK_OFFSET: " + HashHandler.getBINHash((String) o));
