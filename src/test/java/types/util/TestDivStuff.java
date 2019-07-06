@@ -273,7 +273,7 @@ public class TestDivStuff
         }
         
         String itemContainerKey       = "D186C31A";
-        String itemFromKey            = "8B83BA8A";
+        String itemFromKey            = "mComposition";
         String itemEffectContainer    = "C13D6D31";
         String itemDescription        = "765F18DA";
         String itemEffectVarContainer = "62FF42F4";
@@ -380,10 +380,60 @@ public class TestDivStuff
     }
     
     @Test
+    public void testBinHashFromDesc() throws IOException
+    {
+        Path fontConfig = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu\\fontconfig_en_us.txt");
+        
+        Map<String, String> descs = Files.readAllLines(fontConfig)
+                                         .stream()
+                                         .filter(s -> s.startsWith("tr "))
+                                         .map(s -> s.substring(s.indexOf(" ") + 1))
+                                         .collect(Collectors.toMap(s -> {
+                                             String part = s.split("=")[0];
+                                             part = part.substring(part.indexOf("\"") + 1);
+                                             part = part.substring(0, part.indexOf("\""));
+                                             return part;
+                                         }, s -> {
+                                             String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
+                                             part = part.substring(part.indexOf("\"") + 1);
+                                             part = part.substring(0, part.lastIndexOf("\""));
+                                             return part;
+                                         }));
+        
+        Path         binhash  = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
+        List<String> possible = Files.readAllLines(binhash);
+        
+        descs.values().forEach(v -> {
+            String[] parts = v.split("@");
+            for (int i = 1; i < parts.length; i += 2)
+            {
+                String toHash = parts[i];
+                
+                if (toHash.contains("*"))
+                {
+                    toHash = toHash.substring(0, toHash.indexOf('*'));
+                }
+                
+                String hashList = HashHandler.getBINHash(toHash);
+                String output   = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
+                if (!toHash.equalsIgnoreCase(hashList))
+                {
+                    if (possible.contains(output))
+                    {
+                        String formatted = String.format("\"%s\":\"%s\",", output, toHash);
+                        System.out.println(formatted);
+                    }
+                }
+            }
+        });
+        
+    }
+    
+    @Test
     public void testBinHashSingle()
     {
-        String toHash = "dragonslayer";
-        String output = HashHandler.getBINHash(toHash);
+        String toHash = "BurnDuration";
+        String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
         System.out.println(output);
     }
     
