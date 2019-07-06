@@ -63,8 +63,9 @@ public class TestDivStuff
         Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
         Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
         
-        BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
-        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt   = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
+        BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray   = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
+        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt     = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
+        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultStringP = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive("P");
         
         BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
             String     realData = "{" + data.substring(data.indexOf(key) - 1);
@@ -136,7 +137,7 @@ public class TestDivStuff
                 JsonObject inner = effect.getAsJsonObject().getAsJsonObject(innerEffectContainer);
                 
                 JsonArray varAdded     = new JsonArray();
-                JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitContainerKey);
+                JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitEffectVarContainer);
                 for (JsonElement vars : varContainer)
                 {
                     JsonObject var        = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
@@ -201,10 +202,10 @@ public class TestDivStuff
             
             String champDataContainer = "304496F1";
             String spellDataContainer = "5E7E5A06";
-            String traitContainer     = "1AF7CAAC";
+            String traitContainer     = "mLinkedTraits";
             
-            String initialSpellValue = "6D3CCFD7";
-            String nextSpellValue    = "E7B832F2";
+            String initialSpellValue = "mBaseP";
+            String nextSpellValue    = "mFormula";
             
             Path   selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
             String data    = parser.parse(selfBin).toJson();
@@ -256,7 +257,7 @@ public class TestDivStuff
                         JsonObject currentVar = new JsonObject();
                         currentVar.add("key", entry.get("mName"));
                         currentVar.add("initialValue", getKeyOrDefaultInt.apply(entry, initialSpellValue));
-                        currentVar.add("nextValue", entry.get(nextSpellValue));
+                        currentVar.add("nextValue", getKeyOrDefaultStringP.apply(entry, nextSpellValue));
                         abilityVars.add(currentVar);
                     }
                     break;

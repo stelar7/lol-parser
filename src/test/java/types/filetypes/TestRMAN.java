@@ -57,8 +57,16 @@ public class TestRMAN
         
         Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
         Files.write(binhash, "".getBytes(StandardCharsets.UTF_8));
-        List<String> sortedHashes = new ArrayList<>(BINParser.hashes);
-        Collections.sort(sortedHashes);
+        List<String> sortedHashes = new ArrayList<>(BINParser.hashes).stream().filter(h -> {
+            try
+            {
+                Long.decode("0x" + h);
+                return true;
+            } catch (Exception e)
+            {
+                return false;
+            }
+        }).sorted().collect(Collectors.toList());
         for (String hash : sortedHashes)
         {
             Files.write(binhash, (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
