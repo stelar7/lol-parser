@@ -66,6 +66,18 @@ public class TestDivStuff
         BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray   = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
         BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt     = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
         BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultStringP = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive("P");
+        BiFunction<JsonObject, String, JsonArray> shortenArray = (obj, key) -> {
+            if (obj.has(key))
+            {
+                JsonArray arr = obj.getAsJsonArray(key);
+                while (arr.size() > 3)
+                {
+                    arr.remove(3);
+                }
+                return arr;
+            }
+            return new JsonArray();
+        };
         
         BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
             String     realData = "{" + data.substring(data.indexOf(key) - 1);
@@ -99,7 +111,7 @@ public class TestDivStuff
         String traitContainerKey       = "6F870247";
         String traitDescription        = "765F18DA";
         String traitIcon               = "8BEE2972";
-        String traitEffectContainter   = "9E0B0655";
+        String traitEffectContainter   = "mTraitsSets";
         String innerEffectContainer    = "C130C1E5";
         String traitMinUnits           = "749EAB2B";
         String traitEffectVarContainer = "C13D6D31";
@@ -140,15 +152,16 @@ public class TestDivStuff
                 JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitEffectVarContainer);
                 for (JsonElement vars : varContainer)
                 {
-                    JsonObject var        = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
-                    Long       name       = var.get("name").getAsLong();
-                    String     hashedName = HashHandler.toHex(name, 8, 8);
-                    
-                    JsonPrimitive realName = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashedName, hashedName));
-                    JsonElement   value    = var.get("value");
+                    JsonObject var  = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
+                    String     name = var.get("name").getAsString();
+                    if (name.startsWith("STRING_HASH: "))
+                    {
+                        name = name.substring("STRING_HASH: ".length());
+                    }
+                    JsonElement value = var.get("value");
                     
                     JsonObject temp = new JsonObject();
-                    temp.add("name", realName);
+                    temp.add("name", new JsonPrimitive(name));
                     temp.add("value", value);
                     varAdded.add(temp);
                 }
@@ -205,8 +218,6 @@ public class TestDivStuff
             String traitContainer     = "mLinkedTraits";
             
             String initialSpellValue = "mBaseP";
-            String nextSpellValue    = "mFormula";
-            
             Path   selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
             String data    = parser.parse(selfBin).toJson();
             
@@ -218,7 +229,8 @@ public class TestDivStuff
             JsonArray traitArray = new JsonArray();
             for (JsonElement traitDatum : traitDatas)
             {
-                traitArray.add(new JsonPrimitive(traitLookup.get(traitDatum.getAsString())));
+                String hash = traitDatum.getAsString().substring("LINK_OFFSET: ".length());
+                traitArray.add(new JsonPrimitive(traitLookup.get(hash)));
             }
             
             JsonObject manaContainer = getFirstChildObject.apply(champItem.get("PrimaryAbilityResource"));
@@ -256,8 +268,7 @@ public class TestDivStuff
                         
                         JsonObject currentVar = new JsonObject();
                         currentVar.add("key", entry.get("mName"));
-                        currentVar.add("initialValue", getKeyOrDefaultInt.apply(entry, initialSpellValue));
-                        currentVar.add("nextValue", getKeyOrDefaultStringP.apply(entry, nextSpellValue));
+                        currentVar.add("values", shortenArray.apply(entry, "mValues"));
                         abilityVars.add(currentVar);
                     }
                     break;

@@ -409,7 +409,7 @@ public class BINFile
                 jw.value(output);
             } else if (value.getType() == BINValueType.LINK_OFFSET)
             {
-                jw.value("LINK_OFFSET: " + HashHandler.getBINHash((String) o));
+                jw.value("LINK_OFFSET: " + o);
             } else
             {
                 jw.jsonValue(o.toString());
