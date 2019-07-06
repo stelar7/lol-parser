@@ -48,6 +48,7 @@ public class BINParser implements Parseable<BINFile>
             BINEntry entry = new BINEntry();
             
             int lengthCheck = raf.pos() + Integer.BYTES;
+            entry.setType(HashHandler.getBINHash(file.getHeader().getEntryTypes().get(i)));
             entry.setLenght(raf.readInt());
             entry.setHash(HashHandler.getBINHash(raf.readInt()));
             entry.setValueCount(raf.readShort());

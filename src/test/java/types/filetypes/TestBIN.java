@@ -26,7 +26,7 @@ public class TestBIN
     @Test
     public void testBIN() throws IOException
     {
-        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\unknown\\Shipping\\22E2CF785BAEAC7E.bin");
+        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\characters\\aatrox\\aatrox.bin");
         BINFile data    = parser.parse(file);
         String  content = data.toJson();
         Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -332,7 +332,7 @@ public class TestBIN
     @Test
     public void testClientBIN() throws IOException
     {
-        Path rito = UtilHandler.CDRAGON_FOLDER.resolve("temp");
+        Path rito = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
         
         List<Path> paths = new ArrayList<>();
         Files.walkFileTree(rito, new SimpleFileVisitor<>()
@@ -352,7 +352,7 @@ public class TestBIN
                     byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
                     byte[] data = FileTypeHandler.makePrettyJson(json);
                     
-                    Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), data);
+                   // Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), data);
                     
                 }
                 return FileVisitResult.CONTINUE;

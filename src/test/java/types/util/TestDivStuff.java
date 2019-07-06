@@ -432,7 +432,7 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "BurnDuration";
+        String toHash = "mRecTranslator ";
         String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
         System.out.println(output);
     }
@@ -440,13 +440,21 @@ public class TestDivStuff
     @Test
     public void testBinHashFromFile() throws IOException
     {
+        List<String> unknowns = Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt"));
+        
         Path        binhash  = UtilHandler.CDRAGON_FOLDER.resolve("bruteforceWords.txt");
         Set<String> possible = new HashSet<>(Files.readAllLines(binhash));
         Map<String, String> hashed = possible.stream()
                                              .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
                                              .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
         
-        hashed.entrySet().forEach(System.out::println);
+        hashed.forEach((key, value) -> {
+            if (unknowns.contains(value))
+            {
+                String formatted = String.format("\"%s\":\"%s\",", value, key);
+                System.out.println(formatted);
+            }
+        });
     }
     
     @Test

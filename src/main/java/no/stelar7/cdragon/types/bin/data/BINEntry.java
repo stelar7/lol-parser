@@ -6,9 +6,20 @@ import java.util.*;
 public class BINEntry
 {
     private int            lenght;
+    private String         type;
     private String         hash;
     private short          valueCount;
     private List<BINValue> values = new ArrayList<>();
+    
+    public String getType()
+    {
+        return type;
+    }
+    
+    public void setType(String type)
+    {
+        this.type = type;
+    }
     
     public int getLenght()
     {

@@ -220,11 +220,9 @@ public class BINFile
                 JsonWriterWrapper jw = new JsonWriterWrapper();
                 jw.beginObject();
                 
-                for (int i = 0; i < entries.size(); i++)
+                for (BINEntry entry : entries)
                 {
-                    BINEntry entry  = entries.get(i);
-                    String   prefix = HashHandler.getBINHash(header.getEntryTypes().get(i));
-                    jw.name(prefix).beginObject();
+                    jw.name(entry.getType()).beginObject();
                     entryToJson(entry, jw);
                     jw.endObject();
                 }
@@ -305,6 +303,11 @@ public class BINFile
                 jw.value("LINK_OFFSET: " + data.toString());
                 break;
             }
+            case STRING_HASH:
+            {
+                jw.value("STRING_HASH: " + data.toString());
+                break;
+            }
             default:
             {
                 jw.jsonValue(data.toString());
@@ -337,6 +340,8 @@ public class BINFile
             JsonWriterWrapper temp = new JsonWriterWrapper();
             printType("", value.getType1(), obj.getFirst(), temp);
             String val1 = temp.toString();
+            // val1 should always be a string-like object, so remove quotes if any
+            val1 = val1.replace("\"", "");
             
             temp.clear();
             printType("", value.getType2(), obj.getSecond(), temp);
@@ -392,7 +397,10 @@ public class BINFile
                 printString(o.toString(), jw);
             } else if (value.getType() == BINValueType.STRING_HASH)
             {
-                jw.value(HashHandler.getBINHash((Integer) o));
+                jw.value("STRING_HASH: " + HashHandler.getBINHash((Integer) o));
+            } else if (value.getType() == BINValueType.LINK_OFFSET)
+            {
+                jw.value("LINK_OFFSET: " + HashHandler.getBINHash((String) o));
             } else
             {
                 jw.jsonValue(o.toString());
