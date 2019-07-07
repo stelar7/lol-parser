@@ -447,7 +447,7 @@ public class TestBIN
         System.out.println("Starting tests...");
         Set<String> outputHashes = new HashSet<>();
         wordsToTest.forEach(w -> {
-            String hash = String.valueOf(HashHandler.getBINHash(w.toLowerCase(Locale.ENGLISH)));
+            String hash = HashHandler.getBINHash(w);
             if (hashes.contains(hash))
             {
                 System.out.printf("Found a new hash! (%s)%n", w);
