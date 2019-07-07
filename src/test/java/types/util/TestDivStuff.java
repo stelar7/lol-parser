@@ -63,6 +63,18 @@ public class TestDivStuff
         Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
         Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
         
+        Function<String, Boolean> isFloat = obj -> {
+            try
+            {
+                Float.parseFloat(obj);
+                return true;
+            } catch (Exception e)
+            {
+                return false;
+            }
+        };
+        
+        
         BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray   = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
         BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt     = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
         BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultStringP = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive("P");
@@ -77,6 +89,27 @@ public class TestDivStuff
                 return arr;
             }
             return new JsonArray();
+        };
+        
+        BiFunction<String, String, JsonPrimitive> adjustBasedOnFormula = (formula, P) -> {
+            
+            // assume that all formulas are in the format "X+Y"
+            
+            String compute = formula.replace("P", P);
+            if (!compute.contains("+"))
+            {
+                if (isFloat.apply(compute))
+                {
+                    return new JsonPrimitive(Float.parseFloat(compute));
+                }
+                
+                return new JsonPrimitive(compute);
+            }
+            
+            String[] parts = compute.split("\\+");
+            float    A     = Float.parseFloat(parts[0]);
+            float    B     = Float.parseFloat(parts[1]);
+            return new JsonPrimitive(A + B);
         };
         
         BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
@@ -214,12 +247,12 @@ public class TestDivStuff
             
             
             String champDataContainer = "304496F1";
-            String spellDataContainer = "5E7E5A06";
+            String spellDataContainer = "SpellObject";
             String traitContainer     = "mLinkedTraits";
             
             String initialSpellValue = "mBaseP";
-            Path   selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
-            String data    = parser.parse(selfBin).toJson();
+            Path   selfBin           = champFileParent.resolve(mName).resolve(mName + ".bin");
+            String data              = parser.parse(selfBin).toJson();
             
             JsonObject elem               = createJsonObject.apply(data, champDataContainer);
             JsonObject champContainerData = getFirstChildObject.apply(elem);
@@ -238,12 +271,14 @@ public class TestDivStuff
             JsonObject stats = new JsonObject();
             stats.add("hp", champItem.get("baseHP"));
             stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
+            stats.add("initalMana", new JsonPrimitive("unknown at this moment, sorry :("));
             stats.add("damage", champItem.get("BaseDamage"));
             stats.add("armor", champItem.get("baseArmor"));
             stats.add("magicResist", champItem.get("baseSpellBlock"));
             stats.add("critMultiplier", champItem.get("critDamageMultiplier"));
             stats.add("attackSpeed", champItem.get("AttackSpeed"));
             stats.add("range", new JsonPrimitive(champItem.get("attackRange").getAsInt() / 180));
+            stats.add("statScaleFactor", new JsonPrimitive(1.8f));
             
             String spellName = champItem.getAsJsonArray("spellNames").get(0).getAsString();
             if (spellName.contains("/"))
@@ -260,15 +295,21 @@ public class TestDivStuff
                 JsonObject spellContainerData = getFirstChildObject.apply(elemm);
                 if (spellContainerData.get("mScriptName").getAsString().equals(spellName))
                 {
-                    JsonObject spellData = getFirstChildObject.apply(spellContainerData.getAsJsonObject("mSpell"));
-                    JsonArray  variables = getKeyOrDefaultArray.apply(spellData, "mDataValues");
-                    for (JsonElement variable : variables)
+                    JsonObject spellData       = getFirstChildObject.apply(spellContainerData.getAsJsonObject("mSpell"));
+                    JsonArray  spellDataValues = getKeyOrDefaultArray.apply(spellData, "mDataValues");
+                    for (JsonElement variable : spellDataValues)
                     {
-                        JsonObject entry = getFirstChildObject.apply(variable);
+                        JsonObject spellDataEntry = variable.getAsJsonObject().getAsJsonObject("SpellDataValue");
+                        
+                        JsonArray shortened = shortenArray.apply(spellDataEntry, "mValues");
+                        JsonArray realShort = new JsonArray();
+                        String    formula   = getKeyOrDefaultStringP.apply(spellDataEntry, "mFormula").getAsString();
+                        shortened.forEach(s -> realShort.add(adjustBasedOnFormula.apply(formula, s.getAsString())));
+                        
                         
                         JsonObject currentVar = new JsonObject();
-                        currentVar.add("key", entry.get("mName"));
-                        currentVar.add("values", shortenArray.apply(entry, "mValues"));
+                        currentVar.add("key", spellDataEntry.get("mName"));
+                        currentVar.add("values", realShort);
                         abilityVars.add(currentVar);
                     }
                     break;
@@ -312,7 +353,11 @@ public class TestDivStuff
             o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(item).apply(displayName)));
             o.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(descs).apply(item).apply(itemDescription)));
             o.add("icon", new JsonPrimitive(item.get(itemIcon).getAsString()));
-            o.add("from", getKeyOrDefaultArray.apply(item, itemFromKey));
+            
+            JsonArray fromOther = getKeyOrDefaultArray.apply(item, itemFromKey);
+            JsonArray fromReal  = new JsonArray();
+            fromOther.forEach(f -> fromReal.add(f.getAsString().substring("LINK_OFFSET: ".length())));
+            o.add("from", fromReal);
             
             JsonArray effects    = new JsonArray();
             JsonArray effectJson = getKeyOrDefaultArray.apply(item, itemEffectContainer);
@@ -320,13 +365,15 @@ public class TestDivStuff
             {
                 JsonObject inner = effect.getAsJsonObject().getAsJsonObject(itemEffectVarContainer);
                 
-                Long          name       = inner.get("name").getAsLong();
-                String        hashedName = HashHandler.toHex(name, 8, 8);
-                JsonPrimitive realName   = new JsonPrimitive(HashHandler.getBinHashes().getOrDefault(hashedName, hashedName));
-                JsonElement   value      = inner.get("value");
+                String name = inner.get("name").getAsString();
+                if (name.startsWith("STRING_HASH: "))
+                {
+                    name = name.substring("STRING_HASH: ".length());
+                }
+                JsonElement value = inner.get("value");
                 
                 JsonObject temp = new JsonObject();
-                temp.add("name", realName);
+                temp.add("name", new JsonPrimitive(name));
                 temp.add("value", value);
                 effects.add(temp);
             }
