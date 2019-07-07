@@ -270,15 +270,17 @@ public class TestDivStuff
             
             JsonObject stats = new JsonObject();
             stats.add("hp", champItem.get("baseHP"));
+            stats.add("hpScaleFactor", new JsonPrimitive(1.8f));
             stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
             stats.add("initalMana", new JsonPrimitive("unknown at this moment, sorry :("));
             stats.add("damage", champItem.get("BaseDamage"));
+            stats.add("damageScaleFactor", new JsonPrimitive(1.25f));
             stats.add("armor", champItem.get("baseArmor"));
             stats.add("magicResist", champItem.get("baseSpellBlock"));
             stats.add("critMultiplier", champItem.get("critDamageMultiplier"));
+            stats.add("critChance", new JsonPrimitive(0.25f));
             stats.add("attackSpeed", champItem.get("AttackSpeed"));
             stats.add("range", new JsonPrimitive(champItem.get("attackRange").getAsInt() / 180));
-            stats.add("statScaleFactor", new JsonPrimitive(1.8f));
             
             String spellName = champItem.getAsJsonArray("spellNames").get(0).getAsString();
             if (spellName.contains("/"))
