@@ -143,10 +143,10 @@ public class TestDivStuff
         
         String traitContainerKey       = "6F870247";
         String traitDescription        = "765F18DA";
-        String traitIcon               = "8BEE2972";
+        String traitIcon               = "mIconPath";
         String traitEffectContainter   = "mTraitsSets";
         String innerEffectContainer    = "C130C1E5";
-        String traitMinUnits           = "749EAB2B";
+        String traitMinUnits           = "mMinUnits";
         String traitEffectVarContainer = "C13D6D31";
         String traitEffectVar          = "62FF42F4";
         
@@ -211,11 +211,11 @@ public class TestDivStuff
         
         String champFileTraitContainer = "1AF7CAAC";
         String champContainerKey       = "E52B8F5D";
-        String costModifier            = "1F01E303";
+        String costModifier            = "mRarity";
         String champAbilityName        = "87A69A5E";
-        String champSplash             = "8BEE2972";
+        String champSplash             = "mIconPath";
         String champAbilityDesc        = "BC4F18B3";
-        String champAbilityIcon        = "63F1FC69";
+        String champAbilityIcon        = "mPortraitIconPath";
         
         JsonArray champs = shipping.getAsJsonObject().getAsJsonArray(champContainerKey);
         for (JsonElement champContainer : champs)
@@ -331,7 +331,7 @@ public class TestDivStuff
         String itemEffectContainer    = "C13D6D31";
         String itemDescription        = "765F18DA";
         String itemEffectVarContainer = "62FF42F4";
-        String itemIcon               = "8BEE2972";
+        String itemIcon               = "mIconPath";
         
         Map<String, Integer> itemLookup = new HashMap<>();
         

@@ -23,20 +23,20 @@ public class MemoryHandler
 {
     public static void readProcessMemory(String handleName)
     {
-        byte[] dataPattern = new byte[]{(byte) 0x8B, 0x3D, 0x00, 0x00, 0x00, 0x00, (byte) 0x8B, 0x35, 0x00, 0x00, 0x00, 0x00, 0x3B, (byte) 0xF7, 0x0F, (byte) 0x84, 0x00, 0x00, 0x00, 0x00, 0x66, 0x66};
-        byte[] mask        = new byte[]{1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1};
+        byte[] dataPattern = UtilHandler.byteArrayFromString("0x8B0x3D0x000x000x000x000x8B0x350x000x000x000x000x3B0xF70x0F0x840x000x000x000x000x660x66");
+        byte[] mask        = UtilHandler.byteArrayFromSetBits(0b1100001100001111000011);
+        
         
         int     processId         = findProcessID(handleName);
         HANDLE  processHandle     = openProcess(processId);
-        Pointer memoryPagePointer = scanMemoryPages(processHandle, dataPattern, mask);
-        readGameObjects(processHandle, memoryPagePointer, dataPattern);
+        Pointer memoryPagePointer = findPattern(processHandle, dataPattern, mask);
+        readGameObjects(processHandle, memoryPagePointer, dataPattern, mask);
         
     }
     
-    private static void readGameObjects(HANDLE processHandle, Pointer startAddress, byte[] pattern)
+    private static void readGameObjects(HANDLE processHandle, Pointer startAddress, byte[] pattern, byte[] mask)
     {
         byte[] data = startAddress.readArray(22);
-        byte[] mask = new byte[]{1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 1};
         
         for (int i = 0; i < data.length; i++)
         {
@@ -56,12 +56,10 @@ public class MemoryHandler
             Pointer index          = new Pointer(processHandle, i);
             Pointer objectLocation = index.readPointer();
             
-            int objectNameLocation    = 0x60;
-            int characterNameLocation = 0x32DC;
+            int objectNameLocation = 0x60;
             
             String gameObjName = objectLocation.readAString(objectNameLocation);
-            String charName    = objectLocation.readAString(characterNameLocation);
-            System.out.println(gameObjName + ": " + charName);
+            System.out.println(gameObjName);
         }
     }
     
@@ -100,7 +98,7 @@ public class MemoryHandler
     }
     
     
-    private static Pointer scanMemoryPages(HANDLE handle, byte[] pattern, byte[] mask)
+    private static Pointer findPattern(HANDLE handle, byte[] pattern, byte[] mask)
     {
         SYSTEM_INFO si             = getSystemInfo();
         Pointer     scanAddress    = new Pointer(handle, si.lpMinimumApplicationAddress);

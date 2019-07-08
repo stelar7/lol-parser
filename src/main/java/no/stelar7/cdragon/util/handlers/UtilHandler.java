@@ -614,4 +614,44 @@ public final class UtilHandler
         
         return (value & (1L << bit)) != 0;
     }
+    
+    public static byte[] byteArrayFromString(String data)
+    {
+        int    length     = data.length() / 4;
+        byte[] returnData = new byte[length];
+        
+        for (int i = 0; i < length; i++)
+        {
+            String hex   = data.substring(i * 4, (i * 4) + 4);
+            byte   value = Integer.decode(hex).byteValue();
+            returnData[i] = value;
+        }
+        return returnData;
+    }
+    
+    public static boolean isBitSet(int number, int bit)
+    {
+        return (number & (1 << bit)) > 0;
+    }
+    
+    public static byte[] byteArrayFromSetBits(int number)
+    {
+        byte[]  returnData = new byte[31];
+        boolean found      = false;
+        int     i          = 0;
+        for (int j = 31; j >= 0; j--)
+        {
+            boolean bitValue = isBitSet(number, j);
+            found = found || bitValue;
+            if (found)
+            {
+                returnData[i++] = (byte) (bitValue ? 1 : 0);
+            }
+        }
+        
+        byte[] realData = new byte[i];
+        System.arraycopy(returnData, 0, realData, 0, i);
+        
+        return realData;
+    }
 }
