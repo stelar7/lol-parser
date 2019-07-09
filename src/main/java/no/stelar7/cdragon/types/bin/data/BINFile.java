@@ -299,15 +299,14 @@ public class BINFile
             }
             case LINK_OFFSET:
             {
-                jw.value("LINK_OFFSET: " + data.toString());
+                jw.value("LINK_OFFSET: " + HashHandler.getBinHashes().getOrDefault(data.toString(), data.toString()));
                 break;
             }
             case STRING_HASH:
             {
-                int    other    = Integer.parseInt(data.toString());
-                String hex      = HashHandler.toHex((long) other, 8, 8);
+                String other    = data.toString();
                 String testHash = HashHandler.getBINHash(other);
-                String output   = (hex.equalsIgnoreCase(testHash)) ? "STRING_HASH: " : "";
+                String output   = (other.equalsIgnoreCase(testHash)) ? "STRING_HASH: " : "";
                 output += testHash;
                 jw.value(output);
                 break;
@@ -401,15 +400,15 @@ public class BINFile
                 printString(o.toString(), jw);
             } else if (value.getType() == BINValueType.STRING_HASH)
             {
-                int    other  = (Integer) o;
-                String hex    = HashHandler.toHex((long) other, 8, 8);
+                String other  = o.toString();
                 String hash   = HashHandler.getBINHash(other);
-                String output = (hex.equalsIgnoreCase(hash)) ? "STRING_HASH: " : "";
+                String output = (other.equalsIgnoreCase(hash)) ? "STRING_HASH: " : "";
                 output += hash;
                 jw.value(output);
             } else if (value.getType() == BINValueType.LINK_OFFSET)
             {
-                jw.value("LINK_OFFSET: " + o);
+                String other = (String) o;
+                jw.value("LINK_OFFSET: " + HashHandler.getBinHashes().getOrDefault(other, other));
             } else
             {
                 jw.jsonValue(o.toString());

@@ -249,6 +249,29 @@ public class TestWAD
         extractWads(rito, extractPath);
         transformManifest(extractPath);
         transformBIN(extractPath);
+        
+        // export unknown bin hashes
+        Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
+        Files.write(binhash, "".getBytes(StandardCharsets.UTF_8));
+        List<String> sortedHashes = new ArrayList<>(BINParser.hashes).stream()
+                                                                     .filter(h -> {
+                                                                         try
+                                                                         {
+                                                                             Long.decode("0x" + h);
+                                                                             return true;
+                                                                         } catch (Exception e)
+                                                                         {
+                                                                             return false;
+                                                                         }
+                                                                     })
+                                                                     .sorted()
+                                                                     .filter(h -> HashHandler.getBinHashes().get(h) != null)
+                                                                     .collect(Collectors.toList());
+        for (String hash : sortedHashes)
+        {
+            Files.write(binhash, (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+        }
+        
         transformDDS(extractPath);
     }
     
