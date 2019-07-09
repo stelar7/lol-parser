@@ -502,9 +502,10 @@ public class TestDivStuff
     {
         List<String> unknowns = Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt"));
         
-        Path        binhash  = UtilHandler.CDRAGON_FOLDER.resolve("bruteforceWords.txt");
+        Path        binhash  = UtilHandler.CDRAGON_FOLDER.resolve("wordsToTest.txt");
         Set<String> possible = new HashSet<>(Files.readAllLines(binhash));
         Map<String, String> hashed = possible.stream()
+                                             .map(l -> l.substring(9))
                                              .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
                                              .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
         
