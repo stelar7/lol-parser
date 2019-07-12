@@ -5,7 +5,7 @@ import java.util.*;
 
 public class BINEntry
 {
-    private int            lenght;
+    private int            length;
     private String         type;
     private String         hash;
     private short          valueCount;
@@ -21,14 +21,14 @@ public class BINEntry
         this.type = type;
     }
     
-    public int getLenght()
+    public int getLength()
     {
-        return lenght;
+        return length;
     }
     
-    public void setLenght(int lenght)
+    public void setLength(int length)
     {
-        this.lenght = lenght;
+        this.length = length;
     }
     
     public String getHash()

@@ -247,10 +247,17 @@ public class TestWAD
         
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
-        transformManifest(extractPath);
-        transformBIN(extractPath);
         
-        // export unknown bin hashes
+        transformManifest(extractPath);
+        
+        transformBIN(extractPath);
+        generateUnknownBinHashList();
+        
+        transformDDS(extractPath);
+    }
+    
+    private void generateUnknownBinHashList() throws IOException
+    {
         Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
         Files.write(binhash, "".getBytes(StandardCharsets.UTF_8));
         List<String> sortedHashes = new ArrayList<>(BINParser.hashes).stream()
@@ -265,14 +272,12 @@ public class TestWAD
                                                                          }
                                                                      })
                                                                      .sorted()
-                                                                     .filter(h -> HashHandler.getBinHashes().get(h) != null)
+                                                                     .filter(h -> HashHandler.getBinHashes().get(h) == null)
                                                                      .collect(Collectors.toList());
         for (String hash : sortedHashes)
         {
             Files.write(binhash, (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
         }
-        
-        transformDDS(extractPath);
     }
     
     private void transformManifest(Path extractPath) throws IOException

@@ -3,7 +3,6 @@ package types.util;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import no.stelar7.cdragon.types.bin.BINParser;
-import no.stelar7.cdragon.util.NaturalOrderComparator;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import org.junit.jupiter.api.Test;
@@ -52,6 +51,56 @@ public class TestDivStuff
         Path fontConfig      = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu");
         Path champFileParent = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\characters");
         
+        
+        Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
+        Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
+        Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
+        Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
+        
+        Function<String, Boolean> isFloat = obj -> {
+            try
+            {
+                Float.parseFloat(obj);
+                return true;
+            } catch (Exception e)
+            {
+                return false;
+            }
+        };
+        
+        
+        BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray   = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
+        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt     = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
+        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultStringP = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive("P");
+        
+        BiFunction<String, String, JsonPrimitive> adjustBasedOnFormula = (formula, P) -> {
+            
+            // assume that all formulas are in the format "X+Y"
+            
+            String compute = formula.replace("P", P);
+            if (!compute.contains("+"))
+            {
+                if (isFloat.apply(compute))
+                {
+                    return new JsonPrimitive(Float.parseFloat(compute));
+                }
+                
+                return new JsonPrimitive(compute);
+            }
+            
+            String[] parts = compute.split("\\+");
+            float    A     = Float.parseFloat(parts[0]);
+            float    B     = Float.parseFloat(parts[1]);
+            return new JsonPrimitive(A + B);
+        };
+        
+        BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
+            String     realData = "{" + data.substring(data.indexOf(key) - 1);
+            JsonReader reader   = new JsonReader(new StringReader(realData));
+            reader.setLenient(true);
+            return UtilHandler.getJsonParser().parse(reader).getAsJsonObject();
+        };
+        
         Map<String, Map<String, String>> descs = new HashMap<>();
         
         Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
@@ -83,361 +132,291 @@ public class TestDivStuff
         });
         
         
-        Function<String, Function<JsonObject, Function<String, String>>> getFromMapOrDefault = lang -> obj -> key -> descs.get(lang).getOrDefault(obj.get(key).getAsString(), obj.get(key).getAsString());
-        
-        Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
-        Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
-        Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
-        Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
-        
-        Function<String, Boolean> isFloat = obj -> {
-            try
-            {
-                Float.parseFloat(obj);
-                return true;
-            } catch (Exception e)
-            {
-                return false;
-            }
-        };
+        JsonObject champData = new JsonObject();
+        JsonObject itemData  = new JsonObject();
+        JsonArray  traitData = new JsonArray();
         
         
-        BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray   = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
-        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt     = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
-        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultStringP = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive("P");
-        BiFunction<JsonObject, String, JsonArray> shortenArray = (obj, key) -> {
-            if (obj.has(key))
-            {
-                JsonArray arr = obj.getAsJsonArray(key);
-                while (arr.size() > 3)
-                {
-                    arr.remove(3);
-                }
-                return arr;
-            }
-            return new JsonArray();
-        };
+        BINParser parser = new BINParser();
         
-        BiFunction<String, String, JsonPrimitive> adjustBasedOnFormula = (formula, P) -> {
+        String displayName = "C3143D66";
+        
+        String traitContainerKey       = "6F870247";
+        String traitDescription        = "765F18DA";
+        String traitIcon               = "mIconPath";
+        String traitEffectContainter   = "mTraitsSets";
+        String innerEffectContainer    = "C130C1E5";
+        String traitMinUnits           = "mMinUnits";
+        String traitEffectVarContainer = "EffectAmounts";
+        String traitEffectVar          = "TftEffectAmount";
+        
+        Map<String, String> traitLookup = new HashMap<>();
+        
+        JsonElement shipping = UtilHandler.getJsonParser().parse(parser.parse(traitFile).toJson());
+        JsonArray   traits   = shipping.getAsJsonObject().getAsJsonArray(traitContainerKey);
+        for (JsonElement traitContainer : traits)
+        {
+            String     hashKey = getFirstChildKey.apply(traitContainer);
+            JsonObject trait   = getFirstChildObject.apply(traitContainer);
             
-            // assume that all formulas are in the format "X+Y"
+            String mName = trait.get("mName").getAsString();
             
-            String compute = formula.replace("P", P);
-            if (!compute.contains("+"))
+            if (mName.contains("Template"))
             {
-                if (isFloat.apply(compute))
-                {
-                    return new JsonPrimitive(Float.parseFloat(compute));
-                }
-                
-                return new JsonPrimitive(compute);
+                continue;
             }
             
-            String[] parts = compute.split("\\+");
-            float    A     = Float.parseFloat(parts[0]);
-            float    B     = Float.parseFloat(parts[1]);
-            return new JsonPrimitive(A + B);
-        };
-        
-        BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
-            String     realData = "{" + data.substring(data.indexOf(key) - 1);
-            JsonReader reader   = new JsonReader(new StringReader(realData));
-            reader.setLenient(true);
-            return UtilHandler.getJsonParser().parse(reader).getAsJsonObject();
-        };
-        
-        descs.forEach((language, mapContent) -> {
+            traitLookup.put(hashKey, mName);
             
-            JsonArray champData = new JsonArray();
-            JsonArray traitData = new JsonArray();
-            JsonArray itemData  = new JsonArray();
+            JsonObject o = new JsonObject();
+            o.add("name", trait.get(displayName));
+            o.add("desc", trait.get(traitDescription));
+            o.add("icon", trait.get(traitIcon));
             
+            JsonArray effects = new JsonArray();
             
-            BINParser parser = new BINParser();
-            
-            String displayName = "C3143D66";
-            
-            String traitContainerKey       = "6F870247";
-            String traitDescription        = "765F18DA";
-            String traitIcon               = "mIconPath";
-            String traitEffectContainter   = "mTraitsSets";
-            String innerEffectContainer    = "C130C1E5";
-            String traitMinUnits           = "mMinUnits";
-            String traitEffectVarContainer = "EffectAmounts";
-            String traitEffectVar          = "TftEffectAmount";
-            
-            Map<String, String> traitLookup = new HashMap<>();
-            
-            JsonElement shipping = UtilHandler.getJsonParser().parse(parser.parse(traitFile).toJson());
-            JsonArray   traits   = shipping.getAsJsonObject().getAsJsonArray(traitContainerKey);
-            for (JsonElement traitContainer : traits)
+            JsonArray effectJson = trait.getAsJsonArray(traitEffectContainter);
+            for (JsonElement effect : effectJson)
             {
-                String     hashKey = getFirstChildKey.apply(traitContainer);
-                JsonObject trait   = getFirstChildObject.apply(traitContainer);
+                JsonObject adder = new JsonObject();
+                JsonObject inner = effect.getAsJsonObject().getAsJsonObject(innerEffectContainer);
                 
-                String mName = trait.get("mName").getAsString();
-                
-                if (mName.contains("Template"))
+                JsonArray varAdded     = new JsonArray();
+                JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitEffectVarContainer);
+                for (JsonElement vars : varContainer)
                 {
-                    continue;
-                }
-                
-                traitLookup.put(hashKey, getFromMapOrDefault.apply(language).apply(trait).apply(displayName));
-                
-                JsonObject o = new JsonObject();
-                o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(trait).apply(displayName)));
-                o.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(trait).apply(traitDescription)));
-                o.add("icon", new JsonPrimitive(trait.get(traitIcon).getAsString()));
-                
-                JsonArray effects = new JsonArray();
-                
-                JsonArray effectJson = trait.getAsJsonArray(traitEffectContainter);
-                for (JsonElement effect : effectJson)
-                {
-                    JsonObject adder = new JsonObject();
-                    JsonObject inner = effect.getAsJsonObject().getAsJsonObject(innerEffectContainer);
-                    
-                    JsonArray varAdded     = new JsonArray();
-                    JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitEffectVarContainer);
-                    for (JsonElement vars : varContainer)
-                    {
-                        JsonObject var  = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
-                        String     name = var.get("name").getAsString();
-                        if (name.startsWith("STRING_HASH: "))
-                        {
-                            name = name.substring("STRING_HASH: ".length());
-                        }
-                        JsonElement value = var.get("value");
-                        
-                        JsonObject temp = new JsonObject();
-                        temp.add("name", new JsonPrimitive(name));
-                        temp.add("value", value);
-                        varAdded.add(temp);
-                    }
-                    
-                    adder.add("minUnits", new JsonPrimitive(inner.get(traitMinUnits).getAsInt()));
-                    adder.add("vars", varAdded);
-                    
-                    effects.add(adder);
-                }
-                
-                o.add("effects", effects);
-                traitData.add(o);
-            }
-            
-            String champFileTraitContainer = "mLinkedTraits";
-            String champContainerKey       = "E52B8F5D";
-            String costModifier            = "mRarity";
-            String champAbilityName        = "87A69A5E";
-            String champSplash             = "mIconPath";
-            String champAbilityDesc        = "BC4F18B3";
-            String champAbilityIcon        = "mPortraitIconPath";
-            
-            JsonArray champs = shipping.getAsJsonObject().getAsJsonArray(champContainerKey);
-            for (JsonElement champContainer : champs)
-            {
-                JsonObject champ = getFirstChildObject.apply(champContainer);
-                String     mName = champ.get("mName").getAsString();
-                
-                if (!mName.startsWith("TFT_") || mName.equals("TFT_Template"))
-                {
-                    continue;
-                }
-                
-                JsonObject o         = new JsonObject();
-                JsonObject abilities = new JsonObject();
-                
-                String     realName    = mName.substring(4);
-                Path       selfRealBin = champFileParent.resolve(realName).resolve(realName + ".bin");
-                String     realData    = parser.parse(selfRealBin).toJson();
-                JsonObject realChamp   = createJsonObject.apply(realData, "characterToolData");
-                
-                o.add("id", realChamp.getAsJsonObject("characterToolData").getAsJsonObject("characterToolData").get("championId"));
-                o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(champ).apply(displayName)));
-                o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
-                o.add("splash", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(champ).apply(champSplash)));
-                
-                abilities.add("name", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(champ).apply(champAbilityName)));
-                abilities.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(champ).apply(champAbilityDesc)));
-                abilities.add("icon", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(champ).apply(champAbilityIcon)));
-                
-                
-                String champDataContainer = "304496F1";
-                String spellDataContainer = "SpellObject";
-                String traitContainer     = "mLinkedTraits";
-                
-                String initialSpellValue = "mBaseP";
-                Path   selfBin           = champFileParent.resolve(mName).resolve(mName + ".bin");
-                String data              = parser.parse(selfBin).toJson();
-                
-                JsonObject elem               = createJsonObject.apply(data, champDataContainer);
-                JsonObject champContainerData = getFirstChildObject.apply(elem);
-                JsonObject champItem          = getFirstChildObject.apply(champContainerData);
-                
-                JsonArray traitDatas = champItem.getAsJsonArray(traitContainer);
-                JsonArray traitArray = new JsonArray();
-                for (JsonElement traitDatum : traitDatas)
-                {
-                    String hash = traitDatum.getAsString().substring("LINK_OFFSET: ".length());
-                    traitArray.add(new JsonPrimitive(traitLookup.get(hash)));
-                }
-                
-                JsonObject manaContainer = getFirstChildObject.apply(champItem.get("PrimaryAbilityResource"));
-                
-                JsonObject stats = new JsonObject();
-                stats.add("hp", champItem.get("baseHP"));
-                stats.add("hpScaleFactor", new JsonPrimitive(1.8f));
-                stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
-                stats.add("initalMana", new JsonPrimitive("unknown at this moment, sorry :("));
-                stats.add("damage", champItem.get("BaseDamage"));
-                stats.add("damageScaleFactor", new JsonPrimitive(1.25f));
-                stats.add("armor", champItem.get("baseArmor"));
-                stats.add("magicResist", champItem.get("baseSpellBlock"));
-                stats.add("critMultiplier", champItem.get("critDamageMultiplier"));
-                stats.add("critChance", new JsonPrimitive(0.25f));
-                stats.add("attackSpeed", champItem.get("AttackSpeed"));
-                stats.add("range", new JsonPrimitive(champItem.get("attackRange").getAsInt() / 180));
-                
-                String spellName = champItem.getAsJsonArray("spellNames").get(0).getAsString();
-                if (spellName.contains("/"))
-                {
-                    spellName = spellName.substring(spellName.indexOf('/') + 1);
-                }
-                
-                elem = createJsonObject.apply(data, spellDataContainer);
-                JsonArray elems = getFirstChildArray.apply(elem);
-                
-                JsonArray abilityVars = new JsonArray();
-                for (JsonElement elemm : elems)
-                {
-                    JsonObject spellContainerData = getFirstChildObject.apply(elemm);
-                    if (spellContainerData.get("mScriptName").getAsString().equals(spellName))
-                    {
-                        JsonObject spellData       = getFirstChildObject.apply(spellContainerData.getAsJsonObject("mSpell"));
-                        JsonArray  spellDataValues = getKeyOrDefaultArray.apply(spellData, "mDataValues");
-                        for (JsonElement variable : spellDataValues)
-                        {
-                            JsonObject spellDataEntry = variable.getAsJsonObject().getAsJsonObject("SpellDataValue");
-                            
-                            JsonArray shortened = shortenArray.apply(spellDataEntry, "mValues");
-                            JsonArray realShort = new JsonArray();
-                            String    formula   = getKeyOrDefaultStringP.apply(spellDataEntry, "mFormula").getAsString();
-                            shortened.forEach(s -> realShort.add(adjustBasedOnFormula.apply(formula, s.getAsString())));
-                            
-                            
-                            JsonObject currentVar = new JsonObject();
-                            currentVar.add("key", spellDataEntry.get("mName"));
-                            currentVar.add("values", realShort);
-                            abilityVars.add(currentVar);
-                        }
-                        break;
-                    }
-                }
-                abilities.add("variables", abilityVars);
-                
-                
-                o.add("stats", stats);
-                o.add("traits", traitArray);
-                o.add("ability", abilities);
-                champData.add(o);
-            }
-            
-            String itemContainerKey       = "D186C31A";
-            String itemFromKey            = "mComposition";
-            String itemEffectContainer    = "EffectAmounts";
-            String itemDescription        = "765F18DA";
-            String itemEffectVarContainer = "TftEffectAmount";
-            String itemIcon               = "mIconPath";
-            
-            Map<String, Integer> itemLookup = new HashMap<>();
-            
-            JsonArray items = shipping.getAsJsonObject().getAsJsonArray(itemContainerKey);
-            for (JsonElement itemContainer : items)
-            {
-                String     hashKey = getFirstChildKey.apply(itemContainer);
-                JsonObject item    = getFirstChildObject.apply(itemContainer);
-                
-                String mName = item.get("mName").getAsString();
-                
-                if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
-                {
-                    continue;
-                }
-                
-                itemLookup.put(hashKey, item.get("mID").getAsInt());
-                
-                JsonObject o = new JsonObject();
-                o.add("id", item.get("mID"));
-                o.add("name", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(item).apply(displayName)));
-                o.add("desc", new JsonPrimitive(getFromMapOrDefault.apply(language).apply(item).apply(itemDescription)));
-                o.add("icon", new JsonPrimitive(item.get(itemIcon).getAsString()));
-                
-                JsonArray fromOther = getKeyOrDefaultArray.apply(item, itemFromKey);
-                JsonArray fromReal  = new JsonArray();
-                fromOther.forEach(f -> fromReal.add(f.getAsString().substring("LINK_OFFSET: ".length())));
-                o.add("from", fromReal);
-                
-                JsonArray effects    = new JsonArray();
-                JsonArray effectJson = getKeyOrDefaultArray.apply(item, itemEffectContainer);
-                for (JsonElement effect : effectJson)
-                {
-                    JsonObject inner = effect.getAsJsonObject().getAsJsonObject(itemEffectVarContainer);
-                    
-                    String name = inner.get("name").getAsString();
+                    JsonObject var  = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
+                    String     name = var.get("name").getAsString();
                     if (name.startsWith("STRING_HASH: "))
                     {
                         name = name.substring("STRING_HASH: ".length());
                     }
-                    JsonElement value = inner.get("value");
+                    JsonElement value = var.get("value");
                     
                     JsonObject temp = new JsonObject();
                     temp.add("name", new JsonPrimitive(name));
                     temp.add("value", value);
-                    effects.add(temp);
+                    varAdded.add(temp);
                 }
                 
-                o.add("effects", effects);
-                itemData.add(o);
+                adder.add("minUnits", new JsonPrimitive(inner.get(traitMinUnits).getAsInt()));
+                adder.add("vars", varAdded);
+                
+                effects.add(adder);
             }
             
-            for (JsonElement it : itemData)
+            o.add("effects", effects);
+            traitData.add(o);
+        }
+        
+        String champFileTraitContainer = "mLinkedTraits";
+        String champContainerKey       = "E52B8F5D";
+        String costModifier            = "mRarity";
+        String champAbilityName        = "87A69A5E";
+        String champSplash             = "mIconPath";
+        String champAbilityDesc        = "BC4F18B3";
+        String champAbilityIcon        = "mPortraitIconPath";
+        
+        JsonArray champs = shipping.getAsJsonObject().getAsJsonArray(champContainerKey);
+        for (JsonElement champContainer : champs)
+        {
+            JsonObject champ = getFirstChildObject.apply(champContainer);
+            String     mName = champ.get("mName").getAsString();
+            
+            if (!mName.startsWith("TFT_") || mName.equals("TFT_Template"))
             {
-                JsonArray from    = it.getAsJsonObject().getAsJsonArray("from");
-                JsonArray newFrom = new JsonArray();
-                for (JsonElement element : from)
+                continue;
+            }
+            
+            JsonObject o         = new JsonObject();
+            JsonObject abilities = new JsonObject();
+            
+            String     realName    = mName.substring(4);
+            Path       selfRealBin = champFileParent.resolve(realName).resolve(realName + ".bin");
+            String     realData    = parser.parse(selfRealBin).toJson();
+            JsonObject realChamp   = createJsonObject.apply(realData, "characterToolData");
+            String     championId  = realChamp.getAsJsonObject("characterToolData").getAsJsonObject("characterToolData").get("championId").getAsString();
+            
+            o.add("name", champ.get(displayName));
+            o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
+            o.add("splash", champ.get(champSplash));
+            
+            abilities.add("name", champ.get(champAbilityName));
+            abilities.add("desc", champ.get(champAbilityDesc));
+            abilities.add("icon", champ.get(champAbilityIcon));
+            
+            
+            String champDataContainer = "304496F1";
+            String spellDataContainer = "SpellObject";
+            String traitContainer     = "mLinkedTraits";
+            
+            String initialSpellValue = "mBaseP";
+            Path   selfBin           = champFileParent.resolve(mName).resolve(mName + ".bin");
+            String data              = parser.parse(selfBin).toJson();
+            
+            JsonObject elem               = createJsonObject.apply(data, champDataContainer);
+            JsonObject champContainerData = getFirstChildObject.apply(elem);
+            JsonObject champItem          = getFirstChildObject.apply(champContainerData);
+            
+            JsonArray traitDatas = champItem.getAsJsonArray(traitContainer);
+            JsonArray traitArray = new JsonArray();
+            for (JsonElement traitDatum : traitDatas)
+            {
+                String hash = traitDatum.getAsString().substring("LINK_OFFSET: ".length());
+                traitArray.add(new JsonPrimitive(traitLookup.get(hash)));
+            }
+            
+            JsonObject manaContainer = getFirstChildObject.apply(champItem.get("PrimaryAbilityResource"));
+            
+            JsonObject stats = new JsonObject();
+            stats.add("hp", champItem.get("baseHP"));
+            stats.add("hpScaleFactor", new JsonPrimitive(1.8f));
+            stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
+            stats.add("initalMana", new JsonPrimitive("unknown at this moment, sorry :("));
+            stats.add("damage", champItem.get("BaseDamage"));
+            stats.add("damageScaleFactor", new JsonPrimitive(1.25f));
+            stats.add("armor", champItem.get("baseArmor"));
+            stats.add("magicResist", champItem.get("baseSpellBlock"));
+            stats.add("critMultiplier", champItem.get("critDamageMultiplier"));
+            stats.add("critChance", new JsonPrimitive(0.25f));
+            stats.add("attackSpeed", champItem.get("AttackSpeed"));
+            stats.add("range", new JsonPrimitive(champItem.get("attackRange").getAsInt() / 180));
+            
+            String spellName = champItem.getAsJsonArray("spellNames").get(0).getAsString();
+            if (spellName.contains("/"))
+            {
+                spellName = spellName.substring(spellName.indexOf('/') + 1);
+            }
+            
+            elem = createJsonObject.apply(data, spellDataContainer);
+            JsonArray elems = getFirstChildArray.apply(elem);
+            
+            JsonArray abilityVars = new JsonArray();
+            for (JsonElement elemm : elems)
+            {
+                JsonObject spellContainerData = getFirstChildObject.apply(elemm);
+                if (spellContainerData.get("mScriptName").getAsString().equals(spellName))
                 {
-                    newFrom.add(itemLookup.get(element.getAsString()));
+                    JsonObject spellData       = getFirstChildObject.apply(spellContainerData.getAsJsonObject("mSpell"));
+                    JsonArray  spellDataValues = getKeyOrDefaultArray.apply(spellData, "mDataValues");
+                    for (JsonElement variable : spellDataValues)
+                    {
+                        JsonObject spellDataEntry = variable.getAsJsonObject().getAsJsonObject("SpellDataValue");
+                        
+                        JsonObject currentVar = new JsonObject();
+                        currentVar.add("key", spellDataEntry.get("mName"));
+                        currentVar.add("values", spellDataEntry.getAsJsonArray("mValues"));
+                        abilityVars.add(currentVar);
+                    }
+                    break;
                 }
-                it.getAsJsonObject().add("from", newFrom);
+            }
+            abilities.add("variables", abilityVars);
+            
+            
+            o.add("stats", stats);
+            o.add("traits", traitArray);
+            o.add("ability", abilities);
+            champData.add(championId, o);
+        }
+        
+        String itemContainerKey       = "D186C31A";
+        String itemFromKey            = "mComposition";
+        String itemEffectContainer    = "EffectAmounts";
+        String itemDescription        = "765F18DA";
+        String itemEffectVarContainer = "TftEffectAmount";
+        String itemIcon               = "mIconPath";
+        
+        Map<String, String> itemLookup = new HashMap<>();
+        
+        JsonArray items = shipping.getAsJsonObject().getAsJsonArray(itemContainerKey);
+        for (JsonElement itemContainer : items)
+        {
+            String     hashKey = getFirstChildKey.apply(itemContainer);
+            JsonObject item    = getFirstChildObject.apply(itemContainer);
+            
+            String mName = item.get("mName").getAsString();
+            
+            if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
+            {
+                continue;
             }
             
+            String mId = item.get("mID").getAsString();
+            itemLookup.put(hashKey, mId);
             
-            // sort items by id
-            NaturalOrderComparator noc   = new NaturalOrderComparator();
-            List<JsonElement>      elems = new ArrayList<>();
-            for (JsonElement datum : itemData)
+            JsonObject o = new JsonObject();
+            o.add("name", item.get(displayName));
+            o.add("desc", item.get(itemDescription));
+            o.add("icon", item.get(itemIcon));
+            
+            JsonArray fromOther = getKeyOrDefaultArray.apply(item, itemFromKey);
+            JsonArray fromReal  = new JsonArray();
+            fromOther.forEach(f -> fromReal.add(f.getAsString().substring("LINK_OFFSET: ".length())));
+            o.add("from", fromReal);
+            
+            JsonArray effects    = new JsonArray();
+            JsonArray effectJson = getKeyOrDefaultArray.apply(item, itemEffectContainer);
+            for (JsonElement effect : effectJson)
             {
-                elems.add(datum);
+                JsonObject inner = effect.getAsJsonObject().getAsJsonObject(itemEffectVarContainer);
+                
+                String name = inner.get("name").getAsString();
+                if (name.startsWith("STRING_HASH: "))
+                {
+                    name = name.substring("STRING_HASH: ".length());
+                }
+                JsonElement value = inner.get("value");
+                
+                JsonObject temp = new JsonObject();
+                temp.add("name", new JsonPrimitive(name));
+                temp.add("value", value);
+                effects.add(temp);
             }
-            elems.sort(Comparator.comparingInt(a -> a.getAsJsonObject().get("id").getAsInt()));
-            itemData = new JsonArray();
-            elems.forEach(itemData::add);
             
-            JsonObject obj = new JsonObject();
-            obj.add("champions", champData);
-            obj.add("traits", traitData);
-            obj.add("items", itemData);
-            String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
-            
-            try
+            o.add("effects", effects);
+            itemData.add(mId, o);
+        }
+        
+        for (String key : itemData.keySet())
+        {
+            JsonObject fromObject = itemData.get(key).getAsJsonObject();
+            JsonArray  from       = fromObject.getAsJsonArray("from");
+            JsonArray  newFrom    = new JsonArray();
+            for (JsonElement element : from)
             {
-                Files.createDirectories(UtilHandler.CDRAGON_FOLDER.resolve("TFT"));
-                Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT").resolve(language + "_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
+                newFrom.add(itemLookup.get(element.getAsString()));
             }
-        });
+            fromObject.add("from", newFrom);
+        }
+        
+        JsonObject obj = new JsonObject();
+        obj.add("champions", champData);
+        obj.add("traits", traitData);
+        obj.add("items", itemData);
+        String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
+        
+        try
+        {
+            Files.createDirectories(UtilHandler.CDRAGON_FOLDER.resolve("TFT"));
+            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            
+            descs.forEach((lang, vals) -> {
+                try
+                {
+                    final String[] alteredData = {data};
+                    vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
+                    Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            });
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     @Test
@@ -516,7 +495,7 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "HPThreshold";
+        String toHash = "attackcount";
         String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
         System.out.println(output);
     }
@@ -525,19 +504,25 @@ public class TestDivStuff
     public void testBinHashFromFile() throws IOException
     {
         List<String> unknowns = Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt"));
+        Path         output   = UtilHandler.CDRAGON_FOLDER.resolve("newhash.json");
         
-        Path        binhash  = UtilHandler.CDRAGON_FOLDER.resolve("wordsToTest.txt");
-        Set<String> possible = new HashSet<>(Files.readAllLines(binhash));
-        Map<String, String> hashed = possible.stream()
-                                             .map(l -> l.substring(9))
-                                             .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
-                                             .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
+        Map<String, String> hashed = new HashSet<>(Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("wordsToTest.txt")))
+                .stream()
+                .map(l -> l.substring(9))
+                .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
+                .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
         
         hashed.forEach((key, value) -> {
             if (unknowns.contains(value))
             {
-                String formatted = String.format("\"%s\":\"%s\",", value, key);
-                System.out.println(formatted);
+                String formatted = String.format("\"%s\":\"%s\",%n", value, key);
+                try
+                {
+                    Files.write(output, formatted.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
             }
         });
     }

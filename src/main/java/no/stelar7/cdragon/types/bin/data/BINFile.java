@@ -64,7 +64,7 @@ public class BINFile
             }
             
             this.entries.forEach(e -> {
-                bw.writeInt(e.getLenght());
+                bw.writeInt(e.getLength());
                 bw.writeInt(Integer.parseInt(HashHandler.getBinKeyForHash(e.getHash()), 16));
                 bw.writeShort(e.getValueCount());
                 e.getValues().forEach(v -> writeBinValue(v.getType(), v, bw, true));
@@ -253,15 +253,10 @@ public class BINFile
         jw.beginObject();
         for (BINValue value : entry.getValues())
         {
-            printValue(value, jw);
+            jw.name(value.getHash());
+            printType(value.getHash(), value.getType(), value.getValue(), jw);
         }
         jw.endObject();
-    }
-    
-    private void printValue(BINValue value, JsonWriterWrapper jw) throws IOException
-    {
-        jw.name(value.getHash());
-        printType(value.getHash(), value.getType(), value.getValue(), jw);
     }
     
     // hash is here for debugging purposes
@@ -305,7 +300,7 @@ public class BINFile
             case STRING_HASH:
             {
                 String other    = data.toString();
-                String testHash = HashHandler.getBINHash(other);
+                String testHash = HashHandler.getBinHashes().getOrDefault(other, other);
                 String output   = (other.equalsIgnoreCase(testHash)) ? "STRING_HASH: " : "";
                 output += testHash;
                 jw.value(output);
@@ -378,7 +373,9 @@ public class BINFile
         jw.beginObject();
         for (Object o : value.getData())
         {
-            printValue((BINValue) o, jw);
+            BINValue other = (BINValue) o;
+            jw.name(other.getHash());
+            printType(other.getHash(), other.getType(), other.getValue(), jw);
         }
         jw.endObject();
         jw.endObject();
@@ -391,7 +388,8 @@ public class BINFile
         {
             if (o instanceof BINValue)
             {
-                printType(((BINValue) o).getHash(), ((BINValue) o).getType(), ((BINValue) o).getValue(), jw);
+                BINValue other = (BINValue) o;
+                printType(other.getHash(), other.getType(), other.getValue(), jw);
             } else if (o instanceof BINStruct)
             {
                 printStruct((BINStruct) o, jw);
@@ -401,7 +399,7 @@ public class BINFile
             } else if (value.getType() == BINValueType.STRING_HASH)
             {
                 String other  = o.toString();
-                String hash   = HashHandler.getBINHash(other);
+                String hash   = HashHandler.getBinHashes().getOrDefault(other, other);
                 String output = (other.equalsIgnoreCase(hash)) ? "STRING_HASH: " : "";
                 output += hash;
                 jw.value(output);
