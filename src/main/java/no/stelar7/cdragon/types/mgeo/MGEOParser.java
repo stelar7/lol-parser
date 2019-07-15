@@ -35,12 +35,6 @@ public class MGEOParser implements Parseable<MGEOFile>
             throw new RuntimeException("Invalid magic number! " + file.getHeader().getMagic());
         }
         
-        if (file.getHeader().getVersion() != 5)
-        {
-            throw new RuntimeException("Invalid version! " + file.getHeader().getVersion());
-        }
-        
-        
         file.setMeshes(parseMeshes(raf, file.getHeader()));
         file.setBucketGeometry(parseGeometry(raf));
         
@@ -127,13 +121,13 @@ public class MGEOParser implements Parseable<MGEOFile>
         List<MGEOFileMesh> meshes    = new ArrayList<>();
         for (int i = 0; i < meshCount; i++)
         {
-            meshes.add(parseMesh(raf, vertexBufferOffsets, indexBufferOffsets, header.isUnknown()));
+            meshes.add(parseMesh(raf, header.getVersion(), vertexBufferOffsets, indexBufferOffsets, header.isUnknown()));
         }
         
         return meshes;
     }
     
-    private MGEOFileMesh parseMesh(RandomAccessReader raf, List<Integer> vertexBufferOffsets, List<Integer> indexBufferOffsets, boolean unknown)
+    private MGEOFileMesh parseMesh(RandomAccessReader raf, int version, List<Integer> vertexBufferOffsets, List<Integer> indexBufferOffsets, boolean unknown)
     {
         MGEOFileMesh mesh = new MGEOFileMesh();
         mesh.setName(raf.readString(raf.readInt()));
@@ -197,6 +191,10 @@ public class MGEOParser implements Parseable<MGEOFile>
             subMeshes.add(parseSubmesh(raf));
         }
         mesh.setSubMeshes(subMeshes);
+        if (version >= 6)
+        {
+            raf.readByte();
+        }
         mesh.setBoundingBox(raf.readBoundingBox());
         mesh.setTransformationMatrix(raf.readMatrix4x4());
         byte padding = raf.readByte();

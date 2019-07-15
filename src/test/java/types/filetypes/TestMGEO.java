@@ -13,15 +13,8 @@ public class TestMGEO
     public void testMGEO()
     {
         MGEOParser parser = new MGEOParser();
-        
-        // v5 file
-        Path file = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\74517e3dd13f5d7f.mapgeo");
-        
-        // v6 file
-        // Path file = UtilHandler.DOWNLOADS_FOLDER.resolve("cdragon\\9a61cbe95992f8ce.mapgeo");
-        
-        System.out.println("Parsing: " + file.toString());
-        MGEOFile data = parser.parse(file);
+        Path       file   = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\maps\\mapgeometry\\map22\\base.mapgeo");
+        MGEOFile   data   = parser.parse(file);
         System.out.println();
     }
     

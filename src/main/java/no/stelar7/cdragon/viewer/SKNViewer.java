@@ -46,11 +46,11 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        Path               path   = UtilHandler.CDRAGON_FOLDER.resolve("cdragon");
-        SKNFile            skn    = new SKNParser().parse(path.resolve("ghosty_tier2.companions.skn"));
-        SKLFile            skl    = new SKLParser().parse(path.resolve("ghosty_tier2.companions.skl"));
+        Path               path   = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\assets\\characters\\corki\\skins\\base");
+        SKNFile            skn    = new SKNParser().parse(path.resolve("corki.skn"));
+        SKLFile            skl    = new SKLParser().parse(path.resolve("corki.skl"));
         List<ReadableBone> bones  = skl.toReadableBones();
-        BufferedImage      texImg = new DDSParser().parse(path.resolve("npc_pet_ghosty_fire_tx_cm.dds"));
+        BufferedImage      texImg = new DDSParser().parse(path.resolve("corki.dds"));
         
         for (SKNMaterial submesh : skn.getMaterials())
         {
