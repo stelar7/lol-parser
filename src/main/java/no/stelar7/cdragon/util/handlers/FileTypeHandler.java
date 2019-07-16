@@ -2,7 +2,6 @@ package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
 import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.*;
@@ -93,6 +92,12 @@ public final class FileTypeHandler
             return "preload";
         }
         
+        if (FileTypeHandler.isProbableKTX(magic))
+        {
+            // OpenGL ES shaders
+            return "ktx";
+        }
+        
         if (FileTypeHandler.isProbableGLSLF(magic))
         {
             //  OpenGL fragment profile
@@ -110,13 +115,13 @@ public final class FileTypeHandler
             // Compiled Shader Object
             return "dx9-cso";
         }
-    
+        
         if (FileTypeHandler.isProbableCGC(magic))
         {
             // Compiled Shader Config
             return "dx9-cgc";
         }
-    
+        
         if (FileTypeHandler.isProbableWPK(magic))
         {
             return "wpk";
@@ -261,6 +266,11 @@ public final class FileTypeHandler
     private static boolean isProbableGLSLF(ByteArray magic)
     {
         return new String(magic.getData()).contains("// glslf output by Cg compiler");
+    }
+    
+    private static boolean isProbableKTX(ByteArray magic)
+    {
+        return magic.startsWith(new ByteArray(new byte[]{(byte) 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, (byte) 0xBB, 0x0D, 0x0A, 0x1A, 0x0A}));
     }
     
     // Compiled Shader Object

@@ -329,6 +329,7 @@ public class TestWAD
              .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".dds"))
              .forEach(file -> {
+                 System.out.println(file);
                  try
                  {
                      BufferedImage img    = dp.parse(file);
@@ -383,8 +384,9 @@ public class TestWAD
     
     private void extractWads(Path from, Path to) throws IOException
     {
-        List<String> ends  = Arrays.asList(".wad", ".wad.client");
-        List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+        //List<String> ends  = Arrays.asList(".wad", ".wad.client");
+        List<String> ends  = Arrays.asList(".wad.mobile");
+        List<String> endsc = Arrays.asList(".asdasdwad.compressed", ".waasdasdasdd.client.compressed");
         
         WADParser parser = new WADParser();
         Files.walk(from)
