@@ -329,7 +329,6 @@ public class TestWAD
              .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".dds"))
              .forEach(file -> {
-                 System.out.println(file);
                  try
                  {
                      BufferedImage img    = dp.parse(file);
@@ -384,9 +383,9 @@ public class TestWAD
     
     private void extractWads(Path from, Path to) throws IOException
     {
-        //List<String> ends  = Arrays.asList(".wad", ".wad.client");
-        List<String> ends  = Arrays.asList(".wad.mobile");
-        List<String> endsc = Arrays.asList(".asdasdwad.compressed", ".waasdasdasdd.client.compressed");
+        List<String> ends  = Arrays.asList(".wad", ".wad.client");
+        List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+        List<String> endsm = Collections.singletonList(".wad.mobile");
         
         WADParser parser = new WADParser();
         Files.walk(from)
@@ -414,6 +413,13 @@ public class TestWAD
                      System.out.println("Extracting from " + filename);
                      WADFile parsed = parser.parseCompressed(file);
                      parsed.extractFiles(to, parent);
+                 }
+    
+                 if (endsm.stream().anyMatch(child::endsWith))
+                 {
+                     System.out.println("Extracting from " + filename);
+                     WADFile parsed = parser.parseReadOnly(file);
+                     parsed.extractFiles(to.resolveSibling("mobile"), parent);
                  }
             
                  //file.toFile().delete();

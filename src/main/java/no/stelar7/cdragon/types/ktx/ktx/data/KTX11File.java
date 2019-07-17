@@ -70,11 +70,11 @@ public class KTX11File
                     byte[] data     = ByteBuffer.allocate(8).putLong(swapped).array();
                     byte[] unpacked = unpackETCBlock(data, alpha);
                     
-                    for (int x = xImage + xStart; x < xImage + xStart + 4; x++)
+                    for (int xPos = 0, x = xImage + xStart; x < xImage + xStart + 4; x++, xPos++)
                     {
-                        for (int y = yImage + yStart; y < yImage + yStart + 4; y++)
+                        for (int yPos = 0, y = yImage + yStart; y < yImage + yStart + 4; y++, yPos++)
                         {
-                            output.put((x * height) + y, );
+                            output.put((x * height) + y, unpacked[(xPos * 4) + yPos]);
                         }
                     }
                 }
@@ -90,6 +90,9 @@ public class KTX11File
         boolean flip_flag    = (block[3] & 1) != 0;
         int     table_index0 = (block[3] >> 5) & 7;
         int     table_index1 = (block[3] >> 2) & 7;
+     
+        return block;
+        /*
         
         // 4xRGBA
         byte[][] subblock_colors0 = new byte[4][4];
@@ -187,6 +190,7 @@ public class KTX11File
         }
         
         return pDst;
+         */
     }
     
 }
