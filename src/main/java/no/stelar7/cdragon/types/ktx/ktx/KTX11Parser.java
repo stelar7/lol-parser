@@ -93,6 +93,12 @@ public class KTX11Parser implements Parseable<KTX11File>
         KTX11FileHeader header = new KTX11FileHeader();
         header.setIdentifier(raf.readBytes(12));
         header.setEndianness(raf.readInt());
+        
+        if (header.getEndianness() == 0x01020304)
+        {
+            header.setReversedEndian(true);
+        }
+        
         header.setGlType(raf.readInt());
         header.setGlTypeSize(raf.readInt());
         header.setGlFormat(raf.readInt());

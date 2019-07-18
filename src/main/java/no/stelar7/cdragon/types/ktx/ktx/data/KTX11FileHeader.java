@@ -5,22 +5,34 @@ import java.util.*;
 public class KTX11FileHeader
 {
     
-    private byte[] identifier;
-    private int    endianness;
-    private int    glType;
-    private int    glTypeSize;
-    private int    glFormat;
-    private String glFormatString;
-    private int    glInternalFormat;
-    private String glInternalFormatString;
-    private int    glBaseInternalFormat;
-    private int    pixelWidth;
-    private int    pixelHeight;
-    private int    pixelDepth;
-    private int    numberOfArrayElements;
-    private int    numberOfFaces;
-    private int    numberOfMipmapLevels;
-    private int    bytesOfKeyValueData;
+    private byte[]  identifier;
+    private int     endianness;
+    private boolean reversedEndian;
+    private int     glType;
+    private int     glTypeSize;
+    private int     glFormat;
+    private String  glFormatString;
+    private int     glInternalFormat;
+    private String  glInternalFormatString;
+    private int     glBaseInternalFormat;
+    private int     pixelWidth;
+    private int     pixelHeight;
+    private int     pixelDepth;
+    private int     numberOfArrayElements;
+    private int     numberOfFaces;
+    private int     numberOfMipmapLevels;
+    private int     bytesOfKeyValueData;
+    
+    public boolean isReversedEndian()
+    {
+        return reversedEndian;
+    }
+    
+    
+    public void setReversedEndian(boolean reversedEndian)
+    {
+        this.reversedEndian = reversedEndian;
+    }
     
     public String getGlFormatString()
     {
@@ -239,6 +251,7 @@ public class KTX11FileHeader
         return "KTX11File{" +
                "identifier=" + Arrays.toString(identifier) +
                ", endianness=" + endianness +
+               ", reversedEndian=" + isReversedEndian() +
                ", glType=" + glType +
                ", glTypeSize=" + glTypeSize +
                ", glFormat=" + this.glFormatString +

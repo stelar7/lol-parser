@@ -3,7 +3,7 @@ package no.stelar7.cdragon.types.ktx.ktx.data;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.writers.ByteWriter;
 
-import java.nio.ByteBuffer;
+import java.nio.*;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -67,7 +67,9 @@ public class KTX11File
                     int xStart = (z == 0 || z == 1 ? 0 : 4);
                     int yStart = (z == 0 || z == 2 ? 0 : 4);
                     
-                    long read = input.getLong();
+                    long read    = input.getLong();
+                    long swapped = Long.reverseBytes(read);
+                    /*
                     long swapped = ((read & 0x00000000000000FFL) << 56) |
                                    ((read & 0x000000000000FF00L) << 40) |
                                    ((read & 0x0000000000FF0000L) << 24) |
@@ -76,7 +78,9 @@ public class KTX11File
                                    ((read & 0x0000FF0000000000L) >> 24) |
                                    ((read & 0x00FF000000000000L) >> 40) |
                                    ((read & 0xFF00000000000000L) >> 56);
-                    byte[]      data     = ByteBuffer.allocate(8).putLong(swapped).array();
+                     */
+                    
+                    byte[]      data     = ByteBuffer.allocate(8).putLong(swapped).order(ByteOrder.LITTLE_ENDIAN).array();
                     ColorQuad[] unpacked = unpackETCBlock(data, alpha);
                     
                     int indexA = 0;

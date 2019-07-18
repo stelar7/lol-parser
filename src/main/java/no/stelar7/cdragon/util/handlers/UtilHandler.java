@@ -373,14 +373,8 @@ public final class UtilHandler
                 if (count == 0)
                 {
                     List<JsonElement> list = data.getOrDefault(key, new ArrayList<>());
-                    if (key.equals("linkedBinFiles"))
-                    {
-                        data.put(key, list);
-                    } else
-                    {
-                        list.add(getJsonParser().parse(sb.toString()));
-                        data.put(key, list);
-                    }
+                    list.add(getJsonParser().parse(sb.toString()));
+                    data.put(key, list);
                     
                     sb.setLength(0);
                     json = json.substring(++i);
