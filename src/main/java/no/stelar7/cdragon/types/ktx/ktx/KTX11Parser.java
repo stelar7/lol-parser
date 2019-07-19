@@ -31,7 +31,6 @@ public class KTX11Parser implements Parseable<KTX11File>
         data.setHeader(parseHeader(raf));
         data.setKeyValueData(parseKeyValueData(raf, data.getHeader().getBytesOfKeyValueData()));
         data.setMipMaps(parseMipMaps(raf, data.getHeader()));
-        
         return data;
     }
     
@@ -40,22 +39,45 @@ public class KTX11Parser implements Parseable<KTX11File>
         boolean isGL_PALETTEFormat = header.getGlInternalFormat() >= 0x8b90 && header.getGlInternalFormat() <= 0x8b99;
         int     mipCount           = isGL_PALETTEFormat ? 1 : Math.max(1, header.getNumberOfMipmapLevels());
         
-        KTX11FileMipMap map = new KTX11FileMipMap();
+        KTX11FileMipMap map      = new KTX11FileMipMap();
+        int             width    = header.getPixelWidth();
+        int             height   = header.getPixelHeight();
+        int             exWidth  = ((width + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth();
+        int             exHeight = ((height + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight();
         for (int mipmap_level = 0; mipmap_level < mipCount; mipmap_level++)
         {
             map.setImageSize(raf.readInt());
-            int faces = header.getNumberOfFaces();
-            if (!(header.getNumberOfFaces() == 6 && header.getNumberOfArrayElements() == 0))
+            int nominalSize = (header.getExtendedHeight() / header.getTextureFormat().getBlockHeight()) * (header.getExtendedWidth() / header.getTextureFormat().getBlockWidth());
+            if (map.getImageSize() != nominalSize * header.getBytesPerBlock())
             {
-                faces = 1;
+                throw new RuntimeException("Mipmap size does not match expected size");
             }
             
-            for (int face = 0; face < faces; face++)
+            KTX11FileMipMapTexture tex = new KTX11FileMipMapTexture();
+            tex.setFormat(header.getTextureFormat());
+            tex.setWidth(header.getPixelWidth());
+            tex.setHeight(header.getPixelHeight());
+            tex.setWidthInBlocks(exWidth / header.getTextureFormat().getBlockWidth());
+            tex.setHeightInBlocks(exWidth / header.getTextureFormat().getBlockHeight());
+            tex.setData(raf.readBytes(nominalSize * header.getBytesPerBlock()));
+            map.setTextureData(mipmap_level, tex);
+            
+            if (tex.getData().length < nominalSize * header.getBytesPerBlock())
             {
-                map.setTextureData(mipmap_level, raf.readBytes(map.getImageSize()));
+                throw new RuntimeException("Read image size does not match expected size");
+            }
+            
+            width >>= 1;
+            height >>= 1;
+            exWidth = ((width + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth();
+            exHeight = ((height + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight();
+            
+            if (mipmap_level + 1 < mipCount)
+            {
+                int padding = 3 - ((map.getImageSize() + 3) % 4);
+                raf.readBytes(padding);
             }
         }
-        
         
         return map;
     }
@@ -111,6 +133,29 @@ public class KTX11Parser implements Parseable<KTX11File>
         header.setNumberOfFaces(raf.readInt());
         header.setNumberOfMipmapLevels(raf.readInt());
         header.setBytesOfKeyValueData(raf.readInt());
+        header.setTextureFormat(findTextureFormat(header.getGlInternalFormat(), header.getGlFormat(), header.getGlType()));
+        header.setBytesPerBlock(header.getGlFormat() == 0 ? header.getTextureFormat().getCompressedBlockSize() : header.getTextureFormat().getPixelSize());
+        header.setExtendedWidth(((header.getPixelWidth() + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth());
+        header.setExtendedHeight(((header.getPixelHeight() + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight());
         return header;
+    }
+    
+    private TextureFormat findTextureFormat(int glInternalFormat, int glFormat, int glType)
+    {
+        for (TextureFormat format : TextureFormat.values())
+        {
+            if (format.getGlInternalFormat() != 0 && format.getGlInternalFormat() == glInternalFormat)
+            {
+                if (format.getGlFormat() == 0)
+                {
+                    return format;
+                }
+                if (format.getGlFormat() == glFormat && format.getGlType() == glType)
+                {
+                    return format;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -4,8 +4,8 @@ import java.util.*;
 
 public class KTX11FileMipMap
 {
-    int                  imageSize;
-    Map<Integer, byte[]> textureData = new HashMap<>();
+    int                                  imageSize;
+    Map<Integer, KTX11FileMipMapTexture> textureData = new HashMap<>();
     
     public int getImageSize()
     {
@@ -17,14 +17,14 @@ public class KTX11FileMipMap
         this.imageSize = imageSize;
     }
     
-    public Map<Integer, byte[]> getTextureData()
+    public Map<Integer, KTX11FileMipMapTexture> getTextureData()
     {
         return textureData;
     }
     
-    public void setTextureData(int level, byte[] textureData)
+    public void setTextureData(int level, KTX11FileMipMapTexture texture)
     {
-        this.textureData.put(level, textureData);
+        this.textureData.put(level, texture);
     }
     
     

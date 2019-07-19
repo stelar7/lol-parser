@@ -1,9 +1,8 @@
 package no.stelar7.cdragon.types.ktx.ktx.data;
 
-import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.writers.ByteWriter;
 
-import java.nio.*;
+import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -44,70 +43,329 @@ public class KTX11File
         this.keyValueData = keyValueData;
     }
     
-    private ByteBuffer unpackETC(int level, boolean alpha)
+    public void decompressETC(int level)
     {
-        // assume no alpha
-        ByteBuffer input  = ByteBuffer.wrap(mipMaps.getTextureData().get(level));
-        ByteBuffer output = ByteBuffer.allocate(this.getHeader().getPixelWidth() * this.header.getPixelHeight());
+        TextureFormat          outputFormat = TextureFormat.PIXEL_FORMAT_RGB8;
+        KTX11FileMipMapTexture tex          = mipMaps.getTextureData().get(level);
+        int                    size         = outputFormat.getPixelSize() * tex.getWidth() * tex.getHeight();
+        ByteBuffer             input        = ByteBuffer.wrap(tex.getData());
+        ByteBuffer             output       = ByteBuffer.allocate(size);
         
-        int width  = this.header.getPixelWidth() >> level;
-        int height = this.header.getPixelHeight() >> level;
-        
-        for (int xImage = 0; xImage < width; xImage += 8)
+        if (!tex.getFormat().isCompressed())
         {
-            for (int yImage = 0; yImage < height; yImage += 8)
-            {
-                for (int z = 0; z < 4; z++)
-                {
-                    if (input.remaining() < 8)
-                    {
-                        return output;
-                    }
-                    
-                    int xStart = (z == 0 || z == 1 ? 0 : 4);
-                    int yStart = (z == 0 || z == 2 ? 0 : 4);
-                    
-                    long read    = input.getLong();
-                    long swapped = Long.reverseBytes(read);
-                    /*
-                    long swapped = ((read & 0x00000000000000FFL) << 56) |
-                                   ((read & 0x000000000000FF00L) << 40) |
-                                   ((read & 0x0000000000FF0000L) << 24) |
-                                   ((read & 0x00000000FF000000L) << 8) |
-                                   ((read & 0x000000FF00000000L) >> 8) |
-                                   ((read & 0x0000FF0000000000L) >> 24) |
-                                   ((read & 0x00FF000000000000L) >> 40) |
-                                   ((read & 0xFF00000000000000L) >> 56);
-                     */
-                    
-                    byte[]      data     = ByteBuffer.allocate(8).putLong(swapped).order(ByteOrder.LITTLE_ENDIAN).array();
-                    ColorQuad[] unpacked = unpackETCBlock(data, alpha);
-                    
-                    int indexA = 0;
-                    int indexB = 0;
-                    for (int x = xImage + xStart; x < xImage + xStart + 4; x++)
-                    {
-                        for (int y = yImage + yStart; y < yImage + yStart + 4; y++)
-                        {
-                            output.put((x * height) + y, unpacked[indexA].get(indexB));
-                            indexB++;
-                            if (indexB == 4)
-                            {
-                                indexA++;
-                                indexB = 0;
-                            }
-                        }
-                    }
-                }
-            }
+            convertPixels(input, tex.getWidth() * tex.getHeight(), tex.getFormat(), output, outputFormat);
         }
         
-        return output;
+        ByteBuffer blockBuffer = ByteBuffer.allocate(256);
+        int        pixelSize   = outputFormat.getPixelSize();
+        int        dataOffset  = 0;
+        for (int y = 0; y < tex.getHeightInBlocks(); y++)
+        {
+            int rows = 4;
+            if ((y * 4) + 3 >= tex.getHeight())
+            {
+                rows = tex.getHeight() - (y * 4);
+            }
+            
+            for (int x = 0; x < tex.getWidthInBlocks(); x++)
+            {
+                decompressBlock(input, dataOffset, tex.getFormat(), 0XFFFFFFFF, 0, blockBuffer, outputFormat);
+                
+                int blockSize = pixelSize * 16;
+                int pixelPos  = y * 4 * tex.getWidth() * pixelSize + x * 4 * pixelSize;
+                int columns   = 4;
+                if ((x * 4) + 3 >= tex.getWidth())
+                {
+                    columns = tex.getWidth() - (x * 4);
+                }
+                
+                for (int row = 0; row < rows; row++)
+                {
+                    byte[] buffer = new byte[columns * pixelSize];
+                    input.get(buffer, row * 4 * pixelSize, buffer.length);
+                    output.put(buffer, pixelPos + row * tex.getWidth() * pixelSize, buffer.length);
+                }
+                
+                dataOffset += tex.getFormat().getCompressedBlockSize();
+            }
+            
+        }
+        
+        
+        System.out.println();
     }
+    
+    private void decompressBlock(ByteBuffer bitstring, int bitstringOffset, TextureFormat format, int modeMask, int flags, ByteBuffer pixelBuffer, TextureFormat pixelFormat)
+    {
+        ByteBuffer blockBuffer = ByteBuffer.allocate(256);
+        byte[]     data        = ByteBuffer.allocate(8).putLong(bitstring.getLong(bitstringOffset)).array();
+        decompressionFunctions.get(format.getCompressedFormat()).apply(data, modeMask, flags, blockBuffer);
+        convertPixels(blockBuffer, 16, format, pixelBuffer, pixelFormat);
+    }
+    
+    private void convertPixels(ByteBuffer input, int pixelCount, TextureFormat sourceFormat, ByteBuffer output, TextureFormat destFormat)
+    {
+        if (sourceFormat == destFormat)
+        {
+            return;
+        }
+        
+        convertionFunctions.get(sourceFormat).get(destFormat).apply(input, pixelCount, output);
+        System.out.println();
+    }
+    
+    @FunctionalInterface
+    interface TriFunction<A, B, C, R>
+    {
+        R apply(A a, B b, C c);
+    }
+    
+    private static final Map<TextureFormat, Map<TextureFormat, TriFunction<ByteBuffer, Integer, ByteBuffer, Void>>> convertionFunctions = new HashMap<>()
+    
+    {
+        {
+            Map<TextureFormat, TriFunction<ByteBuffer, Integer, ByteBuffer, Void>> inner = new HashMap<>()
+            {{
+                put(TextureFormat.PIXEL_FORMAT_RGB8, (ByteBuffer input, Integer pixels, ByteBuffer output) -> {
+                    for (int i = 0; i < pixels; i++)
+                    {
+                        // RGBA32 -> RGB24
+                        int r = input.getInt() & 0xFF;
+                        int g = (input.getInt() & 0xFF) >> 8;
+                        int b = (input.getInt() & 0xFF) >> 16;
+                        int a = (input.getInt() & 0xFF) >> 24;
+                        
+                        output.putInt(r);
+                        output.putInt(g);
+                        output.putInt(b);
+                    }
+                    
+                    return null;
+                });
+            }};
+            put(TextureFormat.TEXTURE_FORMAT_ETC2, inner);
+        }
+    };
+    
+    @FunctionalInterface
+    interface QuadFunction<A, B, C, D, R>
+    {
+        R apply(A a, B b, C c, D d);
+    }
+    
+    private static final Map<Integer, QuadFunction<byte[], Integer, Integer, ByteBuffer, Boolean>> decompressionFunctions = new HashMap<>()
+    {
+        {
+            put(12, (byte[] bitstring, Integer modeMask, Integer flags, ByteBuffer pixelBuffer) -> {
+                boolean differential_mode = (bitstring[3] & 2) != 0;
+                if (differential_mode)
+                {
+                    if ((modeMask & 2) == 0)
+                    {
+                        return false;
+                    }
+                    
+                } else if ((modeMask & 1) == 0)
+                {
+                    return false;
+                }
+                
+                boolean isFlipped            = (bitstring[3] & 1) != 0;
+                int[]   base_color_subblock1 = new int[3];
+                int[]   base_color_subblock2 = new int[3];
+                
+                if (differential_mode)
+                {
+                    base_color_subblock1[0] = (bitstring[0] & 0xF8);
+                    base_color_subblock1[0] |= ((base_color_subblock1[0] & 224) >> 5);
+                    base_color_subblock1[1] = (bitstring[1] & 0xF8);
+                    base_color_subblock1[1] |= (base_color_subblock1[1] & 224) >> 5;
+                    base_color_subblock1[2] = (bitstring[2] & 0xF8);
+                    base_color_subblock1[2] |= (base_color_subblock1[2] & 224) >> 5;
+                    base_color_subblock2[0] = (bitstring[0] & 0xF8);
+                    base_color_subblock2[0] += complement3bitshifted(bitstring[0] & 7);
+                    if ((base_color_subblock2[0] & 0xFF07) > 0)
+                    {
+                        return false;
+                    }
+                    
+                    base_color_subblock2[0] |= (base_color_subblock2[0] & 224) >> 5;
+                    base_color_subblock2[1] = (bitstring[1] & 0xF8);
+                    base_color_subblock2[1] += complement3bitshifted(bitstring[1] & 7);
+                    if ((base_color_subblock2[1] & 0xFF07) > 0)
+                    {
+                        return false;
+                    }
+                    
+                    base_color_subblock2[1] |= (base_color_subblock2[1] & 224) >> 5;
+                    base_color_subblock2[2] = (bitstring[2] & 0xF8);
+                    base_color_subblock2[2] += complement3bitshifted(bitstring[2] & 7);
+                    if ((base_color_subblock2[2] & 0xFF07) > 0)
+                    {
+                        return false;
+                    }
+                    
+                    base_color_subblock2[2] |= (base_color_subblock2[2] & 224) >> 5;
+                } else
+                {
+                    base_color_subblock1[0] = (bitstring[0] & 0xF0);
+                    base_color_subblock1[0] |= base_color_subblock1[0] >> 4;
+                    base_color_subblock1[1] = (bitstring[1] & 0xF0);
+                    base_color_subblock1[1] |= base_color_subblock1[1] >> 4;
+                    base_color_subblock1[2] = (bitstring[2] & 0xF0);
+                    base_color_subblock1[2] |= base_color_subblock1[2] >> 4;
+                    base_color_subblock2[0] = (bitstring[0] & 0x0F);
+                    base_color_subblock2[0] |= base_color_subblock2[0] << 4;
+                    base_color_subblock2[1] = (bitstring[1] & 0x0F);
+                    base_color_subblock2[1] |= base_color_subblock2[1] << 4;
+                    base_color_subblock2[2] = (bitstring[2] & 0x0F);
+                    base_color_subblock2[2] |= base_color_subblock2[2] << 4;
+                }
+                int table_codeword1 = (bitstring[3] & 224) >> 5;
+                int table_codeword2 = (bitstring[3] & 28) >> 2;
+                
+                long indexA           = Integer.toUnsignedLong(Byte.toUnsignedInt(bitstring[4]) << 24);
+                long indexB           = Integer.toUnsignedLong(Byte.toUnsignedInt(bitstring[5]) << 16);
+                long indexC           = Integer.toUnsignedLong(Byte.toUnsignedInt(bitstring[6]) << 8);
+                long indexD           = Integer.toUnsignedLong(Byte.toUnsignedInt(bitstring[7]) << 0);
+                long pixel_index_word = indexA | indexB | indexC | indexD;
+                
+                if (!isFlipped)
+                {
+                    processPixelETC1(0, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(1, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(2, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(3, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(4, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(5, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(6, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(7, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(8, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(9, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(10, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(11, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(12, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(13, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(14, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(15, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                } else
+                {
+                    processPixelETC1(0, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(1, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(2, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(3, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(4, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(5, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(6, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(7, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(8, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(9, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(10, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(11, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(12, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(13, pixel_index_word, table_codeword1, base_color_subblock1, pixelBuffer);
+                    processPixelETC1(14, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                    processPixelETC1(15, pixel_index_word, table_codeword2, base_color_subblock2, pixelBuffer);
+                }
+                
+                return true;
+            });
+        }
+        
+        private void processPixelETC1(int i, long pixelIndexCode, int tableCode, int[] baseColorSubblock, ByteBuffer pixelBuffer)
+        {
+            int pixelIndex = (int) (((pixelIndexCode & (1 << i)) >> i) | ((pixelIndexCode & (0x10000 << i)) >> (16 + i - 1)));
+            int modifier   = modifierTable[tableCode][pixelIndex];
+            int r          = clampTable[baseColorSubblock[0] + modifier + 255];
+            int g          = clampTable[baseColorSubblock[1] + modifier + 255];
+            int b          = clampTable[baseColorSubblock[2] + modifier + 255];
+            int index      = (i & 3) * 4 + ((i & 12) >> 2);
+            int value      = pack32RGB8A0xFF(r, g, b);
+            pixelBuffer.putInt(index, value);
+        }
+        
+        private int pack32RGB8A0xFF(int r, int g, int b)
+        {
+            return pack32RGB8A(r, g, b, 0xff);
+        }
+        
+        private int pack32RGB8A(int r, int g, int b, int a)
+        {
+            return (r | (g << 8) | (b << 16) | (a << 24));
+        }
+        
+        int[] clampTable = new int[]{
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32,
+                33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+                49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
+                65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
+                81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96,
+                97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
+                113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128,
+                129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144,
+                145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160,
+                161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176,
+                177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192,
+                193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208,
+                209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224,
+                225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240,
+                241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+                255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+        };
+        
+        int[][] modifierTable = new int[][]{
+                {2, 8, -2, -8},
+                {5, 17, -5, -17},
+                {9, 29, -9, -29},
+                {13, 42, -13, -42},
+                {18, 60, -18, -60},
+                {24, 80, -24, -80},
+                {33, 106, -33, -106},
+                {47, 183, -47, -183}
+        };
+        
+        private int complement3bitshifted(int i)
+        {
+            return new int[]{0, 8, 16, 24, -32, -24, -16, -8}[i];
+        }
+    };
+    
     
     public void toImage(int level, Path output)
     {
-        byte[] data = UtilHandler.bytebufferToArray(unpackETC(level, false));
+        byte[] data = new byte[0];//UtilHandler.bytebufferToArray(unpackETC(level, false));
         
         ByteWriter bw             = new ByteWriter();
         int        fileHeaderSize = 14;
@@ -147,448 +405,6 @@ public class KTX11File
         }
         
         bw.save(output);
-    }
-    
-    class ColorQuad
-    {
-        private byte r;
-        private byte g;
-        private byte b;
-        private byte a;
-        
-        public ColorQuad(int r, int g, int b, int a)
-        {
-            this.r = (byte) r;
-            this.g = (byte) g;
-            this.b = (byte) b;
-            this.a = (byte) a;
-        }
-        
-        public ColorQuad()
-        {
-        }
-        
-        public void setRGB(ColorQuad other)
-        {
-            this.r = other.r;
-            this.g = other.g;
-            this.b = other.b;
-        }
-        
-        public byte get(int index)
-        {
-            switch (index)
-            {
-                case 0:
-                    return r;
-                case 1:
-                    return g;
-                case 2:
-                    return b;
-                case 3:
-                    return a;
-                default:
-                    throw new RuntimeException("Index out of range");
-            }
-        }
-        
-        public void set(int r, int g, int b)
-        {
-            this.r = (byte) r;
-            this.g = (byte) g;
-            this.b = (byte) b;
-        }
-    }
-    
-    class ETCBlock
-    {
-        private byte[] data;
-        
-        public ETCBlock(long input)
-        {
-            this.data = new byte[8];
-            for (int i = 7; i >= 0; i--)
-            {
-                data[i] = (byte) (input & 0xFF);
-                input >>= 8;
-            }
-        }
-        
-        public ETCBlock(byte[] input)
-        {
-            this.data = input;
-        }
-        
-        public boolean getDiffBit()
-        {
-            return (data[3] & 2) != 0;
-        }
-        
-        public boolean getFlipBit()
-        {
-            return (data[3] & 1) != 0;
-        }
-        
-        public int getIntenTable(int i)
-        {
-            int offset = i > 0 ? 2 : 5;
-            return (data[3] >> offset) & 7;
-        }
-        
-        public int getSelector(int x, int y)
-        {
-            int bit_index    = x * 4 + y;
-            int byte_bit_ofs = bit_index & 7;
-            int index        = 7 - (bit_index >> 3);
-            int lsb          = (data[index + 0] >> byte_bit_ofs) & 1;
-            int msb          = (data[index - 2] >> byte_bit_ofs) & 1;
-            int val          = lsb | (msb << 1);
-            
-            switch (val)
-            {
-                case 0:
-                    return 2;
-                case 1:
-                    return 3;
-                case 2:
-                    return 1;
-                case 3:
-                    return 0;
-                default:
-                    throw new RuntimeException("Invalid index");
-            }
-        }
-        
-        public short getBase5Color()
-        {
-            int r = getByteBits(59, 5);
-            int g = getByteBits(51, 5);
-            int b = getByteBits(43, 5);
-            return (short) (b | (g << 5) | (r << 10));
-        }
-        
-        public short getDelta3Color()
-        {
-            int r = getByteBits(56, 3);
-            int g = getByteBits(48, 3);
-            int b = getByteBits(40, 3);
-            return (short) (b | (g << 3) | (r << 6));
-        }
-        
-        public short getBase4(int i)
-        {
-            int r;
-            int g;
-            int b;
-            
-            if (i > 0)
-            {
-                r = getByteBits(56, 4);
-                g = getByteBits(48, 4);
-                b = getByteBits(40, 4);
-            } else
-            {
-                r = getByteBits(60, 4);
-                g = getByteBits(52, 4);
-                b = getByteBits(44, 4);
-            }
-            
-            return (short) (b | (g << 4) | (r << 8));
-        }
-        
-        public byte getByteBits(int offset, int num)
-        {
-            int byte_ofs     = 7 - (offset >> 3);
-            int byte_bit_ofs = offset & 7;
-            return (byte) ((data[byte_ofs] >> byte_bit_ofs) & ((1 << num) - 1));
-        }
-        
-        public void getDiffSubblockColor(ColorQuad[] dest, short base5, int tableIndex)
-        {
-            int[][] g_etc1_inten_tables =
-                    {
-                            {-8, -2, 2, 8}, {-17, -5, 5, 17}, {-29, -9, 9, 29}, {-42, -13, 13, 42},
-                            {-60, -18, 18, 60}, {-80, -24, 24, 80}, {-106, -33, 33, 106}, {-183, -47, 47, 183}
-                    };
-            
-            
-            int[] intenTable = g_etc1_inten_tables[tableIndex];
-            int[] rgb        = new int[3];
-            
-            unpack_color5(rgb, base5, true, 0);
-            int ir = rgb[0];
-            int ig = rgb[1];
-            int ib = rgb[2];
-            
-            int y0 = intenTable[0];
-            dest[0].set(ir + y0, ig + y0, ib + y0);
-            
-            int y1 = intenTable[1];
-            dest[1].set(ir + y1, ig + y1, ib + y1);
-            
-            int y2 = intenTable[2];
-            dest[2].set(ir + y2, ig + y2, ib + y2);
-            
-            int y3 = intenTable[3];
-            dest[3].set(ir + y3, ig + y3, ib + y3);
-        }
-        
-        private void unpack_color5(int[] rgb, short base5, boolean scaled, int alpha)
-        {
-            int b = base5 & 31;
-            int g = (base5 >> 5) & 31;
-            int r = (base5 >> 10) & 31;
-            
-            if (scaled)
-            {
-                b = (b << 3) | (b >> 2);
-                g = (g << 3) | (g >> 2);
-                r = (r << 3) | (r >> 2);
-            }
-            
-            rgb[0] = r;
-            rgb[1] = g;
-            rgb[2] = b;
-        }
-        
-        private void unpack_color5(int[] rgb, short base5, short delta3, boolean scaled, int alpha)
-        {
-            int[] drgb = new int[3];
-            unpack_delta3(drgb, delta3);
-            
-            int b = (base5 & 31) + drgb[2];
-            int g = ((base5 >> 5) & 31) + drgb[1];
-            int r = ((base5 >> 10) & 31) + drgb[0];
-            
-            if ((r | g | b) > 31)
-            {
-                r = Math.max(0, Math.min(31, r));
-                g = Math.max(0, Math.min(31, g));
-                b = Math.max(0, Math.min(31, b));
-            }
-            
-            if (scaled)
-            {
-                b = (b << 3) | (b >> 2);
-                g = (g << 3) | (g >> 2);
-                r = (r << 3) | (r >> 2);
-            }
-            
-            rgb[0] = r;
-            rgb[1] = g;
-            rgb[2] = b;
-        }
-        
-        
-        private void unpack_color4(int[] rgb, short packed4, boolean scaled, int alpha)
-        {
-            int b = packed4 & 15;
-            int g = (packed4 >> 4) & 15;
-            int r = (packed4 >> 8) & 15;
-            
-            if (scaled)
-            {
-                b = (b << 4) | b;
-                g = (g << 4) | g;
-                r = (r << 4) | r;
-            }
-            
-            rgb[0] = r;
-            rgb[1] = g;
-            rgb[2] = b;
-        }
-        
-        private void unpack_delta3(int[] drgb, short delta3)
-        {
-            int r = (drgb[0] >> 6) & 7;
-            int g = (drgb[1] >> 3) & 7;
-            int b = drgb[2] & 7;
-            
-            if (r >= 4)
-            {
-                r -= 8;
-            }
-            
-            if (g >= 4)
-            {
-                g -= 8;
-            }
-            
-            if (b >= 4)
-            {
-                b -= 8;
-            }
-            
-            drgb[0] = r;
-            drgb[1] = g;
-            drgb[2] = b;
-        }
-        
-        public void getDiffSubblockColor(ColorQuad[] dest, short base5, short delta3, int tableIndex)
-        {
-            int[][] g_etc1_inten_tables =
-                    {
-                            {-8, -2, 2, 8}, {-17, -5, 5, 17}, {-29, -9, 9, 29}, {-42, -13, 13, 42},
-                            {-60, -18, 18, 60}, {-80, -24, 24, 80}, {-106, -33, 33, 106}, {-183, -47, 47, 183}
-                    };
-            
-            int[] intenTable = g_etc1_inten_tables[tableIndex];
-            int[] rgb        = new int[3];
-            unpack_color5(rgb, base5, delta3, true, 0);
-            int ir = rgb[0];
-            int ig = rgb[1];
-            int ib = rgb[2];
-            
-            int y0 = intenTable[0];
-            dest[0].set(ir + y0, ig + y0, ib + y0);
-            
-            int y1 = intenTable[1];
-            dest[1].set(ir + y1, ig + y1, ib + y1);
-            
-            int y2 = intenTable[2];
-            dest[2].set(ir + y2, ig + y2, ib + y2);
-            
-            int y3 = intenTable[3];
-            dest[3].set(ir + y3, ig + y3, ib + y3);
-        }
-        
-        public void getAbsSubblockColor(ColorQuad[] dest, short packed4, int tableIndex)
-        {
-            int[][] g_etc1_inten_tables =
-                    {
-                            {-8, -2, 2, 8}, {-17, -5, 5, 17}, {-29, -9, 9, 29}, {-42, -13, 13, 42},
-                            {-60, -18, 18, 60}, {-80, -24, 24, 80}, {-106, -33, 33, 106}, {-183, -47, 47, 183}
-                    };
-            
-            int[] intenTable = g_etc1_inten_tables[tableIndex];
-            int[] rgb        = new int[3];
-            unpack_color4(rgb, packed4, true, 0);
-            
-            int ir = rgb[0];
-            int ig = rgb[1];
-            int ib = rgb[2];
-            
-            int y0 = intenTable[0];
-            dest[0].set(ir + y0, ig + y0, ib + y0);
-            
-            int y1 = intenTable[1];
-            dest[1].set(ir + y1, ig + y1, ib + y1);
-            
-            int y2 = intenTable[2];
-            dest[2].set(ir + y2, ig + y2, ib + y2);
-            
-            int y3 = intenTable[3];
-            dest[3].set(ir + y3, ig + y3, ib + y3);
-        }
-    }
-    
-    ColorQuad[] unpackETCBlock(byte[] input, boolean alpha)
-    {
-        ColorQuad[] pDst = new ColorQuad[4 * 4];
-        
-        ETCBlock block = new ETCBlock(input);
-        
-        boolean diff_flag    = block.getDiffBit();
-        boolean flip_flag    = block.getFlipBit();
-        int     table_index0 = block.getIntenTable(0);
-        int     table_index1 = block.getIntenTable(1);
-        
-        ColorQuad[] subblock_colors0 = new ColorQuad[4];
-        ColorQuad[] subblock_colors1 = new ColorQuad[4];
-        Arrays.fill(subblock_colors0, new ColorQuad());
-        Arrays.fill(subblock_colors1, new ColorQuad());
-        
-        if (diff_flag)
-        {
-            short base5  = block.getBase5Color();
-            short delta3 = block.getDelta3Color();
-            block.getDiffSubblockColor(subblock_colors0, base5, table_index0);
-            block.getDiffSubblockColor(subblock_colors1, base5, delta3, table_index1);
-        } else
-        {
-            short base40 = block.getBase4(0);
-            short base41 = block.getBase4(1);
-            block.getAbsSubblockColor(subblock_colors0, base40, table_index0);
-            block.getAbsSubblockColor(subblock_colors1, base41, table_index1);
-        }
-        
-        int index = 0;
-        if (alpha)
-        {
-            if (flip_flag)
-            {
-                for (int y = 0; y < 2; y++)
-                {
-                    pDst[index + 0].setRGB(subblock_colors0[block.getSelector(0, y)]);
-                    pDst[index + 1].setRGB(subblock_colors0[block.getSelector(1, y)]);
-                    pDst[index + 2].setRGB(subblock_colors0[block.getSelector(2, y)]);
-                    pDst[index + 3].setRGB(subblock_colors0[block.getSelector(3, y)]);
-                    index += 4;
-                }
-                
-                for (int y = 2; y < 4; y++)
-                {
-                    pDst[index + 0].setRGB(subblock_colors1[block.getSelector(0, y)]);
-                    pDst[index + 1].setRGB(subblock_colors1[block.getSelector(1, y)]);
-                    pDst[index + 2].setRGB(subblock_colors1[block.getSelector(2, y)]);
-                    pDst[index + 3].setRGB(subblock_colors1[block.getSelector(3, y)]);
-                    index += 4;
-                }
-            } else
-            {
-                for (int y = 0; y < 4; y++)
-                {
-                    pDst[index + 0].setRGB(subblock_colors0[block.getSelector(0, y)]);
-                    pDst[index + 1].setRGB(subblock_colors0[block.getSelector(1, y)]);
-                    pDst[index + 2].setRGB(subblock_colors1[block.getSelector(2, y)]);
-                    pDst[index + 3].setRGB(subblock_colors1[block.getSelector(3, y)]);
-                    index += 4;
-                }
-            }
-        } else
-        {
-            if (flip_flag)
-            {
-                // 0000
-                // 0000
-                // 1111
-                // 1111
-                for (int y = 0; y < 2; y++)
-                {
-                    pDst[index + 0] = subblock_colors0[block.getSelector(0, y)];
-                    pDst[index + 1] = subblock_colors0[block.getSelector(1, y)];
-                    pDst[index + 2] = subblock_colors0[block.getSelector(2, y)];
-                    pDst[index + 3] = subblock_colors0[block.getSelector(3, y)];
-                    index += 4;
-                }
-                
-                for (int y = 2; y < 4; y++)
-                {
-                    pDst[index + 0] = subblock_colors1[block.getSelector(0, y)];
-                    pDst[index + 1] = subblock_colors1[block.getSelector(1, y)];
-                    pDst[index + 2] = subblock_colors1[block.getSelector(2, y)];
-                    pDst[index + 3] = subblock_colors1[block.getSelector(3, y)];
-                    index += 4;
-                }
-            } else
-            {
-                // 0011
-                // 0011
-                // 0011
-                // 0011
-                for (int y = 0; y < 4; y++)
-                {
-                    pDst[index + 0] = subblock_colors0[block.getSelector(0, y)];
-                    pDst[index + 1] = subblock_colors0[block.getSelector(1, y)];
-                    pDst[index + 2] = subblock_colors1[block.getSelector(2, y)];
-                    pDst[index + 3] = subblock_colors1[block.getSelector(3, y)];
-                    index += 4;
-                }
-            }
-        }
-        
-        
-        return pDst;
     }
     
 }

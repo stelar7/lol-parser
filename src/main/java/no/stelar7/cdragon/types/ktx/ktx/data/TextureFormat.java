@@ -3,7 +3,7 @@ package no.stelar7.cdragon.types.ktx.ktx.data;
 public enum TextureFormat
 {
     // Uncompressed formats (texture format = pixel format).
-    PIXEL_FORMAT_RGB8(true, true, "RGB8", "", 1, 1, 0x1907, 0x1907, 0x1401, "", 0),
+    PIXEL_FORMAT_RGB8(544, true, true, "RGB8", "", 1, 1, 0x1907, 0x1907, 0x1401, "", 0),
     PIXEL_FORMAT_RGBA8(true, true, "RGBA8", "", 1, 1, 0x1908, 0x1908, 0x1401, "DX10", 28),
     PIXEL_FORMAT_R8(true, true, "R8", "", 1, 1, 0x8229, 0x1903, 0x1401, "DX10", 61),
     PIXEL_FORMAT_SIGNED_R8(true, true, "SIGNED_R8", "", 1, 1, 0x8F49, 0x1903, 0x1400, "DX10", 63),
@@ -37,7 +37,7 @@ public enum TextureFormat
     TEXTURE_FORMAT_BPTC_FLOAT(true, true, "BPTC_FLOAT", "BC6H_UF16", 4, 4, 0x8E8F, 0, 0, "DX10", 95),
     TEXTURE_FORMAT_BPTC_SIGNED_FLOAT(true, true, "BPTC_SIGNED_FLOAT", "BC6H_SF16", 4, 4, 0x8E8E, 0, 0, "DX10", 96),
     TEXTURE_FORMAT_BPTC(true, true, "BPTC", "BC7", 4, 4, 0x8E8C, 0, 0, "DX10", 98),
-    TEXTURE_FORMAT_ETC1(true, false, "ETC1", "", 4, 4, 0x8D64, 0, 0, "", 0),
+    TEXTURE_FORMAT_ETC1(201327392L, true, false, "ETC1", "", 4, 4, 0x8D64, 0, 0, "", 0),
     TEXTURE_FORMAT_ETC2(true, false, "ETC2", "ETC2_RGB8", 4, 4, 0x9274, 0, 0, "", 0),
     TEXTURE_FORMAT_ETC2_PUNCHTHROUGH(true, false, "ETC2_PUNCHTHROUGH", "", 4, 4, 0x9275, 0, 0, "", 0),
     TEXTURE_FORMAT_ETC2_EAC(true, false, "ETC2_EAC", "EAC", 4, 4, 0x9278, 0, 0, "", 0),
@@ -78,7 +78,7 @@ public enum TextureFormat
     PIXEL_FORMAT_FLOAT_RGBA32_HDR(false, false, "FLOAT_RGBA32_HDR", "", 1, 1, 0, 0, 0, "", 0),
     ;
     
-    
+    long    flags;
     boolean ktxSupport;
     boolean ddsSupport;
     String  identifier;
@@ -90,6 +90,82 @@ public enum TextureFormat
     int     glType;
     String  dxFourCC;
     int     dx10Format;
+    
+    public long getFlags()
+    {
+        return flags;
+    }
+    
+    public boolean isKtxSupport()
+    {
+        return ktxSupport;
+    }
+    
+    public boolean isDdsSupport()
+    {
+        return ddsSupport;
+    }
+    
+    public String getIdentifier()
+    {
+        return identifier;
+    }
+    
+    public String getAltIdentifier()
+    {
+        return altIdentifier;
+    }
+    
+    public int getBlockWidth()
+    {
+        return blockWidth;
+    }
+    
+    public int getBlockHeight()
+    {
+        return blockHeight;
+    }
+    
+    public int getGlInternalFormat()
+    {
+        return glInternalFormat;
+    }
+    
+    public int getGlFormat()
+    {
+        return glFormat;
+    }
+    
+    public int getGlType()
+    {
+        return glType;
+    }
+    
+    public String getDxFourCC()
+    {
+        return dxFourCC;
+    }
+    
+    public int getDx10Format()
+    {
+        return dx10Format;
+    }
+    
+    TextureFormat(long flags, boolean ktxSupport, boolean ddsSupport, String identifier, String altIdentifier, int blockWidth, int blockHeight, int glInternalFormat, int glFormat, int glType, String dxFourCC, int dx10Format)
+    {
+        this.flags = flags;
+        this.ktxSupport = ktxSupport;
+        this.ddsSupport = ddsSupport;
+        this.identifier = identifier;
+        this.altIdentifier = altIdentifier;
+        this.blockWidth = blockWidth;
+        this.blockHeight = blockHeight;
+        this.glInternalFormat = glInternalFormat;
+        this.glFormat = glFormat;
+        this.glType = glType;
+        this.dxFourCC = dxFourCC;
+        this.dx10Format = dx10Format;
+    }
     
     TextureFormat(boolean ktxSupport, boolean ddsSupport, String identifier, String altIdentifier, int blockWidth, int blockHeight, int glInternalFormat, int glFormat, int glType, String dxFourCC, int dx10Format)
     {
@@ -104,6 +180,31 @@ public enum TextureFormat
         this.glType = glType;
         this.dxFourCC = dxFourCC;
         this.dx10Format = dx10Format;
+    }
+    
+    public int getPixelSize()
+    {
+        return (int) (1 + ((this.flags & 0xF00) >> 8));
+    }
+    
+    public int getCompressedBlockSize()
+    {
+        return (int) (8 + ((this.flags & 0x00800000) >> 20));
+    }
+    
+    public int getPixelFormat()
+    {
+        return (int) (this.flags & 0xffff);
+    }
+    
+    public boolean isCompressed()
+    {
+        return (this.flags >> 24) != 0;
+    }
+    
+    public int getCompressedFormat()
+    {
+        return (int) (this.flags >> 24);
     }
 }
 

@@ -36,7 +36,7 @@ public class DDSParser implements Parseable<BufferedImage>
         {
             if (data.startsWith(new ByteArray(new byte[]{(byte) 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, (byte) 0xBB, 0x0D, 0x0A, 0x1A, 0x0A})))
             {
-                data = new ByteArray(parser.parse(data).getMipMaps().getTextureData().get(0));
+                data = new ByteArray(parser.parse(data).getMipMaps().getTextureData().get(0).getData());
             }
             
             return ImageIO.read(new ByteArrayInputStream(data.getData()));

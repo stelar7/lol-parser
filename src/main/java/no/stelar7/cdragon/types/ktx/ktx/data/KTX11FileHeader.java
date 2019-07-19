@@ -5,43 +5,74 @@ import java.util.*;
 public class KTX11FileHeader
 {
     
-    private byte[]  identifier;
-    private int     endianness;
-    private boolean reversedEndian;
-    private int     glType;
-    private int     glTypeSize;
-    private int     glFormat;
-    private String  glFormatString;
-    private int     glInternalFormat;
-    private String  glInternalFormatString;
-    private int     glBaseInternalFormat;
-    private int     pixelWidth;
-    private int     pixelHeight;
-    private int     pixelDepth;
-    private int     numberOfArrayElements;
-    private int     numberOfFaces;
-    private int     numberOfMipmapLevels;
-    private int     bytesOfKeyValueData;
+    private byte[]        identifier;
+    private int           endianness;
+    private boolean       reversedEndian;
+    private int           glType;
+    private int           glTypeSize;
+    private int           glFormat;
+    private int           glInternalFormat;
+    private int           glBaseInternalFormat;
+    private int           pixelWidth;
+    private int           pixelHeight;
+    private int           pixelDepth;
+    private int           numberOfArrayElements;
+    private int           numberOfFaces;
+    private int           numberOfMipmapLevels;
+    private int           bytesOfKeyValueData;
+    private TextureFormat textureFormat;
+    private int           bytesPerBlock;
+    private int           extendedWidth;
+    private int           extendedHeight;
+    
+    public int getExtendedWidth()
+    {
+        return extendedWidth;
+    }
+    
+    public void setExtendedWidth(int extendedWidth)
+    {
+        this.extendedWidth = extendedWidth;
+    }
+    
+    public int getExtendedHeight()
+    {
+        return extendedHeight;
+    }
+    
+    public void setExtendedHeight(int extendedHeight)
+    {
+        this.extendedHeight = extendedHeight;
+    }
+    
+    public int getBytesPerBlock()
+    {
+        return bytesPerBlock;
+    }
+    
+    public void setBytesPerBlock(int bytesPerBlock)
+    {
+        this.bytesPerBlock = bytesPerBlock;
+    }
     
     public boolean isReversedEndian()
     {
         return reversedEndian;
     }
     
+    public TextureFormat getTextureFormat()
+    {
+        return textureFormat;
+    }
+    
+    public void setTextureFormat(TextureFormat format)
+    {
+        this.textureFormat = format;
+    }
     
     public void setReversedEndian(boolean reversedEndian)
     {
         this.reversedEndian = reversedEndian;
-    }
-    
-    public String getGlFormatString()
-    {
-        return glFormatString;
-    }
-    
-    public String getGlInternalFormatString()
-    {
-        return glInternalFormatString;
     }
     
     public byte[] getIdentifier()
@@ -92,13 +123,6 @@ public class KTX11FileHeader
     public void setGlFormat(int glFormat)
     {
         this.glFormat = glFormat;
-        if (glFormat == 0)
-        {
-            this.glFormatString = "COMPRESSED";
-        } else
-        {
-            this.glFormatString = String.valueOf(glFormat);
-        }
     }
     
     public int getGlInternalFormat()
@@ -109,24 +133,6 @@ public class KTX11FileHeader
     public void setGlInternalFormat(int glInternalFormat)
     {
         this.glInternalFormat = glInternalFormat;
-        switch (glInternalFormat)
-        {
-            case 0x8D64:
-            {
-                this.glInternalFormatString = "GL_ETC1_RGB8_OES";
-                break;
-            }
-            case 0x9274:
-            {
-                this.glInternalFormatString = "GL_COMPRESSED_RGB8_ETC2";
-                break;
-            }
-            default:
-            {
-                this.glInternalFormatString = String.valueOf(glInternalFormat);
-            }
-        }
-        
     }
     
     public int getGlBaseInternalFormat()
@@ -254,9 +260,10 @@ public class KTX11FileHeader
                ", reversedEndian=" + isReversedEndian() +
                ", glType=" + glType +
                ", glTypeSize=" + glTypeSize +
-               ", glFormat=" + this.glFormatString +
-               ", glInternalFormat=" + this.glInternalFormatString +
+               ", glFormat=" + glFormat +
+               ", glInternalFormat=" + glInternalFormat +
                ", glBaseInternalFormat=" + glBaseInternalFormat +
+               ", textureFormat=" + textureFormat +
                ", pixelWidth=" + pixelWidth +
                ", pixelHeight=" + pixelHeight +
                ", pixelDepth=" + pixelDepth +

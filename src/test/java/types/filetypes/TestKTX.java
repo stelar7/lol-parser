@@ -22,7 +22,7 @@ public class TestKTX
         KTX11File data = parser.parse(file);
         for (int i = 0; i < data.getHeader().getNumberOfMipmapLevels(); i++)
         {
-            byte[] textureData = data.getMipMaps().getTextureData().get(i);
+            byte[] textureData = data.getMipMaps().getTextureData().get(i).getData();
             Files.write(UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\ktx\\output\\parsed_" + i + ".etc1"), textureData);
             data.toImage(i, UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\ktx\\output\\parsed_bmp_" + i + ".bmp"));
         }
