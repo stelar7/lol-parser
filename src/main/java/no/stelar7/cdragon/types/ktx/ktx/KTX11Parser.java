@@ -39,11 +39,11 @@ public class KTX11Parser implements Parseable<KTX11File>
         boolean isGL_PALETTEFormat = header.getGlInternalFormat() >= 0x8b90 && header.getGlInternalFormat() <= 0x8b99;
         int     mipCount           = isGL_PALETTEFormat ? 1 : Math.max(1, header.getNumberOfMipmapLevels());
         
-        KTX11FileMipMap map      = new KTX11FileMipMap();
-        int             width    = header.getPixelWidth();
-        int             height   = header.getPixelHeight();
-        int             exWidth  = ((width + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth();
-        int             exHeight = ((height + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight();
+        KTX11FileMipMap map           = new KTX11FileMipMap();
+        int             width         = header.getPixelWidth();
+        int             height        = header.getPixelHeight();
+        int             encodedWidth  = (width + 3) & ~3;
+        int             encodedHeight = (height + 3) & ~3;
         
         if (header.getNumberOfArrayElements() > 1)
         {
@@ -63,7 +63,7 @@ public class KTX11Parser implements Parseable<KTX11File>
         for (int mipmap_level = 0; mipmap_level < mipCount; mipmap_level++)
         {
             map.setImageSize(raf.readInt());
-            int nominalSize = (exHeight / header.getTextureFormat().getBlockHeight()) * (exWidth / header.getTextureFormat().getBlockWidth());
+            int nominalSize = (encodedHeight / header.getTextureFormat().getBlockHeight()) * (encodedWidth / header.getTextureFormat().getBlockWidth());
             if (map.getImageSize() != nominalSize * header.getBytesPerBlock())
             {
                 throw new RuntimeException("Mipmap size does not match expected size");
@@ -73,8 +73,8 @@ public class KTX11Parser implements Parseable<KTX11File>
             tex.setFormat(header.getTextureFormat());
             tex.setWidth(header.getPixelWidth());
             tex.setHeight(header.getPixelHeight());
-            tex.setWidthInBlocks(exWidth / header.getTextureFormat().getBlockWidth());
-            tex.setHeightInBlocks(exWidth / header.getTextureFormat().getBlockHeight());
+            tex.setWidthInBlocks(encodedWidth / header.getTextureFormat().getBlockWidth());
+            tex.setHeightInBlocks(encodedWidth / header.getTextureFormat().getBlockHeight());
             tex.setData(raf.readBytes(nominalSize * header.getBytesPerBlock()));
             map.setTextureData(mipmap_level, tex);
             
@@ -85,8 +85,8 @@ public class KTX11Parser implements Parseable<KTX11File>
             
             width >>= 1;
             height >>= 1;
-            exWidth = ((width + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth();
-            exHeight = ((height + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight();
+            encodedWidth = (width + 3) & ~3;
+            encodedHeight = (height + 3) & ~3;
             
             if (mipmap_level + 1 < mipCount)
             {
