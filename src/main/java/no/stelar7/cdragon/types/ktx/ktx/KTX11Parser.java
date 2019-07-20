@@ -44,10 +44,26 @@ public class KTX11Parser implements Parseable<KTX11File>
         int             height   = header.getPixelHeight();
         int             exWidth  = ((width + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth();
         int             exHeight = ((height + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight();
+        
+        if (header.getNumberOfArrayElements() > 1)
+        {
+            throw new RuntimeException("Unable to parse images with multiple arrays");
+        }
+        
+        if (header.getNumberOfFaces() > 1)
+        {
+            throw new RuntimeException("Unable to parse cubemaps");
+        }
+        
+        if (header.getPixelDepth() > 1)
+        {
+            throw new RuntimeException("Unable to parse images with multiple depths");
+        }
+        
         for (int mipmap_level = 0; mipmap_level < mipCount; mipmap_level++)
         {
             map.setImageSize(raf.readInt());
-            int nominalSize = (header.getExtendedHeight() / header.getTextureFormat().getBlockHeight()) * (header.getExtendedWidth() / header.getTextureFormat().getBlockWidth());
+            int nominalSize = (exHeight / header.getTextureFormat().getBlockHeight()) * (exWidth / header.getTextureFormat().getBlockWidth());
             if (map.getImageSize() != nominalSize * header.getBytesPerBlock())
             {
                 throw new RuntimeException("Mipmap size does not match expected size");
@@ -135,8 +151,6 @@ public class KTX11Parser implements Parseable<KTX11File>
         header.setBytesOfKeyValueData(raf.readInt());
         header.setTextureFormat(findTextureFormat(header.getGlInternalFormat(), header.getGlFormat(), header.getGlType()));
         header.setBytesPerBlock(header.getGlFormat() == 0 ? header.getTextureFormat().getCompressedBlockSize() : header.getTextureFormat().getPixelSize());
-        header.setExtendedWidth(((header.getPixelWidth() + header.getTextureFormat().getBlockWidth() - 1) / header.getTextureFormat().getBlockWidth()) * header.getTextureFormat().getBlockWidth());
-        header.setExtendedHeight(((header.getPixelHeight() + header.getTextureFormat().getBlockHeight() - 1) / header.getTextureFormat().getBlockHeight()) * header.getTextureFormat().getBlockHeight());
         return header;
     }
     

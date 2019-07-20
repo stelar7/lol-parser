@@ -22,28 +22,6 @@ public class KTX11FileHeader
     private int           bytesOfKeyValueData;
     private TextureFormat textureFormat;
     private int           bytesPerBlock;
-    private int           extendedWidth;
-    private int           extendedHeight;
-    
-    public int getExtendedWidth()
-    {
-        return extendedWidth;
-    }
-    
-    public void setExtendedWidth(int extendedWidth)
-    {
-        this.extendedWidth = extendedWidth;
-    }
-    
-    public int getExtendedHeight()
-    {
-        return extendedHeight;
-    }
-    
-    public void setExtendedHeight(int extendedHeight)
-    {
-        this.extendedHeight = extendedHeight;
-    }
     
     public int getBytesPerBlock()
     {
