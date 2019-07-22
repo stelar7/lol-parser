@@ -50,21 +50,24 @@ public class KTX11File
         byte[]     textureData = this.getMipMaps().getTextureData().get(level).getData();
         ByteBuffer input       = ByteBuffer.wrap(textureData);
         
+        int pixelWidth  = this.getHeader().getPixelWidth() >> level;
+        int pixelHeight = this.getHeader().getPixelHeight() >> level;
+        
         int        align  = 0;
-        int        stride = ((this.getHeader().getPixelWidth() * 3) + align) & ~align;
-        int        size   = stride * this.getHeader().getPixelHeight();
+        int        stride = ((pixelWidth * 3) + align) & ~align;
+        int        size   = stride * pixelHeight;
         ByteBuffer output = ByteBuffer.allocate(size);
         
         int    pixelSize = 3;
         byte[] block     = new byte[48];
         
-        int encodedWidth  = (this.header.getPixelWidth() + 3) & ~3;
-        int encodedHeight = (this.header.getPixelWidth() + 3) & ~3;
+        int encodedWidth  = (pixelWidth + 3) & ~3;
+        int encodedHeight = (pixelHeight + 3) & ~3;
         
         
         for (int y = 0; y < encodedHeight; y += 4)
         {
-            int yOff = this.header.getPixelHeight() - y;
+            int yOff = pixelHeight - y;
             int yEnd = yOff;
             if (yOff > 4)
             {
@@ -73,12 +76,13 @@ public class KTX11File
             
             for (int x = 0; x < encodedWidth; x += 4)
             {
-                int xOff = this.header.getPixelWidth() - x;
+                int xOff = pixelWidth - x;
                 int xEnd = xOff;
                 if (xOff > 4)
                 {
                     xEnd = 4;
                 }
+                
                 byte[] inVal = new byte[8];
                 input.get(inVal);
                 decodeETC1Block(inVal, block);
@@ -106,8 +110,6 @@ public class KTX11File
                         }
                     }
                 }
-                
-                System.out.println();
             }
         }
         return output;
@@ -244,6 +246,11 @@ public class KTX11File
     
     public void toImage(int level, Path output)
     {
+        if (this.header.getTextureFormat() != TextureFormat.TEXTURE_FORMAT_ETC1)
+        {
+            throw new RuntimeException("Unable to transform from other types than ETC!, found: " + this.header.getTextureFormat());
+        }
+        
         byte[] data = UtilHandler.bytebufferToArray(decodeETC1(level));
         
         ByteWriter bw             = new ByteWriter();
@@ -258,7 +265,7 @@ public class KTX11File
         bw.writeString("BM");
         bw.writeInt(totalSize);
         bw.writeInt(0);
-        bw.writeInt(headerSize );
+        bw.writeInt(headerSize);
         bw.writeInt(dataHeaderSize);
         bw.writeInt(header.getPixelWidth() >> level);
         bw.writeInt(header.getPixelHeight() >> level);

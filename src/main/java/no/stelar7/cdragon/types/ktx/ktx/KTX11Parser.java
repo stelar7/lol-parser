@@ -74,7 +74,7 @@ public class KTX11Parser implements Parseable<KTX11File>
             tex.setWidth(header.getPixelWidth());
             tex.setHeight(header.getPixelHeight());
             tex.setWidthInBlocks(encodedWidth / header.getTextureFormat().getBlockWidth());
-            tex.setHeightInBlocks(encodedWidth / header.getTextureFormat().getBlockHeight());
+            tex.setHeightInBlocks(encodedHeight / header.getTextureFormat().getBlockHeight());
             tex.setData(raf.readBytes(nominalSize * header.getBytesPerBlock()));
             map.setTextureData(mipmap_level, tex);
             
