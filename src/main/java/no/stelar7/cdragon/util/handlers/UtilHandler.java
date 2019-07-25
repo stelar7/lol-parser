@@ -45,6 +45,10 @@ public final class UtilHandler
     
     public static String pathToFilename(Path path)
     {
+        if (!path.getFileName().toString().contains("."))
+        {
+            return path.getFileName().toString();
+        }
         return path.getFileName().toString().substring(0, path.getFileName().toString().lastIndexOf('.'));
     }
     

@@ -177,7 +177,7 @@ public class TestWAD
         List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
         Path         from  = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
         
-        String search = "yuumiloadscreen";
+        String search = "fontconfig";
         
         WADParser parser = new WADParser();
         Files.walk(from)

@@ -3,6 +3,9 @@ package types.util;
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
 import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.wad.WADParser;
+import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import org.junit.jupiter.api.Test;
@@ -10,8 +13,10 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TestDivStuff
@@ -43,13 +48,90 @@ public class TestDivStuff
         }
     }
     
+    /**
+     * Only has the data from your local install, meaning not all languages etc..
+     */
+    @Test
+    public void extractTFTData() throws IOException
+    {
+        Path leagueInstallFolder = Paths.get("C:\\Riot Games\\League of Legends");
+        Path outputFolder        = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        
+        WADParser parser    = new WADParser();
+        Pattern   filenames = Pattern.compile("data/characters/(.*)/\\1\\.bin");
+        
+        Files.walkFileTree(leagueInstallFolder, new SimpleFileVisitor<>()
+        {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
+            {
+                String pathName = UtilHandler.pathToFilename(file);
+                
+                if (file.toString().endsWith("Maps\\Shipping\\Map22.wad.client"))
+                {
+                    System.out.println("Extracting TFT constants from: " + file.toString());
+                    
+                    WADFile map = parser.parse(file);
+                    for (WADContentHeaderV1 header : map.getContentHeaders())
+                    {
+                        String filename = HashHandler.getWadHash(header.getPathHash());
+                        if (filename.contains("map22.bin") || filenames.matcher(filename).find())
+                        {
+                            map.saveFile(header, outputFolder, pathName);
+                        }
+                    }
+                }
+                
+                if (file.toString().contains("Localized\\Global."))
+                {
+                    System.out.println("Extracting locales from: " + file.toString());
+                    
+                    WADFile map = parser.parse(file);
+                    for (WADContentHeaderV1 header : map.getContentHeaders())
+                    {
+                        String filename = HashHandler.getWadHash(header.getPathHash());
+                        if (filename.contains("fontconfig"))
+                        {
+                            map.saveFile(header, outputFolder, UtilHandler.pathToFilename(file));
+                        }
+                    }
+                }
+                
+                if (file.toString().contains("Champions\\"))
+                {
+                    if (pathName.contains("_"))
+                    {
+                        return FileVisitResult.CONTINUE;
+                    }
+                    
+                    System.out.println("Extracting champion constants from: " + file.toString());
+                    
+                    WADFile map = parser.parse(file);
+                    for (WADContentHeaderV1 header : map.getContentHeaders())
+                    {
+                        String filename = HashHandler.getWadHash(header.getPathHash());
+                        if (filenames.matcher(filename).find())
+                        {
+                            map.saveFile(header, outputFolder, pathName);
+                        }
+                    }
+                }
+                
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
+    }
     
     @Test
     public void buildTFTDataFiles() throws IOException
     {
-        Path traitFile       = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\maps\\shipping\\map22\\map22.bin");
-        Path fontConfig      = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu");
-        Path champFileParent = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\characters");
+        Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        
+        Path traitFile       = inputFolder.resolve("data\\maps\\shipping\\map22\\map22.bin");
+        Path fontConfig      = inputFolder.resolve("data\\menu");
+        Path champFileParent = inputFolder.resolve("data\\characters");
         
         
         Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
@@ -398,8 +480,8 @@ public class TestDivStuff
         
         try
         {
-            Files.createDirectories(UtilHandler.CDRAGON_FOLDER.resolve("TFT"));
-            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.createDirectories(outputFolder.resolve("TFT"));
+            Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
             
             descs.forEach((lang, vals) -> {
                 try
@@ -408,7 +490,7 @@ public class TestDivStuff
                     
                     final String[] alteredData = {data};
                     vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
-                    Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                    Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                 } catch (IOException e)
                 {
                     e.printStackTrace();

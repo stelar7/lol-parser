@@ -65,8 +65,6 @@ public class WADFile
             
             saveFile(fileHeader, path, wadName);
         }
-        
-        fileReader.close();
     }
     
     public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName)
