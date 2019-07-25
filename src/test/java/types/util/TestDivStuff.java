@@ -272,7 +272,7 @@ public class TestDivStuff
             stats.add("hp", champItem.get("baseHP"));
             stats.add("hpScaleFactor", new JsonPrimitive(1.8f));
             stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
-            stats.add("initalMana", new JsonPrimitive("unknown at this moment, sorry :("));
+            stats.add("initalMana", champItem.has("57C662CB") ? champItem.get("57C662CB") : new JsonPrimitive(0));
             stats.add("damage", champItem.get("BaseDamage"));
             stats.add("damageScaleFactor", new JsonPrimitive(1.25f));
             stats.add("armor", champItem.get("baseArmor"));
@@ -404,6 +404,8 @@ public class TestDivStuff
             descs.forEach((lang, vals) -> {
                 try
                 {
+                    System.out.println("Generating files for " + lang);
+                    
                     final String[] alteredData = {data};
                     vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
                     Files.write(UtilHandler.CDRAGON_FOLDER.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -477,13 +479,13 @@ public class TestDivStuff
                     toHash = toHash.substring(0, toHash.indexOf('*'));
                 }
                 
-                String hashList = HashHandler.getBINHash(toHash);
-                String output   = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
-                if (!toHash.equalsIgnoreCase(hashList))
+                String possibleHash = HashHandler.getBINHash(toHash);
+                String hexHash      = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
+                if (hexHash.equalsIgnoreCase(possibleHash))
                 {
-                    if (possible.contains(output))
+                    if (possible.contains(hexHash))
                     {
-                        String formatted = String.format("\"%s\":\"%s\",", output, toHash);
+                        String formatted = String.format("\"%s\":\"%s\",", hexHash, toHash);
                         System.out.println(formatted);
                     }
                 }
@@ -495,7 +497,7 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "attackcount";
+        String toHash = "disarmchance";
         String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
         System.out.println(output);
     }

@@ -60,7 +60,6 @@ public class GameHashGuesser extends HashGuesser
               .forEach(e -> {
                   for (JsonElement link : e.getAsJsonArray("linkedBinFiles"))
                   {
-                      System.out.println(link);
                       String real = link.getAsString().toLowerCase();
                       this.check(real);
                   }
