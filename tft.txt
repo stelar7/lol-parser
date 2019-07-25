@@ -4,19 +4,15 @@
 3. import lol-parser as a maven project. https://www.jetbrains.com/help/idea/maven-support.html#maven_import_project_start
 
 4.1 open project settings
-4.2 mark the correct folders as source folders https://images-ext-1.discordapp.net/external/ObouxEM2F6b0Oygu14RdGF0oeZbbtnor-VKYwssw6Ns/https/i.imgur.com/OeflRyq.png
+4.2 mark the correct folders as source folders i.imgur.com/OeflRyq.png
 
-5.1 open the file src/main/java/no/stelar7/cdragon/util/handlers/UtilHandler.java in intellij
-5.2 change the value of CDRAGON_FOLDER to a folder on your desktop or something (make sure it has ca. 20GB of space)
+5.1 open the file src/test/java/types/util/TestDivStuff.java in intellij
+5.2 scroll to the line public void extractTFTData() throws IOException
+5.3 set the correct path on leagueInstallFolder and outputFolder
+5.4 rightclick the line and select run extractTFTData()
 
-6. open the file src/test/java/types/filetypes/TestWAD.java in intellij
-6.2 scroll to the line public void testCDragonWAD() throws Exception
-6.3 change UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles"); to Paths.get("path-to-your-league-folder-here")
-6.4 add // in front of generateUnknownFileList(rito);, transformManifest(extractPath);, generateUnknownBinHashList();, transformDDS(extractPath);
-6.5 rightclick the line in 6.2, and select run testCDragonWAD()
+6.1 scroll to the line public void buildTFTDataFiles() throws IOException
+6.2 set the correct path on inputFolder (outputFolder from 5.3) and outputFolder
+6.3 rightclick the line and select run buildTFTDataFiles()
 
-7.1 open the file src/test/java/types/util/TestDivStuff.java in intellij
-7.2 scroll to the line public void buildTFTDataFiles() throws IOException
-7.3 rightclick the line and select run buildTFTDataFiles()
-
-8. You now have a folder named TFT inside what you set CDRAGON_FOLDER, where all the TFT data is 
+7. You now have a folder named TFT inside what you set as outputFolder in 6.2, where all the TFT data is
