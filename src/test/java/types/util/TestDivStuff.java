@@ -214,9 +214,9 @@ public class TestDivStuff
         });
         
         
-        JsonObject champData = new JsonObject();
-        JsonObject itemData  = new JsonObject();
-        JsonArray  traitData = new JsonArray();
+        Map<Integer, JsonObject> champData = new TreeMap<>();
+        Map<Integer, JsonObject> itemData  = new TreeMap<>();
+        List<JsonObject>         traitData = new ArrayList<>();
         
         
         BINParser parser = new BINParser();
@@ -399,7 +399,7 @@ public class TestDivStuff
             o.add("stats", stats);
             o.add("traits", traitArray);
             o.add("ability", abilities);
-            champData.add(championId, o);
+            champData.put(Integer.valueOf(championId), o);
         }
         
         String itemContainerKey       = "D186C31A";
@@ -457,10 +457,10 @@ public class TestDivStuff
             }
             
             o.add("effects", effects);
-            itemData.add(mId, o);
+            itemData.put(Integer.valueOf(mId), o);
         }
         
-        for (String key : itemData.keySet())
+        for (Integer key : itemData.keySet())
         {
             JsonObject fromObject = itemData.get(key).getAsJsonObject();
             JsonArray  from       = fromObject.getAsJsonArray("from");
@@ -473,9 +473,9 @@ public class TestDivStuff
         }
         
         JsonObject obj = new JsonObject();
-        obj.add("champions", champData);
-        obj.add("traits", traitData);
-        obj.add("items", itemData);
+        obj.add("champions", UtilHandler.getGson().toJsonTree(champData));
+        obj.add("traits", UtilHandler.getGson().toJsonTree(traitData));
+        obj.add("items", UtilHandler.getGson().toJsonTree(itemData));
         String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
         
         try
