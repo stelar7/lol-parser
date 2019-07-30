@@ -126,7 +126,7 @@ public class TestDivStuff
     @Test
     public void buildTFTDataFiles() throws IOException
     {
-        Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        Path inputFolder  = Paths.get("D:\\pbe");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         
         Path traitFile       = inputFolder.resolve("data\\maps\\shipping\\map22\\map22.bin");
@@ -579,7 +579,7 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "disarmchance";
+        String toHash = "APValue";
         String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
         System.out.println(output);
     }
