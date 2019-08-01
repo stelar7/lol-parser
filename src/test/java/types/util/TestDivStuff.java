@@ -121,12 +121,29 @@ public class TestDivStuff
             }
         });
         
+        Files.walkFileTree(outputFolder, new SimpleFileVisitor<>()
+        {
+            BINParser parser = new BINParser();
+            
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+            {
+                if (file.toString().endsWith(".bin"))
+                {
+                    String json = parser.parse(file).toJson();
+                    Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), json.getBytes(StandardCharsets.UTF_8));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        
     }
     
     @Test
     public void buildTFTDataFiles() throws IOException
     {
         Path inputFolder  = Paths.get("D:\\pbe");
+        //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         
         Path traitFile       = inputFolder.resolve("data\\maps\\shipping\\map22\\map22.bin");
@@ -229,6 +246,7 @@ public class TestDivStuff
         String traitEffectContainter   = "mTraitsSets";
         String innerEffectContainer    = "C130C1E5";
         String traitMinUnits           = "mMinUnits";
+        String traitMaxUnits           = "mMaxUnits";
         String traitEffectVarContainer = "EffectAmounts";
         String traitEffectVar          = "TftEffectAmount";
         
@@ -282,6 +300,7 @@ public class TestDivStuff
                 }
                 
                 adder.add("minUnits", new JsonPrimitive(inner.get(traitMinUnits).getAsInt()));
+                adder.add("maxUnits", new JsonPrimitive(inner.getAsJsonArray(traitMaxUnits).get(0).getAsInt()));
                 adder.add("vars", varAdded);
                 
                 effects.add(adder);
