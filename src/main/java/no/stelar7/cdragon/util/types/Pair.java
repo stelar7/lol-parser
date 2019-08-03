@@ -33,6 +33,11 @@ public class Pair<A, B>
         this.b = b;
     }
     
+    public String toJson()
+    {
+        return "\"" + a.toString() + "\": \"" + b.toString() + "\",";
+    }
+    
     @Override
     public boolean equals(Object o)
     {
@@ -44,9 +49,9 @@ public class Pair<A, B>
         {
             return false;
         }
-        Pair<?, ?> triplet = (Pair<?, ?>) o;
-        return Objects.equals(a, triplet.a) &&
-               Objects.equals(b, triplet.b);
+        Pair<?, ?> pair = (Pair<?, ?>) o;
+        return Objects.equals(a, pair.a) &&
+               Objects.equals(b, pair.b);
     }
     
     @Override
@@ -58,7 +63,7 @@ public class Pair<A, B>
     @Override
     public String toString()
     {
-        return "Triplet{" +
+        return "Pair{" +
                "a=" + a +
                ", b=" + b +
                '}';

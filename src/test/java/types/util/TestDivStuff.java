@@ -8,6 +8,7 @@ import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.types.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -142,7 +143,7 @@ public class TestDivStuff
     @Test
     public void buildTFTDataFiles() throws IOException
     {
-        Path inputFolder  = Paths.get("D:\\pbe");
+        Path inputFolder = Paths.get("D:\\pbe");
         //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         
@@ -550,26 +551,39 @@ public class TestDivStuff
     {
         Path fontConfig = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\menu\\fontconfig_en_us.txt");
         
-        Map<String, String> descs = Files.readAllLines(fontConfig)
-                                         .stream()
-                                         .filter(s -> s.startsWith("tr "))
-                                         .map(s -> s.substring(s.indexOf(" ") + 1))
-                                         .collect(Collectors.toMap(s -> {
-                                             String part = s.split("=")[0];
-                                             part = part.substring(part.indexOf("\"") + 1);
-                                             part = part.substring(0, part.indexOf("\""));
-                                             return part;
-                                         }, s -> {
-                                             String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
-                                             part = part.substring(part.indexOf("\"") + 1);
-                                             part = part.substring(0, part.lastIndexOf("\""));
-                                             return part;
-                                         }));
+        Map<String, Map<String, String>> descs = new HashMap<>();
         
-        Path         binhash  = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
-        List<String> possible = Files.readAllLines(binhash);
+        Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
+            try
+            {
+                Map<String, String> desc = Files.readAllLines(p)
+                                                .stream()
+                                                .filter(s -> s.startsWith("tr "))
+                                                .map(s -> s.substring(s.indexOf(" ") + 1))
+                                                .collect(Collectors.toMap(s -> {
+                                                    String part = s.split("=")[0];
+                                                    part = part.substring(part.indexOf("\"") + 1);
+                                                    part = part.substring(0, part.indexOf("\""));
+                                                    return part;
+                                                }, s -> {
+                                                    String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
+                                                    part = part.substring(part.indexOf("\"") + 1);
+                                                    part = part.substring(0, part.lastIndexOf("\""));
+                                                    return part;
+                                                }));
+                
+                descs.put(UtilHandler.pathToFilename(p).substring("fontconfig_".length()), desc);
+                
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
         
-        descs.values().forEach(v -> {
+        Path                      binhash  = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
+        List<String>              possible = Files.readAllLines(binhash);
+        Set<Pair<String, String>> saveme   = new HashSet<>();
+        descs.values().forEach(d -> d.values().forEach(v -> {
             String[] parts = v.split("@");
             for (int i = 1; i < parts.length; i += 2)
             {
@@ -587,11 +601,12 @@ public class TestDivStuff
                     if (possible.contains(hexHash))
                     {
                         String formatted = String.format("\"%s\":\"%s\",", hexHash, toHash);
-                        System.out.println(formatted);
+                        saveme.add(new Pair<>(hexHash, toHash));
                     }
                 }
             }
-        });
+        }));
+        saveme.forEach(a -> System.out.println(a.toJson()));
         
     }
     
