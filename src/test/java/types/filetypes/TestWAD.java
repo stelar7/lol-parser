@@ -248,12 +248,14 @@ public class TestWAD
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
         
-        transformManifest(extractPath);
-        
         transformBIN(extractPath);
         generateUnknownBinHashList();
         
+        
+        transformManifest(extractPath);
         transformDDS(extractPath);
+        
+        //transformSKN(extractPath);
     }
     
     private void generateUnknownBinHashList() throws IOException
@@ -320,6 +322,40 @@ public class TestWAD
              });
     }
     
+    private void transformSKN(Path extractPath) throws IOException
+    {
+        System.out.println("Transforming skl files to obj");
+        
+        final SKNParser dp = new SKNParser();
+        Files.walk(extractPath)
+             .parallel()
+             .filter(a -> a.getFileName().toString().endsWith(".skn"))
+             .forEach(file -> {
+                 try
+                 {
+                     SKNFile skn          = dp.parse(file);
+                     Path    outputFolder = file.resolveSibling("models");
+                     Files.createDirectories(outputFolder);
+                     skn.getMaterials().forEach(m -> {
+                         try
+                         {
+                             Path   output = outputFolder.resolve(m.getName().replace(":", "-") + ".obj");
+                             String obj    = skn.toOBJ(m);
+                             Files.write(output, obj.getBytes(StandardCharsets.UTF_8));
+                         } catch (IOException e)
+                         {
+                             System.out.println(file);
+                             e.printStackTrace();
+                         }
+                     });
+                 } catch (IOException e)
+                 {
+                     System.out.println(file);
+                     e.printStackTrace();
+                 }
+             });
+    }
+    
     private void transformDDS(Path extractPath) throws IOException
     {
         System.out.println("Transforming dds files to png");
@@ -337,6 +373,7 @@ public class TestWAD
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
+                     System.out.println(file);
                      e.printStackTrace();
                  }
              });
@@ -359,6 +396,7 @@ public class TestWAD
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
+                     System.out.println(file);
                      e.printStackTrace();
                  }
              });
@@ -414,7 +452,7 @@ public class TestWAD
                      WADFile parsed = parser.parseCompressed(file);
                      parsed.extractFiles(to, parent);
                  }
-    
+            
                  if (endsm.stream().anyMatch(child::endsWith))
                  {
                      System.out.println("Extracting from " + filename);
