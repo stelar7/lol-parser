@@ -19,7 +19,6 @@ public class TestCDTBHashGuessing
         GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         gguesser.guessAssetsBySearch(dataPath);
         gguesser.guessBinByLinkedFiles(dataPath);
-        gguesser.guessVoiceLines(dataPath);
         //gguesser.save();
         
         gguesser.saveToBackup();
