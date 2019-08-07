@@ -58,18 +58,25 @@ public class Model implements AutoCloseable
     public void bind()
     {
         vao.bind();
+        texture.bind();
         mesh.bindIBO();
     }
     
     public void unbind()
     {
         vao.unbind();
+        texture.unbind();
         mesh.unbindIBO();
     }
     
     public Mesh getMesh()
     {
         return mesh;
+    }
+    
+    public Texture getTexture()
+    {
+        return texture;
     }
     
     @Override

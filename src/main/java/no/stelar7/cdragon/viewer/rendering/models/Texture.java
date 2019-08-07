@@ -48,7 +48,9 @@ public class Texture implements AutoCloseable
     public void bind()
     {
         tbo.bind();
-        glActiveTexture(0);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, id);
+        UtilHandler.logToFile("gl.log", "glActiveTexture(GL_TEXTURE0)");
         UtilHandler.logToFile("gl.log", String.format("glBindTexture(GL_TEXTURE_2D, %s)", id));
     }
     
