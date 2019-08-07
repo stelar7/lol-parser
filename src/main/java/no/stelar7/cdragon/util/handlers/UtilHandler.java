@@ -309,7 +309,7 @@ public final class UtilHandler
         return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
     }
     
-    private static final boolean debug = false;
+    public static final boolean debug = false;
     
     public static void logToFile(String file, String text)
     {

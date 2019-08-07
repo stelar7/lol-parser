@@ -70,12 +70,12 @@ public class WADFile
     public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName)
     {
         String unhashed = HashHandler.getWadHash(header.getPathHash());
-        String filename = unhashed.equals(header.getPathHash()) ?  header.getPathHash() : unhashed;
+        String filename = unhashed.equals(header.getPathHash()) ? header.getPathHash() : unhashed;
         Path   self     = savePath.resolve(filename);
         
         if (self.toString().length() > 255)
         {
-            self = self.resolveSibling("too_long_filename_" + header.getPathHash());
+            self = self.resolveSibling("too_long_filename_" + header.getPathHash() + "." + UtilHandler.getEnding(self));
         }
         
         self.getParent().toFile().mkdirs();
