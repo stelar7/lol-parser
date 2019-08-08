@@ -241,11 +241,15 @@ public class SKNViewer extends Renderer
         String             texPath  = ((List<Pair<String, String>>) readData.material.values().toArray()[0]).get(0).getB();
         for (SKNMaterial submesh : skn.getMaterials())
         {
-            BufferedImage matImg = new DDSParser().parse(assetRoot.resolve(readData.materialOverride.getOrDefault(submesh.getName(), new ArrayList<>())
-                                                                                                    .stream()
-                                                                                                    .filter(p -> p.getA().equalsIgnoreCase("Diffuse_Texture"))
-                                                                                                    .findFirst().orElseGet(() -> new Pair<>("", texPath)).getB()));
-            Texture tex = new Texture(submesh, matImg);
+            Path mat = assetRoot.resolve(readData.materialOverride.getOrDefault(submesh.getName(), new ArrayList<>())
+                                                                  .stream()
+                                                                  .filter(p -> p.getA().equalsIgnoreCase("Diffuse_Texture"))
+                                                                  .findFirst().orElseGet(() -> new Pair<>("", texPath)).getB());
+            
+            System.out.println(submesh.getName() + " // " + mat.toString());
+            
+            BufferedImage matImg = new DDSParser().parse(mat);
+            Texture       tex    = new Texture(submesh, matImg);
             models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
         }
         
