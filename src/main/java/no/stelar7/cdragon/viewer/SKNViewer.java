@@ -87,148 +87,7 @@ public class SKNViewer extends Renderer
                                     .filter(f -> f.toString().contains("\\skins\\"))
                                     .filter(f -> f.toString().endsWith(".json"))
                                     .collect(Collectors.toList());
-            skins.stream().limit(10).forEach(p -> {
-                try
-                {
-                    if (!p.toString().matches(".*skins\\\\skin\\d+\\.json"))
-                    {
-                        return;
-                    }
-                    String     content = String.join("", Files.readAllLines(p));
-                    JsonObject parsed  = UtilHandler.getJsonParser().parse(content).getAsJsonObject();
-                    
-                    List<String> linkedFiles = new ArrayList<>();
-                    linkedFiles.add(content);
-                    parsed.get("linkedBinFiles").getAsJsonArray().forEach(f -> {
-                        try
-                        {
-                            Path hashPath = assetRoot.resolve(f.getAsString());
-                            Path scanPath = assetRoot.resolve(UtilHandler.replaceEnding(f.getAsString(), "bin", "json"));
-                            if (scanPath.toString().length() > 255)
-                            {
-                                String hashMe = hashPath.toString().substring(assetRoot.toString().length() + 1).replace("\\", "/");
-                                String hash   = HashHandler.computeXXHash64(hashMe.toLowerCase());
-                                scanPath = scanPath.resolveSibling("too_long_filename_" + hash + ".json");
-                            }
-                            
-                            linkedFiles.add(String.join("", Files.readAllLines(scanPath)));
-                        } catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
-                    });
-                    
-                    SkinData storedData = new SkinData();
-                    
-                    JsonObject skinData = parsed.getAsJsonObject("SkinCharacterDataProperties");
-                    JsonObject next     = getFirstChildObject.apply(skinData);
-                    JsonObject meshData = next.getAsJsonObject("skinMeshProperties");
-                    JsonObject skinMesh = getFirstChildObject.apply(meshData);
-                    
-                    String skinName = next.has("championSkinName") ? next.get("championSkinName").getAsString() : getFirstChildKey.apply(skinData);
-                    storedData.skinId = next.has("championSkinId") ? next.get("championSkinId").getAsString() : skinName;
-                    if (!skinMesh.has("skeleton"))
-                    {
-                        // ignore objects with no skeleton
-                        return;
-                    }
-                    storedData.skeleton = skinMesh.get("skeleton").getAsString();
-                    
-                    if (!skinMesh.has("simpleSkin"))
-                    {
-                        // ignore objects with no model
-                        return;
-                    }
-                    storedData.simpleSkin = skinMesh.get("simpleSkin").getAsString();
-                    storedData.initialSubmeshToHide = skinMesh.has("skinMesh") ? skinMesh.get("initialSubmeshToHide").getAsString() : "";
-                    
-                    storedData.material = new HashMap<>();
-                    
-                    if (skinMesh.has("material"))
-                    {
-                        JsonObject materialData = createJsonObject.apply(linkedFiles, skinMesh.get("material").getAsString().substring(13));
-                        if (materialData == null)
-                        {
-                            System.out.println("Unable to find link in linked files!?");
-                            return;
-                        }
-                        
-                        JsonObject                 materialDataEntry = getFirstChildObject.apply(materialData);
-                        List<Pair<String, String>> samplers          = new ArrayList<>();
-                        
-                        materialDataEntry.getAsJsonArray("samplerValues").forEach(s -> {
-                            JsonObject samplerEntry = getFirstChildObject.apply(s);
-                            
-                            String samplerName = samplerEntry.get("samplerName").getAsString();
-                            if (samplerEntry.has("textureName"))
-                            {
-                                String textureName = samplerEntry.get("textureName").getAsString();
-                                samplers.add(new Pair<>(samplerName, textureName));
-                            }
-                        });
-                        
-                        storedData.material.put(materialDataEntry.get("name").getAsString(), samplers);
-                    } else if (skinMesh.has("texture"))
-                    {
-                        List<Pair<String, String>> realMat = Collections.singletonList(new Pair<>("Diffuse_Texture", skinMesh.get("texture").getAsString()));
-                        storedData.material.put("BASE_CHARACTER_MATERIAL", realMat);
-                    } else
-                    {
-                        storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
-                    }
-                    
-                    storedData.materialOverride = new HashMap<>();
-                    if (skinMesh.has("materialOverride"))
-                    {
-                        skinMesh.get("materialOverride").getAsJsonArray().forEach(e -> {
-                            JsonObject entry = getFirstChildObject.apply(e);
-                            if (entry.has("material"))
-                            {
-                                JsonObject parseData = createJsonObject.apply(linkedFiles, entry.get("material").getAsString().substring(13));
-                                if (parseData == null)
-                                {
-                                    System.out.println("Unable to find link in linked files!?");
-                                    return;
-                                }
-                                JsonObject                 parsedData       = getFirstChildObject.apply(parseData);
-                                List<Pair<String, String>> materialSamplers = new ArrayList<>();
-                                if (parsedData.has("samplerValues"))
-                                {
-                                    parsedData.getAsJsonArray("samplerValues").forEach(s -> {
-                                        JsonObject samplerEntry = getFirstChildObject.apply(s);
-                                        
-                                        String samplerName = samplerEntry.get("samplerName").getAsString();
-                                        if (samplerEntry.has("textureName"))
-                                        {
-                                            String textureName = samplerEntry.get("textureName").getAsString();
-                                            materialSamplers.add(new Pair<>(samplerName, textureName));
-                                        }
-                                    });
-                                }
-                                storedData.materialOverride.put(entry.get("submesh").getAsString(), materialSamplers);
-                            } else if (skinMesh.has("texture"))
-                            {
-                                if (entry.has("texture"))
-                                {
-                                    List<Pair<String, String>> realMat = Collections.singletonList(new Pair<>("Diffuse_Texture", entry.get("texture").getAsString()));
-                                    storedData.materialOverride.put(entry.get("submesh").getAsString(), realMat);
-                                } else
-                                {
-                                    storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
-                                }
-                            } else
-                            {
-                                storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
-                            }
-                        });
-                    }
-                    
-                    skinList.add(storedData);
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            });
+            skins.stream().limit(10).forEach(p -> parseSkinInfoFromBin(assetRoot, skinList, p));
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -245,8 +104,6 @@ public class SKNViewer extends Renderer
                                                                   .stream()
                                                                   .filter(p -> p.getA().equalsIgnoreCase("Diffuse_Texture"))
                                                                   .findFirst().orElseGet(() -> new Pair<>("", texPath)).getB());
-            
-            System.out.println(submesh.getName() + " // " + mat.toString());
             
             BufferedImage matImg = new DDSParser().parse(mat);
             Texture       tex    = new Texture(submesh, matImg);
@@ -307,6 +164,150 @@ public class SKNViewer extends Renderer
         prog.bindFragLocation("color", 0);
         
         prog.link();
+    }
+    
+    private void parseSkinInfoFromBin(Path assetRoot, List<SkinData> skinList, Path p)
+    {
+        try
+        {
+            if (!p.toString().matches(".*skins\\\\skin\\d+\\.json"))
+            {
+                return;
+            }
+            String     content = String.join("", Files.readAllLines(p));
+            JsonObject parsed  = UtilHandler.getJsonParser().parse(content).getAsJsonObject();
+            
+            List<String> linkedFiles = new ArrayList<>();
+            linkedFiles.add(content);
+            parsed.get("linkedBinFiles").getAsJsonArray().forEach(f -> {
+                try
+                {
+                    Path hashPath = assetRoot.resolve(f.getAsString());
+                    Path scanPath = assetRoot.resolve(UtilHandler.replaceEnding(f.getAsString(), "bin", "json"));
+                    if (scanPath.toString().length() > 255)
+                    {
+                        String hashMe = hashPath.toString().substring(assetRoot.toString().length() + 1).replace("\\", "/");
+                        String hash   = HashHandler.computeXXHash64(hashMe.toLowerCase());
+                        scanPath = scanPath.resolveSibling("too_long_filename_" + hash + ".json");
+                    }
+                    
+                    linkedFiles.add(String.join("", Files.readAllLines(scanPath)));
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            });
+            
+            SkinData storedData = new SkinData();
+            
+            JsonObject skinData = parsed.getAsJsonObject("SkinCharacterDataProperties");
+            JsonObject next     = getFirstChildObject.apply(skinData);
+            JsonObject meshData = next.getAsJsonObject("skinMeshProperties");
+            JsonObject skinMesh = getFirstChildObject.apply(meshData);
+            
+            String skinName = next.has("championSkinName") ? next.get("championSkinName").getAsString() : getFirstChildKey.apply(skinData);
+            storedData.skinId = next.has("championSkinId") ? next.get("championSkinId").getAsString() : skinName;
+            if (!skinMesh.has("skeleton"))
+            {
+                // ignore objects with no skeleton
+                return;
+            }
+            storedData.skeleton = skinMesh.get("skeleton").getAsString();
+            
+            if (!skinMesh.has("simpleSkin"))
+            {
+                // ignore objects with no model
+                return;
+            }
+            storedData.simpleSkin = skinMesh.get("simpleSkin").getAsString();
+            storedData.initialSubmeshToHide = skinMesh.has("skinMesh") ? skinMesh.get("initialSubmeshToHide").getAsString() : "";
+            
+            storedData.material = new HashMap<>();
+            
+            if (skinMesh.has("material"))
+            {
+                JsonObject materialData = createJsonObject.apply(linkedFiles, skinMesh.get("material").getAsString().substring(13));
+                if (materialData == null)
+                {
+                    System.out.println("Unable to find link in linked files!?");
+                    return;
+                }
+                
+                JsonObject                 materialDataEntry = getFirstChildObject.apply(materialData);
+                List<Pair<String, String>> samplers          = new ArrayList<>();
+                
+                materialDataEntry.getAsJsonArray("samplerValues").forEach(s -> {
+                    JsonObject samplerEntry = getFirstChildObject.apply(s);
+                    
+                    String samplerName = samplerEntry.get("samplerName").getAsString();
+                    if (samplerEntry.has("textureName"))
+                    {
+                        String textureName = samplerEntry.get("textureName").getAsString();
+                        samplers.add(new Pair<>(samplerName, textureName));
+                    }
+                });
+                
+                storedData.material.put(materialDataEntry.get("name").getAsString(), samplers);
+            } else if (skinMesh.has("texture"))
+            {
+                List<Pair<String, String>> realMat = Collections.singletonList(new Pair<>("Diffuse_Texture", skinMesh.get("texture").getAsString()));
+                storedData.material.put("BASE_CHARACTER_MATERIAL", realMat);
+            } else
+            {
+                storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
+            }
+            
+            storedData.materialOverride = new HashMap<>();
+            if (skinMesh.has("materialOverride"))
+            {
+                skinMesh.get("materialOverride").getAsJsonArray().forEach(e -> {
+                    JsonObject entry = getFirstChildObject.apply(e);
+                    if (entry.has("material"))
+                    {
+                        JsonObject parseData = createJsonObject.apply(linkedFiles, entry.get("material").getAsString().substring(13));
+                        if (parseData == null)
+                        {
+                            System.out.println("Unable to find link in linked files!?");
+                            return;
+                        }
+                        JsonObject                 parsedData       = getFirstChildObject.apply(parseData);
+                        List<Pair<String, String>> materialSamplers = new ArrayList<>();
+                        if (parsedData.has("samplerValues"))
+                        {
+                            parsedData.getAsJsonArray("samplerValues").forEach(s -> {
+                                JsonObject samplerEntry = getFirstChildObject.apply(s);
+                                
+                                String samplerName = samplerEntry.get("samplerName").getAsString();
+                                if (samplerEntry.has("textureName"))
+                                {
+                                    String textureName = samplerEntry.get("textureName").getAsString();
+                                    materialSamplers.add(new Pair<>(samplerName, textureName));
+                                }
+                            });
+                        }
+                        storedData.materialOverride.put(entry.get("submesh").getAsString(), materialSamplers);
+                    } else if (skinMesh.has("texture"))
+                    {
+                        if (entry.has("texture"))
+                        {
+                            List<Pair<String, String>> realMat = Collections.singletonList(new Pair<>("Diffuse_Texture", entry.get("texture").getAsString()));
+                            storedData.materialOverride.put(entry.get("submesh").getAsString(), realMat);
+                        } else
+                        {
+                            storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
+                        }
+                    } else
+                    {
+                        storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
+                    }
+                });
+            }
+            
+            skinList.add(storedData);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     float   x;

@@ -74,6 +74,8 @@ public class Texture implements AutoCloseable
         
          */
         
+        bind();
+        
         int[] pixelData = new int[image.getWidth() * image.getHeight()];
         image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixelData, 0, image.getWidth());
         ByteBuffer data = BufferUtils.createByteBuffer(image.getHeight() * image.getWidth() * 4);
@@ -120,4 +122,5 @@ public class Texture implements AutoCloseable
     {
         return tbo;
     }
+    public int getId(){return id;}
 }
