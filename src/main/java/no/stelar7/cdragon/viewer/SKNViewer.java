@@ -2,6 +2,8 @@ package no.stelar7.cdragon.viewer;
 
 import com.google.gson.*;
 import com.google.gson.stream.JsonReader;
+import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.skl.SKLParser;
 import no.stelar7.cdragon.types.skl.data.*;
@@ -85,7 +87,7 @@ public class SKNViewer extends Renderer
             Path characterBase = assetRoot.resolve("data\\characters");
             List<Path> skins = Files.walk(characterBase, FileVisitOption.FOLLOW_LINKS)
                                     .filter(f -> f.toString().contains("\\skins\\"))
-                                    .filter(f -> f.toString().endsWith(".json"))
+                                    .filter(f -> f.toString().endsWith(".bin"))
                                     .collect(Collectors.toList());
             skins.stream().limit(10).forEach(p -> parseSkinInfoFromBin(assetRoot, skinList, p));
         } catch (IOException e)
@@ -110,204 +112,149 @@ public class SKNViewer extends Renderer
             models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
         }
         
-        /*
-        use this when bins support linked files!
-        Path       binPath       = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("ahri_skin_14.bin");
-        Path       extractedPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
-        JsonObject bin           = new JsonParser().parse(new BINParser().parse(binPath).toJson()).getAsJsonObject();
-        JsonObject skinContainer = bin.getAsJsonObject("SkinCharacterDataProperties");
-        JsonObject skinData      = skinContainer.getAsJsonObject((String) skinContainer.keySet().toArray()[0]).getAsJsonObject();
-        JsonObject meshContainer = skinData.getAsJsonObject("skinMeshProperties");
-        JsonObject meshData      = meshContainer.getAsJsonObject((String) meshContainer.keySet().toArray()[0]).getAsJsonObject();
-        
-        SKNFile            skn        = new SKNParser().parse(extractedPath.resolve(meshData.get("simpleSkin").getAsString()));
-        SKLFile            skl        = new SKLParser().parse(extractedPath.resolve(meshData.get("skeleton").getAsString()));
-        BufferedImage      defaultTex = new DDSParser().parse(extractedPath.resolve(meshData.get("texture").getAsString()));
-        List<ReadableBone> bones      = skl.toReadableBones();
-        
-        outer:
-        for (SKNMaterial submesh : skn.getMaterials())
-        {
-            for (JsonElement override : meshData.getAsJsonArray("materialOverride"))
-            {
-                JsonObject obj = override.getAsJsonObject().get((String) override.getAsJsonObject().keySet().toArray()[0]).getAsJsonObject();
-                if (submesh.getName().equals(obj.get("submesh").getAsString()))
-                {
-                    Texture tex = new Texture(submesh, new DDSParser().parse(extractedPath.resolve(obj.get("texture").getAsString())));
-                    models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
-                    continue outer;
-                }
-            }
-            
-            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), defaultTex, skn.getDataForSubmesh(submesh))));
-        }
-        
-        if (skn.getMaterials().size() != models.size())
-        {
-            System.out.println();
-        }
-        */
-        
         meshIndex = 0;
-        model = models.get(meshIndex).getSecond();
+        queuedModel = models.get(meshIndex).getSecond();
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
         
-        prog = new Program();
-        prog.attach(vert);
-        prog.attach(frag);
+        activeProgram = new Program();
+        activeProgram.attach(vert);
+        activeProgram.attach(frag);
         
-        prog.bindVertLocation("position", 0);
-        prog.bindVertLocation("uv", 1);
+        activeProgram.bindVertLocation("position", 0);
+        activeProgram.bindVertLocation("uv", 1);
         
-        prog.bindFragLocation("color", 0);
+        activeProgram.bindFragLocation("color", 0);
         
-        prog.link();
+        activeProgram.link();
+        
+        activeProgram.bind();
+    }
+    
+    private Path resolveLinkToAsset(Path assetRoot, String assetString)
+    {
+        Path hashPath = assetRoot.resolve(assetString);
+        if (hashPath.toString().length() > 255)
+        {
+            String hashMe = hashPath.toString().substring(assetRoot.toString().length() + 1).replace("\\", "/");
+            String hash   = HashHandler.computeXXHash64(hashMe.toLowerCase());
+            hashPath = hashPath.resolveSibling("too_long_filename_" + hash + ".bin");
+        }
+        return hashPath;
+    }
+    
+    
+    private List<Pair<String, String>> extractMaterialData(List<BINFile> linkedFiles, Optional<BINValue> material, Optional<BINValue> texture)
+    {
+        if (material.isPresent())
+        {
+            Optional<BINEntry> materialData = linkedFiles.stream()
+                                                         .map(f -> f.get((String) material.get().getValue()))
+                                                         .filter(Optional::isPresent)
+                                                         .findFirst().get();
+            
+            if (materialData.isEmpty())
+            {
+                System.out.println("Unable to find link in linked files!?");
+                return null;
+            }
+            
+            List<Pair<String, String>> samplers = new ArrayList<>();
+            
+            BINValue samplerData = materialData.get().get("samplerValues").get();
+            if (samplerData.getType() != BINValueType.CONTAINER)
+            {
+                return samplers;
+            }
+            
+            BINContainer samples = (BINContainer) samplerData.getValue();
+            for (Object sample : samples.getData())
+            {
+                BINStruct          sampleStruct   = (BINStruct) sample;
+                Optional<BINValue> samplerName    = sampleStruct.get("samplerName");
+                Optional<BINValue> samplerTexture = sampleStruct.get("textureName");
+                
+                if (samplerName.isPresent() && samplerTexture.isPresent())
+                {
+                    samplers.add(new Pair<>((String) samplerName.get().getValue(), (String) samplerTexture.get().getValue()));
+                }
+            }
+            return samplers;
+        }
+        
+        //noinspection OptionalIsPresent
+        if (texture.isPresent())
+        {
+            return Collections.singletonList(new Pair<>("Diffuse_Texture", (String) texture.get().getValue()));
+        }
+        
+        return Collections.emptyList();
     }
     
     private void parseSkinInfoFromBin(Path assetRoot, List<SkinData> skinList, Path p)
     {
-        try
+        if (!p.toString().matches(".*skins\\\\skin\\d+\\.bin"))
         {
-            if (!p.toString().matches(".*skins\\\\skin\\d+\\.json"))
-            {
-                return;
-            }
-            String     content = String.join("", Files.readAllLines(p));
-            JsonObject parsed  = UtilHandler.getJsonParser().parse(content).getAsJsonObject();
-            
-            List<String> linkedFiles = new ArrayList<>();
-            linkedFiles.add(content);
-            parsed.get("linkedBinFiles").getAsJsonArray().forEach(f -> {
-                try
-                {
-                    Path hashPath = assetRoot.resolve(f.getAsString());
-                    Path scanPath = assetRoot.resolve(UtilHandler.replaceEnding(f.getAsString(), "bin", "json"));
-                    if (scanPath.toString().length() > 255)
-                    {
-                        String hashMe = hashPath.toString().substring(assetRoot.toString().length() + 1).replace("\\", "/");
-                        String hash   = HashHandler.computeXXHash64(hashMe.toLowerCase());
-                        scanPath = scanPath.resolveSibling("too_long_filename_" + hash + ".json");
-                    }
-                    
-                    linkedFiles.add(String.join("", Files.readAllLines(scanPath)));
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            });
-            
-            SkinData storedData = new SkinData();
-            
-            JsonObject skinData = parsed.getAsJsonObject("SkinCharacterDataProperties");
-            JsonObject next     = getFirstChildObject.apply(skinData);
-            JsonObject meshData = next.getAsJsonObject("skinMeshProperties");
-            JsonObject skinMesh = getFirstChildObject.apply(meshData);
-            
-            String skinName = next.has("championSkinName") ? next.get("championSkinName").getAsString() : getFirstChildKey.apply(skinData);
-            storedData.skinId = next.has("championSkinId") ? next.get("championSkinId").getAsString() : skinName;
-            if (!skinMesh.has("skeleton"))
-            {
-                // ignore objects with no skeleton
-                return;
-            }
-            storedData.skeleton = skinMesh.get("skeleton").getAsString();
-            
-            if (!skinMesh.has("simpleSkin"))
-            {
-                // ignore objects with no model
-                return;
-            }
-            storedData.simpleSkin = skinMesh.get("simpleSkin").getAsString();
-            storedData.initialSubmeshToHide = skinMesh.has("skinMesh") ? skinMesh.get("initialSubmeshToHide").getAsString() : "";
-            
-            storedData.material = new HashMap<>();
-            
-            if (skinMesh.has("material"))
-            {
-                JsonObject materialData = createJsonObject.apply(linkedFiles, skinMesh.get("material").getAsString().substring(13));
-                if (materialData == null)
-                {
-                    System.out.println("Unable to find link in linked files!?");
-                    return;
-                }
-                
-                JsonObject                 materialDataEntry = getFirstChildObject.apply(materialData);
-                List<Pair<String, String>> samplers          = new ArrayList<>();
-                
-                materialDataEntry.getAsJsonArray("samplerValues").forEach(s -> {
-                    JsonObject samplerEntry = getFirstChildObject.apply(s);
-                    
-                    String samplerName = samplerEntry.get("samplerName").getAsString();
-                    if (samplerEntry.has("textureName"))
-                    {
-                        String textureName = samplerEntry.get("textureName").getAsString();
-                        samplers.add(new Pair<>(samplerName, textureName));
-                    }
-                });
-                
-                storedData.material.put(materialDataEntry.get("name").getAsString(), samplers);
-            } else if (skinMesh.has("texture"))
-            {
-                List<Pair<String, String>> realMat = Collections.singletonList(new Pair<>("Diffuse_Texture", skinMesh.get("texture").getAsString()));
-                storedData.material.put("BASE_CHARACTER_MATERIAL", realMat);
-            } else
-            {
-                storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
-            }
-            
-            storedData.materialOverride = new HashMap<>();
-            if (skinMesh.has("materialOverride"))
-            {
-                skinMesh.get("materialOverride").getAsJsonArray().forEach(e -> {
-                    JsonObject entry = getFirstChildObject.apply(e);
-                    if (entry.has("material"))
-                    {
-                        JsonObject parseData = createJsonObject.apply(linkedFiles, entry.get("material").getAsString().substring(13));
-                        if (parseData == null)
-                        {
-                            System.out.println("Unable to find link in linked files!?");
-                            return;
-                        }
-                        JsonObject                 parsedData       = getFirstChildObject.apply(parseData);
-                        List<Pair<String, String>> materialSamplers = new ArrayList<>();
-                        if (parsedData.has("samplerValues"))
-                        {
-                            parsedData.getAsJsonArray("samplerValues").forEach(s -> {
-                                JsonObject samplerEntry = getFirstChildObject.apply(s);
-                                
-                                String samplerName = samplerEntry.get("samplerName").getAsString();
-                                if (samplerEntry.has("textureName"))
-                                {
-                                    String textureName = samplerEntry.get("textureName").getAsString();
-                                    materialSamplers.add(new Pair<>(samplerName, textureName));
-                                }
-                            });
-                        }
-                        storedData.materialOverride.put(entry.get("submesh").getAsString(), materialSamplers);
-                    } else if (skinMesh.has("texture"))
-                    {
-                        if (entry.has("texture"))
-                        {
-                            List<Pair<String, String>> realMat = Collections.singletonList(new Pair<>("Diffuse_Texture", entry.get("texture").getAsString()));
-                            storedData.materialOverride.put(entry.get("submesh").getAsString(), realMat);
-                        } else
-                        {
-                            storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
-                        }
-                    } else
-                    {
-                        storedData.material.put("BASE_CHARACTER_MATERIAL", Collections.emptyList());
-                    }
-                });
-            }
-            
-            skinList.add(storedData);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+            return;
         }
+        BINParser parser = new BINParser();
+        BINFile   file   = parser.parse(p);
+        
+        List<BINFile> linkedFiles = new ArrayList<>();
+        linkedFiles.add(file);
+        file.getLinkedFiles().forEach(f -> linkedFiles.add(parser.parse(resolveLinkToAsset(assetRoot, f))));
+        
+        SkinData  storedData = new SkinData();
+        BINEntry  skinData   = file.getEntries().stream().filter(e -> e.getType().equalsIgnoreCase("SkinCharacterDataProperties")).findFirst().get();
+        BINValue  meshData   = skinData.getIfPresent("skinMeshProperties");
+        BINStruct skinMesh   = (BINStruct) meshData.getValue();
+        
+        String skinName = skinData.get("championSkinName").map(v -> (String) v.getValue()).orElse("UNKNOWN SKIN NAME");
+        storedData.skinId = skinData.get("championSkinId").map(v -> String.valueOf(v.getValue())).orElse(skinName);
+        
+        Optional<BINValue> skeleton = skinMesh.get("skeleton");
+        if (skeleton.isEmpty())
+        {
+            // ignore objects with no skeleton
+            return;
+        }
+        storedData.skeleton = (String) skeleton.get().getValue();
+        
+        Optional<BINValue> skin = skinMesh.get("simpleSkin");
+        if (skin.isEmpty())
+        {
+            // ignore objects with no model
+            return;
+        }
+        storedData.simpleSkin = (String) skin.get().getValue();
+        storedData.initialSubmeshToHide = (String) skinMesh.get("initialSubmeshToHide").get().getValue();
+        
+        storedData.material = new HashMap<>();
+        storedData.materialOverride = new HashMap<>();
+        
+        Optional<BINValue> material         = skinMesh.get("material");
+        Optional<BINValue> texture          = skinMesh.get("texture");
+        Optional<BINValue> materialOverride = skinMesh.get("materialOverride");
+        
+        storedData.material.put("BASE_CHARACTER_MATERIAL", extractMaterialData(linkedFiles, material, texture));
+        if (materialOverride.isPresent())
+        {
+            BINContainer container = (BINContainer) materialOverride.get().getValue();
+            for (Object data : container.getData())
+            {
+                BINStruct          struct  = (BINStruct) data;
+                Optional<BINValue> submesh = struct.get("submesh");
+                
+                Optional<BINValue> overrideMaterial = struct.get("material");
+                Optional<BINValue> overrideTexture  = struct.get("texture");
+                
+                List<Pair<String, String>> content = extractMaterialData(linkedFiles, overrideMaterial, overrideTexture);
+                submesh.ifPresent(binValue -> storedData.materialOverride.put((String) binValue.getValue(), content));
+            }
+            
+        }
+        skinList.add(storedData);
     }
     
     float   x;
@@ -337,9 +284,9 @@ public class SKNViewer extends Renderer
         
         Matrix4f mvp = projection.mul(view, new Matrix4f()).mul(modelMat, new Matrix4f());
         
-        prog.bind();
-        prog.setMatrix4f("mvp", mvp);
-        prog.setInt("texImg", 0);
+        activeProgram.bind();
+        activeProgram.setMatrix4f("mvp", mvp);
+        activeProgram.setInt("texImg", 0);
         dirty = false;
     }
     
@@ -355,25 +302,31 @@ public class SKNViewer extends Renderer
         z = (float) Math.cos(time) * distance;
         
         dirty = true;
-        updateMVP();
     }
     
     float last = 0;
     
-    Model   model;
-    Program prog;
+    
+    Model   queuedModel;
+    Model   activeModel;
+    Program activeProgram;
     
     @Override
     public void render()
     {
+        updateMVP();
+        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         UtilHandler.logToFile("gl.log", "glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)");
         
-        prog.bind();
-        model.bind();
+        if (queuedModel != activeModel)
+        {
+            activeModel = queuedModel;
+            activeModel.bind();
+        }
         
-        glDrawElements(GL_TRIANGLES, model.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
-        UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", model.getMesh().getIndexCount()));
+        glDrawElements(GL_TRIANGLES, activeModel.getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
+        UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", activeModel.getMesh().getIndexCount()));
     }
     
     @Override
@@ -388,15 +341,15 @@ public class SKNViewer extends Renderer
                 index = (index >= models.size()) ? (index % models.size()) : index;
                 
                 Vector2<String, Model> data = models.get(index);
-                if (model == data.getSecond())
+                if (queuedModel == data.getSecond())
                 {
                     System.out.println("Only one model present!");
                     return;
                 }
                 
-                System.out.println(data.getFirst());
-                model = data.getSecond();
+                queuedModel = data.getSecond();
                 meshIndex = index;
+                
             }
             
             if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN)
@@ -406,3 +359,4 @@ public class SKNViewer extends Renderer
         }
     }
 }
+    

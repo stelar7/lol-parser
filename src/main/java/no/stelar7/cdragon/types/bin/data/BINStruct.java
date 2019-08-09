@@ -10,6 +10,16 @@ public class BINStruct
     private short          count;
     private List<BINValue> data = new ArrayList<>();
     
+    public BINValue getIfPresent(String hash)
+    {
+        return data.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst().get();
+    }
+    
+    public Optional<BINValue> get(String hash)
+    {
+        return data.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
+    }
+    
     public String getHash()
     {
         return hash;

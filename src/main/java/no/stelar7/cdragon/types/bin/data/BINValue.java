@@ -35,4 +35,14 @@ public class BINValue
     {
         this.value = value;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "BINValue{" +
+               "hash='" + hash + '\'' +
+               ", type=" + type +
+               ", value=" + value +
+               '}';
+    }
 }

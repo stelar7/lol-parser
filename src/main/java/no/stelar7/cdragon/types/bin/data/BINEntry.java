@@ -11,6 +11,16 @@ public class BINEntry
     private short          valueCount;
     private List<BINValue> values = new ArrayList<>();
     
+    public BINValue getIfPresent(String hash)
+    {
+        return values.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst().get();
+    }
+    
+    public Optional<BINValue> get(String hash)
+    {
+        return values.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
+    }
+    
     public String getType()
     {
         return type;
@@ -59,5 +69,17 @@ public class BINEntry
     public void setValues(List<BINValue> values)
     {
         this.values = values;
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "BINEntry{" +
+               "length=" + length +
+               ", type='" + type + '\'' +
+               ", hash='" + hash + '\'' +
+               ", valueCount=" + valueCount +
+               ", values=" + values +
+               '}';
     }
 }

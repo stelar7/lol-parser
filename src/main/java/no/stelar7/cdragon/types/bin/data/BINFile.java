@@ -14,6 +14,16 @@ public class BINFile
     private List<BINEntry> entries     = new ArrayList<>();
     private List<String>   linkedFiles = new ArrayList<>();
     
+    public BINEntry getIfPresent(String hash)
+    {
+        return entries.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst().get();
+    }
+    
+    public Optional<BINEntry> get(String hash)
+    {
+        return entries.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
+    }
+    
     public BINHeader getHeader()
     {
         return header;
