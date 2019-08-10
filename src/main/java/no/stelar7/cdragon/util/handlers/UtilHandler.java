@@ -652,4 +652,12 @@ public final class UtilHandler
         
         return realData;
     }
+    
+    public static void leftPad(StringBuilder zString, String s, int i)
+    {
+        while (zString.length() < 16)
+        {
+            zString.insert(0, "0");
+        }
+    }
 }

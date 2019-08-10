@@ -22,6 +22,11 @@ public class SkinData
     private Map<String, List<Pair<String, String>>> materialOverride = new HashMap<>();
     private Map<String, ANMFile>                    animations       = new HashMap<>();
     
+    public Map<String, ANMFile> getAnimations()
+    {
+        return animations;
+    }
+    
     public String getSkinId()
     {
         return skinId;

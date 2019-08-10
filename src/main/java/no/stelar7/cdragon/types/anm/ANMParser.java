@@ -99,7 +99,7 @@ public class ANMParser implements Parseable<ANMFile>
             {
                 ANMFrame frame = new ANMFrame();
                 
-                frame.setBoneHash(ver.getHashes().get(j));
+                frame.setBoneHash(j);
                 frame.setPositionId(raf.readShort());
                 frame.setScaleId(raf.readShort());
                 frame.setRotationId(raf.readShort());

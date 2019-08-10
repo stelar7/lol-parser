@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.viewer.rendering.models;
+package no.stelar7.cdragon.viewer.rendering.models.skeleton;
 
 import no.stelar7.cdragon.types.skl.data.*;
 
@@ -12,4 +12,5 @@ public class Skeleton
     {
         bones = skl.toReadableBones();
     }
+    
 }

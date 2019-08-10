@@ -2,7 +2,7 @@ package no.stelar7.cdragon.viewer;
 
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.skl.SKLParser;
-import no.stelar7.cdragon.types.skl.data.*;
+import no.stelar7.cdragon.types.skl.data.SKLFile;
 import no.stelar7.cdragon.types.skn.SKNParser;
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
@@ -11,6 +11,7 @@ import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.viewer.rendering.Renderer;
 import no.stelar7.cdragon.viewer.rendering.entities.*;
 import no.stelar7.cdragon.viewer.rendering.models.*;
+import no.stelar7.cdragon.viewer.rendering.models.skeleton.*;
 import no.stelar7.cdragon.viewer.rendering.models.texture.*;
 import no.stelar7.cdragon.viewer.rendering.shaders.*;
 import org.joml.*;
@@ -68,6 +69,8 @@ public class SKNViewer extends Renderer
         
         SKLFile  skl      = new SKLParser().parse(assetRoot.resolve(readData.getSkeleton()));
         Skeleton skeleton = new Skeleton(skl);
+        
+        Animation anim = new Animation(readData.getAnimations().get("Dance_Loop"), skeleton);
         
         String texPath = ((List<Pair<String, String>>) readData.getMaterial().values().toArray()[0]).get(0).getB();
         for (SKNMaterial submesh : skn.getMaterials())
