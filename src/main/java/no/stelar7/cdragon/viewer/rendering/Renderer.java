@@ -122,6 +122,10 @@ public abstract class Renderer
         GL.createCapabilities();
         glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         
+        // swap once so we get a black screen instead of a white one...
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glfwSwapBuffers(window);
+        
         initPostGL();
         
         int   updatesPerSecond = 60;

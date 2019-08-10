@@ -8,13 +8,15 @@ public class BaseEntity
 {
     private Model       model;
     private Vector3f    position;
+    private Vector3f    scale;
     private Quaternionf rotation;
     
-    public BaseEntity(Model model, Vector3f position, Quaternionf rotation)
+    public BaseEntity(Model model, Vector3f position, Quaternionf rotation, Vector3f scale)
     {
         this.model = model;
         this.position = position;
         this.rotation = rotation;
+        this.scale = scale;
     }
     
     public Model getModel()
@@ -45,5 +47,15 @@ public class BaseEntity
     public void setRotation(Quaternionf rotation)
     {
         this.rotation = rotation;
+    }
+    
+    public Vector3f getScale()
+    {
+        return scale;
+    }
+    
+    public void setScale(Vector3f scale)
+    {
+        this.scale = scale;
     }
 }

@@ -13,10 +13,10 @@ public class ANMDataVersion5
     private int unknown2;
     private int unknown3;
     
-    private int boneCount;
-    private int frameCount;
-    private int frameDelay;
-    private int hashOffset;
+    private int   boneCount;
+    private int   frameCount;
+    private float frameDelay;
+    private int   hashOffset;
     
     private int unknown4;
     private int unknown5;
@@ -94,12 +94,12 @@ public class ANMDataVersion5
         this.frameCount = frameCount;
     }
     
-    public int getFrameDelay()
+    public float getFrameDelay()
     {
         return frameDelay;
     }
     
-    public void setFrameDelay(int frameDelay)
+    public void setFrameDelay(float frameDelay)
     {
         this.frameDelay = frameDelay;
     }

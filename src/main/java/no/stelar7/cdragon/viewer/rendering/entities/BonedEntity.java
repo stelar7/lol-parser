@@ -14,7 +14,7 @@ public class BonedEntity extends BaseEntity
     
     public BonedEntity(List<ReadableBone> bones, Model model)
     {
-        super(model, new Vector3f(), new Quaternionf());
+        super(model, new Vector3f(), new Quaternionf(), new Vector3f(1));
     }
     
     public List<ReadableBone> getBones()

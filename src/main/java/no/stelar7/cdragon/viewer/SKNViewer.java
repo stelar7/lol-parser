@@ -40,6 +40,8 @@ public class SKNViewer extends Renderer
     @Override
     public void initPostGL()
     {
+        System.out.println("LOADING ASSETS");
+        
         // enable gl.log
         UtilHandler.debug = true;
         
@@ -84,6 +86,7 @@ public class SKNViewer extends Renderer
         float far  = 10000f;
         
         camera = new Camera(fov, width, height, near, far);
+        camera.getPosition().set(0, 0, -10);
         
         meshIndex = 0;
         entity = new BonedEntity(bones, models.get(meshIndex).getSecond());
@@ -104,11 +107,11 @@ public class SKNViewer extends Renderer
         activeProgram.bind();
     }
     
-    boolean forceRotate = true;
-    int     meshIndex;
-    boolean dirty       = true;
-    float   time        = -1;
-    float   distance    = 10;
+    int       meshIndex;
+    boolean[] forceRotate = {true, false, false, false};
+    boolean   dirty       = true;
+    float     time        = -1;
+    float     distance    = 10;
     
     List<Vector2<String, Model>> models = new ArrayList<>();
     Camera                       camera;
@@ -129,7 +132,7 @@ public class SKNViewer extends Renderer
                 new Vector3f(entity.getPosition()),
                 new Vector3f(0, 1f, 0));
         
-        Matrix4f modelMat = new Matrix4f().translation(entity.getPosition());//.scaling(2);
+        Matrix4f modelMat = new Matrix4f().translationRotateScale(entity.getPosition(), entity.getRotation(), entity.getScale());
         
         Matrix4f mvp = projection.mul(view, new Matrix4f()).mul(modelMat, new Matrix4f());
         
@@ -143,13 +146,32 @@ public class SKNViewer extends Renderer
     @Override
     public void update()
     {
-        time += .01f;
-        
-        if (forceRotate)
+        for (int i = 0; i < forceRotate.length; i++)
         {
-            float x = (float) Math.sin(time) * distance;
-            float z = (float) Math.cos(time) * distance;
-            camera.getPosition().set(x, 0.5f, z);
+            boolean rot = forceRotate[i];
+            if (i == 0 && rot)
+            {
+                time += .01f;
+                float x = (float) Math.sin(time) * distance;
+                float z = (float) Math.cos(time) * distance;
+                camera.getPosition().set(x, 0.5f, z);
+            }
+            
+            if (i == 1 && rot)
+            {
+                entity.getRotation().rotate(0.01f, 0, 0);
+            }
+            
+            if (i == 2 && rot)
+            {
+                entity.getRotation().rotate(0, 0.01f, 0);
+            }
+            
+            if (i == 3 && rot)
+            {
+                entity.getRotation().rotate(0, 0, 0.01f);
+            }
+            
         }
         
         dirty = true;
@@ -184,6 +206,23 @@ public class SKNViewer extends Renderer
                 entity.setModel(data.getSecond());
                 meshIndex = index;
                 
+            }
+            
+            if (key == GLFW.GLFW_KEY_1)
+            {
+                forceRotate[0] = !forceRotate[0];
+            }
+            if (key == GLFW.GLFW_KEY_2)
+            {
+                forceRotate[1] = !forceRotate[1];
+            }
+            if (key == GLFW.GLFW_KEY_3)
+            {
+                forceRotate[2] = !forceRotate[2];
+            }
+            if (key == GLFW.GLFW_KEY_4)
+            {
+                forceRotate[3] = !forceRotate[3];
             }
             
             if (key == GLFW.GLFW_KEY_UP || key == GLFW.GLFW_KEY_DOWN)

@@ -63,7 +63,7 @@ public class ANMParser implements Parseable<ANMFile>
         
         ver.setBoneCount(raf.readInt());
         ver.setFrameCount(raf.readInt());
-        ver.setFrameDelay(raf.readInt());
+        ver.setFrameDelay(raf.readFloat());
         ver.setHashOffset(raf.readInt());
         
         ver.setUnknown4(raf.readInt());
@@ -99,6 +99,7 @@ public class ANMParser implements Parseable<ANMFile>
             {
                 ANMFrame frame = new ANMFrame();
                 
+                frame.setBoneHash(ver.getHashes().get(j));
                 frame.setPositionId(raf.readShort());
                 frame.setScaleId(raf.readShort());
                 frame.setRotationId(raf.readShort());

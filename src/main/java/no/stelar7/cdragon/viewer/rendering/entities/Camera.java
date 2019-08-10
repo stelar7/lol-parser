@@ -16,7 +16,7 @@ public class Camera extends BaseEntity
     
     public Camera(float fov, float width, float height, float near, float far)
     {
-        super(null, new Vector3f(), new Quaternionf());
+        super(null, new Vector3f(), new Quaternionf(), new Vector3f(1));
         this.fov = fov;
         this.width = width;
         this.height = height;
