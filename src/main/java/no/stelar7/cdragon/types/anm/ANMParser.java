@@ -55,13 +55,15 @@ public class ANMParser implements Parseable<ANMFile>
     {
         ANMDataVersion5 ver = new ANMDataVersion5();
         
+        ver.setFileSize(raf.readInt());
+        
         ver.setUnknown1(raf.readInt());
         ver.setUnknown2(raf.readInt());
         ver.setUnknown3(raf.readInt());
         
         ver.setBoneCount(raf.readInt());
         ver.setFrameCount(raf.readInt());
-        ver.setFPS(raf.readInt());
+        ver.setFrameDelay(raf.readInt());
         ver.setHashOffset(raf.readInt());
         
         ver.setUnknown4(raf.readInt());

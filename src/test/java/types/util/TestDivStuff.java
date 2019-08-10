@@ -613,7 +613,7 @@ public class TestDivStuff
     @Test
     public void testBinHashSingle()
     {
-        String toHash = "HexSize";
+        String toHash = "Passive_INTO_Shlth";
         String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
         System.out.println(output);
     }

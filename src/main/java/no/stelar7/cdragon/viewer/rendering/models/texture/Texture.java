@@ -1,4 +1,4 @@
-package no.stelar7.cdragon.viewer.rendering.models;
+package no.stelar7.cdragon.viewer.rendering.models.texture;
 
 import no.stelar7.cdragon.types.skn.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;

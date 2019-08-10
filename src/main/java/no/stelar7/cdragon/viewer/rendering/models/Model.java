@@ -3,6 +3,7 @@ package no.stelar7.cdragon.viewer.rendering.models;
 
 import no.stelar7.cdragon.types.skn.data.SKNData;
 import no.stelar7.cdragon.viewer.rendering.buffers.VAO;
+import no.stelar7.cdragon.viewer.rendering.models.texture.Texture;
 
 import java.util.List;
 

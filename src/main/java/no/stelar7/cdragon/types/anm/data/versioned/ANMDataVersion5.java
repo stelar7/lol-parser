@@ -7,13 +7,15 @@ import java.util.*;
 
 public class ANMDataVersion5
 {
+    private int fileSize;
+    
     private int unknown1;
     private int unknown2;
     private int unknown3;
     
     private int boneCount;
     private int frameCount;
-    private int FPS;
+    private int frameDelay;
     private int hashOffset;
     
     private int unknown4;
@@ -31,6 +33,16 @@ public class ANMDataVersion5
     private List<Vector3s>               rotations = new ArrayList<>();
     private List<Integer>                hashes    = new ArrayList<>();
     private Map<Integer, List<ANMFrame>> frames    = new HashMap<>();
+    
+    public int getFileSize()
+    {
+        return fileSize;
+    }
+    
+    public void setFileSize(int fileSize)
+    {
+        this.fileSize = fileSize;
+    }
     
     public int getUnknown1()
     {
@@ -82,14 +94,14 @@ public class ANMDataVersion5
         this.frameCount = frameCount;
     }
     
-    public int getFPS()
+    public int getFrameDelay()
     {
-        return FPS;
+        return frameDelay;
     }
     
-    public void setFPS(int FPS)
+    public void setFrameDelay(int frameDelay)
     {
-        this.FPS = FPS;
+        this.frameDelay = frameDelay;
     }
     
     public int getHashOffset()
