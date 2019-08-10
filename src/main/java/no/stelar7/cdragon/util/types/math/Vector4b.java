@@ -2,10 +2,10 @@ package no.stelar7.cdragon.util.types.math;
 
 public class Vector4b
 {
-    private byte x;
-    private byte y;
-    private byte z;
-    private byte w;
+    public byte x;
+    public byte y;
+    public byte z;
+    public byte w;
     
     public byte getX()
     {

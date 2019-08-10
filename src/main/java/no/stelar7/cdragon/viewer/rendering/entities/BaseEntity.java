@@ -19,6 +19,11 @@ public class BaseEntity
         this.scale = scale;
     }
     
+    public BaseEntity(Model model)
+    {
+        this(model, new Vector3f(), new Quaternionf(), new Vector3f(1));
+    }
+    
     public Model getModel()
     {
         return model;

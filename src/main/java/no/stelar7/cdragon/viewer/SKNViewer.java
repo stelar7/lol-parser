@@ -63,11 +63,13 @@ public class SKNViewer extends Renderer
             e.printStackTrace();
         }
         
-        SkinData           readData = skinList.get(0);
-        SKNFile            skn      = new SKNParser().parse(assetRoot.resolve(readData.getSimpleSkin()));
-        SKLFile            skl      = new SKLParser().parse(assetRoot.resolve(readData.getSkeleton()));
-        List<ReadableBone> bones    = skl.toReadableBones();
-        String             texPath  = ((List<Pair<String, String>>) readData.getMaterial().values().toArray()[0]).get(0).getB();
+        SkinData readData = skinList.get(0);
+        SKNFile  skn      = new SKNParser().parse(assetRoot.resolve(readData.getSimpleSkin()));
+        
+        SKLFile  skl      = new SKLParser().parse(assetRoot.resolve(readData.getSkeleton()));
+        Skeleton skeleton = new Skeleton(skl);
+        
+        String texPath = ((List<Pair<String, String>>) readData.getMaterial().values().toArray()[0]).get(0).getB();
         for (SKNMaterial submesh : skn.getMaterials())
         {
             Path mat = assetRoot.resolve(readData.getMaterialOverride().getOrDefault(submesh.getName(), new ArrayList<>())
@@ -77,7 +79,7 @@ public class SKNViewer extends Renderer
             
             BufferedImage matImg = new DDSParser().parse(mat);
             Texture       tex    = new Texture(submesh, matImg);
-            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skn.getDataForSubmesh(submesh))));
+            models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skeleton)));
         }
         
         
@@ -89,7 +91,7 @@ public class SKNViewer extends Renderer
         camera.getPosition().set(0, 0, -10);
         
         meshIndex = 0;
-        entity = new BonedEntity(bones, models.get(meshIndex).getSecond());
+        entity = new BaseEntity(models.get(meshIndex).getSecond());
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
@@ -115,7 +117,7 @@ public class SKNViewer extends Renderer
     
     List<Vector2<String, Model>> models = new ArrayList<>();
     Camera                       camera;
-    BonedEntity                  entity;
+    BaseEntity                   entity;
     Program                      activeProgram;
     
     private void updateMVP()
@@ -138,6 +140,7 @@ public class SKNViewer extends Renderer
         
         activeProgram.bind();
         activeProgram.setMatrix4f("mvp", mvp);
+        activeProgram.setMatrix4f("bones", new Matrix4f().identity());
         activeProgram.setInt("texImg", 0);
         dirty = false;
     }
