@@ -4,9 +4,8 @@ import java.util.Objects;
 
 public class MGEOFileHeader
 {
-    private String  magic;
-    private int     version;
-    private boolean unknown;
+    private String magic;
+    private int    version;
     
     public String getMagic()
     {
@@ -28,16 +27,6 @@ public class MGEOFileHeader
         this.version = version;
     }
     
-    public boolean isUnknown()
-    {
-        return unknown;
-    }
-    
-    public void setUnknown(boolean unknown)
-    {
-        this.unknown = unknown;
-    }
-    
     @Override
     public boolean equals(Object o)
     {
@@ -51,14 +40,13 @@ public class MGEOFileHeader
         }
         MGEOFileHeader that = (MGEOFileHeader) o;
         return version == that.version &&
-               unknown == that.unknown &&
                Objects.equals(magic, that.magic);
     }
     
     @Override
     public int hashCode()
     {
-        return Objects.hash(magic, version, unknown);
+        return Objects.hash(magic, version);
     }
     
     @Override
@@ -67,7 +55,6 @@ public class MGEOFileHeader
         return "MGEOFileHeader{" +
                "magic='" + magic + '\'' +
                ", version=" + version +
-               ", unknown=" + unknown +
                '}';
     }
 }

@@ -23,4 +23,19 @@ public class Animation
             time.updateAndGet(v -> v + animation.getVersion5().getFrameDelay());
         });
     }
+    
+    public Map<Integer, BoneData> getClosestFrame(float time)
+    {
+        Float ceil = animationData.ceilingKey(time);
+        if (ceil != null)
+        {
+            return animationData.get(ceil);
+        }
+        
+        float max      = animationData.lastKey();
+        float realTime = time % max;
+        
+        ceil = animationData.ceilingKey(realTime);
+        return animationData.get(ceil);
+    }
 }

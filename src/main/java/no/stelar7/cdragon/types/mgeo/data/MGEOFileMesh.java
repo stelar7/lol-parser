@@ -8,14 +8,35 @@ public class MGEOFileMesh
 {
     private String                    name;
     private MGEOFileMeshType          type;
-    private List<Integer>             vertexBuffers;
+    private List<MGEOFileMeshVertex>  vertices;
+    private List<Short>               indices;
     private List<MGeoFileMeshSubMesh> subMeshes;
     private BoundingBox               boundingBox;
     private Matrix4f                  transformationMatrix;
     private Vector3f                  unknown;
     private Matrix4f[]                unknown2;
-    private String                    texture;
-    private Vector4f                  color;
+    private String                    lightMap;
+    private Vector4f                  unknown3;
+    
+    public List<MGEOFileMeshVertex> getVertices()
+    {
+        return vertices;
+    }
+    
+    public void setVertices(List<MGEOFileMeshVertex> vertices)
+    {
+        this.vertices = vertices;
+    }
+    
+    public List<Short> getIndices()
+    {
+        return indices;
+    }
+    
+    public void setIndices(List<Short> indices)
+    {
+        this.indices = indices;
+    }
     
     public String getName()
     {
@@ -35,16 +56,6 @@ public class MGEOFileMesh
     public void setType(MGEOFileMeshType type)
     {
         this.type = type;
-    }
-    
-    public List<Integer> getVertexBuffers()
-    {
-        return vertexBuffers;
-    }
-    
-    public void setVertexBuffers(List<Integer> vertexBuffers)
-    {
-        this.vertexBuffers = vertexBuffers;
     }
     
     public List<MGeoFileMeshSubMesh> getSubMeshes()
@@ -97,24 +108,24 @@ public class MGEOFileMesh
         this.unknown2 = unknown2;
     }
     
-    public String getTexture()
+    public String getLightMap()
     {
-        return texture;
+        return lightMap;
     }
     
-    public void setTexture(String texture)
+    public void setLightMap(String lightMap)
     {
-        this.texture = texture;
+        this.lightMap = lightMap;
     }
     
-    public Vector4f getColor()
+    public Vector4f getUnknown3()
     {
-        return color;
+        return unknown3;
     }
     
-    public void setColor(Vector4f color)
+    public void setUnknown3(Vector4f unknown3)
     {
-        this.color = color;
+        this.unknown3 = unknown3;
     }
     
     @Override
@@ -131,20 +142,21 @@ public class MGEOFileMesh
         MGEOFileMesh that = (MGEOFileMesh) o;
         return Objects.equals(name, that.name) &&
                type == that.type &&
-               Objects.equals(vertexBuffers, that.vertexBuffers) &&
+               Objects.equals(vertices, that.vertices) &&
+               Objects.equals(indices, that.indices) &&
                Objects.equals(subMeshes, that.subMeshes) &&
                Objects.equals(boundingBox, that.boundingBox) &&
                Objects.equals(transformationMatrix, that.transformationMatrix) &&
                Objects.equals(unknown, that.unknown) &&
                Arrays.equals(unknown2, that.unknown2) &&
-               Objects.equals(texture, that.texture) &&
-               Objects.equals(color, that.color);
+               Objects.equals(lightMap, that.lightMap) &&
+               Objects.equals(unknown3, that.unknown3);
     }
     
     @Override
     public int hashCode()
     {
-        int result = Objects.hash(name, type, vertexBuffers, subMeshes, boundingBox, transformationMatrix, unknown, texture, color);
+        int result = Objects.hash(name, type, vertices, indices, subMeshes, boundingBox, transformationMatrix, unknown, lightMap, unknown3);
         result = 31 * result + Arrays.hashCode(unknown2);
         return result;
     }
@@ -155,14 +167,15 @@ public class MGEOFileMesh
         return "MGEOFileMesh{" +
                "name='" + name + '\'' +
                ", type=" + type +
-               ", vertexBuffers=" + vertexBuffers +
+               ", vertices=" + vertices +
+               ", indices=" + indices +
                ", subMeshes=" + subMeshes +
                ", boundingBox=" + boundingBox +
                ", transformationMatrix=" + transformationMatrix +
                ", unknown=" + unknown +
                ", unknown2=" + Arrays.toString(unknown2) +
-               ", texture='" + texture + '\'' +
-               ", color=" + color +
+               ", lightMap='" + lightMap + '\'' +
+               ", unknown3=" + unknown3 +
                '}';
     }
 }

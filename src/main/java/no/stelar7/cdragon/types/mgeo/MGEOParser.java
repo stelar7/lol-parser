@@ -91,11 +91,21 @@ public class MGEOParser implements Parseable<MGEOFile>
     
     private List<MGEOFileMesh> parseMeshes(RandomAccessReader raf, MGEOFileHeader header)
     {
+        boolean isUnknownSet = false;
+        if (header.getVersion() != 7)
+        {
+            int unknownHeaderBytes = raf.readByte();
+            isUnknownSet = unknownHeaderBytes == 1;
+        }
+        
         List<Integer> unknownList  = new ArrayList<>();
-        int           unknownCount = (raf.readInt() << 7) / 4;
+        int           unknownCount = raf.readInt();
         for (int i = 0; i < unknownCount; i++)
         {
-            unknownList.add(raf.readInt());
+            for (int j = 0; j < 32; j++)
+            {
+                unknownList.add(raf.readInt());
+            }
         }
         
         
@@ -121,7 +131,7 @@ public class MGEOParser implements Parseable<MGEOFile>
         List<MGEOFileMesh> meshes    = new ArrayList<>();
         for (int i = 0; i < meshCount; i++)
         {
-            meshes.add(parseMesh(raf, header.getVersion(), vertexBufferOffsets, indexBufferOffsets, header.isUnknown()));
+            meshes.add(parseMesh(raf, header.getVersion(), vertexBufferOffsets, indexBufferOffsets, isUnknownSet));
         }
         
         return meshes;
@@ -171,6 +181,7 @@ public class MGEOParser implements Parseable<MGEOFile>
                 raf.seek(originalPos);
             }
         }
+        mesh.setVertices(vertices);
         
         int indexCount  = raf.readInt();
         int indexBuffer = raf.readInt();
@@ -183,6 +194,7 @@ public class MGEOParser implements Parseable<MGEOFile>
             indices.add(raf.readShort());
         }
         raf.seek(originalPos);
+        mesh.setIndices(indices);
         
         int                       submeshCount = raf.readInt();
         List<MGeoFileMeshSubMesh> subMeshes    = new ArrayList<>();
@@ -191,13 +203,18 @@ public class MGEOParser implements Parseable<MGEOFile>
             subMeshes.add(parseSubmesh(raf));
         }
         mesh.setSubMeshes(subMeshes);
-        if (version >= 6)
+        if (version != 5)
         {
             raf.readByte();
         }
         mesh.setBoundingBox(raf.readBoundingBox());
         mesh.setTransformationMatrix(raf.readMatrix4x4());
-        byte padding = raf.readByte();
+        byte unknownA = raf.readByte();
+        
+        if (version == 7)
+        {
+            byte unknownB = raf.readByte();
+        }
         
         if (unknown)
         {
@@ -210,8 +227,8 @@ public class MGEOParser implements Parseable<MGEOFile>
             unknown2[i] = raf.readMatrix3x3();
         }
         mesh.setUnknown2(unknown2);
-        mesh.setTexture(raf.readString(raf.readInt()));
-        mesh.setColor(raf.readVec4F());
+        mesh.setLightMap(raf.readString(raf.readInt()));
+        mesh.setUnknown3(raf.readVec4F());
         return mesh;
     }
     
@@ -232,7 +249,6 @@ public class MGEOParser implements Parseable<MGEOFile>
         MGEOFileHeader header = new MGEOFileHeader();
         header.setMagic(raf.readString(4));
         header.setVersion(raf.readInt());
-        header.setUnknown(raf.readByte() == 1);
         return header;
     }
 }
