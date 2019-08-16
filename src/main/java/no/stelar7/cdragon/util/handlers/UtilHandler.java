@@ -304,6 +304,14 @@ public final class UtilHandler
         return pre + other;
     }
     
+    /**
+     * Removes everything starting at the last .
+     */
+    public static String removeEnding(String name)
+    {
+        return name.substring(0, name.lastIndexOf('.'));
+    }
+    
     public static float scale(final float valueIn, final float baseMin, final float baseMax, final float limitMin, final float limitMax)
     {
         return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
@@ -481,23 +489,14 @@ public final class UtilHandler
         }
     }
     
-    public static Predicate<Path> IS_JSON_PREDICATE = (file) -> {
-        if (Files.isDirectory(file))
-        {
-            return false;
-        }
-        
-        return file.toString().endsWith(".json");
-    };
+    public static Predicate<Path> filetypePredicate(String type)
+    {
+        return test -> !Files.isDirectory(test) && test.toString().endsWith(type);
+    }
     
-    public static Predicate<Path> IS_BIN_PREDICATE = (file) -> {
-        if (Files.isDirectory(file))
-        {
-            return false;
-        }
-        
-        return file.toString().endsWith(".bin");
-    };
+    public static Predicate<Path> IS_JSON_PREDICATE = (file) -> filetypePredicate(".json").test(file);
+    
+    public static Predicate<Path> IS_BIN_PREDICATE = (file) -> filetypePredicate(".bin").test(file);
     
     public static List<Path> getFilesMatchingPredicate(Path start, Predicate<Path> check)
     {

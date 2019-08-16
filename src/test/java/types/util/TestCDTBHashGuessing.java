@@ -44,11 +44,12 @@ public class TestCDTBHashGuessing
     public void doBINTest()
     {
         BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
-        //guesser.guessNewCharacters();
+        guesser.guessNewCharacters();
         guesser.guessNewAnimations();
+        guesser.guessFromFontFiles();
         
         // guesser.saveAsJson();
         
-        // guesser.saveToBackup();
+        guesser.saveToBackup();
     }
 }
