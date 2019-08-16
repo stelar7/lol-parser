@@ -25,7 +25,7 @@ public class TestCDTBHashGuessing
     }
     
     @Test
-    @Order(2)
+    @Order(10)
     public void doLCUTest()
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
@@ -40,7 +40,7 @@ public class TestCDTBHashGuessing
     }
     
     @Test
-    @Order(3)
+    @Order(2)
     public void doBINTest()
     {
         BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
