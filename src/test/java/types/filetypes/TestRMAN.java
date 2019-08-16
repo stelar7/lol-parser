@@ -1,5 +1,6 @@
 package types.filetypes;
 
+import com.google.gson.JsonObject;
 import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
@@ -7,6 +8,7 @@ import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -19,19 +21,23 @@ public class TestRMAN
     public void testRMAN() throws Exception
     {
         List<RMANFile> files = new ArrayList<>();
-        files.add(RMANParser.loadFromPBE(RMANFileType.GAME));
-        files.add(RMANParser.loadFromPBE(RMANFileType.LCU));
+        JsonObject     obj   = RMANParser.getPBEManifest();
+        files.add(RMANParser.loadFromPBE(obj, RMANFileType.GAME));
+        files.add(RMANParser.loadFromPBE(obj, RMANFileType.LCU));
         files.forEach(RMANFile::printFileList);
         
         Path bundleFolder = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\bundles");
         Files.createDirectories(bundleFolder);
         
-        boolean shouldDownload = true;
+        int     currentVersion = obj.get("version").getAsInt();
+        Path    lastVersion    = UtilHandler.CDRAGON_FOLDER.resolve("version");
+        boolean shouldDownload = !Files.exists(lastVersion) || Integer.parseInt(Files.readAllLines(lastVersion).get(0)) < currentVersion;
         if (shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
             removeOldBundles(removedBundles, bundleFolder);
             downloadAllBundles(files, bundleFolder);
+            Files.write(lastVersion, String.valueOf(currentVersion).getBytes(StandardCharsets.UTF_8));
         }
         
         Path    fileFolder   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");

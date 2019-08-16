@@ -68,7 +68,8 @@ public class RMANParser implements Parseable<RMANFile>
         }
     }
     
-    public static RMANFile loadFromPBE(RMANFileType type)
+    
+    public static JsonObject getPBEManifest()
     {
         try
         {
@@ -97,37 +98,46 @@ public class RMANParser implements Parseable<RMANFile>
                 Files.move(downloadPath, realPath);
             }
             
-            Path usedManfest = null;
-            switch (type)
-            {
-                case GAME:
-                {
-                    System.out.println("Downloading game manifest");
-                    String url = obj.get("game_patch_url").getAsString();
-                    usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
-                    WebHandler.downloadFile(usedManfest, url);
-                    break;
-                }
-                
-                case LCU:
-                {
-                    System.out.println("Downloading lcu manifest");
-                    String url = obj.get("client_patch_url").getAsString();
-                    usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
-                    WebHandler.downloadFile(usedManfest, url);
-                    
-                    break;
-                }
-            }
-            
-            System.out.println("Parsing...");
-            return new RMANParser().parse(usedManfest);
-            
+            obj.addProperty("localsavepath", realPath.toString());
+            return obj;
         } catch (IOException e)
         {
             e.printStackTrace();
-            return null;
         }
+        
+        return null;
+    }
+    
+    public static RMANFile loadFromPBE(JsonObject obj, RMANFileType type)
+    {
+        Path   downloadPath = Paths.get(obj.get("localsavepath").getAsString());
+        String version      = obj.get("version").getAsString();
+        
+        Path usedManfest = null;
+        switch (type)
+        {
+            case GAME:
+            {
+                System.out.println("Downloading game manifest");
+                String url = obj.get("game_patch_url").getAsString();
+                usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
+                WebHandler.downloadFile(usedManfest, url);
+                break;
+            }
+            
+            case LCU:
+            {
+                System.out.println("Downloading lcu manifest");
+                String url = obj.get("client_patch_url").getAsString();
+                usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
+                WebHandler.downloadFile(usedManfest, url);
+                
+                break;
+            }
+        }
+        
+        System.out.println("Parsing...");
+        return new RMANParser().parse(usedManfest);
     }
     
     /**
