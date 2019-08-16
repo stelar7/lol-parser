@@ -155,6 +155,7 @@ public class TestDivStuff
         Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
         Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
         Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
+        Function<String, JsonElement>      replaceDDSPNG        = input -> new JsonPrimitive(UtilHandler.replaceEnding(input, "dds", "png"));
         
         Function<String, Boolean> isFloat = obj -> {
             try
@@ -271,7 +272,7 @@ public class TestDivStuff
             JsonObject o = new JsonObject();
             o.add("name", trait.get(displayName));
             o.add("desc", trait.get(traitDescription));
-            o.add("icon", trait.get(traitIcon));
+            o.add("icon", replaceDDSPNG.apply(trait.get(traitIcon).getAsString()));
             
             JsonArray effects = new JsonArray();
             
@@ -340,11 +341,11 @@ public class TestDivStuff
             
             o.add("name", champ.get(displayName));
             o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
-            o.add("splash", champ.get(champSplash));
+            o.add("splash", replaceDDSPNG.apply(champ.get(champSplash).getAsString()));
             
             abilities.add("name", champ.get(champAbilityName));
             abilities.add("desc", champ.get(champAbilityDesc));
-            abilities.add("icon", champ.get(champAbilityIcon));
+            abilities.add("icon", replaceDDSPNG.apply(champ.get(champAbilityIcon).getAsString()));
             
             
             String champDataContainer = "304496F1";
@@ -449,7 +450,7 @@ public class TestDivStuff
             JsonObject o = new JsonObject();
             o.add("name", item.get(displayName));
             o.add("desc", item.get(itemDescription));
-            o.add("icon", item.get(itemIcon));
+            o.add("icon", replaceDDSPNG.apply(item.get(itemIcon).getAsString()));
             
             JsonArray fromOther = getKeyOrDefaultArray.apply(item, itemFromKey);
             JsonArray fromReal  = new JsonArray();
@@ -497,29 +498,72 @@ public class TestDivStuff
         obj.add("items", UtilHandler.getGson().toJsonTree(itemData));
         String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
         
-        try
+        if (false)
         {
-            Files.createDirectories(outputFolder.resolve("TFT"));
-            Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            
-            descs.forEach((lang, vals) -> {
+            champData.forEach((k, v) -> {
+                String splashPath  = v.get("splash").getAsString();
+                Path   splash      = inputFolder.resolve(splashPath);
+                String abilityPath = v.getAsJsonObject("ability").get("icon").getAsString();
+                Path   ability     = inputFolder.resolve(abilityPath);
+                
                 try
                 {
-                    System.out.println("Generating files for " + lang);
-                    
-                    final String[] alteredData = {data};
-                    vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
-                    Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                    Files.createDirectories(outputFolder.resolve(splashPath).getParent());
+                    Files.createDirectories(outputFolder.resolve(abilityPath).getParent());
+                    Files.copy(splash, outputFolder.resolve(splashPath), StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(ability, outputFolder.resolve(abilityPath), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+                
+            });
+            
+            traitData.forEach((v) -> {
+                String iconPath = v.get("icon").getAsString();
+                Path   icon     = inputFolder.resolve(iconPath);
+                
+                try
+                {
+                    Files.createDirectories(outputFolder.resolve(iconPath).getParent());
+                    Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e)
                 {
                     e.printStackTrace();
                 }
             });
             
-        } catch (IOException e)
-        {
-            e.printStackTrace();
+            itemData.forEach((k, v) -> {
+                String iconPath = v.get("icon").getAsString();
+                Path   icon     = inputFolder.resolve(iconPath);
+                
+                try
+                {
+                    Files.createDirectories(outputFolder.resolve(iconPath).getParent());
+                    Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            });
         }
+        
+        Files.createDirectories(outputFolder.resolve("TFT"));
+        Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        
+        descs.forEach((lang, vals) -> {
+            try
+            {
+                System.out.println("Generating files for " + lang);
+                
+                final String[] alteredData = {data};
+                vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
+                Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
     }
     
     @Test
