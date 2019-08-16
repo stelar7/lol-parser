@@ -17,6 +17,7 @@ public class HashGuesser
 {
     public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("lcu.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\lcu.json"));
     public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("game.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\game.json"));
+    public static HashFile hashFileBIN  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("bin.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\bin\\binhash.json"));
     
     
     protected Set<String> REGIONS = new HashSet<>(Arrays.asList("global", "br", "cn", "eun", "eune", "euw", "garena2", "garena3", "id", "jp", "kr", "la", "la1", "la2",
@@ -38,10 +39,10 @@ public class HashGuesser
     protected Set<WADFile>        wads;
     protected Set<String>         dirList;
     
-    public HashGuesser(HashFile hashFile, Set<String> hashes)
+    public HashGuesser(HashFile hashFile, Collection<String> hashes)
     {
         this.hashFile = hashFile;
-        this.hashes = hashes;
+        this.hashes = new HashSet<>(hashes);
         this.newHashes = new HashMap<>();
         
         this.known = this.hashFile.load(true);
@@ -63,12 +64,25 @@ public class HashGuesser
         return this;
     }
     
-    public static Set<String> unknownFromExport(Path unknownFile)
+    public static Set<String> unknownFromExportWAD(Path unknownFile)
     {
         try
         {
             return Files.readAllLines(unknownFile).stream().map(a -> a.substring(0, 16)).collect(Collectors.toSet());
             
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return Collections.emptySet();
+    }
+    
+    public static Set<String> unknownFromExportBIN(Path unknownFile)
+    {
+        try
+        {
+            return new HashSet<>(Files.readAllLines(unknownFile));
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -86,7 +100,7 @@ public class HashGuesser
     public void saveNew()
     {
         System.out.println("Saving new hashes as CDTB format");
-        this.hashFile.saveAsJson(this.newHashes);
+        this.hashFile.save(this.newHashes);
     }
     
     public void saveNewAsJson()

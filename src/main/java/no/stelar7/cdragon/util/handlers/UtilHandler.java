@@ -490,6 +490,15 @@ public final class UtilHandler
         return file.toString().endsWith(".json");
     };
     
+    public static Predicate<Path> IS_BIN_PREDICATE = (file) -> {
+        if (Files.isDirectory(file))
+        {
+            return false;
+        }
+        
+        return file.toString().endsWith(".bin");
+    };
+    
     public static List<Path> getFilesMatchingPredicate(Path start, Predicate<Path> check)
     {
         List<Path> readMe = new ArrayList<>();

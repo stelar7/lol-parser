@@ -10,13 +10,13 @@ import java.nio.file.Path;
 @TestMethodOrder(OrderAnnotation.class)
 public class TestCDTBHashGuessing
 {
+    private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+    
     @Test
     @Order(1)
     public void doGameTest()
     {
-        Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
-        
-        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         gguesser.guessAssetsBySearch(dataPath);
         gguesser.guessBinByLinkedFiles(dataPath);
         //gguesser.save();
@@ -28,7 +28,7 @@ public class TestCDTBHashGuessing
     @Order(2)
     public void doLCUTest()
     {
-        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExport(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.substituteRegionLang();
         guesser.substitutePlugin();
         guesser.substituteBasenames();
@@ -37,5 +37,18 @@ public class TestCDTBHashGuessing
         //guesser.save();
         
         guesser.saveToBackup();
+    }
+    
+    @Test
+    @Order(3)
+    public void doBINTest()
+    {
+        BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
+        //guesser.guessNewCharacters();
+        guesser.guessNewAnimations();
+        
+        // guesser.saveAsJson();
+        
+        // guesser.saveToBackup();
     }
 }
