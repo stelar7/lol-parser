@@ -6,6 +6,7 @@ import org.joml.Quaternionf;
 
 public class BaseEntity
 {
+    public  boolean     visible = true;
     private Model       model;
     private Vector3f    position;
     private Vector3f    scale;

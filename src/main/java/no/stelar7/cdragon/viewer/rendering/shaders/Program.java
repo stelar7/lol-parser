@@ -4,6 +4,7 @@ package no.stelar7.cdragon.viewer.rendering.shaders;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import org.joml.Matrix4f;
 
+import java.nio.FloatBuffer;
 import java.util.*;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -101,5 +102,19 @@ public class Program implements AutoCloseable
         int loc = getUniformLocation(name);
         glUniform1i(loc, data);
         UtilHandler.logToFile("gl.log", String.format("glUniform1i(%s, %s)", loc, data));
+    }
+    
+    public void setArrayMatrix4f(String name, List<Matrix4f> mats)
+    {
+        FloatBuffer data = FloatBuffer.allocate(mats.size() * 16);
+        for (Matrix4f mat : mats)
+        {
+            mat.get(data);
+            data.position(data.position() + 16);
+        }
+        
+        int loc = getUniformLocation(name);
+        glUniformMatrix4fv(loc, false, data);
+        UtilHandler.logToFile("gl.log", String.format("glUniformMatrix4fv(%s, GL_FALSE, %s)", loc, data.capacity() > 0 ? "{data}" : "null"));
     }
 }

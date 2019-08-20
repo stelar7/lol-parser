@@ -13,15 +13,31 @@ public class Animation
     {
         AtomicReference<Float> time = new AtomicReference<>((float) 0);
         
-        animation.getVersion5().getFrames().forEach((frame, frameData) -> {
-            frameData.forEach(data -> {
-                animationData.putIfAbsent(time.get(), new HashMap<>());
-                BoneData boneFrame = BoneData.fromFrame(animation, data, skeleton);
-                animationData.get(time.get()).put(boneFrame.hash, boneFrame);
+        if (animation.getVersion5() != null)
+        {
+            animation.getVersion5().getFrames().forEach((frame, frameData) -> {
+                frameData.forEach(data -> {
+                    animationData.putIfAbsent(time.get(), new HashMap<>());
+                    BoneData boneFrame = BoneData.fromFrame(animation, data, skeleton);
+                    animationData.get(time.get()).put(boneFrame.hash, boneFrame);
+                });
+                
+                time.updateAndGet(v -> v + animation.getVersion5().getFrameDelay());
             });
-            
-            time.updateAndGet(v -> v + animation.getVersion5().getFrameDelay());
-        });
+        }
+        
+        if (animation.getVersion4() != null)
+        {
+            animation.getVersion4().getFrames().forEach((frame, frameData) -> {
+                frameData.forEach(data -> {
+                    animationData.putIfAbsent(time.get(), new HashMap<>());
+                    BoneData boneFrame = BoneData.fromFrame(animation, data, skeleton);
+                    animationData.get(time.get()).put(boneFrame.hash, boneFrame);
+                });
+                
+                time.updateAndGet(v -> v + animation.getVersion4().getFrameOffset());
+            });
+        }
     }
     
     public Map<Integer, BoneData> getClosestFrame(float time)

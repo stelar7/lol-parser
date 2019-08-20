@@ -114,6 +114,9 @@ public class TestTFTData
     @Test
     public void buildTFTDataFiles() throws IOException
     {
+        // only set this to true if you have exported the images aswell!
+        boolean exportImages = true;
+        
         Path inputFolder = Paths.get("D:\\pbe");
         //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
@@ -470,7 +473,7 @@ public class TestTFTData
         obj.add("items", UtilHandler.getGson().toJsonTree(itemData));
         String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
         
-        if (false)
+        if (exportImages)
         {
             champData.forEach((k, v) -> {
                 String splashPath  = v.get("splash").getAsString();

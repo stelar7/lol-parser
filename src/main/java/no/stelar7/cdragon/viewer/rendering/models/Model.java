@@ -8,9 +8,9 @@ import no.stelar7.cdragon.viewer.rendering.models.texture.Texture;
 
 public class Model implements AutoCloseable
 {
-    private static final int VERTEX_SIZE  = 3;
-    private static final int NORMAL_SIZE  = 3;
-    private static final int TEXTURE_SIZE = 2;
+    private static final int VERTEX_SIZE   = 3;
+    private static final int NORMAL_SIZE   = 3;
+    private static final int TEXTURE_SIZE  = 2;
     private static final int SKELETON_SIZE = 4;
     
     private VAO vao;
@@ -18,6 +18,8 @@ public class Model implements AutoCloseable
     private Mesh     mesh;
     private Texture  texture;
     private Skeleton skeleton;
+    
+    private boolean hasSkeleton = false;
     
     private Model()
     {
@@ -76,6 +78,7 @@ public class Model implements AutoCloseable
         
         mesh.bindBWbo();
         setPointer(4, SKELETON_SIZE);
+        hasSkeleton = true;
     }
     
     public void setPointer(int index, int size)
@@ -121,5 +124,10 @@ public class Model implements AutoCloseable
         this.mesh = mesh;
         mesh.bindVBO();
         vao.setPointer(0, VERTEX_SIZE);
+    }
+    
+    public boolean hasSkeleton()
+    {
+        return hasSkeleton;
     }
 }

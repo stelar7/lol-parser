@@ -1,8 +1,7 @@
 package no.stelar7.cdragon.viewer.rendering.models.skeleton;
 
 import no.stelar7.cdragon.types.anm.data.*;
-import no.stelar7.cdragon.types.anm.data.versioned.ANMDataVersion5;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.types.anm.data.versioned.*;
 import no.stelar7.cdragon.util.types.math.Vector3s;
 import org.joml.*;
 
@@ -18,8 +17,18 @@ public class BoneData
     
     public static BoneData fromFrame(ANMFile file, ANMFrame frame, Skeleton skl)
     {
-        BoneData        data     = new BoneData();
+        BoneData data = new BoneData();
+        
+        if (file.getVersion5() != null)
+        {
+            return data;
+        }
+        
         ANMDataVersion5 fileData = file.getVersion5();
+        if (skl.bones.stream().noneMatch(bone -> bone.getHash() == fileData.getHashes().get(frame.getBoneHash())))
+        {
+            return data;
+        }
         
         data.hash = fileData.getHashes().get(frame.getBoneHash());
         data.name = skl.bones.stream().filter(bone -> bone.getHash() == data.hash).findFirst().get().getName();
@@ -27,12 +36,17 @@ public class BoneData
         data.scale = fileData.getPositions().get(frame.getScaleId());
         
         Vector3s rotationData = fileData.getRotations().get(frame.getRotationId());
-        String   bits         = extractBits(rotationData);
-        short    flag         = Short.parseShort(bits.substring(0, 3), 2);
-        short    sx           = Short.parseShort(bits.substring(3, 18), 2);
-        short    sy           = Short.parseShort(bits.substring(18, 33), 2);
-        short    sz           = Short.parseShort(bits.substring(33, 48), 2);
+        long     dataA        = ((long) rotationData.getZ() << 48) >>> 16;
+        long     dataB        = ((long) rotationData.getY() << 48) >>> 32;
+        long     dataC        = ((long) rotationData.getX() << 48) >>> 48;
+        long     value        = dataA | dataB | dataC;
+        
+        short flag = (short) ((value >> 45) & 3);
+        short sx   = (short) ((value >> 30) & 0x7FFF);
+        short sy   = (short) ((value >> 15) & 0x7FFF);
+        short sz   = (short) ((value) & 0x7FFF);
         data.rotation = uncompressRotation(flag, sx, sy, sz);
+        
         return data;
     }
     
@@ -61,37 +75,5 @@ public class BoneData
             default:
                 throw new RuntimeException("Error in unpacking quaternion");
         }
-    }
-    
-    @SuppressWarnings("SuspiciousNameCombination")
-    private static String extractBits(Vector3s array)
-    {
-        /*
-        for some reason this is incorrect...
-        long xVal2 = array.getX();
-        long yVal2 = array.getY();
-        long zVal2 = array.getZ();
-        
-        long  data = zVal2 | yVal2 << 16 | xVal2 << 32;
-        short flag = (short) ((data >> 45) & 3);
-        short a    = (short) ((data >> 30) & 0x7FFF);
-        short b    = (short) ((data >> 15) & 0x7FFF);
-        short c    = (short) ((data) & 0x7FFF);
-        */
-        
-        short xVal = array.getX();
-        short yVal = array.getY();
-        short zVal = array.getZ();
-        
-        StringBuilder xString = new StringBuilder(Long.toBinaryString(Short.toUnsignedLong(xVal)));
-        UtilHandler.leftPad(xString, "0", 16);
-        
-        StringBuilder yString = new StringBuilder(Long.toBinaryString(Short.toUnsignedLong(yVal)));
-        UtilHandler.leftPad(yString, "0", 16);
-        
-        StringBuilder zString = new StringBuilder(Long.toBinaryString(Short.toUnsignedLong(zVal)));
-        UtilHandler.leftPad(zString, "0", 16);
-        
-        return zString.toString() + yString.toString() + xString.toString();
     }
 }

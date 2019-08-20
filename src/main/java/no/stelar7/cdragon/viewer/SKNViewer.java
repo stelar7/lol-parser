@@ -67,12 +67,21 @@ public class SKNViewer extends Renderer
         SkinData readData = skinList.get(0);
         SKNFile  skn      = new SKNParser().parse(assetRoot.resolve(readData.getSimpleSkin()));
         
-        SKLFile  skl      = new SKLParser().parse(assetRoot.resolve(readData.getSkeleton()));
-        Skeleton skeleton = new Skeleton(skl);
+        SKLFile skl = new SKLParser().parse(assetRoot.resolve(readData.getSkeleton()));
+        skeleton = new Skeleton(skl);
         
-        Animation anim = new Animation(readData.getAnimations().get("Dance_Loop"), skeleton);
+        /*
+        readData.getAnimations().forEach((k, v) -> {
+            System.out.println(k);
+            Animation anim = new Animation(v, skeleton);
+            animations.add(anim);
+        });*/
         
-        String texPath = ((List<Pair<String, String>>) readData.getMaterial().values().toArray()[0]).get(0).getB();
+        Animation anim = new Animation(readData.getAnimations().get("157F3634"), skeleton);
+        animations.add(anim);
+        
+        List<Vector2<String, Model>> models  = new ArrayList<>();
+        String                       texPath = ((List<Pair<String, String>>) readData.getMaterial().values().toArray()[0]).get(0).getB();
         for (SKNMaterial submesh : skn.getMaterials())
         {
             Path mat = assetRoot.resolve(readData.getMaterialOverride().getOrDefault(submesh.getName(), new ArrayList<>())
@@ -85,6 +94,16 @@ public class SKNViewer extends Renderer
             models.add(new Vector2<>(submesh.getName(), new Model(new Mesh(submesh), tex, skeleton)));
         }
         
+        for (Vector2<String, Model> model : models)
+        {
+            BaseEntity e = new BaseEntity(model.getSecond());
+            if (readData.getInitialSubmeshToHide().contains(model.getFirst()))
+            {
+                e.visible = false;
+            }
+            
+            entities.add(e);
+        }
         
         float fov  = (float) Math.toRadians(65);
         float near = 0.001f;
@@ -92,9 +111,6 @@ public class SKNViewer extends Renderer
         
         camera = new Camera(fov, width, height, near, far);
         camera.getPosition().set(0, 0, -10);
-        
-        meshIndex = 0;
-        entity = new BaseEntity(models.get(meshIndex).getSecond());
         
         Shader vert = new Shader("shaders/basic.vert");
         Shader frag = new Shader("shaders/basic.frag");
@@ -112,22 +128,42 @@ public class SKNViewer extends Renderer
         activeProgram.bind();
     }
     
-    int       meshIndex;
     boolean[] forceRotate = {true, false, false, false};
     boolean   dirty       = true;
-    float     time        = -1;
+    float     updateTime  = 0;
     float     distance    = 10;
     
-    List<Vector2<String, Model>> models = new ArrayList<>();
-    Camera                       camera;
-    BaseEntity                   entity;
-    Program                      activeProgram;
+    List<BaseEntity> entities   = new ArrayList<>();
+    List<Animation>  animations = new ArrayList<>();
+    Skeleton         skeleton;
+    Camera           camera;
+    Program          activeProgram;
     
-    private void updateMVP()
+    Animation currentAnimation;
+    
+    private void updateMVP(BaseEntity entity)
     {
         if (!dirty)
         {
             return;
+        }
+        
+        List<Matrix4f> bones = new ArrayList<>(skeleton.bones.size());
+        if (entity.getModel().hasSkeleton())
+        {
+            if (currentAnimation == null)
+            {
+                Matrix4f identity = new Matrix4f().identity();
+                for (int i = 0; i < bones.size(); i++)
+                {
+                    bones.add(identity);
+                }
+                
+                currentAnimation = animations.get(0);
+            } else
+            {
+                setupAnimation(bones, updateTime);
+            }
         }
         
         Matrix4f projection = camera.getPerspectiveMatrix();
@@ -143,26 +179,34 @@ public class SKNViewer extends Renderer
         
         activeProgram.bind();
         activeProgram.setMatrix4f("mvp", mvp);
-        activeProgram.setMatrix4f("bones", new Matrix4f().identity());
+        activeProgram.setArrayMatrix4f("bones", bones);
         activeProgram.setInt("texImg", 0);
         dirty = false;
+    }
+    
+    private void setupAnimation(List<Matrix4f> bones, float updateTime)
+    {
+        Matrix4f inverseRoot = new Matrix4f().identity();
+        // TODO
     }
     
     
     @Override
     public void update()
     {
+        updateTime += 1f / 60f;
+        System.out.println(updateTime);
+        
         for (int i = 0; i < forceRotate.length; i++)
         {
             boolean rot = forceRotate[i];
             if (i == 0 && rot)
             {
-                time += .01f;
-                float x = (float) Math.sin(time) * distance;
-                float z = (float) Math.cos(time) * distance;
+                float x = (float) Math.sin(updateTime) * distance;
+                float z = (float) Math.cos(updateTime) * distance;
                 camera.getPosition().set(x, 0.5f, z);
             }
-            
+            /*
             if (i == 1 && rot)
             {
                 entity.getRotation().rotate(0.01f, 0, 0);
@@ -177,7 +221,7 @@ public class SKNViewer extends Renderer
             {
                 entity.getRotation().rotate(0, 0, 0.01f);
             }
-            
+            */
         }
         
         dirty = true;
@@ -186,15 +230,23 @@ public class SKNViewer extends Renderer
     @Override
     public void render()
     {
-        updateMVP();
-        
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         UtilHandler.logToFile("gl.log", "glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)");
         
-        entity.getModel().bind();
+        for (BaseEntity e : entities)
+        {
+            if (!e.visible)
+            {
+                continue;
+            }
+            
+            updateMVP(e);
+            e.getModel().bind();
+            
+            glDrawElements(GL_TRIANGLES, e.getModel().getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
+            UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", e.getModel().getMesh().getIndexCount()));
+        }
         
-        glDrawElements(GL_TRIANGLES, entity.getModel().getMesh().getIndexCount(), GL_UNSIGNED_INT, 0);
-        UtilHandler.logToFile("gl.log", String.format("glDrawElements(GL_TRIANGLES, %s, GL_UNSIGNED_INT, 0)", entity.getModel().getMesh().getIndexCount()));
     }
     
     @Override
@@ -202,18 +254,6 @@ public class SKNViewer extends Renderer
     {
         if (action == GLFW.GLFW_RELEASE)
         {
-            if (key == GLFW.GLFW_KEY_LEFT || key == GLFW.GLFW_KEY_RIGHT)
-            {
-                int index = meshIndex + ((key == GLFW.GLFW_KEY_LEFT) ? -1 : 1);
-                index = (index >= 0) ? index : (models.size() - 1);
-                index = (index >= models.size()) ? (index % models.size()) : index;
-                
-                Vector2<String, Model> data = models.get(index);
-                entity.setModel(data.getSecond());
-                meshIndex = index;
-                
-            }
-            
             if (key == GLFW.GLFW_KEY_1)
             {
                 forceRotate[0] = !forceRotate[0];
