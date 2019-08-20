@@ -19,7 +19,7 @@ public class TestCDTBHashGuessing
         GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         gguesser.guessAssetsBySearch(dataPath);
         gguesser.guessBinByLinkedFiles(dataPath);
-        //gguesser.save();
+        //gguesser.saveAsJson();
         
         gguesser.saveToBackup();
     }
@@ -34,7 +34,7 @@ public class TestCDTBHashGuessing
         guesser.substituteBasenames();
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
-        //guesser.save();
+        //guesser.saveAsJson();
         
         guesser.saveToBackup();
     }
@@ -44,10 +44,10 @@ public class TestCDTBHashGuessing
     public void doBINTest()
     {
         BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
+        guesser.pullCDTB();
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();
         guesser.guessFromFontFiles();
-        
         // guesser.saveAsJson();
         
         guesser.saveToBackup();

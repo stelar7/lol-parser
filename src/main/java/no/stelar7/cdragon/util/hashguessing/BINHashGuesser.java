@@ -36,6 +36,7 @@ public class BINHashGuesser extends HashGuesser
     
     public void guessNewCharacters()
     {
+        System.out.println("Guessing new characters");
         files.stream()
              .flatMap(b -> b.getEntries().stream())
              .filter(b -> b.getType().equalsIgnoreCase("character"))
@@ -48,6 +49,7 @@ public class BINHashGuesser extends HashGuesser
     
     public void guessNewAnimations()
     {
+        System.out.println("Guessing new animations");
         files.stream()
              .flatMap(b -> b.getEntries().stream())
              .filter(b -> b.getType().equalsIgnoreCase("animationGraphData"))
@@ -96,6 +98,7 @@ public class BINHashGuesser extends HashGuesser
     
     public void guessFromFontFiles()
     {
+        System.out.println("Guessing description variables");
         Map<String, Map<String, String>> descs = new HashMap<>();
         
         try
@@ -188,4 +191,19 @@ public class BINHashGuesser extends HashGuesser
         return this.known.containsKey(hash);
     }
     
+    public void pullCDTB()
+    {
+        System.out.println("Feching hashlists from CDTB");
+        String hashA = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.binentries.txt";
+        String hashB = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.binfields.txt";
+        String hashC = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.binhashes.txt";
+        String hashD = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.bintypes.txt";
+        
+        Set<String>  changedPlugins = new HashSet<>();
+        List<String> data           = WebHandler.readWeb(hashA);
+        data.addAll(WebHandler.readWeb(hashB));
+        data.addAll(WebHandler.readWeb(hashC));
+        data.addAll(WebHandler.readWeb(hashD));
+        data.stream().map(line -> line.substring(line.indexOf(' ') + 1)).forEach(this::check);
+    }
 }
