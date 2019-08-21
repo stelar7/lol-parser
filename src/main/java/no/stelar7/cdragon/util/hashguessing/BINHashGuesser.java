@@ -160,6 +160,11 @@ public class BINHashGuesser extends HashGuesser
     @Override
     public boolean check(String path)
     {
+        if (path.isBlank())
+        {
+            return true;
+        }
+        
         Long   hashNum = HashHandler.computeBINHash(path);
         String hash    = HashHandler.toHex(hashNum, 8);
         if (this.unknown.contains(hash))
