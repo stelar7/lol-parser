@@ -14,33 +14,6 @@ public class TestCDTBHashGuessing
     
     @Test
     @Order(1)
-    public void doGameTest()
-    {
-        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
-        gguesser.guessAssetsBySearch(dataPath);
-        gguesser.guessBinByLinkedFiles(dataPath);
-        //gguesser.saveAsJson();
-        
-        gguesser.saveToBackup();
-    }
-    
-    @Test
-    @Order(10)
-    public void doLCUTest()
-    {
-        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
-        guesser.substituteRegionLang();
-        guesser.substitutePlugin();
-        guesser.substituteBasenames();
-        guesser.substituteBasenameWords(null, null, null, 1);
-        guesser.addBasenameWord();
-        //guesser.saveAsJson();
-        
-        guesser.saveToBackup();
-    }
-    
-    @Test
-    @Order(2)
     public void doBINTest()
     {
         BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
@@ -52,4 +25,34 @@ public class TestCDTBHashGuessing
         
         guesser.saveToBackup();
     }
+    
+    @Test
+    @Order(10)
+    public void doGameTest()
+    {
+        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        gguesser.pullCDTB();
+        gguesser.guessAssetsBySearch(dataPath);
+        gguesser.guessBinByLinkedFiles(dataPath);
+        //gguesser.saveAsJson();
+        
+        gguesser.saveToBackup();
+    }
+    
+    @Test
+    @Order(20)
+    public void doLCUTest()
+    {
+        LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        guesser.pullCDTB();
+        guesser.substituteRegionLang();
+        guesser.substitutePlugin();
+        guesser.substituteBasenames();
+        guesser.substituteBasenameWords(null, null, null, 1);
+        guesser.addBasenameWord();
+        //guesser.saveAsJson();
+        
+        guesser.saveToBackup();
+    }
+    
 }

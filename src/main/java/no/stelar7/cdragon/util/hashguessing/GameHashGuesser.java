@@ -1,11 +1,13 @@
 package no.stelar7.cdragon.util.hashguessing;
 
 import com.google.gson.JsonElement;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.*;
+import java.util.stream.Stream;
 
 public class GameHashGuesser extends HashGuesser
 {
@@ -76,5 +78,20 @@ public class GameHashGuesser extends HashGuesser
                       }
                   }
               });
+    }
+    
+    private final Predicate<String> isGameHash = s -> !s.startsWith("plugins/");
+    
+    public void pullCDTB()
+    {
+        System.out.println("Feching hashlists from CDTB");
+        String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.game.txt";
+        String hashB = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.game.txt";
+        
+        Stream.of(WebHandler.readWeb(hashA).stream(), WebHandler.readWeb(hashB).stream())
+              .flatMap(a -> a)
+              .map(line -> line.substring(line.indexOf(' ') + 1))
+              .filter(isGameHash)
+              .forEach(this::check);
     }
 }

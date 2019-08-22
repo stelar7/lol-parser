@@ -19,7 +19,7 @@ public class BINParser implements Parseable<BINFile>
     public BINFile parse(RandomAccessReader raf)
     {
         BINFile file = new BINFile();
-        parseHeader(file, raf);
+        file.setHeader(parseHeader(file, raf));
         if (file.getHeader() == null)
         {
             return null;
@@ -127,45 +127,45 @@ public class BINParser implements Parseable<BINFile>
                 {
                     hash = hash.substring(8);
                 }
-    
+                
                 hashes.add(hash);
                 return hash;
             }
             case CONTAINER:
             {
                 BINContainer bc = new BINContainer();
-    
+                
                 bc.setType(BINValueType.valueOf(raf.readByte()));
                 bc.setSize(raf.readInt());
                 bc.setCount(raf.readInt());
-    
+                
                 for (int i = 0; i < bc.getCount(); i++)
                 {
                     bc.getData().add(readByType(bc.getType(), raf));
                 }
-    
+                
                 return bc;
             }
             case STRUCTURE:
             case EMBEDDED:
             {
                 BINStruct bs = new BINStruct();
-    
+                
                 bs.setHash(HashHandler.getBINHash(raf.readInt()));
                 hashes.add(bs.getHash());
-    
+                
                 if (bs.getHash().equalsIgnoreCase("00000000"))
                 {
                     return bs;
                 }
-    
+                
                 bs.setSize(raf.readInt());
                 bs.setCount(raf.readShort());
                 for (int i = 0; i < bs.getCount(); i++)
                 {
                     bs.getData().add(readValue(raf));
                 }
-    
+                
                 return bs;
             }
             case LINK_OFFSET:
@@ -215,15 +215,20 @@ public class BINParser implements Parseable<BINFile>
         }
     }
     
-    private void parseHeader(BINFile file, RandomAccessReader raf)
+    private BINHeader parseHeader(BINFile file, RandomAccessReader raf)
     {
         BINHeader header = new BINHeader();
         header.setMagic(raf.readString(4));
         
         if (!"PROP".equalsIgnoreCase(header.getMagic()))
         {
-            file.setHeader(null);
-            return;
+            if ("PTCH".equalsIgnoreCase(header.getMagic()))
+            {
+                long patchVersion = raf.readLong();
+                return parseHeader(file, raf);
+            }
+            
+            return null;
         }
         
         header.setVersion(raf.readInt());
@@ -245,6 +250,6 @@ public class BINParser implements Parseable<BINFile>
             header.getEntryTypes().add(raf.readInt());
         }
         
-        file.setHeader(header);
+        return header;
     }
 }

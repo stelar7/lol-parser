@@ -56,7 +56,6 @@ public class TestRMAN
         }
         
         TestWAD tw = new TestWAD();
-        tw.testPullCDTB();
         tw.testCDragonWAD();
     }
     

@@ -1,11 +1,12 @@
 package no.stelar7.cdragon.util.hashguessing;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.Triplet;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.*;
 import java.util.stream.*;
 
@@ -420,5 +421,20 @@ public class LCUHashGuesser extends HashGuesser
                 check(toCheck);
             }
         }
+    }
+    
+    private final Predicate<String> isLCUHash = s -> s.startsWith("plugins/");
+    
+    public void pullCDTB()
+    {
+        System.out.println("Feching hashlists from CDTB");
+        String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.lcu.txt";
+        String hashB = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.lcu.txt";
+        
+        Stream.of(WebHandler.readWeb(hashA).stream(), WebHandler.readWeb(hashB).stream())
+              .flatMap(a -> a)
+              .map(line -> line.substring(line.indexOf(' ') + 1))
+              .filter(isLCUHash)
+              .forEach(this::check);
     }
 }
