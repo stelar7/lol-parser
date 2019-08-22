@@ -23,7 +23,8 @@ public class BINHashGuesser extends HashGuesser
         
         try
         {
-            System.out.println("Parsing files...");
+            System.out.println("Started guessing BIN hashes");
+            System.out.println("Parsing bin files...");
             BINParser parser = new BINParser();
             files = Files.walk(dataPath)
                          .filter(UtilHandler.IS_BIN_PREDICATE)
@@ -154,46 +155,11 @@ public class BINHashGuesser extends HashGuesser
     }
     
     
-    /**
-     * returns false if there are no more hashes
-     */
     @Override
-    public boolean check(String path)
+    public String generateHash(String val)
     {
-        if (path.isBlank())
-        {
-            return true;
-        }
-        
-        Long   hashNum = HashHandler.computeBINHash(path);
-        String hash    = HashHandler.toHex(hashNum, 8);
-        if (this.unknown.contains(hash))
-        {
-            this.addKnown(hash, path);
-            return true;
-        }
-        
-        if (this.unknown.isEmpty())
-        {
-            System.out.println("No more unknown hashes!");
-            return false;
-        }
-        
-        return true;
-    }
-    
-    @Override
-    public boolean isKnown(String path)
-    {
-        long   hashNum = HashHandler.computeBINHash(path);
-        String hash    = HashHandler.toHex(hashNum, 8);
-        if (this.unknown.contains(hash))
-        {
-            this.addKnown(hash, path);
-            return true;
-        }
-        
-        return this.known.containsKey(hash);
+        long hashNum = HashHandler.computeBINHash(val);
+        return HashHandler.toHex(hashNum, 8);
     }
     
     public void pullCDTB()

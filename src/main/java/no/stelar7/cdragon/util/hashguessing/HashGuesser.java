@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.*;
 
-public class HashGuesser
+public abstract class HashGuesser
 {
     public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("lcu.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\lcu.json"));
     public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("game.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\game.json"));
@@ -135,13 +135,20 @@ public class HashGuesser
         }
     }
     
+    public abstract String generateHash(String val);
+    
     /**
      * returns false if there are no more hashes
      */
     public boolean check(String path)
     {
-        Long   hashNum = HashHandler.computeXXHash64AsLong(path);
-        String hash    = HashHandler.toHex(hashNum, 16);
+        String lowerCased = path.toLowerCase();
+        if (lowerCased.isBlank())
+        {
+            return true;
+        }
+        
+        String hash = generateHash(lowerCased);
         if (this.unknown.contains(hash))
         {
             this.addKnown(hash, path);
@@ -153,20 +160,7 @@ public class HashGuesser
             System.out.println("No more unknown hashes!");
             return false;
         }
-        
         return true;
-    }
-    
-    public boolean isKnown(String path)
-    {
-        String hash = HashHandler.computeXXHash64(path);
-        if (this.unknown.contains(hash))
-        {
-            this.addKnown(hash, path);
-            return true;
-        }
-        
-        return this.known.containsKey(hash);
     }
     
     public void check(String... paths)

@@ -1,9 +1,10 @@
 package no.stelar7.cdragon.util.hashguessing;
 
-import com.google.gson.JsonElement;
+import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.util.handlers.*;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.*;
@@ -15,25 +16,25 @@ public class GameHashGuesser extends HashGuesser
     public GameHashGuesser(Set<String> hashes)
     {
         super(HashGuesser.hashFileGAME, hashes);
+        System.out.println("Started guessing GAME hashes");
     }
     
     public void guessBinByLinkedFiles(Path pbe)
     {
         System.out.println("Guessing bin files by linked file names");
-        List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
-        
-        readMe.stream()
-              .map(UtilHandler::readAsString)
-              .filter(s -> s.contains("linkedBinFiles"))
-              .map(s -> UtilHandler.getJsonParser().parse(s))
-              .map(JsonElement::getAsJsonObject)
-              .forEach(e -> {
-                  for (JsonElement link : e.getAsJsonArray("linkedBinFiles"))
-                  {
-                      String real = link.getAsString().toLowerCase();
-                      this.check(real);
-                  }
-              });
+        try
+        {
+            System.out.println("Parsing bin files...");
+            BINParser parser = new BINParser();
+            Files.walk(pbe)
+                 .filter(UtilHandler.IS_BIN_PREDICATE)
+                 .map(parser::parse)
+                 .flatMap(b -> b.getLinkedFiles().stream())
+                 .forEach(this::check);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     
@@ -93,5 +94,12 @@ public class GameHashGuesser extends HashGuesser
               .map(line -> line.substring(line.indexOf(' ') + 1))
               .filter(isGameHash)
               .forEach(this::check);
+    }
+    
+    @Override
+    public String generateHash(String val)
+    {
+        Long hashNum = HashHandler.computeXXHash64AsLong(val);
+        return HashHandler.toHex(hashNum, 16);
     }
 }

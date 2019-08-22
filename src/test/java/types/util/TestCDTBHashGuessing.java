@@ -21,7 +21,6 @@ public class TestCDTBHashGuessing
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();
         guesser.guessFromFontFiles();
-        // guesser.saveAsJson();
         
         guesser.saveToBackup();
     }
@@ -30,13 +29,12 @@ public class TestCDTBHashGuessing
     @Order(10)
     public void doGameTest()
     {
-        GameHashGuesser gguesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
-        gguesser.pullCDTB();
-        gguesser.guessAssetsBySearch(dataPath);
-        gguesser.guessBinByLinkedFiles(dataPath);
-        //gguesser.saveAsJson();
+        GameHashGuesser guesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        guesser.pullCDTB();
+        guesser.guessAssetsBySearch(dataPath);
+        guesser.guessBinByLinkedFiles(dataPath);
         
-        gguesser.saveToBackup();
+        guesser.saveToBackup();
     }
     
     @Test
@@ -50,7 +48,6 @@ public class TestCDTBHashGuessing
         guesser.substituteBasenames();
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
-        //guesser.saveAsJson();
         
         guesser.saveToBackup();
     }

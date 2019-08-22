@@ -16,6 +16,7 @@ public class LCUHashGuesser extends HashGuesser
     public LCUHashGuesser(Set<String> hashes)
     {
         super(HashGuesser.hashFileLCU, hashes);
+        System.out.println("Started guessing LCU hashes");
     }
     
     public Set<String> buildWordlist()
@@ -436,5 +437,12 @@ public class LCUHashGuesser extends HashGuesser
               .map(line -> line.substring(line.indexOf(' ') + 1))
               .filter(isLCUHash)
               .forEach(this::check);
+    }
+    
+    @Override
+    public String generateHash(String val)
+    {
+        Long hashNum = HashHandler.computeXXHash64AsLong(val);
+        return HashHandler.toHex(hashNum, 16);
     }
 }
