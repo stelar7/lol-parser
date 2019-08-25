@@ -6,13 +6,14 @@
 4.1 open project settings
 4.2 mark the correct folders as source folders i.imgur.com/OeflRyq.png
 
-5.1 open the file src/test/java/types/util/TestDivStuff.java in intellij
+5.1 open the file src/test/java/types/util/TestTFTData.java in intellij
 5.2 scroll to the line public void extractTFTData() throws IOException
 5.3 set the correct path on leagueInstallFolder and outputFolder
 5.4 rightclick the line and select run extractTFTData()
 
 6.1 scroll to the line public void buildTFTDataFiles() throws IOException
 6.2 set the correct path on inputFolder (outputFolder from 5.3) and outputFolder
-6.3 rightclick the line and select run buildTFTDataFiles()
+6.3 set boolean exportImages to false if you haven't exported the images as well
+6.4 rightclick the line and select run buildTFTDataFiles()
 
 7. You now have a folder named TFT inside what you set as outputFolder in 6.2, where all the TFT data is
