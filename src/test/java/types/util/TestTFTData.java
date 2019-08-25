@@ -349,7 +349,7 @@ public class TestTFTData
             stats.add("hp", champItem.get("baseHP"));
             stats.add("hpScaleFactor", new JsonPrimitive(1.8f));
             stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
-            stats.add("initalMana", champItem.has("57C662CB") ? champItem.get("57C662CB") : new JsonPrimitive(0));
+            stats.add("initalMana", champItem.has("mInitialMana") ? champItem.get("mInitialMana") : new JsonPrimitive(0));
             stats.add("damage", champItem.get("BaseDamage"));
             stats.add("damageScaleFactor", new JsonPrimitive(1.25f));
             stats.add("armor", champItem.get("baseArmor"));
