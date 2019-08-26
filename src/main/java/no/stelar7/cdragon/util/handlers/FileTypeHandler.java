@@ -135,7 +135,7 @@ public final class FileTypeHandler
         
         if (FileTypeHandler.isProbablePATCH(magic))
         {
-            return "patch";
+            return "bin";
         }
         
         if (FileTypeHandler.isProbableWGEO(magic))
