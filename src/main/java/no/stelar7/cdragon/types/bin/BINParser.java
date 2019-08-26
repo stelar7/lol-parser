@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.handlers.HashHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
@@ -52,7 +52,11 @@ public class BINParser implements Parseable<BINFile>
             entry.setLength(raf.readInt());
             entry.setHash(HashHandler.getBINHash(raf.readInt()));
             entry.setValueCount(raf.readShort());
+            
+            long   val = Integer.toUnsignedLong(file.getHeader().getEntryTypes().get(i));
+            String hex = HashHandler.toHex(val, 8);
             hashes.add(entry.getHash());
+            hashes.add(hex);
             
             for (int j = 0; j < entry.getValueCount(); j++)
             {

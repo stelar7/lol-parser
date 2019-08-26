@@ -216,7 +216,7 @@ public class TestTFTData
         
         String displayName = "C3143D66";
         
-        String traitContainerKey       = "6F870247";
+        String traitContainerKey       = "TftTraitData";
         String traitDescription        = "765F18DA";
         String traitIcon               = "mIconPath";
         String traitEffectContainter   = "mTraitsSets";
@@ -287,7 +287,7 @@ public class TestTFTData
         }
         
         String champFileTraitContainer = "mLinkedTraits";
-        String champContainerKey       = "E52B8F5D";
+        String champContainerKey       = "TftShopData";
         String costModifier            = "mRarity";
         String champAbilityName        = "87A69A5E";
         String champSplash             = "mIconPath";
@@ -323,7 +323,7 @@ public class TestTFTData
             abilities.add("icon", replaceDDSPNG.apply(champ.get(champAbilityIcon).getAsString()));
             
             
-            String champDataContainer = "304496F1";
+            String champDataContainer = "TFTCharacterRecord";
             String spellDataContainer = "SpellObject";
             String traitContainer     = "mLinkedTraits";
             
@@ -397,7 +397,7 @@ public class TestTFTData
             champData.put(Integer.valueOf(championId), o);
         }
         
-        String itemContainerKey       = "D186C31A";
+        String itemContainerKey       = "TftItemData";
         String itemFromKey            = "mComposition";
         String itemEffectContainer    = "EffectAmounts";
         String itemDescription        = "765F18DA";
