@@ -137,7 +137,7 @@ public class RMANFile
             List<String>                chunkIds = file.getChunkIds();
             RMANFileBodyBundleChunkInfo current  = getChunkMap().get(chunkIds.get(0));
             
-            FileOutputStream   fos = new FileOutputStream(outputName.toFile());
+            FileOutputStream   fos = new FileOutputStream(outputName.toFile(), false);
             RandomAccessReader raf = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
             for (int i = 0, chunkIdsSize = chunkIds.size(); i < chunkIdsSize; i++)
             {
