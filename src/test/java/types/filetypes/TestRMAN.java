@@ -50,6 +50,8 @@ public class TestRMAN
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             files.forEach(manifest -> manifest.getBody()
                                               .getFiles()
+                                              .stream()
+                                              .sorted(Comparator.comparingInt(RMANFileBodyFile::getFileSize).reversed())
                                               .forEach(f -> service.submit(() -> manifest.extractFile(f, bundleFolder, fileFolder))));
             service.shutdown();
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
