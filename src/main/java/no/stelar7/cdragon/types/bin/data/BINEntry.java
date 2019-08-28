@@ -21,6 +21,12 @@ public class BINEntry
         return values.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
     }
     
+    public <T> T getValue(String hash, T def)
+    {
+        Optional<BINValue> key = get(hash);
+        return key.map(b -> (T) b.getValue()).orElseGet(() -> def);
+    }
+    
     public String getType()
     {
         return type;

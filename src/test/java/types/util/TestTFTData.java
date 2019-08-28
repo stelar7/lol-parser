@@ -125,7 +125,7 @@ public class TestTFTData
         Path fontConfig      = inputFolder.resolve("data\\menu");
         Path champFileParent = inputFolder.resolve("data\\characters");
         
-        
+        // replace JSON with BIN parsing... |
         Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
         Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
         Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
