@@ -171,6 +171,14 @@ public abstract class HashGuesser
         }
     }
     
+    public void check(Collection<String> paths)
+    {
+        for (String path : paths)
+        {
+            check(path);
+        }
+    }
+    
     public void checkTextList(String text)
     {
         check(text.split(" "));

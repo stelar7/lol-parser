@@ -5,6 +5,7 @@ import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Triplet;
 
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.*;
@@ -422,6 +423,62 @@ public class LCUHashGuesser extends HashGuesser
                 check(toCheck);
             }
         }
+    }
+    
+    public void guessAssetsBySearch(Path pbe)
+    {
+        System.out.println("Guessing assets by searching strings");
+        List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.WEB_FILE_PREDICATE);
+        
+        // need a better regex for this :thinking:
+        Pattern p = Pattern.compile("(?:/)(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))(?:\\\")");
+        
+        readMe.stream()
+              .map(UtilHandler::readAsString)
+              .forEach(e -> {
+                  Matcher m = p.matcher(e);
+                  while (m.find())
+                  {
+                      int lastStart = 0;
+                      for (int i = 0; i <= m.groupCount(); i++)
+                      {
+                          int start = m.start(i);
+                          int end   = m.end(i) - 1;
+                    
+                          if (start == lastStart)
+                          {
+                              continue;
+                          }
+                    
+                          lastStart = start;
+                          while (start > 0 && e.charAt(start - 1) != '"' && e.charAt(start - 1) != '\'')
+                          {
+                              start--;
+                          }
+                    
+                          while (end < e.length() && e.charAt(end) != '"' && e.charAt(end) != '\'')
+                          {
+                              end++;
+                          }
+                    
+                          String toCheck = e.substring(start, end).toLowerCase();
+                          if (toCheck.contains("/"))
+                          {
+                              String prefix = "plugins/";
+                              String plugin = toCheck.substring(toCheck.lastIndexOf("/") + 1, toCheck.indexOf("."));
+                              String suffix = "/global/default/";
+                        
+                              List<String> endings = Arrays.asList("index.html", "init.js", plugin + ".css", plugin + ".js", "trans.json", "license.json");
+                              List<String> full    = endings.stream().map(att -> prefix + plugin + suffix + att).collect(Collectors.toList());
+                              this.check(full);
+                          } else
+                          {
+                              System.out.println("failed on " + toCheck);
+                              this.check(toCheck);
+                          }
+                      }
+                  }
+              });
     }
     
     private final Predicate<String> isLCUHash = s -> s.startsWith("plugins/");

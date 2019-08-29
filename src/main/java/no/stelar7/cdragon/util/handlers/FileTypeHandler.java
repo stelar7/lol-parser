@@ -489,6 +489,7 @@ public final class FileTypeHandler
         isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x6C) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6C);
         isCSS |= isSame(data[0], (byte) 0x64) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x76) && isSame(data[3], (byte) 0x5B);
         isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x70);
+        isCSS |= isSame(data[0], (byte) 0x20) && isSame(data[1], (byte) 0x2E) && isSame(data[2], (byte) 0x70) && isSame(data[3], (byte) 0x6C);
         
         return isCSS;
     }
@@ -503,6 +504,7 @@ public final class FileTypeHandler
         isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x6E) && isSame(data[3], (byte) 0x64);
         isJS |= isSame(data[0], (byte) 0x22) && isSame(data[1], (byte) 0x75) && isSame(data[2], (byte) 0x73) && isSame(data[3], (byte) 0x65);
         isJS |= isSame(data[0], (byte) 0x50) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x4C);
+        isJS |= isSame(data[0], (byte) 0x5F) && isSame(data[1], (byte) 0x4E) && isSame(data[2], (byte) 0x41) && isSame(data[3], (byte) 0x4D);
         
         return isJS;
     }
@@ -524,6 +526,7 @@ public final class FileTypeHandler
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x68) && isSame(data[2], (byte) 0x74) && isSame(data[3], (byte) 0x6D);
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x74) && isSame(data[3], (byte) 0x79);
         isHTML |= isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x23) && isSame(data[3], (byte) 0x75);
+        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x68) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x61);
         
         return isHTML;
     }

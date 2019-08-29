@@ -498,6 +498,8 @@ public final class UtilHandler
     
     public static Predicate<Path> IS_BIN_PREDICATE = (file) -> filetypePredicate(".bin").test(file);
     
+    public static Predicate<Path> WEB_FILE_PREDICATE = (file) -> filetypePredicate(".js").test(file) || filetypePredicate(".html").test(file);
+    
     public static List<Path> getFilesMatchingPredicate(Path start, Predicate<Path> check)
     {
         List<Path> readMe = new ArrayList<>();
