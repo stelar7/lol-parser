@@ -11,20 +11,20 @@ public class BINEntry
     private short          valueCount;
     private List<BINValue> values = new ArrayList<>();
     
-    public BINValue getIfPresent(String hash)
-    {
-        return values.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst().get();
-    }
-    
     public Optional<BINValue> get(String hash)
     {
         return values.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
     }
     
+    public BINValue getIfPresent(String hash)
+    {
+        return get(hash).get();
+    }
+    
     public <T> T getValue(String hash, T def)
     {
         Optional<BINValue> key = get(hash);
-        return key.map(b -> (T) b.getValue()).orElseGet(() -> def);
+        return key.map(b -> (T) b.getValue()).orElse(def);
     }
     
     public String getType()
