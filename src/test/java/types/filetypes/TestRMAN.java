@@ -80,6 +80,7 @@ public class TestRMAN
     
     private List<String> getRemovedBundleIds(Collection<RMANFile> datas, Path bundleFolder) throws IOException
     {
+        System.out.println("Calculating removed bundles");
         Set<String> keep = datas.stream().map(RMANFile::getBundleMap).flatMap(a -> a.keySet().stream()).collect(Collectors.toSet());
         List<String> has = Files.walk(bundleFolder)
                                 .map(Path::getFileName)
