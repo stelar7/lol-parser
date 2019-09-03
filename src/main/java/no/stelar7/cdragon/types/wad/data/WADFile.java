@@ -1,11 +1,16 @@
 package no.stelar7.cdragon.types.wad.data;
 
+import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.bin.data.BINFile;
+import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -48,7 +53,7 @@ public class WADFile
         this.contentHeaders = contentHeaders;
     }
     
-    public void extractFiles(Path path, String wadName)
+    public void extractFiles(Path path, String wadName, boolean convertFiles)
     {
         final int interval = (int) Math.floor(getContentHeaders().size() / 10f);
         for (int index = 0; index < getContentHeaders().size(); index++)
@@ -63,12 +68,15 @@ public class WADFile
                 }
             }
             
-            saveFile(fileHeader, path, wadName);
+            saveFile(fileHeader, path, wadName, convertFiles);
         }
     }
     
-    public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName)
+    public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName, boolean convertFiles)
     {
+        BINParser bp = new BINParser();
+        DDSParser dp = new DDSParser();
+        
         String unhashed = HashHandler.getWadHash(header.getPathHash());
         String filename = unhashed.equals(header.getPathHash()) ? header.getPathHash() : unhashed;
         Path   self     = savePath.resolve(filename);
@@ -109,6 +117,24 @@ public class WADFile
             {
                 Files.write(self, data);
             }
+            
+            if (convertFiles)
+            {
+                if (filename.endsWith("bin"))
+                {
+                    BINFile file   = bp.parse(new ByteArray(data));
+                    Path    output = self.resolveSibling(UtilHandler.pathToFilename(self) + ".json");
+                    Files.write(self, file.toJson().getBytes(StandardCharsets.UTF_8));
+                }
+                
+                if (filename.endsWith("dds"))
+                {
+                    BufferedImage img    = dp.parse(self);
+                    Path          output = self.resolveSibling(UtilHandler.pathToFilename(self) + ".png");
+                    ImageIO.write(img, "png", output.toFile());
+                }
+            }
+            
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -136,7 +162,7 @@ public class WADFile
     }
     
     
-    private void findFileTypeAndRename(byte[] data, String filename, Path parent, String wadName) throws IOException
+    private String findFileTypeAndRename(byte[] data, String filename, Path parent, String wadName) throws IOException
     {
         ByteArray magic    = new ByteArray(Arrays.copyOf(data, data.length));
         String    fileType = FileTypeHandler.findFileType(magic);
@@ -161,6 +187,8 @@ public class WADFile
         
         Files.createDirectories(other.getParent());
         Files.write(other, data);
+        
+        return fileType;
     }
     
     public void printUnknownFiles(String wadfilename)

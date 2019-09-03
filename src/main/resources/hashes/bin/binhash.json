@@ -49705,6 +49705,7 @@
     "1DB1EA09": "mOverTimeForFlashSeconds",
     "9F49799F": "MoveSpeed",
     "873CC4B2": "MoveSpeedBoost",
+    "5486C90E": "MoveSpeedCalc",
     "1D669F9C": "MoveToMinimapDist",
     "98D9849B": "MoveToMinimapMaxTime",
     "42984069": "MoveToMinimapMinTime",

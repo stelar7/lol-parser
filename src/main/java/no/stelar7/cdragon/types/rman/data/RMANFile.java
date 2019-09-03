@@ -62,17 +62,15 @@ public class RMANFile
     
     public void printFileList()
     {
-        StandardOpenOption[] options = {StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE};
-        body.getFiles().forEach(f -> {
-            try
-            {
-                String path = f.getFullFilepath(this) + "\n";
-                Files.write(UtilHandler.CDRAGON_FOLDER.resolve("FILELIST.txt"), path.getBytes(StandardCharsets.UTF_8), options);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
+        try
+        {
+            StandardOpenOption[] options = {StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE};
+            List<String>         lines   = body.getFiles().stream().map(f -> f.getFullFilepath(this)).collect(Collectors.toList());
+            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("FILELIST.txt"), lines, StandardCharsets.UTF_8, options);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     public RMANFileHeader getHeader()

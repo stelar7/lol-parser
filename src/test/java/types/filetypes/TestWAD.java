@@ -37,7 +37,7 @@ public class TestWAD
         
         if (parsed != null)
         {
-            parsed.extractFiles(extractPath, pluginName);
+            parsed.extractFiles(extractPath, pluginName, false);
         }
     }
     
@@ -162,7 +162,7 @@ public class TestWAD
         Path      path   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles\\DATA\\FINAL\\Champions\\Kaisa.cs_CZ.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
-        parsed.extractFiles(path.resolveSibling("Kaisa"), "Kaisa");
+        parsed.extractFiles(path.resolveSibling("Kaisa"), "Kaisa", false);
     }
     
     @Test
@@ -242,14 +242,8 @@ public class TestWAD
         
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
-        
-        transformBIN(extractPath);
         generateUnknownBinHashList();
-        
-        
         transformManifest(extractPath);
-        transformDDS(extractPath);
-        
         //transformSKN(extractPath);
     }
     
@@ -410,7 +404,7 @@ public class TestWAD
         
         System.out.println("Extracting from " + filename);
         WADFile parsed = new WADParser().parse(file);
-        parsed.extractFiles(to, parent);
+        parsed.extractFiles(to, parent, false);
     }
     
     
@@ -438,21 +432,21 @@ public class TestWAD
                  {
                      System.out.println("Extracting from " + filename);
                      WADFile parsed = parser.parseReadOnly(file);
-                     parsed.extractFiles(to, parent);
+                     parsed.extractFiles(to, parent, true);
                  }
             
                  if (endsc.stream().anyMatch(child::endsWith))
                  {
                      System.out.println("Extracting from " + filename);
                      WADFile parsed = parser.parseCompressed(file);
-                     parsed.extractFiles(to, parent);
+                     parsed.extractFiles(to, parent, true);
                  }
             
                  if (endsm.stream().anyMatch(child::endsWith))
                  {
                      System.out.println("Extracting from " + filename);
                      WADFile parsed = parser.parseReadOnly(file);
-                     parsed.extractFiles(to.resolveSibling("mobile"), parent);
+                     parsed.extractFiles(to.resolveSibling("mobile"), parent, true);
                  }
             
                  //file.toFile().delete();

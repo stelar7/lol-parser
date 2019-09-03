@@ -36,7 +36,7 @@ public class TestExtractImages
         Path   extractPath = UtilHandler.CDRAGON_FOLDER.resolve("images_out");
         
         WADFile parsed = parser.parseLatest(pluginName, extractPath, true);
-        parsed.extractFiles(extractPath, pluginName);
+        parsed.extractFiles(extractPath, pluginName, false);
     }
     
     private final List<String> img_exts = Arrays.asList("json", "txt", "png", "jpg", "jpeg", "webm", "ogg", "dds");
@@ -242,7 +242,7 @@ public class TestExtractImages
         try
         {
             WADFile parsed = parser.parseLatest(pluginName, extractPath, false);
-            parsed.extractFiles(extractPath, pluginName);
+            parsed.extractFiles(extractPath, pluginName, false);
         } catch (Exception e)
         {
             e.printStackTrace();

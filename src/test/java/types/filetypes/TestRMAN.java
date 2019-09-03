@@ -24,6 +24,8 @@ public class TestRMAN
         JsonObject     obj   = RMANParser.getPBEManifest();
         files.add(RMANParser.loadFromPBE(obj, RMANFileType.GAME));
         files.add(RMANParser.loadFromPBE(obj, RMANFileType.LCU));
+        
+        System.out.println("Writing manifest content to file");
         files.forEach(RMANFile::printFileList);
         
         Path bundleFolder = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\bundles");
@@ -38,6 +40,9 @@ public class TestRMAN
             removeOldBundles(removedBundles, bundleFolder);
             downloadAllBundles(files, bundleFolder);
             Files.write(lastVersion, String.valueOf(currentVersion).getBytes(StandardCharsets.UTF_8));
+        } else
+        {
+            System.out.println("This version is already downloaded, skipping download step");
         }
         
         Path    fileFolder   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
@@ -55,6 +60,9 @@ public class TestRMAN
                                               .forEach(f -> service.submit(() -> manifest.extractFile(f, bundleFolder, fileFolder))));
             service.shutdown();
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        } else
+        {
+            System.out.println("This version is already extracted, skipping extract step");
         }
         
         TestWAD tw = new TestWAD();

@@ -25,6 +25,6 @@ public class WadExtracter
         Path    path = Paths.get(args[0]);
         WADFile wad  = parser.parse(path);
         
-        wad.extractFiles(path, "");
+        wad.extractFiles(path, "", false);
     }
 }

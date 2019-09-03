@@ -2,8 +2,8 @@ package types.util;
 
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.hashguessing.*;
-import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.*;
 
 import java.nio.file.Path;
 
