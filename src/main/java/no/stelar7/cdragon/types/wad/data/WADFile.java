@@ -1,16 +1,13 @@
 package no.stelar7.cdragon.types.wad.data;
 
 import no.stelar7.cdragon.types.bin.BINParser;
-import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.dds.DDSParser;
-import no.stelar7.cdragon.types.wad.data.content.*;
+import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.ByteArray;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -53,7 +50,7 @@ public class WADFile
         this.contentHeaders = contentHeaders;
     }
     
-    public void extractFiles(Path path, String wadName, boolean convertFiles)
+    public void extractFiles(Path path, String wadName)
     {
         final int interval = (int) Math.floor(getContentHeaders().size() / 10f);
         for (int index = 0; index < getContentHeaders().size(); index++)
@@ -68,11 +65,11 @@ public class WADFile
                 }
             }
             
-            saveFile(fileHeader, path, wadName, convertFiles);
+            saveFile(fileHeader, path, wadName);
         }
     }
     
-    public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName, boolean convertFiles)
+    public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName)
     {
         BINParser bp = new BINParser();
         DDSParser dp = new DDSParser();
@@ -116,23 +113,6 @@ public class WADFile
             } else
             {
                 Files.write(self, data);
-            }
-            
-            if (convertFiles)
-            {
-                if (filename.endsWith("bin"))
-                {
-                    BINFile file   = bp.parse(new ByteArray(data));
-                    Path    output = self.resolveSibling(UtilHandler.pathToFilename(self) + ".json");
-                    Files.write(self, file.toJson().getBytes(StandardCharsets.UTF_8));
-                }
-                
-                if (filename.endsWith("dds"))
-                {
-                    BufferedImage img    = dp.parse(self);
-                    Path          output = self.resolveSibling(UtilHandler.pathToFilename(self) + ".png");
-                    ImageIO.write(img, "png", output.toFile());
-                }
             }
             
         } catch (IOException e)
@@ -195,20 +175,22 @@ public class WADFile
     {
         try
         {
-            StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
-            for (WADContentHeaderV1 header : this.getContentHeaders())
-            {
+            StandardOpenOption[] flags   = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+            List<String>         outputs = new ArrayList<>();
+            this.getContentHeaders().forEach(header -> {
                 String filename = HashHandler.getWadHash(header.getPathHash());
                 if (!filename.equals(header.getPathHash()))
                 {
-                    continue;
+                    return;
                 }
                 
                 byte[] data     = readContentFromHeaderData(header);
                 String filetype = FileTypeHandler.findFileType(new ByteArray(data));
-                String output   = String.format("%s : %-10s : %s%n", filename, filetype, wadfilename);
-                Files.write(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt"), output.getBytes(StandardCharsets.UTF_8), flags);
-            }
+                String output   = String.format("%s : %-10s : %s", filename, filetype, wadfilename);
+                outputs.add(output);
+            });
+            
+            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt"), outputs, StandardCharsets.UTF_8, flags);
         } catch (IOException e)
         {
             e.printStackTrace();

@@ -5,13 +5,16 @@ import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.types.Pair;
 import org.junit.jupiter.api.Test;
+import types.util.TestCDTBHashGuessing;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -53,11 +56,19 @@ public class TestRMAN
             
             // use one thread per core, and leave one free for the OS
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
+            
+            // sort content based on filesize
+            Set<Pair<Integer, Function<Void, Void>>> extracts = new TreeSet<>(Comparator.comparingInt((ToIntFunction<Pair<Integer, Function<Void, Void>>>) Pair::getA).reversed());
             files.forEach(manifest -> manifest.getBody()
                                               .getFiles()
-                                              .stream()
-                                              .sorted(Comparator.comparingInt(RMANFileBodyFile::getFileSize).reversed())
-                                              .forEach(f -> service.submit(() -> manifest.extractFile(f, bundleFolder, fileFolder))));
+                                              .forEach(f -> {
+                                                  extracts.add(new Pair<>(f.getFileSize(), (v) -> {
+                                                      manifest.extractFile(f, bundleFolder, fileFolder);
+                                                      return null;
+                                                  }));
+                                              }));
+            
+            extracts.forEach(e -> service.submit(() -> e.getB().apply(null)));
             service.shutdown();
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         } else
@@ -67,6 +78,11 @@ public class TestRMAN
         
         TestWAD tw = new TestWAD();
         tw.testCDragonWAD();
+    
+        TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
+        hashes.doBINTest();
+        hashes.doGameTest();
+        hashes.doLCUTest();
     }
     
     /**

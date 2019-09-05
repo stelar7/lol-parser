@@ -49,7 +49,7 @@ public class TestTFTData
                         String filename = HashHandler.getWadHash(header.getPathHash());
                         if (filename.contains("map22.bin") || filenames.matcher(filename).find())
                         {
-                            map.saveFile(header, outputFolder, pathName, false);
+                            map.saveFile(header, outputFolder, pathName);
                         }
                     }
                 }
@@ -64,7 +64,7 @@ public class TestTFTData
                         String filename = HashHandler.getWadHash(header.getPathHash());
                         if (filename.contains("fontconfig"))
                         {
-                            map.saveFile(header, outputFolder, UtilHandler.pathToFilename(file), false);
+                            map.saveFile(header, outputFolder, UtilHandler.pathToFilename(file));
                         }
                     }
                 }
@@ -84,7 +84,7 @@ public class TestTFTData
                         String filename = HashHandler.getWadHash(header.getPathHash());
                         if (filenames.matcher(filename).find())
                         {
-                            map.saveFile(header, outputFolder, pathName, false);
+                            map.saveFile(header, outputFolder, pathName);
                         }
                     }
                 }

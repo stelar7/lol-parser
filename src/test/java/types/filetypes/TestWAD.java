@@ -37,7 +37,7 @@ public class TestWAD
         
         if (parsed != null)
         {
-            parsed.extractFiles(extractPath, pluginName, false);
+            parsed.extractFiles(extractPath, pluginName);
         }
     }
     
@@ -162,7 +162,7 @@ public class TestWAD
         Path      path   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles\\DATA\\FINAL\\Champions\\Kaisa.cs_CZ.wad.client");
         WADParser parser = new WADParser();
         WADFile   parsed = parser.parse(path);
-        parsed.extractFiles(path.resolveSibling("Kaisa"), "Kaisa", false);
+        parsed.extractFiles(path.resolveSibling("Kaisa"), "Kaisa");
     }
     
     @Test
@@ -242,13 +242,22 @@ public class TestWAD
         
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
+        
+        transformBIN(extractPath);
         generateUnknownBinHashList();
+        
         transformManifest(extractPath);
+        
+        // windows10 handles dds files just fine
+        //transformDDS(extractPath);
+        
+        // this isnt needed, as i dont mess with models, and when i do, i use SKN files directly
         //transformSKN(extractPath);
     }
     
     private void generateUnknownBinHashList() throws IOException
     {
+        System.out.println("Generating list of unknown bin hashes");
         Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
         Files.write(binhash, "".getBytes(StandardCharsets.UTF_8));
         List<String> sortedHashes = new ArrayList<>(BINParser.hashes).stream()
@@ -265,10 +274,8 @@ public class TestWAD
                                                                      .sorted()
                                                                      .filter(h -> HashHandler.getBinHashes().get(h) == null)
                                                                      .collect(Collectors.toList());
-        for (String hash : sortedHashes)
-        {
-            Files.write(binhash, (hash + "\n").getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
-        }
+        
+        Files.write(binhash, sortedHashes, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
     }
     
     private void transformManifest(Path extractPath) throws IOException
@@ -351,7 +358,6 @@ public class TestWAD
         
         final DDSParser dp = new DDSParser();
         Files.walk(extractPath)
-             .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".dds"))
              .forEach(file -> {
                  try
@@ -374,7 +380,6 @@ public class TestWAD
         
         final BINParser bp = new BINParser();
         Files.walk(extractPath)
-             .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(file -> {
                  try
@@ -404,53 +409,53 @@ public class TestWAD
         
         System.out.println("Extracting from " + filename);
         WADFile parsed = new WADParser().parse(file);
-        parsed.extractFiles(to, parent, false);
+        parsed.extractFiles(to, parent);
     }
     
     
-    private void extractWads(Path from, Path to) throws IOException
+    private void extractWads(Path from, Path to)
     {
-        List<String> ends  = Arrays.asList(".wad", ".wad.client");
-        List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
-        List<String> endsm = Collections.singletonList(".wad.mobile");
-        
-        WADParser parser = new WADParser();
-        Files.walk(from)
-             .parallel()
-             // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
-             .forEach(file -> {
-                 if (Files.isDirectory(file))
-                 {
-                     return;
-                 }
+        try
+        {
+            List<String> ends  = Arrays.asList(".wad", ".wad.client");
+            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+            List<String> endsm = Collections.singletonList(".wad.mobile");
             
-                 String parent   = file.getParent().getFileName().toString();
-                 String child    = file.getFileName().toString();
-                 String filename = parent + "/" + child;
-            
-                 if (ends.stream().anyMatch(child::endsWith))
-                 {
-                     System.out.println("Extracting from " + filename);
-                     WADFile parsed = parser.parseReadOnly(file);
-                     parsed.extractFiles(to, parent, true);
-                 }
-            
-                 if (endsc.stream().anyMatch(child::endsWith))
-                 {
-                     System.out.println("Extracting from " + filename);
-                     WADFile parsed = parser.parseCompressed(file);
-                     parsed.extractFiles(to, parent, true);
-                 }
-            
-                 if (endsm.stream().anyMatch(child::endsWith))
-                 {
-                     System.out.println("Extracting from " + filename);
-                     WADFile parsed = parser.parseReadOnly(file);
-                     parsed.extractFiles(to.resolveSibling("mobile"), parent, true);
-                 }
-            
-                 //file.toFile().delete();
-             });
+            WADParser parser = new WADParser();
+            Files.walk(from)
+                 .parallel()
+                 .filter(f -> !Files.isDirectory(f))
+                 // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
+                 .forEach(file -> {
+                     String parent   = file.getParent().getFileName().toString();
+                     String child    = file.getFileName().toString();
+                     String filename = parent + "/" + child;
+                
+                     if (ends.stream().anyMatch(child::endsWith))
+                     {
+                         System.out.println("Extracting from " + filename);
+                         WADFile parsed = parser.parseReadOnly(file);
+                         parsed.extractFiles(to, parent);
+                     }
+                
+                     if (endsc.stream().anyMatch(child::endsWith))
+                     {
+                         System.out.println("Extracting from " + filename);
+                         WADFile parsed = parser.parseCompressed(file);
+                         parsed.extractFiles(to, parent);
+                     }
+                
+                     if (endsm.stream().anyMatch(child::endsWith))
+                     {
+                         System.out.println("Extracting from " + filename);
+                         WADFile parsed = parser.parseReadOnly(file);
+                         parsed.extractFiles(to.resolveSibling("mobile"), parent);
+                     }
+                 });
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
     
     @Test

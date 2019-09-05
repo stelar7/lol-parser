@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.bin.data;
 
+import com.google.gson.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.*;
 import no.stelar7.cdragon.util.writers.*;
@@ -226,33 +227,38 @@ public class BINFile
         {
             try
             {
-                JsonWriterWrapper jw = new JsonWriterWrapper();
-                jw.beginObject();
-                
+                Map<String, List<JsonElement>> content = new HashMap<>();
+                JsonWriterWrapper              jw      = new JsonWriterWrapper();
                 for (BINEntry entry : entries)
                 {
-                    jw.name(entry.getType()).beginObject();
+                    jw.beginObject();
                     entryToJson(entry, jw);
                     jw.endObject();
+                    
+                    List<JsonElement> enContent = content.getOrDefault(entry.getType(), new ArrayList<>());
+                    enContent.add(UtilHandler.getJsonParser().parse(jw.toString()));
+                    content.put(entry.getType(), enContent);
+                    
+                    jw.clear();
                 }
                 
-                jw.name("linkedBinFiles").beginArray();
+                JsonArray arr = new JsonArray();
                 for (String link : this.linkedFiles)
                 {
-                    jw.value(link);
+                    arr.add(link);
                 }
-                jw.endArray();
                 
-                jw.endObject();
+                JsonObject entryJson = UtilHandler.getJsonParser().parse(UtilHandler.getGson().toJson(content)).getAsJsonObject();
+                entryJson.add("linkedBinFiles", arr);
                 
-                json = UtilHandler.mergeTopKeysToArray(jw.toString());
-                // json = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(json));
+                json = UtilHandler.getGson().toJson(entryJson);
+                return json;
+                
             } catch (IOException e)
             {
                 e.printStackTrace();
             }
         }
-        
         
         return json;
     }
