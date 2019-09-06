@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.util.hashguessing;
 
+import com.google.gson.*;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.util.handlers.*;
 
@@ -101,5 +102,51 @@ public class GameHashGuesser extends HashGuesser
     {
         Long hashNum = HashHandler.computeXXHash64AsLong(val);
         return HashHandler.toHex(hashNum, 16);
+    }
+    
+    public void guessShaderFiles(Path dataPath)
+    {
+        System.out.println("Guessing shaders by manifest");
+        
+        List<String> prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/");
+        List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".glsl"));
+        for (String s : Arrays.asList(".dx9_", ".glsl_"))
+        {
+            for (int i = 0; i < 100000; i += 100)
+            {
+                suffixes.add(s + i);
+            }
+        }
+        
+        Collections.sort(suffixes);
+        
+        try
+        {
+            Path       manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("76EBE65321C56DD9.json")).findFirst().get();
+            JsonObject shaders  = UtilHandler.getJsonParser().parse(Files.readString(manifest)).getAsJsonObject().getAsJsonObject("shaders");
+            JsonArray  sections = shaders.getAsJsonArray("sections");
+            
+            for (JsonElement sectionEle : sections)
+            {
+                JsonObject section = (JsonObject) sectionEle;
+                JsonArray  files   = section.getAsJsonArray("files");
+                
+                for (JsonElement fileEle : files)
+                {
+                    for (String suffix : suffixes)
+                    {
+                        for (String prefix : prefixes)
+                        {
+                            String toCheck = prefix + fileEle.getAsString() + suffix;
+                            check(toCheck);
+                        }
+                    }
+                }
+            }
+            
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
     }
 }

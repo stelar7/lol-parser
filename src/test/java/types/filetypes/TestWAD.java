@@ -283,6 +283,7 @@ public class TestWAD
         System.out.println("Transforming manifests to readable format");
         
         final ManifestContentParser dp = new ManifestContentParser();
+        
         Files.walk(extractPath)
              .parallel()
              .filter(a -> a.getFileName().toString().endsWith(".manifestv1"))

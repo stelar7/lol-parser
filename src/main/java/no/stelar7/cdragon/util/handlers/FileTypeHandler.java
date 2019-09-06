@@ -173,9 +173,9 @@ public final class FileTypeHandler
             return "hls";
         }
         
-        if (FileTypeHandler.isProbableManifestV0(magic))
+        if (FileTypeHandler.isProbableManifestV2(magic))
         {
-            return "manifestv0";
+            return "manifestv2";
         }
         
         if (FileTypeHandler.isProbableManifestV1(magic))
@@ -183,9 +183,9 @@ public final class FileTypeHandler
             return "manifestv1";
         }
         
-        if (FileTypeHandler.isProbableManifestV2(magic))
+        if (FileTypeHandler.isProbableManifestV0(magic))
         {
-            return "manifestv2";
+            return "manifestv0";
         }
         
         if (FileTypeHandler.isProbableTXT(magic))
