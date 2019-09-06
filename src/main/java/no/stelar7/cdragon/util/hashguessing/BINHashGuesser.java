@@ -9,99 +9,135 @@ import no.stelar7.cdragon.util.types.math.Vector2;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.regex.*;
 import java.util.stream.Collectors;
 
 public class BINHashGuesser extends HashGuesser
 {
-    private       List<BINFile> files = new ArrayList<>();
+    private       List<BINFile> files = null;
     private final Path          dataPath;
     
     public BINHashGuesser(Collection<String> strings, Path dataPath)
     {
         super(HashGuesser.hashFileBIN, strings);
         this.dataPath = dataPath;
+    }
+    
+    private List<BINFile> getFiles()
+    {
+        if (files == null)
+        {
+            try
+            {
+                System.out.println("Parsing bin files...");
+                BINParser parser = new BINParser();
+                files = Files.walk(dataPath)
+                             .filter(UtilHandler.IS_BIN_PREDICATE)
+                             .map(parser::parse).collect(Collectors.toList());
+                
+            } catch (Exception e)
+            {
+                e.printStackTrace();
+            }
+        }
+        
+        return files;
+    }
+    
+    public void guessNewCharacters()
+    {
+        System.out.println("Guessing new characters");
+        
+        getFiles().stream()
+                  .flatMap(b -> b.getEntries().stream())
+                  .filter(b -> b.getType().equalsIgnoreCase("character"))
+                  .forEach(e -> {
+                      String name   = (String) e.getValues().get(0).getValue();
+                      String toHash = "Characters/" + name;
+                      this.check(toHash);
+                  });
+    }
+    
+    public void guessNewAnimations()
+    {
+        System.out.println("Guessing new animations");
+        
+        getFiles().stream()
+                  .flatMap(b -> b.getEntries().stream())
+                  .filter(b -> b.getType().equalsIgnoreCase("animationGraphData"))
+                  .forEach(e -> {
+                      Optional<BINValue> clipDataMap = e.get("mClipDataMap");
+                      if (clipDataMap.isEmpty())
+                      {
+                          return;
+                      }
+            
+                      BINMap clipData = (BINMap) clipDataMap.get().getValue();
+                      for (Vector2<Object, Object> pairs : clipData.getData())
+                      {
+                          BINStruct clipContent = (BINStruct) pairs.getSecond();
+                
+                          Optional<BINValue> animationResourcePath = clipContent.get("mAnimationResourceData");
+                          if (animationResourcePath.isEmpty())
+                          {
+                              return;
+                          }
+                
+                          BINStruct          animationResourceData = (BINStruct) animationResourcePath.get().getValue();
+                          Optional<BINValue> animationFilePath     = animationResourceData.get("mAnimationFilePath");
+                          if (animationFilePath.isEmpty())
+                          {
+                              return;
+                          }
+                
+                          String           path      = (String) animationFilePath.get().getValue();
+                          String           filename  = UtilHandler.removeEnding(UtilHandler.getFilename(path));
+                          Set<String>      parts     = new HashSet<>(Arrays.asList(filename.split("_")));
+                          Set<Set<String>> powerSets = Sets.powerSet(parts);
+                          for (Set<String> product : powerSets)
+                          {
+                              String toHash = String.join("", product);
+                              if (toHash.isBlank())
+                              {
+                                  continue;
+                        
+                              }
+                              this.check(toHash);
+                          }
+                      }
+                  });
+    }
+    
+    public void guessFromFile(Path file, String pattern)
+    {
+        System.out.println("Guessing from file " + file.toString() + " with pattern: \"" + pattern + "\"");
         
         try
         {
-            System.out.println("Started guessing BIN hashes");
-            System.out.println("Parsing bin files...");
-            BINParser parser = new BINParser();
-            files = Files.walk(dataPath)
-                         .filter(UtilHandler.IS_BIN_PREDICATE)
-                         .map(parser::parse).collect(Collectors.toList());
+            String  content = Files.readString(file);
+            Pattern p       = Pattern.compile(pattern);
+            Matcher m       = p.matcher(content);
+            
+            while (m.find())
+            {
+                int lastStart = 0;
+                for (int i = 0; i <= m.groupCount(); i++)
+                {
+                    String data = m.group(1).toLowerCase();
+                    check(data);
+                }
+            }
         } catch (IOException e)
         {
             e.printStackTrace();
         }
     }
     
-    public void guessNewCharacters()
-    {
-        System.out.println("Guessing new characters");
-        files.stream()
-             .flatMap(b -> b.getEntries().stream())
-             .filter(b -> b.getType().equalsIgnoreCase("character"))
-             .forEach(e -> {
-                 String name   = (String) e.getValues().get(0).getValue();
-                 String toHash = "Characters/" + name;
-                 this.check(toHash);
-             });
-    }
-    
-    public void guessNewAnimations()
-    {
-        System.out.println("Guessing new animations");
-        files.stream()
-             .flatMap(b -> b.getEntries().stream())
-             .filter(b -> b.getType().equalsIgnoreCase("animationGraphData"))
-             .forEach(e -> {
-                 Optional<BINValue> clipDataMap = e.get("mClipDataMap");
-                 if (clipDataMap.isEmpty())
-                 {
-                     return;
-                 }
-            
-                 BINMap clipData = (BINMap) clipDataMap.get().getValue();
-                 for (Vector2<Object, Object> pairs : clipData.getData())
-                 {
-                     BINStruct clipContent = (BINStruct) pairs.getSecond();
-                
-                     Optional<BINValue> animationResourcePath = clipContent.get("mAnimationResourceData");
-                     if (animationResourcePath.isEmpty())
-                     {
-                         return;
-                     }
-                
-                     BINStruct          animationResourceData = (BINStruct) animationResourcePath.get().getValue();
-                     Optional<BINValue> animationFilePath     = animationResourceData.get("mAnimationFilePath");
-                     if (animationFilePath.isEmpty())
-                     {
-                         return;
-                     }
-                
-                     String           path      = (String) animationFilePath.get().getValue();
-                     String           filename  = UtilHandler.removeEnding(UtilHandler.getFilename(path));
-                     Set<String>      parts     = new HashSet<>(Arrays.asList(filename.split("_")));
-                     Set<Set<String>> powerSets = Sets.powerSet(parts);
-                     for (Set<String> product : powerSets)
-                     {
-                         String toHash = String.join("", product);
-                         if (toHash.isBlank())
-                         {
-                             continue;
-                        
-                         }
-                         this.check(toHash);
-                     }
-                 }
-             });
-    }
-    
     public void guessFromFontFiles()
     {
         System.out.println("Guessing description variables");
-        Map<String, Map<String, String>> descs = new HashMap<>();
         
+        Map<String, Map<String, String>> descs = new HashMap<>();
         try
         {
             Files.walk(dataPath.resolve("data\\menu"))

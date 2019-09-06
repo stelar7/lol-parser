@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
+import java.util.regex.*;
 import java.util.stream.Collectors;
 
 public class TestDivStuff
@@ -16,11 +17,11 @@ public class TestDivStuff
     public void testHashFromManifests()
     {
         //RandomAccessReader r           = new RandomAccessReader(UtilHandler.DOWNLOADS_FOLDER.resolve("pbe/unknown/final/9292a9c26c1abd6b.unknown"));
-        RandomAccessReader r           = new RandomAccessReader(UtilHandler.CDRAGON_FOLDER.resolve("pbe/unknown/final/1DE85B3040E21426.unknown"));
+        RandomAccessReader r = new RandomAccessReader(UtilHandler.CDRAGON_FOLDER.resolve("pbe/unknown/final/1DE85B3040E21426.unknown"));
         
         
-        int                stringCount = r.readInt();
-        List<String>       lines       = new ArrayList<>();
+        int          stringCount = r.readInt();
+        List<String> lines       = new ArrayList<>();
         while (r.remaining() > 0)
         {
             int    length = r.readInt();
@@ -58,9 +59,46 @@ public class TestDivStuff
         
         Map<String, String> hashed = new HashSet<>(Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("wordsToTest.txt")))
                 .stream()
-                .map(l -> l.substring(9))
                 .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
                 .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
+        
+        hashed.forEach((key, value) -> {
+            if (unknowns.contains(value))
+            {
+                String formatted = String.format("\"%s\":\"%s\",%n", value, key);
+                try
+                {
+                    Files.write(output, formatted.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+    
+    @Test
+    public void fetchHashesFromFile() throws IOException
+    {
+        String  unknowns = Files.readString(UtilHandler.CDRAGON_FOLDER.resolve("Lux.BinDump"));
+        Pattern pattern  = Pattern.compile("#\\[(.+?)]");
+        Matcher m        = pattern.matcher(unknowns);
+        
+        Set<String> values = new HashSet<>();
+        while (m.find())
+        {
+            int lastStart = 0;
+            for (int i = 0; i <= m.groupCount(); i++)
+            {
+                String data = m.group(1).toLowerCase();
+                values.add(data);
+            }
+        }
+        
+        Path output = UtilHandler.CDRAGON_FOLDER.resolve("newhash.json");
+        Map<String, String> hashed = values.stream()
+                                           .filter(k -> !HashHandler.getBINHash(k).equalsIgnoreCase(k))
+                                           .collect(Collectors.toMap(k -> k, HashHandler::getBINHash));
         
         hashed.forEach((key, value) -> {
             if (unknowns.contains(value))
