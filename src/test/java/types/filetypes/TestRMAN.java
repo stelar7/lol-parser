@@ -76,13 +76,17 @@ public class TestRMAN
             System.out.println("This version is already extracted, skipping extract step");
         }
         
-        TestWAD tw = new TestWAD();
-        tw.testCDragonWAD();
-    
-        TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
-        hashes.doBINTest();
-        hashes.doGameTest();
-        hashes.doLCUTest();
+        boolean shouldUnpack = shouldDownload || shouldExport;
+        if (shouldUnpack)
+        {
+            TestWAD tw = new TestWAD();
+            tw.testCDragonWAD();
+            
+            TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
+            hashes.doBINTest();
+            hashes.doGameTest();
+            hashes.doLCUTest();
+        }
     }
     
     /**

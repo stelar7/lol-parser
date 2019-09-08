@@ -12,7 +12,7 @@ import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.types.*;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -22,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 public class TestWAD
@@ -422,38 +424,69 @@ public class TestWAD
             List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
             List<String> endsm = Collections.singletonList(".wad.mobile");
             
+            ExecutorService                       service  = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
+            Set<Pair<Long, Function<Void, Void>>> extracts = new TreeSet<>(Comparator.comparingLong((ToLongFunction<Pair<Long, Function<Void, Void>>>) Pair::getA).reversed());
+            
             WADParser parser = new WADParser();
             Files.walk(from)
-                 .parallel()
                  .filter(f -> !Files.isDirectory(f))
                  // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
                  .forEach(file -> {
-                     String parent   = file.getParent().getFileName().toString();
-                     String child    = file.getFileName().toString();
-                     String filename = parent + "/" + child;
-                
-                     if (ends.stream().anyMatch(child::endsWith))
+                     try
                      {
-                         System.out.println("Extracting from " + filename);
-                         WADFile parsed = parser.parseReadOnly(file);
-                         parsed.extractFiles(to, parent);
-                     }
-                
-                     if (endsc.stream().anyMatch(child::endsWith))
+                         String parent   = file.getParent().getFileName().toString();
+                         String child    = file.getFileName().toString();
+                         String filename = parent + "/" + child;
+                         long   size     = Files.size(file);
+                    
+                         if (ends.stream().anyMatch(child::endsWith))
+                         {
+                             Function<Void, Void> export = a -> {
+                                 System.out.println("Extracting from " + filename);
+                                 WADFile parsed = parser.parseReadOnly(file);
+                                 parsed.extractFiles(to, parent);
+                                 return null;
+                             };
+                        
+                             extracts.add(new Pair(size, export));
+                         }
+                    
+                         if (endsc.stream().anyMatch(child::endsWith))
+                         {
+                             Function<Void, Void> export = a -> {
+                                 System.out.println("Extracting from " + filename);
+                                 WADFile parsed = parser.parseCompressed(file);
+                                 parsed.extractFiles(to, parent);
+                                 return null;
+                             };
+                        
+                             extracts.add(new Pair(size, export));
+                         }
+                    
+                         if (endsm.stream().anyMatch(child::endsWith))
+                         {
+                             Function<Void, Void> export = a -> {
+                                 System.out.println("Extracting from " + filename);
+                                 WADFile parsed = parser.parseReadOnly(file);
+                                 parsed.extractFiles(to.resolveSibling("mobile"), parent);
+                                 return null;
+                             };
+                        
+                             extracts.add(new Pair(size, export));
+                         }
+                    
+                     } catch (IOException e)
                      {
-                         System.out.println("Extracting from " + filename);
-                         WADFile parsed = parser.parseCompressed(file);
-                         parsed.extractFiles(to, parent);
-                     }
-                
-                     if (endsm.stream().anyMatch(child::endsWith))
-                     {
-                         System.out.println("Extracting from " + filename);
-                         WADFile parsed = parser.parseReadOnly(file);
-                         parsed.extractFiles(to.resolveSibling("mobile"), parent);
+                         e.printStackTrace();
                      }
                  });
-        } catch (IOException e)
+            
+            
+            extracts.forEach(e -> service.submit(() -> e.getB().apply(null)));
+            service.shutdown();
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+            
+        } catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -474,38 +507,29 @@ public class TestWAD
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
-                long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
-                if (endsCount != 0)
+                try
                 {
-                    WADFile parsed = parser.parse(file);
-                    try
+                    long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                    long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
+                    if (endsCount != 0)
                     {
-                        StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
-                        for (WADContentHeaderV1 header : parsed.getContentHeaders())
-                        {
-                            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
-                        }
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
+                        WADFile              parsed = parser.parse(file);
+                        StandardOpenOption[] flags  = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+                        List<String>         hashes = parsed.getContentHeaders().stream().map(WADContentHeaderV1::getPathHash).collect(Collectors.toList());
+                        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt"), hashes, StandardCharsets.UTF_8, flags);
                     }
-                }
-                
-                if (endscCount != 0)
+                    
+                    if (endscCount != 0)
+                    {
+                        WADFile              parsed = parser.parseCompressed(file);
+                        StandardOpenOption[] flags  = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+                        List<String>         hashes = parsed.getContentHeaders().stream().map(WADContentHeaderV1::getPathHash).collect(Collectors.toList());
+                        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt"), hashes, StandardCharsets.UTF_8, flags);
+                    }
+                    
+                } catch (IOException e)
                 {
-                    WADFile parsed = parser.parseCompressed(file);
-                    try
-                    {
-                        StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
-                        for (WADContentHeaderV1 header : parsed.getContentHeaders())
-                        {
-                            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt"), (header.getPathHash() + "\n").getBytes(StandardCharsets.UTF_8), flags);
-                        }
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
+                    e.printStackTrace();
                 }
                 
                 return FileVisitResult.CONTINUE;

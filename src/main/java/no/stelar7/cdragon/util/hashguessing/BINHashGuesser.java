@@ -114,6 +114,12 @@ public class BINHashGuesser extends HashGuesser
         
         try
         {
+            if (!Files.exists(file))
+            {
+                return;
+            }
+            
+            
             String  content = Files.readString(file);
             Pattern p       = Pattern.compile(pattern);
             Matcher m       = p.matcher(content);
