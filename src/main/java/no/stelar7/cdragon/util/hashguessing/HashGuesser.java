@@ -148,6 +148,14 @@ public abstract class HashGuesser
             return true;
         }
         
+        if (lowerCased.endsWith(".lua"))
+        {
+            String test = lowerCased.substring(0, lowerCased.lastIndexOf(".lua"));
+            check(test + ".luabin");
+            check(test + ".luabin64");
+            check(test + ".preload");
+        }
+        
         String hash = generateHash(lowerCased);
         if (this.unknown.contains(hash))
         {

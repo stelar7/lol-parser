@@ -76,17 +76,19 @@ public class TestRMAN
             System.out.println("This version is already extracted, skipping extract step");
         }
         
-        boolean shouldUnpack = shouldDownload || shouldExport;
+        Path    extractPath  = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+        boolean shouldUnpack = !Files.exists(extractPath) || shouldDownload || shouldExport;
         if (shouldUnpack)
         {
             TestWAD tw = new TestWAD();
             tw.testCDragonWAD();
-            
-            TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
-            hashes.doBINTest();
-            hashes.doGameTest();
-            hashes.doLCUTest();
         }
+        
+        
+        TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
+        hashes.doBINTest();
+        hashes.doGameTest();
+        hashes.doLCUTest();
     }
     
     /**
