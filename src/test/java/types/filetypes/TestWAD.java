@@ -570,5 +570,22 @@ public class TestWAD
                 return FileVisitResult.CONTINUE;
             }
         });
+        
+        Path         output  = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
+        List<String> content = new ArrayList<>();
+        Files.readAllLines(output).stream()
+             .map(s -> new Triplet<>(s.substring(0, s.indexOf(":")).trim(), s.substring(s.indexOf(":") + 1, s.lastIndexOf(":")).trim(), s.substring(s.lastIndexOf(":") + 1).trim()))
+             .collect(Collectors.groupingBy(Triplet::getA, Collectors.mapping(t -> new Pair<>(t.getC(), t.getB()), Collectors.toList())))
+             .forEach((k, v) -> {
+                 String line = String.format("%s : %-10s : %s", k, v.get(0).getB(), v.stream().map(Pair::getA).collect(Collectors.joining(",")));
+                 content.add(line);
+             });
+        
+        content.sort(
+                Comparator.comparing((String a) -> a.substring(32).toLowerCase())
+                          .thenComparing(Comparator.comparing((String a) -> a.substring(20, 30).toLowerCase()).reversed())
+                          .thenComparing(Comparator.comparing((String a) -> a.substring(0, 18).toLowerCase()))
+                    );
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt"), content, StandardCharsets.UTF_8);
     }
 }
