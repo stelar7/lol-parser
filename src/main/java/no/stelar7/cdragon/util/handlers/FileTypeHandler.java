@@ -280,7 +280,7 @@ public final class FileTypeHandler
     
     private static boolean isProbableCGC(ByteArray magic)
     {
-        return magic.startsWith(new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00}));
+        return magic.startsWith(new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x54, (byte) 0x4F, (byte) 0x43, (byte) 0x33}));
     }
     
     public static byte[] makePrettyJson(byte[] jsonString)

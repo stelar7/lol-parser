@@ -12,6 +12,13 @@ public class TestCDTBHashGuessing
 {
     private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
     
+    public void doTests()
+    {
+        doBINTest();
+        doGameTest();
+        doLCUTest();
+    }
+    
     @Test
     @Order(1)
     public void doBINTest()

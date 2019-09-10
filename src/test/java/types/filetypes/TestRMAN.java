@@ -82,13 +82,13 @@ public class TestRMAN
         {
             TestWAD tw = new TestWAD();
             tw.testCDragonWAD();
+        } else
+        {
+            System.out.println("This version is already unpacked, skipping unpack step");
         }
         
-        
         TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
-        hashes.doBINTest();
-        hashes.doGameTest();
-        hashes.doLCUTest();
+        hashes.doTests();
     }
     
     /**
