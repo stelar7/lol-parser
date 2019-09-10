@@ -7,7 +7,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.regex.*;
 import java.util.stream.Stream;
 
@@ -142,6 +142,39 @@ public class GameHashGuesser extends HashGuesser
                         }
                     }
                 }
+            }
+            
+            Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
+            Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
+            Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
+            
+            prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/");
+            suffixes = new ArrayList<>(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.glsl", ".vs_2_0.glsl"));
+            for (String s : Arrays.asList(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.glsl_", ".vs_2_0.glsl_"))
+            {
+                for (int i = 0; i < 100000; i += 100)
+                {
+                    suffixes.add(s + i);
+                }
+            }
+            
+            Path      shaderJson = Paths.get("D:\\pbe\\data\\shaders\\shaders.json");
+            JsonArray shaderObj  = UtilHandler.getJsonParser().parse(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
+            for (JsonElement elem : shaderObj)
+            {
+                JsonObject obj     = (JsonObject) elem;
+                JsonObject realObj = getFirstChildObject.apply(obj);
+                String     name    = realObj.get("objectPath").getAsString();
+                
+                for (String suffix : suffixes)
+                {
+                    for (String prefix : prefixes)
+                    {
+                        String toCheck = prefix + name + suffix;
+                        check(toCheck);
+                    }
+                }
+                
             }
             
         } catch (IOException e)

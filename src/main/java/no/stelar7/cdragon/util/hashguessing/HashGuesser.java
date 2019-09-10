@@ -121,11 +121,11 @@ public abstract class HashGuesser
         this.hashFile.saveToBackupAsJson(this.known);
     }
     
-    public void addKnown(String hash, String path)
+    public void addKnown(String hash, String printPath, String savePath)
     {
-        System.out.format(hashFile.printFormat, hash, path);
-        this.known.put(hash, path);
-        this.newHashes.put(hash, path);
+        System.out.format(hashFile.printFormat, hash, printPath);
+        this.known.put(hash, savePath);
+        this.newHashes.put(hash, savePath);
         this.unknown.remove(hash);
         
         if (this.unknown.isEmpty())
@@ -159,7 +159,7 @@ public abstract class HashGuesser
         String hash = generateHash(lowerCased);
         if (this.unknown.contains(hash))
         {
-            this.addKnown(hash, path);
+            this.addKnown(hash, path, lowerCased);
             return true;
         }
         
