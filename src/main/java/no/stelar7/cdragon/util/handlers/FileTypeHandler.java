@@ -101,25 +101,25 @@ public final class FileTypeHandler
         if (FileTypeHandler.isProbableGLSLF(magic))
         {
             //  OpenGL fragment profile
-            return "glsl-f";
+            return "ps_2_0.glsl";
         }
         
         if (FileTypeHandler.isProbableGLSLV(magic))
         {
             // OpenGL vertex profile
-            return "glsl-v";
+            return "vs_2_0.glsl";
         }
         
         if (FileTypeHandler.isProbableCSO(magic))
         {
             // Compiled Shader Object
-            return "dx9-cso";
+            return "ps_2_0.glsl";
         }
         
         if (FileTypeHandler.isProbableCGC(magic))
         {
             // Compiled Shader Config
-            return "dx9-cgc";
+            return "vs_2_0.dx9";
         }
         
         if (FileTypeHandler.isProbableWPK(magic))
@@ -273,13 +273,11 @@ public final class FileTypeHandler
         return magic.startsWith(new ByteArray(new byte[]{(byte) 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, (byte) 0xBB, 0x0D, 0x0A, 0x1A, 0x0A}));
     }
     
-    // Compiled Shader Object
     private static boolean isProbableCSO(ByteArray magic)
     {
         return new String(magic.getData()).contains("Microsoft (R) HLSL Shader Compiler");
     }
     
-    // Compiled Shader Config
     private static boolean isProbableCGC(ByteArray magic)
     {
         return magic.startsWith(new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00}));
