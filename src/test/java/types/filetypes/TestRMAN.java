@@ -73,7 +73,7 @@ public class TestRMAN
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         } else
         {
-            System.out.println("This version is already extracted, skipping extract step");
+            System.out.println("This version is already extracted, skipping merging step");
         }
         
         Path    extractPath  = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
