@@ -332,7 +332,7 @@ public class TestTFTData
             String data              = parser.parse(selfBin).toJson();
             
             JsonObject elem               = createJsonObject.apply(data, champDataContainer);
-            JsonObject champContainerData = getFirstChildObject.apply(elem);
+            JsonObject champContainerData = (JsonObject) elem.getAsJsonArray("TFTCharacterRecord").get(0);
             JsonObject champItem          = getFirstChildObject.apply(champContainerData);
             
             JsonArray traitDatas = champItem.getAsJsonArray(traitContainer);
@@ -526,7 +526,9 @@ public class TestTFTData
         Files.createDirectories(outputFolder.resolve("TFT"));
         Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         
-        descs.forEach((lang, vals) -> {
+        descs.keySet().stream().sorted().forEach(lang -> {
+            
+            Map<String, String> vals = descs.get(lang);
             try
             {
                 System.out.println("Generating files for " + lang);
