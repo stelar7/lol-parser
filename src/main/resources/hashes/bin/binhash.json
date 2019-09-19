@@ -51073,6 +51073,7 @@
     "31FA3D20": "Passive_Attack_out",
     "AD818229": "Passive_Idle",
     "9CBCCFD4": "Passive_Run",
+    "258D0FB4": "PassiveAoEDamage",
     "E8EC14F2": "PassiveBaseDamage",
     "162CA5E1": "PassiveBonusDamageCalc",
     "250242D7": "PassiveCooldown",
