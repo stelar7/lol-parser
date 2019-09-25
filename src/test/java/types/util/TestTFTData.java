@@ -1,20 +1,19 @@
 package types.util;
 
-import com.google.gson.*;
-import com.google.gson.stream.JsonReader;
 import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -125,61 +124,10 @@ public class TestTFTData
         Path fontConfig      = inputFolder.resolve("data\\menu");
         Path champFileParent = inputFolder.resolve("data\\characters");
         
-        // replace JSON with BIN parsing... |
-        Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
-        Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
-        Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
-        Function<JsonElement, JsonArray>   getFirstChildArray   = obj -> getFirstChildElement.apply(obj).getAsJsonArray();
-        Function<String, JsonElement>      replaceDDSPNG        = input -> new JsonPrimitive(UtilHandler.replaceEnding(input, "dds", "png"));
-        
-        Function<String, Boolean> isFloat = obj -> {
-            try
-            {
-                Float.parseFloat(obj);
-                return true;
-            } catch (Exception e)
-            {
-                return false;
-            }
-        };
-        
-        
-        BiFunction<JsonObject, String, JsonArray>     getKeyOrDefaultArray   = (obj, key) -> obj.has(key) ? obj.getAsJsonArray(key) : new JsonArray();
-        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultInt     = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive(0);
-        BiFunction<JsonObject, String, JsonPrimitive> getKeyOrDefaultStringP = (obj, key) -> obj.has(key) ? obj.get(key).getAsJsonPrimitive() : new JsonPrimitive("P");
-        
-        BiFunction<String, String, JsonPrimitive> adjustBasedOnFormula = (formula, P) -> {
-            
-            // assume that all formulas are in the format "X+Y"
-            
-            String compute = formula.replace("P", P);
-            if (!compute.contains("+"))
-            {
-                if (isFloat.apply(compute))
-                {
-                    return new JsonPrimitive(Float.parseFloat(compute));
-                }
-                
-                return new JsonPrimitive(compute);
-            }
-            
-            String[] parts = compute.split("\\+");
-            float    A     = Float.parseFloat(parts[0]);
-            float    B     = Float.parseFloat(parts[1]);
-            return new JsonPrimitive(A + B);
-        };
-        
-        BiFunction<String, String, JsonObject> createJsonObject = (data, key) -> {
-            String     realData = "{" + data.substring(data.indexOf(key) - 1);
-            JsonReader reader   = new JsonReader(new StringReader(realData));
-            reader.setLenient(true);
-            return UtilHandler.getJsonParser().parse(reader).getAsJsonObject();
-        };
-        
-        Map<String, Map<String, String>> descs = new HashMap<>();
+        Map<String, Map<String, String>> descs         = new HashMap<>();
+        Function<String, String>         replaceDDSPNG = input -> UtilHandler.replaceEnding(input, "dds", "png");
         
         Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
-            
             try
             {
                 Map<String, String> desc = Files.readAllLines(p)
@@ -207,278 +155,264 @@ public class TestTFTData
         });
         
         
-        Map<Integer, JsonObject> champData = new TreeMap<>();
-        Map<Integer, JsonObject> itemData  = new TreeMap<>();
-        List<JsonObject>         traitData = new ArrayList<>();
+        Map<Integer, Map<String, Object>> champData = new TreeMap<>();
+        Map<Integer, Map<String, Object>> itemData  = new TreeMap<>();
+        List<Map<String, Object>>         traitData = new ArrayList<>();
         
         
         BINParser parser = new BINParser();
         
-        String displayName = "C3143D66";
+        Map<String, String> traitLookup = new LinkedHashMap<>();
         
-        String traitContainerKey       = "TftTraitData";
-        String traitDescription        = "765F18DA";
-        String traitIcon               = "mIconPath";
-        String traitEffectContainter   = "mTraitsSets";
-        String innerEffectContainer    = "C130C1E5";
-        String traitMinUnits           = "mMinUnits";
-        String traitMaxUnits           = "mMaxUnits";
-        String traitEffectVarContainer = "EffectAmounts";
-        String traitEffectVar          = "TftEffectAmount";
-        
-        Map<String, String> traitLookup = new HashMap<>();
-        
-        JsonElement shipping = UtilHandler.getJsonParser().parse(parser.parse(traitFile).toJson());
-        JsonArray   traits   = shipping.getAsJsonObject().getAsJsonArray(traitContainerKey);
-        for (JsonElement traitContainer : traits)
+        BINFile        map22  = parser.parse(traitFile);
+        List<BINEntry> traits = map22.getByType("TftTraitData");
+        for (BINEntry trait : traits)
         {
-            String     hashKey = getFirstChildKey.apply(traitContainer);
-            JsonObject trait   = getFirstChildObject.apply(traitContainer);
-            
-            String mName = trait.get("mName").getAsString();
+            String mName = (String) trait.getIfPresent("mName").getValue();
             
             if (mName.contains("Template"))
             {
                 continue;
             }
             
-            traitLookup.put(hashKey, mName);
+            traitLookup.put(trait.getHash(), mName);
             
-            JsonObject o = new JsonObject();
-            o.add("name", trait.get(displayName));
-            o.add("desc", trait.get(traitDescription));
-            o.add("icon", replaceDDSPNG.apply(trait.get(traitIcon).getAsString()));
+            Map<String, Object> o = new LinkedHashMap<>();
+            o.put("name", trait.getIfPresent("C3143D66").getValue());
+            o.put("desc", trait.getIfPresent("765F18DA").getValue());
+            o.put("icon", replaceDDSPNG.apply((String) trait.getIfPresent("mIconPath").getValue()));
             
-            JsonArray effects = new JsonArray();
+            List<Map<String, Object>> effects = new ArrayList<>();
             
-            JsonArray effectJson = trait.getAsJsonArray(traitEffectContainter);
-            for (JsonElement effect : effectJson)
+            List<Object> traitEffectContainer = ((BINContainer) trait.getIfPresent("mTraitsSets").getValue()).getData();
+            for (Object effectObj : traitEffectContainer)
             {
-                JsonObject adder = new JsonObject();
-                JsonObject inner = effect.getAsJsonObject().getAsJsonObject(innerEffectContainer);
+                BINStruct effect = (BINStruct) effectObj;
                 
-                JsonArray varAdded     = new JsonArray();
-                JsonArray varContainer = getKeyOrDefaultArray.apply(inner, traitEffectVarContainer);
-                for (JsonElement vars : varContainer)
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("minUnits", effect.getIfPresent("mMinUnits").getValue());
+                data.put("maxUnits", ((BINData) effect.getIfPresent("mMaxUnits").getValue()).getData().get(0));
+                
+                
+                List<Map<String, Object>> vars          = new ArrayList<>();
+                Optional<BINValue>        effectVarsObj = effect.get("EffectAmounts");
+                if (effectVarsObj.isPresent())
                 {
-                    JsonObject var  = vars.getAsJsonObject().getAsJsonObject(traitEffectVar);
-                    String     name = var.get("name").getAsString();
-                    if (name.startsWith("STRING_HASH: "))
+                    List<Object> effectVars = ((BINContainer) effect.getIfPresent("EffectAmounts").getValue()).getData();
+                    for (Object var : effectVars)
                     {
-                        name = name.substring("STRING_HASH: ".length());
+                        BINStruct           effectVar = (BINStruct) var;
+                        Map<String, Object> inner     = new LinkedHashMap<>();
+                        
+                        for (BINValue value : ((BINStruct) var).getData())
+                        {
+                            if (value.getType() == BINValueType.STRING_HASH)
+                            {
+                                String key = (String) value.getValue();
+                                inner.put(value.getHash(), HashHandler.getBinHashes().getOrDefault(key, key));
+                            } else
+                            {
+                                inner.put(value.getHash(), value.getValue());
+                            }
+                        }
+                        
+                        vars.add(inner);
                     }
-                    JsonElement value = var.get("value");
-                    
-                    JsonObject temp = new JsonObject();
-                    temp.add("name", new JsonPrimitive(name));
-                    temp.add("value", value);
-                    varAdded.add(temp);
                 }
                 
-                adder.add("minUnits", new JsonPrimitive(inner.get(traitMinUnits).getAsInt()));
-                adder.add("maxUnits", new JsonPrimitive(inner.getAsJsonArray(traitMaxUnits).get(0).getAsInt()));
-                adder.add("vars", varAdded);
-                
-                effects.add(adder);
+                data.put("vars", vars);
+                effects.add(data);
             }
             
-            o.add("effects", effects);
+            o.put("effects", effects);
             traitData.add(o);
         }
         
-        String champFileTraitContainer = "mLinkedTraits";
-        String champContainerKey       = "TftShopData";
-        String costModifier            = "mRarity";
-        String champAbilityName        = "87A69A5E";
-        String champSplash             = "mIconPath";
-        String champAbilityDesc        = "BC4F18B3";
-        String champAbilityIcon        = "mPortraitIconPath";
         
-        JsonArray champs = shipping.getAsJsonObject().getAsJsonArray(champContainerKey);
-        for (JsonElement champContainer : champs)
+        List<BINEntry> champs = map22.getByType("TftShopData");
+        for (BINEntry champ : champs)
         {
-            JsonObject champ = getFirstChildObject.apply(champContainer);
-            String     mName = champ.get("mName").getAsString();
+            String mName = (String) champ.getIfPresent("mName").getValue();
             
             if (!mName.startsWith("TFT_") || mName.equals("TFT_Template"))
             {
                 continue;
             }
             
-            JsonObject o         = new JsonObject();
-            JsonObject abilities = new JsonObject();
+            Map<String, Object> champion  = new LinkedHashMap<>();
+            Map<String, Object> abilities = new LinkedHashMap<>();
             
-            String     realName    = mName.substring(4);
-            Path       selfRealBin = champFileParent.resolve(realName).resolve(realName + ".bin");
-            String     realData    = parser.parse(selfRealBin).toJson();
-            JsonObject realChamp   = createJsonObject.apply(realData, "characterToolData");
-            String     championId  = realChamp.getAsJsonObject("characterToolData").getAsJsonObject("characterToolData").get("championId").getAsString();
+            String  realName    = mName.substring(4);
+            Path    selfRealBin = champFileParent.resolve(realName).resolve(realName + ".bin");
+            BINFile realData    = parser.parse(selfRealBin);
+            int     id          = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).getIfPresent("championId").getValue();
             
-            o.add("name", champ.get(displayName));
-            o.add("cost", new JsonPrimitive(1 + (champ.has(costModifier) ? champ.get(costModifier).getAsInt() : 0)));
-            o.add("splash", replaceDDSPNG.apply(champ.get(champSplash).getAsString()));
+            champion.put("name", champ.getIfPresent("C3143D66").getValue());
+            champion.put("id", id);
+            champion.put("cost", 1 + champ.get("mRarity").map(BINValue::getValue).map(a -> (byte) a).orElse((byte) 0));
+            champion.put("splash", replaceDDSPNG.apply((String) champ.getIfPresent("mIconPath").getValue()));
             
-            abilities.add("name", champ.get(champAbilityName));
-            abilities.add("desc", champ.get(champAbilityDesc));
-            abilities.add("icon", replaceDDSPNG.apply(champ.get(champAbilityIcon).getAsString()));
+            abilities.put("name", champ.getIfPresent("87A69A5E").getValue());
+            abilities.put("desc", champ.getIfPresent("BC4F18B3").getValue());
+            abilities.put("icon", replaceDDSPNG.apply((String) champ.getIfPresent("mPortraitIconPath").getValue()));
             
             
-            String champDataContainer = "TFTCharacterRecord";
-            String spellDataContainer = "SpellObject";
-            String traitContainer     = "mLinkedTraits";
+            String  initialSpellValue = "mBaseP";
+            Path    selfBin           = champFileParent.resolve(mName).resolve(mName + ".bin");
+            BINFile data              = parser.parse(selfBin);
             
-            String initialSpellValue = "mBaseP";
-            Path   selfBin           = champFileParent.resolve(mName).resolve(mName + ".bin");
-            String data              = parser.parse(selfBin).toJson();
+            BINEntry champItem = data.getByType("TFTCharacterRecord").get(0);
             
-            JsonObject elem               = createJsonObject.apply(data, champDataContainer);
-            JsonObject champContainerData = (JsonObject) elem.getAsJsonArray("TFTCharacterRecord").get(0);
-            JsonObject champItem          = getFirstChildObject.apply(champContainerData);
-            
-            JsonArray traitDatas = champItem.getAsJsonArray(traitContainer);
-            JsonArray traitArray = new JsonArray();
-            for (JsonElement traitDatum : traitDatas)
+            List<String> traitArray  = new ArrayList<>();
+            List<Object> champTraits = ((BINContainer) champItem.getIfPresent("mLinkedTraits").getValue()).getData();
+            for (Object traitObj : champTraits)
             {
-                String hash = traitDatum.getAsString().substring("LINK_OFFSET: ".length());
-                traitArray.add(new JsonPrimitive(traitLookup.get(hash)));
+                BINStruct trait = (BINStruct) traitObj;
+                String    key   = (String) trait.getIfPresent("053A1F33").getValue();
+                traitArray.add(traitLookup.get(key));
             }
             
-            JsonObject manaContainer = getFirstChildObject.apply(champItem.get("PrimaryAbilityResource"));
+            BINStruct manaContainer = (BINStruct) champItem.getIfPresent("PrimaryAbilityResource").getValue();
             
-            JsonObject stats = new JsonObject();
-            stats.add("hp", champItem.get("baseHP"));
-            stats.add("hpScaleFactor", new JsonPrimitive(1.8f));
-            stats.add("mana", manaContainer.has("arBase") ? manaContainer.get("arBase").getAsJsonPrimitive() : new JsonPrimitive(100));
-            stats.add("initalMana", champItem.has("mInitialMana") ? champItem.get("mInitialMana") : new JsonPrimitive(0));
-            stats.add("damage", champItem.get("BaseDamage"));
-            stats.add("damageScaleFactor", new JsonPrimitive(1.25f));
-            stats.add("armor", champItem.get("baseArmor"));
-            stats.add("magicResist", champItem.get("baseSpellBlock"));
-            stats.add("critMultiplier", champItem.get("critDamageMultiplier"));
-            stats.add("critChance", new JsonPrimitive(0.25f));
-            stats.add("attackSpeed", champItem.get("AttackSpeed"));
-            stats.add("range", new JsonPrimitive(champItem.get("attackRange").getAsInt() / 180));
+            Map<String, Object> stats = new LinkedHashMap<>();
+            stats.put("hp", champItem.getIfPresent("baseHP").getValue());
+            stats.put("hpScaleFactor", 1.8f);
+            stats.put("mana", manaContainer.get("arBase").map(a -> (float) a.getValue()).orElse(100f));
+            stats.put("initalMana", champItem.get("mInitialMana").map(a -> (float) a.getValue()).orElse(0f));
+            stats.put("damage", champItem.getIfPresent("BaseDamage").getValue());
+            stats.put("damageScaleFactor", 1.25f);
+            stats.put("armor", champItem.getIfPresent("baseArmor").getValue());
+            stats.put("magicResist", champItem.getIfPresent("baseSpellBlock").getValue());
+            stats.put("critMultiplier", champItem.getIfPresent("critDamageMultiplier").getValue());
+            stats.put("critChance", champItem.getIfPresent("BaseCritChance").getValue());
+            stats.put("attackSpeed", champItem.getIfPresent("AttackSpeed").getValue());
+            stats.put("range", champItem.get("attackRange").map(a -> Math.floor((float) a.getValue() / 180f)).get());
             
-            String spellName = champItem.getAsJsonArray("spellNames").get(0).getAsString();
+            String spellName = (String) ((BINContainer) champItem.getIfPresent("spellNames").getValue()).getData().get(0);
             if (spellName.contains("/"))
             {
                 spellName = spellName.substring(spellName.indexOf('/') + 1);
             }
             
-            elem = createJsonObject.apply(data, spellDataContainer);
-            JsonArray elems = getFirstChildArray.apply(elem);
+            String finalSpellName = spellName;
             
-            JsonArray abilityVars = new JsonArray();
-            for (JsonElement elemm : elems)
+            List<Map<String, Object>> abilityVars = new ArrayList<>();
+            List<BINEntry>            elems       = data.getByType("SpellObject");
+            for (BINEntry elem : elems)
             {
-                JsonObject spellContainerData = getFirstChildObject.apply(elemm);
-                if (spellContainerData.get("mScriptName").getAsString().equals(spellName))
+                if (elem.getIfPresent("mScriptName").getValue().equals(spellName))
                 {
-                    JsonObject spellData       = getFirstChildObject.apply(spellContainerData.getAsJsonObject("mSpell"));
-                    JsonArray  spellDataValues = getKeyOrDefaultArray.apply(spellData, "mDataValues");
-                    for (JsonElement variable : spellDataValues)
+                    BINStruct    spell      = (BINStruct) elem.getIfPresent("mSpell").getValue();
+                    List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
+                    for (Object variableObj : dataValues)
                     {
-                        JsonObject spellDataEntry = variable.getAsJsonObject().getAsJsonObject("SpellDataValue");
+                        BINStruct variable = (BINStruct) variableObj;
                         
-                        JsonObject currentVar = new JsonObject();
-                        currentVar.add("key", spellDataEntry.get("mName"));
-                        currentVar.add("values", spellDataEntry.getAsJsonArray("mValues"));
+                        
+                        Map<String, Object> currentVar = new LinkedHashMap<>();
+                        currentVar.put("key", variable.getIfPresent("mName").getValue());
+                        
+                        Optional<BINValue> valuesContainer = variable.get("mValues");
+                        if (valuesContainer.isPresent())
+                        {
+                            BINContainer values = (BINContainer) variable.getIfPresent("mValues").getValue();
+                            currentVar.put("values", values.getData());
+                        }
+                        
                         abilityVars.add(currentVar);
                     }
                     break;
                 }
             }
-            abilities.add("variables", abilityVars);
+            abilities.put("variables", abilityVars);
             
             
-            o.add("stats", stats);
-            o.add("traits", traitArray);
-            o.add("ability", abilities);
-            champData.put(Integer.valueOf(championId), o);
+            champion.put("stats", stats);
+            champion.put("traits", traitArray);
+            champion.put("ability", abilities);
+            champData.put((Integer) champion.get("id"), champion);
+            
         }
         
-        String itemContainerKey       = "TftItemData";
-        String itemFromKey            = "mComposition";
-        String itemEffectContainer    = "EffectAmounts";
-        String itemDescription        = "765F18DA";
-        String itemEffectVarContainer = "TftEffectAmount";
-        String itemIcon               = "mIconPath";
+        Map<String, Object> itemLookup = new LinkedHashMap<>();
         
-        Map<String, String> itemLookup = new HashMap<>();
-        
-        JsonArray items = shipping.getAsJsonObject().getAsJsonArray(itemContainerKey);
-        for (JsonElement itemContainer : items)
+        List<BINEntry> items = map22.getByType("TftItemData");
+        for (BINEntry item : items)
         {
-            String     hashKey = getFirstChildKey.apply(itemContainer);
-            JsonObject item    = getFirstChildObject.apply(itemContainer);
-            
-            String mName = item.get("mName").getAsString();
+            String mName = (String) item.getIfPresent("mName").getValue();
             
             if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
             {
                 continue;
             }
             
-            String mId = item.get("mID").getAsString();
-            itemLookup.put(hashKey, mId);
+            int mId = (int) item.getIfPresent("mID").getValue();
+            itemLookup.put(item.getHash(), mId);
             
-            JsonObject o = new JsonObject();
-            o.add("name", item.get(displayName));
-            o.add("desc", item.get(itemDescription));
-            o.add("icon", replaceDDSPNG.apply(item.get(itemIcon).getAsString()));
+            Map<String, Object> o = new LinkedHashMap<>();
+            o.put("name", item.getIfPresent("C3143D66").getValue());
+            o.put("desc", item.getIfPresent("765F18DA").getValue());
+            o.put("icon", replaceDDSPNG.apply((String) item.getIfPresent("mIconPath").getValue()));
             
-            JsonArray fromOther = getKeyOrDefaultArray.apply(item, itemFromKey);
-            JsonArray fromReal  = new JsonArray();
-            fromOther.forEach(f -> fromReal.add(f.getAsString().substring("LINK_OFFSET: ".length())));
-            o.add("from", fromReal);
+            Optional<BINValue> fromCont = item.get("mComposition");
+            o.put("from", fromCont.map(a -> ((BINContainer) a.getValue()).getData()).orElse(new ArrayList<>()));
             
-            JsonArray effects    = new JsonArray();
-            JsonArray effectJson = getKeyOrDefaultArray.apply(item, itemEffectContainer);
-            for (JsonElement effect : effectJson)
+            
+            List<Map<String, Object>> effects = new ArrayList<>();
+            
+            Optional<BINValue> effectCont = item.get("EffectAmounts");
+            if (effectCont.isPresent())
             {
-                JsonObject inner = effect.getAsJsonObject().getAsJsonObject(itemEffectVarContainer);
-                
-                String name = inner.get("name").getAsString();
-                if (name.startsWith("STRING_HASH: "))
+                List<Object> effectContainer = ((BINContainer) effectCont.get().getValue()).getData();
+                for (Object effectObj : effectContainer)
                 {
-                    name = name.substring("STRING_HASH: ".length());
+                    BINStruct effect = (BINStruct) effectObj;
+                    
+                    BINValue nameVal = effect.getIfPresent("name");
+                    String   nameKey = (String) nameVal.getValue();
+                    String   name    = nameKey;
+                    if (nameVal.getType() == BINValueType.STRING_HASH)
+                    {
+                        name = HashHandler.getBinHashes().getOrDefault(nameKey, nameKey);
+                    }
+                    
+                    Map<String, Object> temp = new LinkedHashMap<>();
+                    temp.put("name", name);
+                    temp.put("value", effect.get("value").map(BINValue::getValue).orElse(null));
+                    effects.add(temp);
                 }
-                JsonElement value = inner.get("value");
-                
-                JsonObject temp = new JsonObject();
-                temp.add("name", new JsonPrimitive(name));
-                temp.add("value", value);
-                effects.add(temp);
             }
             
-            o.add("effects", effects);
-            itemData.put(Integer.valueOf(mId), o);
+            o.put("effects", effects);
+            itemData.put(mId, o);
         }
         
         for (Integer key : itemData.keySet())
         {
-            JsonObject fromObject = itemData.get(key).getAsJsonObject();
-            JsonArray  from       = fromObject.getAsJsonArray("from");
-            JsonArray  newFrom    = new JsonArray();
-            for (JsonElement element : from)
+            Map<String, Object> fromObject = itemData.get(key);
+            List<String>        from       = (List<String>) fromObject.get("from");
+            List<Integer>       newFrom    = new ArrayList<>();
+            for (String element : from)
             {
-                newFrom.add(itemLookup.get(element.getAsString()));
+                newFrom.add((int) itemLookup.get(element));
             }
-            fromObject.add("from", newFrom);
+            
+            fromObject.put("from", newFrom);
         }
         
-        JsonObject obj = new JsonObject();
-        obj.add("champions", UtilHandler.getGson().toJsonTree(champData));
-        obj.add("traits", UtilHandler.getGson().toJsonTree(traitData));
-        obj.add("items", UtilHandler.getGson().toJsonTree(itemData));
-        String data = UtilHandler.getGson().toJson(UtilHandler.getJsonParser().parse(obj.toString()));
+        Map<String, Object> obj = new LinkedHashMap<>();
+        obj.put("champions", champData);
+        obj.put("traits", traitData);
+        obj.put("items", itemData);
+        String data = UtilHandler.getGson().toJson(obj);
+        
         
         if (exportImages)
         {
             champData.forEach((k, v) -> {
-                String splashPath  = v.get("splash").getAsString();
+                String splashPath  = (String) v.get("splash");
                 Path   splash      = inputFolder.resolve(splashPath);
-                String abilityPath = v.getAsJsonObject("ability").get("icon").getAsString();
+                String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
                 Path   ability     = inputFolder.resolve(abilityPath);
                 
                 try
@@ -495,7 +429,7 @@ public class TestTFTData
             });
             
             traitData.forEach((v) -> {
-                String iconPath = v.get("icon").getAsString();
+                String iconPath = (String) v.get("icon");
                 Path   icon     = inputFolder.resolve(iconPath);
                 
                 try
@@ -509,7 +443,7 @@ public class TestTFTData
             });
             
             itemData.forEach((k, v) -> {
-                String iconPath = v.get("icon").getAsString();
+                String iconPath = (String) v.get("icon");
                 Path   icon     = inputFolder.resolve(iconPath);
                 
                 try
@@ -525,21 +459,23 @@ public class TestTFTData
         
         Files.createDirectories(outputFolder.resolve("TFT"));
         Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        
-        descs.keySet().stream().sorted().forEach(lang -> {
-            
-            Map<String, String> vals = descs.get(lang);
-            try
-            {
-                System.out.println("Generating files for " + lang);
+        descs.keySet()
+             .stream()
+             .sorted()
+             .forEach(lang ->
+                      {
+                          Map<String, String> vals = descs.get(lang);
+                          try
+                          {
+                              System.out.println("Generating files for " + lang);
                 
-                final String[] alteredData = {data};
-                vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
-                Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
+                              final String[] alteredData = {data};
+                              vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
+                              Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                          } catch (IOException e)
+                          {
+                              e.printStackTrace();
+                          }
+                      });
     }
 }
