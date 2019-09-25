@@ -8,6 +8,7 @@ import no.stelar7.cdragon.util.writers.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.*;
 
 public class BINFile
 {
@@ -23,6 +24,16 @@ public class BINFile
     public Optional<BINEntry> get(String hash)
     {
         return entries.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
+    }
+    
+    public List<BINEntry> getByType(String type)
+    {
+        return entries.stream().filter(v -> v.getType().equalsIgnoreCase(type)).collect(Collectors.toList());
+    }
+    
+    public Stream<BINEntry> stream()
+    {
+        return entries.stream();
     }
     
     public BINHeader getHeader()

@@ -11,6 +11,11 @@ public class BINEntry
     private short          valueCount;
     private List<BINValue> values = new ArrayList<>();
     
+    public boolean has(String hash)
+    {
+        return values.stream().anyMatch(v -> v.getHash().equalsIgnoreCase(hash));
+    }
+    
     public Optional<BINValue> get(String hash)
     {
         return values.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
@@ -88,4 +93,5 @@ public class BINEntry
                ", values=" + values +
                '}';
     }
+    
 }
