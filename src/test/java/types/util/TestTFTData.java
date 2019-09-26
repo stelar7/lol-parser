@@ -116,7 +116,7 @@ public class TestTFTData
         // only set this to true if you have exported the images aswell!
         boolean exportImages = false;
         
-        Path inputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        Path inputFolder = Paths.get("D:\\pbe");
         //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         
