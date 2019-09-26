@@ -114,9 +114,9 @@ public class TestTFTData
     public void buildTFTDataFiles() throws IOException
     {
         // only set this to true if you have exported the images aswell!
-        boolean exportImages = true;
+        boolean exportImages = false;
         
-        Path inputFolder = Paths.get("D:\\pbe");
+        Path inputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         
@@ -267,9 +267,15 @@ public class TestTFTData
             List<Object> champTraits = ((BINContainer) champItem.getIfPresent("mLinkedTraits").getValue()).getData();
             for (Object traitObj : champTraits)
             {
-                BINStruct trait = (BINStruct) traitObj;
-                String    key   = (String) trait.getIfPresent("053A1F33").getValue();
-                traitArray.add(traitLookup.get(key));
+                if (traitObj instanceof BINStruct)
+                {
+                    BINStruct trait = (BINStruct) traitObj;
+                    String    key   = (String) trait.getIfPresent("053A1F33").getValue();
+                    traitArray.add(traitLookup.get(key));
+                } else
+                {
+                    traitArray.add(traitLookup.get((String) traitObj));
+                }
             }
             
             BINStruct manaContainer = (BINStruct) champItem.getIfPresent("PrimaryAbilityResource").getValue();
