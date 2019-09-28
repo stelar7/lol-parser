@@ -29,7 +29,6 @@ public class TestCDTBHashGuessing
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();
         guesser.guessFromFontFiles();
-        
         guesser.saveToBackup();
     }
     
@@ -42,7 +41,6 @@ public class TestCDTBHashGuessing
         guesser.guessShaderFiles(dataPath);
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessBinByLinkedFiles(dataPath);
-        
         guesser.saveToBackup();
     }
     
@@ -53,12 +51,13 @@ public class TestCDTBHashGuessing
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
         guesser.guessAssetsBySearch(dataPath);
+        guesser.saveToBackup();
+        
         guesser.substituteRegionLang();
         guesser.substitutePlugin();
         guesser.substituteBasenames();
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
-        
         guesser.saveToBackup();
     }
     
