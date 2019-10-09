@@ -11,6 +11,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
 
     <dependencies>
@@ -243,7 +244,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        no.stelar7.cdragon.viewer.SwingViewer
+                                        no.stelar7.cdragon.viewer.RMANTool
                                     </mainClass>
                                 </manifest>
                             </archive>

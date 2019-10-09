@@ -171,7 +171,7 @@ public class WADFile
         return fileType;
     }
     
-    public void printUnknownFiles(String wadfilename)
+    public void printUnknownFiles(String wadfilename, Path outputFile)
     {
         try
         {
@@ -190,7 +190,7 @@ public class WADFile
                 outputs.add(output);
             });
             
-            Files.write(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt"), outputs, StandardCharsets.UTF_8, flags);
+            Files.write(outputFile, outputs, StandardCharsets.UTF_8, flags);
         } catch (IOException e)
         {
             e.printStackTrace();

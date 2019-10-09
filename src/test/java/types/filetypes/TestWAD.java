@@ -541,8 +541,9 @@ public class TestWAD
     {
         System.out.println("Generating unknown files list");
         
-        WADParser parser = new WADParser();
-        UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt").toFile().delete();
+        WADParser parser     = new WADParser();
+        Path      outputPath = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
+        outputPath.toFile().delete();
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
             List<String> ends = Arrays.asList(".wad", ".wad.client");
@@ -557,7 +558,7 @@ public class TestWAD
                 {
                     WADFile parsed   = parser.parseReadOnly(file);
                     String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
-                    parsed.printUnknownFiles(filename);
+                    parsed.printUnknownFiles(filename, outputPath);
                     return FileVisitResult.CONTINUE;
                 }
                 
@@ -565,7 +566,7 @@ public class TestWAD
                 {
                     WADFile parsed   = parser.parseCompressed(file);
                     String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
-                    parsed.printUnknownFiles(filename);
+                    parsed.printUnknownFiles(filename, outputPath);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -584,8 +585,8 @@ public class TestWAD
         content.sort(
                 Comparator.comparing((String a) -> a.substring(32).toLowerCase())
                           .thenComparing(Comparator.comparing((String a) -> a.substring(20, 30).toLowerCase()).reversed())
-                          .thenComparing(Comparator.comparing((String a) -> a.substring(0, 18).toLowerCase()))
+                          .thenComparing((String a) -> a.substring(0, 18).toLowerCase())
                     );
-        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt"), content, StandardCharsets.UTF_8);
+        Files.write(outputPath, content, StandardCharsets.UTF_8);
     }
 }

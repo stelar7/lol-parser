@@ -14,10 +14,10 @@ import java.util.Map.Entry;
 public class HashFile
 {
     
-    private Path   file;
-    private Path   backup;
-    public  String printFormat;
-    public  String writeFormat;
+    protected Path   file;
+    protected Path   backup;
+    public    String printFormat;
+    public    String writeFormat;
     
     public HashFile(Path file, Path backup)
     {
@@ -79,7 +79,7 @@ public class HashFile
         }
     }
     
-    public void saveAsJson(Map<String, String> known)
+    public void saveAsJson(Map<String, String> known, Path outputFile)
     {
         try
         {
@@ -96,7 +96,7 @@ public class HashFile
             }
             jw.endObject();
             
-            Files.write(this.file, jw.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+            Files.write(outputFile, jw.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         } catch (IOException e)
         {
             e.printStackTrace();

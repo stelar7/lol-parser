@@ -33,6 +33,8 @@ public abstract class HashGuesser
     protected Set<String> hashes;
     protected HashFile    hashFile;
     
+    private boolean foundNew = false;
+    
     protected Map<String, String> known;
     protected Map<String, String> newHashes;
     protected Set<String>         unknown;
@@ -91,6 +93,11 @@ public abstract class HashGuesser
         return Collections.emptySet();
     }
     
+    public boolean didFindNewHash()
+    {
+        return foundNew;
+    }
+    
     public void save()
     {
         System.out.println("Saving current hashes as CDTB format");
@@ -106,13 +113,19 @@ public abstract class HashGuesser
     public void saveNewAsJson()
     {
         System.out.println("Saving new hashes as JSON");
-        this.hashFile.saveAsJson(this.newHashes);
+        this.hashFile.saveAsJson(this.newHashes, hashFile.file);
     }
     
     public void saveAsJson()
     {
         System.out.println("Saving current hashes as JSON");
-        this.hashFile.saveAsJson(this.known);
+        this.hashFile.saveAsJson(this.known, hashFile.file);
+    }
+    
+    public void saveAsJson(Path output)
+    {
+        System.out.println("Saving current hashes as JSON");
+        this.hashFile.saveAsJson(this.known, output);
     }
     
     public void saveToBackup()
@@ -127,6 +140,7 @@ public abstract class HashGuesser
         this.known.put(hash, savePath);
         this.newHashes.put(hash, savePath);
         this.unknown.remove(hash);
+        this.foundNew = true;
         
         if (this.unknown.isEmpty())
         {

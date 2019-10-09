@@ -193,6 +193,12 @@ public final class FileTypeHandler
             return "txt";
         }
         
+        // some files start with whitespace, so substring it and try again
+        if (magic.startsWith(new ByteArray(new byte[]{13, 10})))
+        {
+            return findFileType(magic.copyOfRange(2, magic.size()));
+        }
+        
         return "unknown";
     }
     

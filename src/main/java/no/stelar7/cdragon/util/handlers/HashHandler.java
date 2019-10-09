@@ -346,15 +346,37 @@ public class HashHandler
         
         try
         {
-            String sb = UtilHandler.readInternalAsString("hashes/bin/binhash.json");
-            binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
-            System.out.println("Loaded known bin hashes");
+            InputStream is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/bin");
+            Scanner     s         = new Scanner(is).useDelimiter("\\A");
+            String[]    fileArray = s.next().split("\n");
+            for (String file : fileArray)
+            {
+                System.out.println("Reading: " + file);
+                String sb = UtilHandler.readInternalAsString("hashes/bin/" + file);
+                binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+                if (binHashNames == null)
+                {
+                    throw new IOException("Failed to load hashes");
+                }
+            }
+            
         } catch (Exception e)
         {
             binHashNames = new HashMap<>();
             System.err.println("BIN Hash file not found: " + e.getMessage());
+            System.err.println("Loading from GH...");
+            
+            String hashBINURL = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/bin/binhash.json";
+            String hashesBIN  = String.join("", WebHandler.readWeb(hashBINURL));
+            
+            binHashNames = UtilHandler.getGson().fromJson(hashesBIN, new TypeToken<Map<String, String>>() {}.getType());
+            if (binHashNames == null)
+            {
+                binHashNames = new HashMap<>();
+            }
         }
         
+        System.out.println("Loaded known bin hashes");
         return getBinHashes();
     }
     
@@ -410,21 +432,47 @@ public class HashHandler
         {
             System.out.println("Reading hash files!");
             wadHashNames = new HashMap<>();
-            InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
-            Scanner      s         = new Scanner(is).useDelimiter("\\A");
-            List<String> files     = new ArrayList<>();
-            String[]     fileArray = s.next().split("\n");
-            for (String file : fileArray)
+            try
             {
-                System.out.println("Reading: " + file);
-                String              plugin = file.substring(0, file.lastIndexOf('.'));
-                String              sb     = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
-                Map<String, String> val    = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+                InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
+                Scanner      s         = new Scanner(is).useDelimiter("\\A");
+                List<String> files     = new ArrayList<>();
+                String[]     fileArray = s.next().split("\n");
+                for (String file : fileArray)
+                {
+                    System.out.println("Reading: " + file);
+                    String              plugin = file.substring(0, file.lastIndexOf('.'));
+                    String              sb     = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
+                    Map<String, String> val    = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+                    if (val == null)
+                    {
+                        val = new HashMap<>();
+                    }
+                    
+                    wadHashNames.putAll(val);
+                }
+            } catch (NoSuchElementException e)
+            {
+                System.err.println("WAD Hash file not found: " + e.getMessage());
+                System.err.println("Loading from GH...");
+                String hashGameURL = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/wad/game.json";
+                String hashLCUURL  = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/wad/lcu.json";
+                
+                String hashesGame = String.join("", WebHandler.readWeb(hashGameURL));
+                String hashesLCU  = String.join("", WebHandler.readWeb(hashLCUURL));
+                
+                Map<String, String> val = UtilHandler.getGson().fromJson(hashesGame, new TypeToken<Map<String, String>>() {}.getType());
                 if (val == null)
                 {
                     val = new HashMap<>();
                 }
+                wadHashNames.putAll(val);
                 
+                val = UtilHandler.getGson().fromJson(hashesLCU, new TypeToken<Map<String, String>>() {}.getType());
+                if (val == null)
+                {
+                    val = new HashMap<>();
+                }
                 wadHashNames.putAll(val);
             }
         }
