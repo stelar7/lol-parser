@@ -498,4 +498,24 @@ public abstract class HashGuesser
         
         return words;
     }
+    
+    /**
+     * returns true if this hash is already known, or is a new valid hash
+     */
+    public boolean checkKnown(String test)
+    {
+        String lowerCased = test.toLowerCase();
+        if (lowerCased.isBlank())
+        {
+            return true;
+        }
+        
+        String hash = generateHash(lowerCased);
+        if (this.unknown.contains(hash))
+        {
+            return true;
+        }
+        
+        return this.known.containsKey(hash);
+    }
 }

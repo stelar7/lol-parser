@@ -20,6 +20,13 @@ public class LCUHashGuesser extends HashGuesser
         System.out.println("Started guessing LCU hashes");
     }
     
+    @Override
+    public String generateHash(String val)
+    {
+        Long hashNum = HashHandler.computeXXHash64AsLong(val);
+        return HashHandler.toHex(hashNum, 16);
+    }
+    
     public Set<String> buildWordlist()
     {
         Pattern     reFilterPath = Pattern.compile("(?:^plugins/rcp-be-lol-game-data/global/default/data/characters/|/[0-9a-f]{32}\\.)");
@@ -431,7 +438,7 @@ public class LCUHashGuesser extends HashGuesser
         List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.WEB_FILE_PREDICATE);
         
         // need a better regex for this :thinking:
-        Pattern p = Pattern.compile("(?:/)(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))(?:\\\")");
+        Pattern p = Pattern.compile("(?:/)(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))(?:\")");
         
         readMe.stream()
               .map(UtilHandler::readAsString)
@@ -496,10 +503,49 @@ public class LCUHashGuesser extends HashGuesser
               .forEach(this::check);
     }
     
-    @Override
-    public String generateHash(String val)
+    public void guessSanitizerHashes()
     {
-        Long hashNum = HashHandler.computeXXHash64AsLong(val);
-        return HashHandler.toHex(hashNum, 16);
+        System.out.println("Guessing new sanitizer hashes");
+        
+        String       base        = "plugins/rcp-be-sanitizer/global/default/";
+        List<String> types       = Arrays.asList("filter", "unfilter", "whitelist", "allowedchars", "breakingchars", "projectedchars", "projectedchars1337", "punctuationchars", "variantaliases");
+        List<String> prefixes    = Arrays.asList("", "0", "1", "2", "3", "4");
+        List<String> subtypes    = Arrays.asList("", "country", "language", "region");
+        Set<String>  languageSet = this.LANGUAGES.stream().map(l -> l.contains("_") ? l.split("_")[0] : "").collect(Collectors.toSet());
+        languageSet.addAll(this.REGIONS);
+        languageSet.add("");
+        
+        for (String prefix : prefixes)
+        {
+            for (String type : types)
+            {
+                for (String subtype : subtypes)
+                {
+                    for (String lang : languageSet)
+                    {
+                        StringBuilder test = new StringBuilder(base);
+                        test.append(prefix);
+                        if (!test.toString().endsWith("/"))
+                        {
+                            test.append(".");
+                        }
+                        
+                        test.append(type);
+                        test.append(".");
+                        test.append(subtype);
+                        
+                        if (!test.toString().endsWith("."))
+                        {
+                            test.append(".");
+                        }
+                        
+                        test.append(lang);
+                        test.append(".csv");
+                        
+                        check(test.toString());
+                    }
+                }
+            }
+        }
     }
 }
