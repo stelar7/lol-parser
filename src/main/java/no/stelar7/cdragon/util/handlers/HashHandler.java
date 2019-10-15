@@ -95,11 +95,18 @@ public class HashHandler
     }
     
     private static StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
+    private static StreamingXXHash32 hash32 = xxHashFactory.newStreamingHash32(0);
     
     public static long computeXXHash64AsLong(String text)
     {
         byte[] data = text.getBytes(StandardCharsets.UTF_8);
         return computeXXHash64AsLong(data);
+    }
+    
+    public static long computeXXHash32AsLong(String text)
+    {
+        byte[] data = text.getBytes(StandardCharsets.UTF_8);
+        return computeXXHash32AsLong(data);
     }
     
     public static synchronized long computeXXHash64AsLong(byte[] data)
@@ -109,9 +116,21 @@ public class HashHandler
         return hash64.getValue();
     }
     
+    public static synchronized long computeXXHash32AsLong(byte[] data)
+    {
+        hash32.reset();
+        hash32.update(data, 0, data.length);
+        return hash32.getValue();
+    }
+    
     public static String computeXXHash64(String text)
     {
         return toHex(computeXXHash64AsLong(text), 16);
+    }
+    
+    public static String computeXXHash32(String text)
+    {
+        return toHex(computeXXHash32AsLong(text), 8);
     }
     
     // FNV-1a
@@ -125,6 +144,22 @@ public class HashHandler
         {
             hash = hash ^ toHash.charAt(i);
             hash = hash * mask;
+        }
+        
+        return Integer.toUnsignedLong(hash);
+    }
+    
+    // SDBM
+    public static long computeSDBMHash(String input)
+    {
+        //String toHash = input.toLowerCase(Locale.ENGLISH);
+        String toHash = input;
+        
+        int hash = 0;
+        for (int i = 0; i < toHash.length(); i++)
+        {
+            int c = toHash.charAt(i);
+            hash = c + (hash << 6) + (hash << 16) - hash;
         }
         
         return Integer.toUnsignedLong(hash);
@@ -220,6 +255,27 @@ public class HashHandler
         }
         
         return Integer.toUnsignedLong(crc);
+    }
+    
+    public static long computeCCITT32(byte[] buffer)
+    {
+        int crc = 0;
+        
+        ByteBuffer data = ByteBuffer.wrap(buffer);
+        
+        for (int i = 0; i < buffer.length; i++)
+        {
+            int value          = data.get(i) & 0xFF;
+            int crcLookupIndex = ((crc >> 24) & 0xFF) ^ value;
+            crc = ((crc << 8) & 0xFFFFFF00) ^ CRC_LOOKUP[crcLookupIndex];
+        }
+        
+        return Integer.toUnsignedLong(crc);
+    }
+    
+    public static long computeCCITT32(String text)
+    {
+        return computeCCITT32(text.getBytes(StandardCharsets.UTF_8));
     }
     
     public static long computeELFHash(String toHash)

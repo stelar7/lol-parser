@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,48 @@ public class TestFindHashStuff
         List<String> lines = Arrays.stream(jsonStrings.split("\n")).collect(Collectors.toList());
         Files.write(UtilHandler.CDRAGON_FOLDER.resolve("bins.txt"), jsonStrings.getBytes(StandardCharsets.UTF_8));
         System.out.println();
+    }
+    
+    @Test
+    public void testSDBM()
+    {
+        
+        // one of these should map to 1036514714 or 3DC7F59A
+        List<String> tests = Arrays.asList("Dialogue/Lissandra/freljordlore", "LoL_Audio_en_US/Dialogue/Lissandra/freljordlore", "LoL_Audio/Dialogue/Lissandra/freljordlore");
+        
+        for (String test : tests)
+        {
+            String input  = test;
+            String input2 = test.toLowerCase();
+            
+            testHash(input, HashHandler::computeXXHash64AsLong);
+            testHash(input2, HashHandler::computeXXHash64AsLong);
+            
+            testHash(input, HashHandler::computeXXHash32AsLong);
+            testHash(input2, HashHandler::computeXXHash32AsLong);
+            
+            testHash(input, HashHandler::computeSDBMHash);
+            testHash(input2, HashHandler::computeSDBMHash);
+            
+            testHash(input, HashHandler::computeBINHash);
+            testHash(input2, HashHandler::computeBINHash);
+            
+            testHash(input, HashHandler::computeELFHash);
+            testHash(input2, HashHandler::computeELFHash);
+            
+            testHash(input, HashHandler::computeCCITT32);
+            testHash(input2, HashHandler::computeCCITT32);
+            
+        }
+    }
+    
+    private void testHash(String toHash, Function<String, Long> hashFunc)
+    {
+        long   out1 = hashFunc.apply(toHash);
+        String out2 = HashHandler.toHex(hashFunc.apply(toHash), 8);
+        
+        System.out.println(out1);
+        System.out.println(out2);
     }
     
     @Test
