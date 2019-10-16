@@ -15,10 +15,9 @@ public class BBQHeader
     private int    flags;
     private int    headerSize;
     
-    // 0 = none, 1 = LZMA, 2/3 = LZ4/LZ4HC
-    private int     compressionMode;
-    private boolean hasEntryInfo;
-    private boolean isMetadataAtEnd;
+    private BBQCompressionType compressionMode;
+    private boolean            hasEntryInfo;
+    private boolean            isMetadataAtEnd;
     
     public String getSignature()
     {
@@ -100,12 +99,12 @@ public class BBQHeader
         this.flags = flags;
     }
     
-    public int getCompressionMode()
+    public BBQCompressionType getCompressionMode()
     {
         return compressionMode;
     }
     
-    public void setCompressionMode(int compressionMode)
+    public void setCompressionMode(BBQCompressionType compressionMode)
     {
         this.compressionMode = compressionMode;
     }

@@ -39,8 +39,6 @@ public class BBQParser implements Parseable<BBQFile>
     
     private List<BBQBundleEntry> parseEntryList(RandomAccessReader raf, BBQHeader header)
     {
-        List<BBQBundleEntry> entries = new ArrayList<>();
-        
         int     headerSize = raf.pos();
         boolean metaAtEnd  = header.isMetadataAtEnd();
         
@@ -52,18 +50,19 @@ public class BBQParser implements Parseable<BBQFile>
         byte[] data = null;
         switch (header.getCompressionMode())
         {
-            case 0:
+            case NONE:
             {
                 data = raf.readBytes(raf.remaining());
                 break;
             }
-            case 1:
+            case LZMA:
             {
                 data = CompressionHandler.uncompressLZMA(raf.readBytes(raf.remaining()));
                 break;
             }
-            case 2:
-            case 3:
+            case LZ4:
+            case LZ4HC:
+            case LZHAM:
             {
                 data = CompressionHandler.uncompressLZ4(raf.readBytes(header.getMetadataCompressedSize()), header.getMetadataUncompressedSize());
                 break;
@@ -71,28 +70,27 @@ public class BBQParser implements Parseable<BBQFile>
         }
         
         RandomAccessReader metaReader = new RandomAccessReader(data, ByteOrder.BIG_ENDIAN);
+        byte[]             guid       = metaReader.readBytes(16);
         
-        // 16 bytes unknown data
-        metaReader.readBytes(16);
-        
-        // block info, we dont care about this yet
-        int blocks = metaReader.readInt();
+        int                blocks    = metaReader.readInt();
+        List<BBQBlockInfo> blockList = new ArrayList<>();
         for (int i = 0; i < blocks; i++)
         {
-            metaReader.readInt();
-            metaReader.readInt();
-            metaReader.readShort();
+            BBQBlockInfo block = new BBQBlockInfo();
+            block.setUncompressedSize(metaReader.readInt());
+            block.setCompressedSize(metaReader.readInt());
+            block.setFlags(metaReader.readShort());
         }
         
-        
-        int files = metaReader.readInt();
-        for (int i = 0; i < files; i++)
+        int                  nodes   = metaReader.readInt();
+        List<BBQBundleEntry> entries = new ArrayList<>();
+        for (int i = 0; i < nodes; i++)
         {
             BBQBundleEntry entry = parseMetaEntry(metaReader, raf);
             entries.add(entry);
         }
-        
         entries.sort(Comparator.comparing(BBQBundleEntry::getOffset));
+        
         return entries;
     }
     
@@ -124,7 +122,7 @@ public class BBQParser implements Parseable<BBQFile>
         header.setMetadataUncompressedSize(raf.readInt());
         header.setFlags(raf.readInt());
         
-        header.setCompressionMode(header.getFlags() & 0x3f);
+        header.setCompressionMode(BBQCompressionType.from(header.getFlags() & 0x3f));
         header.setHasEntryInfo((header.getFlags() & 0x40) == 0x40);
         header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
         
