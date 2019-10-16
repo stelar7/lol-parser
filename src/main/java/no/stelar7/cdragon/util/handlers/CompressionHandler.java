@@ -2,6 +2,7 @@ package no.stelar7.cdragon.util.handlers;
 
 import com.github.luben.zstd.Zstd;
 import net.jpountz.lz4.*;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 
 import java.io.*;
 import java.nio.file.*;
@@ -21,6 +22,20 @@ public final class CompressionHandler
         LZ4FastDecompressor decompressor = factory.fastDecompressor();
         
         return decompressor.decompress(input, outputSize);
+    }
+    
+    public static byte[] uncompressLZMA(byte[] input)
+    {
+        try (LZMACompressorInputStream lzma = new LZMACompressorInputStream(new ByteArrayInputStream(input));
+             ByteArrayOutputStream bos = new ByteArrayOutputStream())
+        {
+            lzma.transferTo(bos);
+            return bos.toByteArray();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public static void uncompressDEFLATE(Path inputPath, Path uncompressPath)

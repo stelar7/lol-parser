@@ -28,56 +28,81 @@ public class BBQParser implements Parseable<BBQFile>
     {
         BBQFile file = new BBQFile();
         
-        BBQHeader   header = parseHeader(raf);
-        BBQMetadata meta   = parseMetadata(raf, header);
+        BBQHeader            header = parseHeader(raf);
+        List<BBQBundleEntry> meta   = parseEntryList(raf, header);
+        
+        file.setHeader(header);
+        file.setEntries(meta);
         
         return file;
     }
     
-    private BBQMetadata parseMetadata(RandomAccessReader raf, BBQHeader header)
+    private List<BBQBundleEntry> parseEntryList(RandomAccessReader raf, BBQHeader header)
     {
-        BBQMetadata meta = new BBQMetadata();
+        List<BBQBundleEntry> entries = new ArrayList<>();
         
         int     headerSize = raf.pos();
-        boolean metaAtEnd  = header.isMetadataAtEnd;
+        boolean metaAtEnd  = header.isMetadataAtEnd();
         
         if (metaAtEnd)
         {
-            raf.seek((int) (header.totalFileSize - header.metadataCompressedSize));
+            raf.seek((int) (header.getTotalFileSize() - header.getMetadataCompressedSize()));
         }
         
         byte[] data = null;
-        switch (header.compressionMode)
+        switch (header.getCompressionMode())
         {
+            case 0:
+            {
+                data = raf.readBytes(raf.remaining());
+                break;
+            }
+            case 1:
+            {
+                data = CompressionHandler.uncompressLZMA(raf.readBytes(raf.remaining()));
+                break;
+            }
             case 2:
             case 3:
-                data = CompressionHandler.uncompressLZ4(raf.readBytes(header.metadataCompressedSize), header.metadataUncompressedSize);
+            {
+                data = CompressionHandler.uncompressLZ4(raf.readBytes(header.getMetadataCompressedSize()), header.getMetadataUncompressedSize());
+                break;
+            }
         }
         
         RandomAccessReader metaReader = new RandomAccessReader(data, ByteOrder.BIG_ENDIAN);
-        metaReader.seek(0x10);
-        int count = metaReader.readInt();
         
-        Map<String, BBQBundleEntry> entries = new HashMap<>();
-        for (int i = 0; i < count; i++)
+        // 16 bytes unknown data
+        metaReader.readBytes(16);
+        
+        // block info, we dont care about this yet
+        int blocks = metaReader.readInt();
+        for (int i = 0; i < blocks; i++)
         {
-            // TODO fix this..?
-            BBQBundleEntry entry = parseMetaEntry(metaReader);
-            entries.put(entry.name, entry);
+            metaReader.readInt();
+            metaReader.readInt();
+            metaReader.readShort();
         }
         
-        System.out.println();
         
-        return meta;
+        int files = metaReader.readInt();
+        for (int i = 0; i < files; i++)
+        {
+            BBQBundleEntry entry = parseMetaEntry(metaReader, raf);
+            entries.add(entry);
+        }
+        
+        entries.sort(Comparator.comparing(BBQBundleEntry::getOffset));
+        return entries;
     }
     
-    private BBQBundleEntry parseMetaEntry(RandomAccessReader raf)
+    private BBQBundleEntry parseMetaEntry(RandomAccessReader meta, RandomAccessReader raf)
     {
         BBQBundleEntry entry = new BBQBundleEntry();
-        entry.offset = raf.readLong();
-        entry.size = raf.readLong();
-        entry.index = raf.readInt();
-        entry.nameOrigin = raf.readString();
+        entry.setOffset(meta.readLong());
+        entry.setSize(meta.readLong());
+        entry.setFlags(meta.readInt());
+        entry.setName(meta.readString());
         return entry;
     }
     
@@ -85,23 +110,25 @@ public class BBQParser implements Parseable<BBQFile>
     {
         BBQHeader header = new BBQHeader();
         
-        header.signature = raf.readString();
-        if (!header.signature.equalsIgnoreCase("UnityFS"))
+        header.setSignature(raf.readString());
+        if (!header.getSignature().equalsIgnoreCase("UnityFS"))
         {
             throw new RuntimeException("Invalid file signature");
         }
         
-        header.version = raf.readInt();
-        header.playerVersion = raf.readString();
-        header.fsVersion = raf.readString();
-        header.totalFileSize = raf.readLong();
-        header.metadataCompressedSize = raf.readInt();
-        header.metadataUncompressedSize = raf.readInt();
-        header.flags = raf.readInt();
+        header.setVersion(raf.readInt());
+        header.setPlayerVersion(raf.readString());
+        header.setFsVersion(raf.readString());
+        header.setTotalFileSize(raf.readLong());
+        header.setMetadataCompressedSize(raf.readInt());
+        header.setMetadataUncompressedSize(raf.readInt());
+        header.setFlags(raf.readInt());
         
-        header.compressionMode = header.flags & 0x3f;
-        header.hasEntryInfo = (header.flags & 0x40) == 0x40;
-        header.isMetadataAtEnd = (header.flags & 0x80) == 0x80;
+        header.setCompressionMode(header.getFlags() & 0x3f);
+        header.setHasEntryInfo((header.getFlags() & 0x40) == 0x40);
+        header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
+        
+        header.setHeaderSize(raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
         
         return header;
     }

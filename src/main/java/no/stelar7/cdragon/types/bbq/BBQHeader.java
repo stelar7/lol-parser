@@ -5,19 +5,20 @@ import java.util.Objects;
 public class BBQHeader
 {
     
-    String signature;
-    int    version;
-    String playerVersion;
-    String fsVersion;
-    long   totalFileSize;
-    int    metadataCompressedSize;
-    int    metadataUncompressedSize;
-    int    flags;
+    private String signature;
+    private int    version;
+    private String playerVersion;
+    private String fsVersion;
+    private long   totalFileSize;
+    private int    metadataCompressedSize;
+    private int    metadataUncompressedSize;
+    private int    flags;
+    private int    headerSize;
     
     // 0 = none, 1 = LZMA, 2/3 = LZ4/LZ4HC
-    int     compressionMode;
-    boolean hasEntryInfo;
-    boolean isMetadataAtEnd;
+    private int     compressionMode;
+    private boolean hasEntryInfo;
+    private boolean isMetadataAtEnd;
     
     public String getSignature()
     {
@@ -127,6 +128,16 @@ public class BBQHeader
     public void setMetadataAtEnd(boolean metadataAtEnd)
     {
         isMetadataAtEnd = metadataAtEnd;
+    }
+    
+    public int getHeaderSize()
+    {
+        return headerSize;
+    }
+    
+    public void setHeaderSize(int headerSize)
+    {
+        this.headerSize = headerSize;
     }
     
     @Override
