@@ -17,9 +17,11 @@ public class TestBBQ
         Path file = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\bbq\\jinxemote.bbq");
         Files.createDirectories(file.resolveSibling("generated"));
         BBQFile data = parser.parse(file);
+        
         for (BBQBundleEntry entry : data.getEntries())
         {
-            data.export(file, entry, file.resolveSibling("generated\\" + entry.getName()));
+            //data.export(file, entry, file.resolveSibling("generated\\" + entry.getName()));
+            data.getAsAsset(file, entry);
         }
     }
 }

@@ -63,29 +63,42 @@ public class BBQFile
                '}';
     }
     
+    private byte[] getAsBytes(Path bbqFile, BBQBundleEntry entry)
+    {
+        byte[]             data = null;
+        RandomAccessReader raf  = new RandomAccessReader(bbqFile);
+        raf.seek(this.header.getHeaderSize());
+        
+        if (this.header.getSignature().equalsIgnoreCase("UnityWeb"))
+        {
+            try (LZMACompressorInputStream is = new LZMACompressorInputStream(new ByteArrayInputStream(raf.readRemaining()));
+                 ByteArrayOutputStream bos = new ByteArrayOutputStream())
+            {
+                data = is.readNBytes((int) entry.getSize());
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        } else
+        {
+            raf.seek((int) entry.getOffset() + header.getHeaderSize() - 4);
+            data = raf.readBytes((int) entry.getSize());
+        }
+        
+        return data;
+    }
+    
+    public BBQAsset getAsAsset(Path bbqFile, BBQBundleEntry entry)
+    {
+        return new BBQAsset(entry, getAsBytes(bbqFile, entry));
+    }
+    
+    
     public void export(Path bbqFile, BBQBundleEntry entry, Path output)
     {
         try
         {
-            byte[]             data = null;
-            RandomAccessReader raf  = new RandomAccessReader(bbqFile);
-            raf.seek(this.header.getHeaderSize());
-            
-            // todo this fails with invalid data...
-            if (this.header.getCompressionMode() > 0)
-            {
-                try (LZMACompressorInputStream is = new LZMACompressorInputStream(new ByteArrayInputStream(raf.readRemaining()));
-                     ByteArrayOutputStream bos = new ByteArrayOutputStream())
-                {
-                    data = is.readNBytes((int) entry.getSize());
-                }
-            } else
-            {
-                raf.seek((int) entry.getOffset() + header.getHeaderSize());
-                data = raf.readBytes((int) entry.getSize());
-            }
-            
-            Files.write(output, data);
+            Files.write(output, getAsBytes(bbqFile, entry));
         } catch (IOException e)
         {
             e.printStackTrace();
