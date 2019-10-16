@@ -106,6 +106,11 @@ public class RandomAccessReader implements AutoCloseable
         return rawBytes;
     }
     
+    public void setEndian(ByteOrder order)
+    {
+        this.buffer.order(order);
+    }
+    
     @Override
     public void close()
     {
@@ -213,7 +218,7 @@ public class RandomAccessReader implements AutoCloseable
             temp[index++] = b;
         }
         
-        return new String(temp, StandardCharsets.UTF_8);
+        return new String(temp, 0, index, StandardCharsets.UTF_8);
     }
     
     /**

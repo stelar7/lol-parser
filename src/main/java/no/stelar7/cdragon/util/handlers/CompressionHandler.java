@@ -1,6 +1,7 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.github.luben.zstd.Zstd;
+import net.jpountz.lz4.*;
 
 import java.io.*;
 import java.nio.file.*;
@@ -14,6 +15,13 @@ public final class CompressionHandler
         // Hide public constructor
     }
     
+    public static byte[] uncompressLZ4(byte[] input, int outputSize)
+    {
+        LZ4Factory          factory      = LZ4Factory.fastestInstance();
+        LZ4FastDecompressor decompressor = factory.fastDecompressor();
+        
+        return decompressor.decompress(input, outputSize);
+    }
     
     public static void uncompressDEFLATE(Path inputPath, Path uncompressPath)
     {

@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Pair;
 import org.junit.jupiter.api.Test;
 import types.util.TestCDTBHashGuessing;
@@ -169,5 +169,13 @@ public class TestRMAN
                                               .collect(Collectors.toSet());
         
         manifest.downloadBundles(bundles, bundleFolder);
+    }
+    
+    @Test
+    public void runTestStufF()
+    {
+        //RMANFile file = new RMANParser().parse(WebHandler.readBytes("https://bacon.secure.dyn.riotcdn.net/channels/public/releases/2A3F9712EE141A58.manifest"));
+        RMANFile file = new RMANParser().parse(Paths.get("C:\\Riot Games\\LoR\\live\\PatcherData.manifest"));
+        System.out.println();
     }
 }
