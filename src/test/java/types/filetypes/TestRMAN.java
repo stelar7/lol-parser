@@ -172,10 +172,10 @@ public class TestRMAN
     }
     
     @Test
-    public void runTestStufF() throws IOException
+    public void runTestStufF()
     {
-        RMANFile file = new RMANParser().parse(WebHandler.readBytes("https://ks-foundation.dyn.riotcdn.net/channels/public/releases/68470C08B9F7309F.manifest "));
-        RMANFile file2 = new RMANParser().parse(WebHandler.readBytes("https://ks-foundation.dyn.riotcdn.net/channels/public/releases/AB41810D95E1599B.manifest"));
+        //RMANFile file  = new RMANParser().parse(WebHandler.readBytes("https://ks-foundation.dyn.riotcdn.net/channels/public/releases/68470C08B9F7309F.manifest "));
+        //RMANFile file2 = new RMANParser().parse(WebHandler.readBytes("https://ks-foundation.dyn.riotcdn.net/channels/public/releases/AB41810D95E1599B.manifest"));
         
         //RMANFile file = new RMANParser().parse(WebHandler.readBytes("https://bacon.secure.dyn.riotcdn.net/channels/public/releases/2A3F9712EE141A58.manifest"));
         //RMANFile file = new RMANParser().parse(Paths.get("C:\\Riot Games\\LoR\\live\\PatcherData.manifest"));
