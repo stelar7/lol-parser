@@ -170,6 +170,14 @@ public abstract class HashGuesser
             check(test + ".preload");
         }
         
+        String startPart = path.substring(0, path.lastIndexOf('/') + 1);
+        String lastPart  = path.substring(path.lastIndexOf('/') + 1);
+        if (!lastPart.startsWith("2x") && !lastPart.startsWith("4x"))
+        {
+            check(startPart + "2x_" + lastPart);
+            check(startPart + "4x_" + lastPart);
+        }
+        
         String hash = generateHash(lowerCased);
         if (this.unknown.contains(hash))
         {

@@ -2,6 +2,7 @@ package no.stelar7.cdragon.util.hashguessing;
 
 import com.google.gson.*;
 import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.filemanifest.*;
 import no.stelar7.cdragon.util.handlers.*;
 
 import java.io.IOException;
@@ -181,5 +182,15 @@ public class GameHashGuesser extends HashGuesser
         {
             e.printStackTrace();
         }
+    }
+    
+    public void guessScripts(Path dataPath)
+    {
+        System.out.println("Guessing scripts by manifest");
+        
+        Path                  luaManifest = dataPath.resolve("data/all_lua_files.manifest");
+        ManifestContentParser parser      = new ManifestContentParser();
+        ManifestContentFileV1 v1          = parser.parseV1(luaManifest);
+        v1.getItems().forEach(this::check);
     }
 }

@@ -38,6 +38,7 @@ public class TestCDTBHashGuessing
     {
         GameHashGuesser guesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
+        guesser.guessScripts(dataPath);
         guesser.guessShaderFiles(dataPath);
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessBinByLinkedFiles(dataPath);

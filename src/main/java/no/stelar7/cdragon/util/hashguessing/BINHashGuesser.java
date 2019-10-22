@@ -196,14 +196,6 @@ public class BINHashGuesser extends HashGuesser
         }));
     }
     
-    
-    @Override
-    public String generateHash(String val)
-    {
-        long hashNum = HashHandler.computeBINHash(val);
-        return HashHandler.toHex(hashNum, 8);
-    }
-    
     public void pullCDTB()
     {
         System.out.println("Feching hashlists from CDTB");
@@ -219,4 +211,40 @@ public class BINHashGuesser extends HashGuesser
         data.addAll(WebHandler.readWeb(hashD));
         data.stream().map(line -> line.substring(line.indexOf(' ') + 1)).forEach(this::check);
     }
+    
+    @Override
+    public String generateHash(String val)
+    {
+        long hashNum = HashHandler.computeBINHash(val);
+        return HashHandler.toHex(hashNum, 8);
+    }
+    
+    
+    /**
+     * returns false if there are no more hashes
+     */
+    @Override
+    public boolean check(String path)
+    {
+        String lowerCased = path.toLowerCase();
+        if (lowerCased.isBlank())
+        {
+            return true;
+        }
+        
+        String hash = generateHash(lowerCased);
+        if (this.unknown.contains(hash))
+        {
+            this.addKnown(hash, path, lowerCased);
+            return true;
+        }
+        
+        if (this.unknown.isEmpty())
+        {
+            System.out.println("No more unknown hashes!");
+            return false;
+        }
+        return true;
+    }
+    
 }
