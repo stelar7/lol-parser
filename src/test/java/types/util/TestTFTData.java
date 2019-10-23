@@ -470,11 +470,10 @@ public class TestTFTData
         Map<String, Object> obj = new LinkedHashMap<>();
         obj.put("items", itemData);
         
-        List<Map<Integer, Map<String, Object>>> setMap = new ArrayList<>();
+        Map<Integer, Map<String, Object>> setMap = new HashMap<>();
         for (Entry<Integer, TFTSetInfo> setInfoEntry : sets.entrySet())
         {
-            Map<Integer, Map<String, Object>> infOuter = new HashMap<>();
-            Map<String, Object>               inf      = new HashMap<>();
+            Map<String, Object> inf = new HashMap<>();
             inf.put("name", setInfoEntry.getValue().setName);
             
             Set<Map<String, Object>> setTraitData = new HashSet<>();
@@ -496,8 +495,7 @@ public class TestTFTData
             Map<Integer, Map<String, Object>> champData = setInfoEntry.getValue().champData;
             inf.put("champions", setInfoEntry.getValue().champData);
             
-            infOuter.put(setInfoEntry.getKey(), inf);
-            setMap.add(infOuter);
+            setMap.put(setInfoEntry.getKey(), inf);
         }
         
         obj.put("sets", setMap);
@@ -506,81 +504,79 @@ public class TestTFTData
         if (exportImages)
         {
             DDSParser d = new DDSParser();
-            setMap.forEach(set -> {
-                set.forEach((Integer setno, Map<String, Object> setData) -> {
-                    Map<Integer, Map<String, Object>> champInfo = (Map<Integer, Map<String, Object>>) setData.get("champions");
-                    champInfo.forEach((k, v) -> {
-                        String splashPath  = (String) v.get("splash");
-                        Path   splash      = inputFolder.resolve(splashPath);
-                        String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
-                        Path   ability     = inputFolder.resolve(abilityPath);
-                        
-                        if (!Files.exists(splash))
-                        {
-                            splash = Paths.get(UtilHandler.replaceEnding(splash.toString(), "dds", "png"));
-                        }
-                        
-                        if (!Files.exists(ability))
-                        {
-                            ability = Paths.get(UtilHandler.replaceEnding(ability.toString(), "dds", "png"));
-                        }
-                        
-                        try
-                        {
-                            Files.createDirectories(outputFolder.resolve(splashPath).getParent());
-                            if (splash.toString().endsWith(".dds"))
-                            {
-                                splashPath = UtilHandler.replaceEnding(splashPath, "dds", "png");
-                                BufferedImage img = d.parse(splash);
-                                ImageIO.write(img, "png", outputFolder.resolve(splashPath).toFile());
-                            } else
-                            {
-                                Files.copy(splash, outputFolder.resolve(splashPath), StandardCopyOption.REPLACE_EXISTING);
-                            }
-                            
-                            Files.createDirectories(outputFolder.resolve(abilityPath).getParent());
-                            if (ability.toString().endsWith(".dds"))
-                            {
-                                abilityPath = UtilHandler.replaceEnding(abilityPath, "dds", "png");
-                                BufferedImage img = d.parse(ability);
-                                ImageIO.write(img, "png", outputFolder.resolve(abilityPath).toFile());
-                            } else
-                            {
-                                Files.copy(ability, outputFolder.resolve(abilityPath), StandardCopyOption.REPLACE_EXISTING);
-                            }
-                            
-                        } catch (IOException e)
-                        {
-                            e.printStackTrace();
-                        }
-                    });
+            setMap.forEach((setId, setData) -> {
+                Map<Integer, Map<String, Object>> champInfo = (Map<Integer, Map<String, Object>>) setData.get("champions");
+                champInfo.forEach((k, v) -> {
+                    String splashPath  = (String) v.get("splash");
+                    Path   splash      = inputFolder.resolve(splashPath);
+                    String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
+                    Path   ability     = inputFolder.resolve(abilityPath);
                     
-                    Set<Map<String, Object>> traitInfo = (Set<Map<String, Object>>) setData.get("traits");
-                    traitInfo.forEach((v) -> {
-                        String iconPath = (String) v.get("icon");
-                        Path   icon     = inputFolder.resolve(iconPath);
-                        if (!Files.exists(icon))
+                    if (!Files.exists(splash))
+                    {
+                        splash = Paths.get(UtilHandler.replaceEnding(splash.toString(), "dds", "png"));
+                    }
+                    
+                    if (!Files.exists(ability))
+                    {
+                        ability = Paths.get(UtilHandler.replaceEnding(ability.toString(), "dds", "png"));
+                    }
+                    
+                    try
+                    {
+                        Files.createDirectories(outputFolder.resolve(splashPath).getParent());
+                        if (splash.toString().endsWith(".dds"))
                         {
-                            icon = Paths.get(UtilHandler.replaceEnding(icon.toString(), "dds", "png"));
+                            splashPath = UtilHandler.replaceEnding(splashPath, "dds", "png");
+                            BufferedImage img = d.parse(splash);
+                            ImageIO.write(img, "png", outputFolder.resolve(splashPath).toFile());
+                        } else
+                        {
+                            Files.copy(splash, outputFolder.resolve(splashPath), StandardCopyOption.REPLACE_EXISTING);
                         }
                         
-                        try
+                        Files.createDirectories(outputFolder.resolve(abilityPath).getParent());
+                        if (ability.toString().endsWith(".dds"))
                         {
-                            Files.createDirectories(outputFolder.resolve(iconPath).getParent());
-                            if (icon.toString().endsWith(".dds"))
-                            {
-                                iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
-                                BufferedImage img = d.parse(icon);
-                                ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
-                            } else
-                            {
-                                Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
-                            }
-                        } catch (IOException e)
+                            abilityPath = UtilHandler.replaceEnding(abilityPath, "dds", "png");
+                            BufferedImage img = d.parse(ability);
+                            ImageIO.write(img, "png", outputFolder.resolve(abilityPath).toFile());
+                        } else
                         {
-                            e.printStackTrace();
+                            Files.copy(ability, outputFolder.resolve(abilityPath), StandardCopyOption.REPLACE_EXISTING);
                         }
-                    });
+                        
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                });
+                
+                Set<Map<String, Object>> traitInfo = (Set<Map<String, Object>>) setData.get("traits");
+                traitInfo.forEach((v) -> {
+                    String iconPath = (String) v.get("icon");
+                    Path   icon     = inputFolder.resolve(iconPath);
+                    if (!Files.exists(icon))
+                    {
+                        icon = Paths.get(UtilHandler.replaceEnding(icon.toString(), "dds", "png"));
+                    }
+                    
+                    try
+                    {
+                        Files.createDirectories(outputFolder.resolve(iconPath).getParent());
+                        if (icon.toString().endsWith(".dds"))
+                        {
+                            iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
+                            BufferedImage img = d.parse(icon);
+                            ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
+                        } else
+                        {
+                            Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
+                        }
+                    } catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
                 });
             });
             
