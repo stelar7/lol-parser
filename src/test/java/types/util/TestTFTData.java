@@ -155,7 +155,7 @@ public class TestTFTData
         });
         
         
-        Map<Integer, Map<String, Object>> champData = new TreeMap<>();
+        Map<String, Map<String, Object>>  champData = new TreeMap<>();
         Map<Integer, Map<String, Object>> itemData  = new TreeMap<>();
         List<Map<String, Object>>         traitData = new ArrayList<>();
         
@@ -347,7 +347,7 @@ public class TestTFTData
             champion.put("stats", stats);
             champion.put("traits", traitArray);
             champion.put("ability", abilities);
-            champData.put((Integer) champion.get("id"), champion);
+            champData.put(mName, champion);
             
         }
         
