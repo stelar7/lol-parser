@@ -2,18 +2,20 @@ package types.util;
 
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
+import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
 import org.junit.jupiter.api.Test;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -114,7 +116,7 @@ public class TestTFTData
     public void buildTFTDataFiles() throws IOException
     {
         // only set this to true if you have exported the images aswell!
-        boolean exportImages = false;
+        boolean exportImages = true;
         
         Path inputFolder = Paths.get("D:\\pbe");
         //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
@@ -124,9 +126,7 @@ public class TestTFTData
         Path fontConfig      = inputFolder.resolve("data\\menu");
         Path champFileParent = inputFolder.resolve("data\\characters");
         
-        Map<String, Map<String, String>> descs         = new HashMap<>();
-        Function<String, String>         replaceDDSPNG = input -> UtilHandler.replaceEnding(input, "dds", "png");
-        
+        Map<String, Map<String, String>> descs = new HashMap<>();
         Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
             try
             {
@@ -179,19 +179,26 @@ public class TestTFTData
             
             Map<String, Object> o = new LinkedHashMap<>();
             o.put("name", trait.getIfPresent("C3143D66").getValue());
-            o.put("desc", trait.getIfPresent("765F18DA").getValue());
-            o.put("icon", replaceDDSPNG.apply((String) trait.getIfPresent("mIconPath").getValue()));
+            o.put("desc", trait.get("765F18DA").map(BINValue::getValue).orElse("No description key found"));
+            o.put("icon", trait.get("mIconPath").map(BINValue::getValue).orElse("No image key found.dds"));
             
-            List<Map<String, Object>> effects = new ArrayList<>();
-            
-            List<Object> traitEffectContainer = ((BINContainer) trait.getIfPresent("mTraitsSets").getValue()).getData();
+            List<Map<String, Object>> effects              = new ArrayList<>();
+            List<Object>              traitEffectContainer = ((BINContainer) trait.getIfPresent("mTraitsSets").getValue()).getData();
             for (Object effectObj : traitEffectContainer)
             {
                 BINStruct effect = (BINStruct) effectObj;
                 
                 Map<String, Object> data = new LinkedHashMap<>();
                 data.put("minUnits", effect.getIfPresent("mMinUnits").getValue());
-                data.put("maxUnits", ((BINData) effect.getIfPresent("mMaxUnits").getValue()).getData().get(0));
+                
+                List<Object> mMaxUnitsList = effect.get("mMaxUnits").map(m -> ((BINData) m.getValue()).getData()).orElse(new ArrayList<>());
+                if (mMaxUnitsList.size() > 0)
+                {
+                    data.put("maxUnits", mMaxUnitsList.get(0));
+                } else
+                {
+                    data.put("maxUnits", 25000);
+                }
                 
                 
                 List<Map<String, Object>> vars          = new ArrayList<>();
@@ -232,9 +239,9 @@ public class TestTFTData
         List<BINEntry> champs = map22.getByType("TftShopData");
         for (BINEntry champ : champs)
         {
-            String mName = (String) champ.getIfPresent("mName").getValue();
-            
-            if (!mName.startsWith("TFT_") || mName.equals("TFT_Template"))
+            String       mName   = (String) champ.getIfPresent("mName").getValue();
+            List<String> badKeys = Arrays.asList("TFT_Template", "Sold", "SellAction", "GetXPAction", "RerollAction", "LockAction");
+            if (badKeys.contains(mName))
             {
                 continue;
             }
@@ -242,24 +249,28 @@ public class TestTFTData
             Map<String, Object> champion  = new LinkedHashMap<>();
             Map<String, Object> abilities = new LinkedHashMap<>();
             
-            String  realName    = mName.substring(4);
-            Path    selfRealBin = champFileParent.resolve(realName).resolve(realName + ".bin");
-            BINFile realData    = parser.parse(selfRealBin);
-            int     id          = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).getIfPresent("championId").getValue();
+            String realName    = mName.substring(mName.lastIndexOf("_") + 1);
+            Path   closestPath = findClosestSubstring(champFileParent, realName);
+            
+            BINFile realData = parser.parse(closestPath);
+            int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).getIfPresent("championId").getValue();
             
             champion.put("name", champ.getIfPresent("C3143D66").getValue());
             champion.put("id", id);
             champion.put("cost", 1 + champ.get("mRarity").map(BINValue::getValue).map(a -> (byte) a).orElse((byte) 0));
-            champion.put("splash", replaceDDSPNG.apply((String) champ.getIfPresent("mIconPath").getValue()));
+            champion.put("splash", champ.getIfPresent("mIconPath").getValue());
             
-            abilities.put("name", champ.getIfPresent("87A69A5E").getValue());
-            abilities.put("desc", champ.getIfPresent("BC4F18B3").getValue());
-            abilities.put("icon", replaceDDSPNG.apply((String) champ.getIfPresent("mPortraitIconPath").getValue()));
+            abilities.put("name", champ.get("87A69A5E").map(BINValue::getValue).orElse("No ability name key present"));
+            abilities.put("desc", champ.get("BC4F18B3").map(BINValue::getValue).orElse("No ability description key present"));
+            abilities.put("icon", champ.get("mPortraitIconPath").map(BINValue::getValue).orElse("No ability icon key present.png"));
             
+            Path selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
+            if (!Files.exists(selfBin))
+            {
+                continue;
+            }
             
-            String  initialSpellValue = "mBaseP";
-            Path    selfBin           = champFileParent.resolve(mName).resolve(mName + ".bin");
-            BINFile data              = parser.parse(selfBin);
+            BINFile data = parser.parse(selfBin);
             
             BINEntry champItem = data.getByType("TFTCharacterRecord").get(0);
             
@@ -274,7 +285,7 @@ public class TestTFTData
                     traitArray.add(traitLookup.get(key));
                 } else
                 {
-                    traitArray.add(traitLookup.get((String) traitObj));
+                    traitArray.add(traitLookup.get(String.valueOf(traitObj)));
                 }
             }
             
@@ -358,7 +369,7 @@ public class TestTFTData
             Map<String, Object> o = new LinkedHashMap<>();
             o.put("name", item.getIfPresent("C3143D66").getValue());
             o.put("desc", item.getIfPresent("765F18DA").getValue());
-            o.put("icon", replaceDDSPNG.apply((String) item.getIfPresent("mIconPath").getValue()));
+            o.put("icon", item.getIfPresent("mIconPath").getValue());
             
             Optional<BINValue> fromCont = item.get("mComposition");
             o.put("from", fromCont.map(a -> ((BINContainer) a.getValue()).getData()).orElse(new ArrayList<>()));
@@ -421,27 +432,69 @@ public class TestTFTData
                 String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
                 Path   ability     = inputFolder.resolve(abilityPath);
                 
+                if (!Files.exists(splash))
+                {
+                    splash = Paths.get(UtilHandler.replaceEnding(splash.toString(), "dds", "png"));
+                }
+                
+                if (!Files.exists(ability))
+                {
+                    ability = Paths.get(UtilHandler.replaceEnding(ability.toString(), "dds", "png"));
+                }
+                
                 try
                 {
                     Files.createDirectories(outputFolder.resolve(splashPath).getParent());
+                    if (splash.toString().endsWith(".dds"))
+                    {
+                        splashPath = UtilHandler.replaceEnding(splashPath, "dds", "png");
+                        DDSParser     d   = new DDSParser();
+                        BufferedImage img = d.parse(splash);
+                        ImageIO.write(img, "png", outputFolder.resolve(splashPath).toFile());
+                    } else
+                    {
+                        Files.copy(splash, outputFolder.resolve(splashPath), StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    
                     Files.createDirectories(outputFolder.resolve(abilityPath).getParent());
-                    Files.copy(splash, outputFolder.resolve(splashPath), StandardCopyOption.REPLACE_EXISTING);
-                    Files.copy(ability, outputFolder.resolve(abilityPath), StandardCopyOption.REPLACE_EXISTING);
+                    if (ability.toString().endsWith(".dds"))
+                    {
+                        abilityPath = UtilHandler.replaceEnding(abilityPath, "dds", "png");
+                        DDSParser     d   = new DDSParser();
+                        BufferedImage img = d.parse(ability);
+                        ImageIO.write(img, "png", outputFolder.resolve(abilityPath).toFile());
+                    } else
+                    {
+                        Files.copy(ability, outputFolder.resolve(abilityPath), StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    
                 } catch (IOException e)
                 {
                     e.printStackTrace();
                 }
-                
             });
             
             traitData.forEach((v) -> {
                 String iconPath = (String) v.get("icon");
                 Path   icon     = inputFolder.resolve(iconPath);
+                if (!Files.exists(icon))
+                {
+                    icon = Paths.get(UtilHandler.replaceEnding(icon.toString(), "dds", "png"));
+                }
                 
                 try
                 {
                     Files.createDirectories(outputFolder.resolve(iconPath).getParent());
-                    Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
+                    if (icon.toString().endsWith(".dds"))
+                    {
+                        iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
+                        DDSParser     d   = new DDSParser();
+                        BufferedImage img = d.parse(icon);
+                        ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
+                    } else
+                    {
+                        Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
+                    }
                 } catch (IOException e)
                 {
                     e.printStackTrace();
@@ -452,10 +505,24 @@ public class TestTFTData
                 String iconPath = (String) v.get("icon");
                 Path   icon     = inputFolder.resolve(iconPath);
                 
+                if (!Files.exists(icon))
+                {
+                    icon = Paths.get(UtilHandler.replaceEnding(icon.toString(), "dds", "png"));
+                }
+                
                 try
                 {
                     Files.createDirectories(outputFolder.resolve(iconPath).getParent());
-                    Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
+                    if (icon.toString().endsWith(".dds"))
+                    {
+                        iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
+                        DDSParser     d   = new DDSParser();
+                        BufferedImage img = d.parse(icon);
+                        ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
+                    } else
+                    {
+                        Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
+                    }
                 } catch (IOException e)
                 {
                     e.printStackTrace();
@@ -483,5 +550,23 @@ public class TestTFTData
                               e.printStackTrace();
                           }
                       });
+    }
+    
+    private Path findClosestSubstring(Path champFileParent, String realName)
+    {
+        String test = realName;
+        
+        while (test.length() > 0)
+        {
+            Path toTest = champFileParent.resolve(test).resolve(test + ".bin");
+            if (Files.exists(toTest))
+            {
+                return toTest;
+            }
+            
+            test = test.substring(0, test.length() - 1);
+        }
+        
+        return null;
     }
 }
