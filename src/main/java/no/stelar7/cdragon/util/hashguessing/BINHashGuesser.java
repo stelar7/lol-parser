@@ -247,4 +247,17 @@ public class BINHashGuesser extends HashGuesser
         return true;
     }
     
+    public void guessFromPets(Path dataPath)
+    {
+        System.out.println("Guessing new hashes based on characters");
+        
+        try
+        {
+            Path chars = dataPath.resolve("data\\characters");
+            Files.walk(chars, 1).filter(f -> Files.isDirectory(f)).forEach(f -> check("characters/" + f.getFileName().toString()));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

@@ -12,6 +12,16 @@ public class BINMap
     private int                           count;
     private List<Vector2<Object, Object>> data = new ArrayList<>();
     
+    public Optional<Object> get(Object key)
+    {
+        return data.stream().filter(f -> f.getFirst().equals(key)).findFirst().map(Vector2::getSecond);
+    }
+    
+    public Object getIfPresent(Object key)
+    {
+        return data.stream().filter(f -> f.getFirst().equals(key)).findFirst().map(Vector2::getSecond).get();
+    }
+    
     public BINValueType getType1()
     {
         return type1;
