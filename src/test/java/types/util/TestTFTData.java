@@ -426,6 +426,8 @@ public class TestTFTData
         
         if (exportImages)
         {
+            DDSParser d = new DDSParser();
+            
             champData.forEach((k, v) -> {
                 String splashPath  = (String) v.get("splash");
                 Path   splash      = inputFolder.resolve(splashPath);
@@ -448,7 +450,6 @@ public class TestTFTData
                     if (splash.toString().endsWith(".dds"))
                     {
                         splashPath = UtilHandler.replaceEnding(splashPath, "dds", "png");
-                        DDSParser     d   = new DDSParser();
                         BufferedImage img = d.parse(splash);
                         ImageIO.write(img, "png", outputFolder.resolve(splashPath).toFile());
                     } else
@@ -460,7 +461,6 @@ public class TestTFTData
                     if (ability.toString().endsWith(".dds"))
                     {
                         abilityPath = UtilHandler.replaceEnding(abilityPath, "dds", "png");
-                        DDSParser     d   = new DDSParser();
                         BufferedImage img = d.parse(ability);
                         ImageIO.write(img, "png", outputFolder.resolve(abilityPath).toFile());
                     } else
@@ -488,7 +488,6 @@ public class TestTFTData
                     if (icon.toString().endsWith(".dds"))
                     {
                         iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
-                        DDSParser     d   = new DDSParser();
                         BufferedImage img = d.parse(icon);
                         ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
                     } else
@@ -516,7 +515,6 @@ public class TestTFTData
                     if (icon.toString().endsWith(".dds"))
                     {
                         iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
-                        DDSParser     d   = new DDSParser();
                         BufferedImage img = d.parse(icon);
                         ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
                     } else
