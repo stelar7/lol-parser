@@ -42,19 +42,52 @@ public class LCUHashGuesser extends HashGuesser
         return buildWordlist(paths);
     }
     
+    private int ordinalIndexOf(String str, String substr, int n)
+    {
+        int pos = str.indexOf(substr);
+        while (--n > 0 && pos != -1)
+        {
+            pos = str.indexOf(substr, pos + 1);
+        }
+        return pos;
+    }
+    
     public void substituteRegionLang()
     {
-        Pattern     regex      = Pattern.compile("^plugins/([^/]+)/[^/]+/[^/]+/");
         Set<String> regionLang = UtilHandler.product("/", this.REGIONS, this.LANGUAGES);
         
-        System.out.format("Substitute region and lang: %s region/languages %s hashes%n", REGIONS.size() * LANGUAGES.size(), this.known.size());
+        System.out.format("Substitute region, and language: %s region/languages, %s hashes%n", regionLang.size(), this.known.size());
         
-        for (String s : regionLang)
+        for (String rl : regionLang)
         {
-            String replacement = "plugins/$1/" + s + "/";
             for (String value : new ArrayList<>(this.known.values()))
             {
-                String toCheck = regex.matcher(value).replaceFirst(replacement);
+                String prefix  = value.substring(0, ordinalIndexOf(value, "/", 2) + 1);
+                String suffix  = value.substring(ordinalIndexOf(value, "/", 4) + 1);
+                String toCheck = prefix + rl + "/" + suffix;
+                
+                check(toCheck);
+            }
+        }
+    }
+    
+    public void substitutePlugins()
+    {
+        Set<String> plugins = this.known.values().stream()
+                                        .map(a -> a.substring("plugins/".length(), a.substring("plugins/".length()).indexOf('/') + "plugins/".length()))
+                                        .collect(Collectors.toSet());
+        
+        
+        System.out.format("Substitute plugins: %s plugins, %s hashes%n", plugins.size(), this.known.size());
+        
+        for (String p : plugins)
+        {
+            for (String value : new ArrayList<>(this.known.values()))
+            {
+                String prefix  = value.substring(0, ordinalIndexOf(value, "/", 1) + 1);
+                String suffix  = value.substring(ordinalIndexOf(value, "/", 2) + 1);
+                String toCheck = prefix + p + "/" + suffix;
+                
                 check(toCheck);
             }
         }
@@ -147,40 +180,6 @@ public class LCUHashGuesser extends HashGuesser
         }
         
         super.substituteNumbers(paths, max, numbers);
-    }
-    
-    public void substitutePlugin()
-    {
-        Set<String> all = new HashSet<>(this.known.values());
-        for (String s : new ArrayList<>(all))
-        {
-            if (!s.startsWith("plugins/"))
-            {
-                all.remove(s);
-            }
-        }
-        
-        Set<String> plugins = new HashSet<>();
-        for (String s : all)
-        {
-            plugins.add(s.split("/", 3)[1]);
-        }
-        
-        Set<String> formats = new HashSet<>();
-        for (String s : all)
-        {
-            formats.add(s.replaceFirst("^plugins/([^/]+)/", "plugins/%s/"));
-        }
-        
-        System.out.format("substitute plugin: %s formats %s plugins%n", formats.size(), plugins.size());
-        for (String format : formats)
-        {
-            for (String plugin : plugins)
-            {
-                String toCheck = String.format(format, plugin);
-                check(toCheck);
-            }
-        }
     }
     
     public void grepWad(WADFile file)

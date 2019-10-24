@@ -159,12 +159,12 @@ public class RMANTool
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(cachePath.resolve("unknownFiles.txt")));
         guesser.pullCDTB();
-        guesser.guessAssetsBySearch(outputPath);
-        guesser.substituteRegionLang();
-        guesser.substitutePlugin();
-        guesser.substituteBasenames();
-        guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
+        guesser.substitutePlugins();
+        guesser.substituteBasenames();
+        guesser.substituteRegionLang();
+        guesser.guessAssetsBySearch(outputPath);
+        guesser.substituteBasenameWords(null, null, null, 1);
         guesser.saveAsJson(cachePath.resolve("lcu.json"));
         return guesser.didFindNewHash();
     }

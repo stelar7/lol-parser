@@ -74,7 +74,8 @@ public abstract class HashGuesser
             
         } catch (IOException e)
         {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
+            System.out.println("Unable to load unknown hash file");
         }
         
         return Collections.emptySet();
