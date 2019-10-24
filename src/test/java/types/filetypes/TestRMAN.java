@@ -50,7 +50,7 @@ public class TestRMAN
         
         Path    fileFolder   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
         boolean shouldExport = !Files.exists(fileFolder);
-        if (shouldDownload || shouldExport)
+        if (shouldExport || shouldDownload)
         {
             Files.createDirectories(fileFolder);
             

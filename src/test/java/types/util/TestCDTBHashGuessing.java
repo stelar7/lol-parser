@@ -24,9 +24,9 @@ public class TestCDTBHashGuessing
     public void doBINTest()
     {
         BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
+        guesser.pullCDTB();
         guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("binhashtest.txt"), "(.*)");
         guesser.guessFromPets(dataPath);
-        guesser.pullCDTB();
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();
         guesser.guessFromFontFiles();

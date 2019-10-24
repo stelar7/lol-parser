@@ -142,144 +142,218 @@ public class TestTFTData
         Path fontConfig      = inputFolder.resolve("data\\menu");
         Path champFileParent = inputFolder.resolve("data\\characters");
         
-        Map<String, Map<String, String>> descs = new HashMap<>();
-        Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
-            try
-            {
-                Map<String, String> desc = Files.readAllLines(p)
-                                                .stream()
-                                                .filter(s -> s.startsWith("tr "))
-                                                .map(s -> s.substring(s.indexOf(" ") + 1))
-                                                .collect(Collectors.toMap(s -> {
-                                                    String part = s.split("=")[0];
-                                                    part = part.substring(part.indexOf("\"") + 1);
-                                                    part = part.substring(0, part.indexOf("\""));
-                                                    return part;
-                                                }, s -> {
-                                                    String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
-                                                    part = part.substring(part.indexOf("\"") + 1);
-                                                    part = part.substring(0, part.lastIndexOf("\""));
-                                                    return part;
-                                                }));
-                
-                descs.put(UtilHandler.pathToFilename(p).substring("fontconfig_".length()), desc);
-                
-            } catch (IOException e)
-            {
-                e.printStackTrace();
-            }
-        });
+        Map<String, Map<String, String>> descs = parseTranslationMaps(fontConfig);
         
-        BINParser parser = new BINParser();
-        BINFile   map22  = parser.parse(traitFile);
+        BINParser           parser       = new BINParser();
+        BINFile             map22        = parser.parse(traitFile);
+        Map<String, Object> outputObject = new LinkedHashMap<>();
         
-        Map<Integer, TFTSetInfo> sets = new HashMap<>();
+        Map<String, String>               characterOffsetLookup = parseCharacterOffsetLookup(map22);
+        Map<Integer, TFTSetInfo>          setData               = parseSetInfo(map22, characterOffsetLookup);
+        Map<String, Map<String, Object>>  traitData             = parseTraitInfo(map22);
+        Map<Integer, Map<String, Object>> outputSetMap          = generateSetMap(setData, traitData, outputObject);
         
-        Map<String, String> characterOffsetLookup = new HashMap<>();
-        for (BINEntry character : map22.getByType("character"))
+        parseChampionInfo(champFileParent, parser, map22, setData);
+        
+        Map<Integer, Map<String, Object>> itemData = parseItemInfo(map22);
+        outputObject.put("items", itemData);
+        
+        String data = UtilHandler.getGson().toJson(outputObject);
+        
+        if (exportImages)
         {
-            characterOffsetLookup.put(character.getHash(), character.getValue("name", "name"));
+            DDSParser d = new DDSParser();
+            outputSetMap.forEach((setId, setInfoData) -> {
+                Map<Integer, Map<String, Object>> champInfo = (Map<Integer, Map<String, Object>>) setInfoData.get("champions");
+                champInfo.forEach((k, v) -> {
+                    String splashPath = (String) v.get("splash");
+                    Path   splash     = inputFolder.resolve(splashPath);
+                    splash = renameIfNotExists(splash);
+                    exportAndRenameIfNeeded(outputFolder, d, splashPath, splash);
+                    
+                    String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
+                    Path   ability     = inputFolder.resolve(abilityPath);
+                    ability = renameIfNotExists(ability);
+                    exportAndRenameIfNeeded(outputFolder, d, abilityPath, ability);
+                });
+                
+                Set<Map<String, Object>> traitInfo = (Set<Map<String, Object>>) setInfoData.get("traits");
+                traitInfo.forEach((v) -> {
+                    String iconPath = (String) v.get("icon");
+                    Path   icon     = inputFolder.resolve(iconPath);
+                    
+                    icon = renameIfNotExists(icon);
+                    exportAndRenameIfNeeded(outputFolder, d, iconPath, icon);
+                });
+            });
+            
+            itemData.forEach((k, v) -> {
+                String iconPath = (String) v.get("icon");
+                Path   icon     = inputFolder.resolve(iconPath);
+                
+                icon = renameIfNotExists(icon);
+                exportAndRenameIfNeeded(outputFolder, d, iconPath, icon);
+            });
         }
         
-        List<BINEntry> TFTSetList = map22.getByType("438850FF");
-        for (BINEntry entry : TFTSetList)
-        {
-            String characterListOffsetId = (String) ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData().get(0);
-            BINMap setInfo               = (BINMap) entry.getIfPresent("D2538E5A").getValue();
-            int    setNumber             = (Integer) ((BINStruct) setInfo.getIfPresent("SetNumber")).getData().get(0).getValue();
-            String setName               = (String) ((BINStruct) setInfo.getIfPresent("SetName")).getData().get(0).getValue();
-            
-            List<String> characters = new ArrayList<>();
-            for (BINEntry characterList : map22.getByType("MapCharacterList"))
-            {
-                if (!characterList.getHash().equalsIgnoreCase(characterListOffsetId))
-                {
-                    continue;
-                }
+        
+        Files.createDirectories(outputFolder.resolve("TFT"));
+        Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        descs.keySet()
+             .stream()
+             .sorted()
+             .forEach(lang ->
+                      {
+                          Map<String, String> vals = descs.get(lang);
+                          try
+                          {
+                              System.out.println("Generating files for " + lang);
                 
-                BINValue     cVal = characterList.getIfPresent("Characters");
-                BINContainer cont = (BINContainer) cVal.getValue();
-                for (Object l : cont.getData())
-                {
-                    String unhashedKey = HashHandler.getBinHashes().getOrDefault(String.valueOf(l), String.valueOf(l));
-                    characters.add(characterOffsetLookup.get(unhashedKey));
-                }
+                              final String[] alteredData = {data};
+                              vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
+                              Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                          } catch (IOException e)
+                          {
+                              e.printStackTrace();
+                          }
+                      });
+    }
+    
+    private Path renameIfNotExists(Path path)
+    {
+        if (!Files.exists(path))
+        {
+            path = Paths.get(UtilHandler.replaceEnding(path.toString(), "dds", "png"));
+        }
+        return path;
+    }
+    
+    private void exportAndRenameIfNeeded(Path outputFolder, DDSParser ddsParser, String pathString, Path realPath)
+    {
+        try
+        {
+            Files.createDirectories(outputFolder.resolve(pathString).getParent());
+            if (realPath.toString().endsWith(".dds"))
+            {
+                pathString = UtilHandler.replaceEnding(pathString, "dds", "png");
+                BufferedImage img = ddsParser.parse(realPath);
+                ImageIO.write(img, "png", outputFolder.resolve(pathString).toFile());
+            } else
+            {
+                Files.copy(realPath, outputFolder.resolve(pathString), StandardCopyOption.REPLACE_EXISTING);
             }
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private Map<Integer, Map<String, Object>> generateSetMap(Map<Integer, TFTSetInfo> setData, Map<String, Map<String, Object>> traitData, Map<String, Object> obj)
+    {
+        Map<Integer, Map<String, Object>> setMap = new HashMap<>();
+        for (Entry<Integer, TFTSetInfo> setInfoEntry : setData.entrySet())
+        {
+            Map<String, Object> inf = new HashMap<>();
+            inf.put("name", setInfoEntry.getValue().setName);
             
-            sets.put(setNumber, new TFTSetInfo(setName, characters));
+            Set<Map<String, Object>> setTraitData = new HashSet<>();
+            for (Map<String, Object> champInfo : setInfoEntry.getValue().champData.values())
+            {
+                List<String> traitHashes   = (List<String>) champInfo.get("traits");
+                List<String> renamedHashes = new ArrayList<>();
+                for (String traitHash : traitHashes)
+                {
+                    setTraitData.add(traitData.get(traitHash));
+                    String traitName = (String) traitData.get(traitHash).get("name");
+                    renamedHashes.add(traitName);
+                }
+                champInfo.put("traits", renamedHashes);
+                
+            }
+            inf.put("traits", setTraitData);
+            
+            Map<Integer, Map<String, Object>> champData = setInfoEntry.getValue().champData;
+            inf.put("champions", setInfoEntry.getValue().champData);
+            
+            setMap.put(setInfoEntry.getKey(), inf);
         }
         
-        Map<String, Map<String, Object>> traitLookup = new LinkedHashMap<>();
-        
-        List<BINEntry> traits = map22.getByType("TftTraitData");
-        for (BINEntry trait : traits)
+        obj.put("sets", setMap);
+        return setMap;
+    }
+    
+    private Map<Integer, Map<String, Object>> parseItemInfo(BINFile map22)
+    {
+        Map<String, Object>               itemLookup = new LinkedHashMap<>();
+        Map<Integer, Map<String, Object>> itemData   = new TreeMap<>();
+        List<BINEntry>                    items      = map22.getByType("TftItemData");
+        for (BINEntry item : items)
         {
-            String mName = (String) trait.getIfPresent("mName").getValue();
+            String mName = (String) item.getIfPresent("mName").getValue();
             
-            if (mName.contains("Template"))
+            if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
             {
                 continue;
             }
             
-            Map<String, Object> o = new LinkedHashMap<>();
-            o.put("name", trait.getIfPresent("C3143D66").getValue());
-            o.put("desc", trait.get("765F18DA").map(BINValue::getValue).orElse("No description key found"));
-            o.put("icon", trait.get("mIconPath").map(BINValue::getValue).orElse("No image key found.dds"));
+            int mId = (int) item.getIfPresent("mID").getValue();
+            itemLookup.put(item.getHash(), mId);
             
-            List<Map<String, Object>> effects              = new ArrayList<>();
-            List<Object>              traitEffectContainer = ((BINContainer) trait.getIfPresent("mTraitsSets").getValue()).getData();
-            for (Object effectObj : traitEffectContainer)
+            Map<String, Object> o = new LinkedHashMap<>();
+            o.put("name", item.getIfPresent("C3143D66").getValue());
+            o.put("desc", item.getIfPresent("765F18DA").getValue());
+            o.put("icon", item.getIfPresent("mIconPath").getValue());
+            
+            Optional<BINValue> fromCont = item.get("mComposition");
+            o.put("from", fromCont.map(a -> ((BINContainer) a.getValue()).getData()).orElse(new ArrayList<>()));
+            
+            
+            List<Map<String, Object>> effects = new ArrayList<>();
+            
+            Optional<BINValue> effectCont = item.get("EffectAmounts");
+            if (effectCont.isPresent())
             {
-                BINStruct effect = (BINStruct) effectObj;
-                
-                Map<String, Object> data = new LinkedHashMap<>();
-                data.put("minUnits", effect.getIfPresent("mMinUnits").getValue());
-                
-                List<Object> mMaxUnitsList = effect.get("mMaxUnits").map(m -> ((BINData) m.getValue()).getData()).orElse(new ArrayList<>());
-                if (mMaxUnitsList.size() > 0)
+                List<Object> effectContainer = ((BINContainer) effectCont.get().getValue()).getData();
+                for (Object effectObj : effectContainer)
                 {
-                    data.put("maxUnits", mMaxUnitsList.get(0));
-                } else
-                {
-                    data.put("maxUnits", 25000);
-                }
-                
-                
-                List<Map<String, Object>> vars          = new ArrayList<>();
-                Optional<BINValue>        effectVarsObj = effect.get("EffectAmounts");
-                if (effectVarsObj.isPresent())
-                {
-                    List<Object> effectVars = ((BINContainer) effect.getIfPresent("EffectAmounts").getValue()).getData();
-                    for (Object var : effectVars)
+                    BINStruct effect = (BINStruct) effectObj;
+                    
+                    BINValue nameVal = effect.getIfPresent("name");
+                    String   nameKey = (String) nameVal.getValue();
+                    String   name    = nameKey;
+                    if (nameVal.getType() == BINValueType.STRING_HASH)
                     {
-                        BINStruct           effectVar = (BINStruct) var;
-                        Map<String, Object> inner     = new LinkedHashMap<>();
-                        
-                        for (BINValue value : ((BINStruct) var).getData())
-                        {
-                            if (value.getType() == BINValueType.STRING_HASH)
-                            {
-                                String key = (String) value.getValue();
-                                inner.put(value.getHash(), HashHandler.getBinHashes().getOrDefault(key, key));
-                            } else
-                            {
-                                inner.put(value.getHash(), value.getValue());
-                            }
-                        }
-                        
-                        vars.add(inner);
+                        name = HashHandler.getBinHashes().getOrDefault(nameKey, nameKey);
                     }
+                    
+                    Map<String, Object> temp = new LinkedHashMap<>();
+                    temp.put("name", name);
+                    temp.put("value", effect.get("value").map(BINValue::getValue).orElse(null));
+                    effects.add(temp);
                 }
-                
-                data.put("vars", vars);
-                effects.add(data);
             }
             
             o.put("effects", effects);
-            traitLookup.put(trait.getHash(), o);
+            itemData.put(mId, o);
         }
         
-        
+        for (Integer key : itemData.keySet())
+        {
+            Map<String, Object> fromObject = itemData.get(key);
+            List<String>        from       = (List<String>) fromObject.get("from");
+            List<Integer>       newFrom    = new ArrayList<>();
+            for (String element : from)
+            {
+                newFrom.add((int) itemLookup.get(element));
+            }
+            
+            fromObject.put("from", newFrom);
+        }
+        return itemData;
+    }
+    
+    private void parseChampionInfo(Path champFileParent, BINParser parser, BINFile map22, Map<Integer, TFTSetInfo> sets)
+    {
         List<BINEntry> champs = map22.getByType("TftShopData");
         for (BINEntry champ : champs)
         {
@@ -400,235 +474,156 @@ public class TestTFTData
                 }
             }
         }
+    }
+    
+    private Map<String, Map<String, Object>> parseTraitInfo(BINFile map22)
+    {
+        Map<String, Map<String, Object>> traitLookup = new LinkedHashMap<>();
         
-        Map<String, Object>               itemLookup = new LinkedHashMap<>();
-        Map<Integer, Map<String, Object>> itemData   = new TreeMap<>();
-        List<BINEntry>                    items      = map22.getByType("TftItemData");
-        for (BINEntry item : items)
+        List<BINEntry> traits = map22.getByType("TftTraitData");
+        for (BINEntry trait : traits)
         {
-            String mName = (String) item.getIfPresent("mName").getValue();
+            String mName = (String) trait.getIfPresent("mName").getValue();
             
-            if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
+            if (mName.contains("Template"))
             {
                 continue;
             }
             
-            int mId = (int) item.getIfPresent("mID").getValue();
-            itemLookup.put(item.getHash(), mId);
-            
             Map<String, Object> o = new LinkedHashMap<>();
-            o.put("name", item.getIfPresent("C3143D66").getValue());
-            o.put("desc", item.getIfPresent("765F18DA").getValue());
-            o.put("icon", item.getIfPresent("mIconPath").getValue());
+            o.put("name", trait.getIfPresent("C3143D66").getValue());
+            o.put("desc", trait.get("765F18DA").map(BINValue::getValue).orElse("No description key found"));
+            o.put("icon", trait.get("mIconPath").map(BINValue::getValue).orElse("No image key found.dds"));
             
-            Optional<BINValue> fromCont = item.get("mComposition");
-            o.put("from", fromCont.map(a -> ((BINContainer) a.getValue()).getData()).orElse(new ArrayList<>()));
-            
-            
-            List<Map<String, Object>> effects = new ArrayList<>();
-            
-            Optional<BINValue> effectCont = item.get("EffectAmounts");
-            if (effectCont.isPresent())
+            List<Map<String, Object>> effects              = new ArrayList<>();
+            List<Object>              traitEffectContainer = ((BINContainer) trait.getIfPresent("mTraitsSets").getValue()).getData();
+            for (Object effectObj : traitEffectContainer)
             {
-                List<Object> effectContainer = ((BINContainer) effectCont.get().getValue()).getData();
-                for (Object effectObj : effectContainer)
+                BINStruct effect = (BINStruct) effectObj;
+                
+                Map<String, Object> data = new LinkedHashMap<>();
+                data.put("minUnits", effect.getIfPresent("mMinUnits").getValue());
+                
+                List<Object> mMaxUnitsList = effect.get("mMaxUnits").map(m -> ((BINData) m.getValue()).getData()).orElse(new ArrayList<>());
+                if (mMaxUnitsList.size() > 0)
                 {
-                    BINStruct effect = (BINStruct) effectObj;
-                    
-                    BINValue nameVal = effect.getIfPresent("name");
-                    String   nameKey = (String) nameVal.getValue();
-                    String   name    = nameKey;
-                    if (nameVal.getType() == BINValueType.STRING_HASH)
-                    {
-                        name = HashHandler.getBinHashes().getOrDefault(nameKey, nameKey);
-                    }
-                    
-                    Map<String, Object> temp = new LinkedHashMap<>();
-                    temp.put("name", name);
-                    temp.put("value", effect.get("value").map(BINValue::getValue).orElse(null));
-                    effects.add(temp);
+                    data.put("maxUnits", mMaxUnitsList.get(0));
+                } else
+                {
+                    data.put("maxUnits", 25000);
                 }
+                
+                
+                List<Map<String, Object>> vars          = new ArrayList<>();
+                Optional<BINValue>        effectVarsObj = effect.get("EffectAmounts");
+                if (effectVarsObj.isPresent())
+                {
+                    List<Object> effectVars = ((BINContainer) effect.getIfPresent("EffectAmounts").getValue()).getData();
+                    for (Object var : effectVars)
+                    {
+                        BINStruct           effectVar = (BINStruct) var;
+                        Map<String, Object> inner     = new LinkedHashMap<>();
+                        
+                        for (BINValue value : ((BINStruct) var).getData())
+                        {
+                            if (value.getType() == BINValueType.STRING_HASH)
+                            {
+                                String key = (String) value.getValue();
+                                inner.put(value.getHash(), HashHandler.getBinHashes().getOrDefault(key, key));
+                            } else
+                            {
+                                inner.put(value.getHash(), value.getValue());
+                            }
+                        }
+                        
+                        vars.add(inner);
+                    }
+                }
+                
+                data.put("vars", vars);
+                effects.add(data);
             }
             
             o.put("effects", effects);
-            itemData.put(mId, o);
+            traitLookup.put(trait.getHash(), o);
         }
         
-        for (Integer key : itemData.keySet())
+        return traitLookup;
+    }
+    
+    private Map<Integer, TFTSetInfo> parseSetInfo(BINFile map22, Map<String, String> characterOffsetLookup)
+    {
+        Map<Integer, TFTSetInfo> sets       = new LinkedHashMap<>();
+        List<BINEntry>           TFTSetList = map22.getByType("438850FF");
+        for (BINEntry entry : TFTSetList)
         {
-            Map<String, Object> fromObject = itemData.get(key);
-            List<String>        from       = (List<String>) fromObject.get("from");
-            List<Integer>       newFrom    = new ArrayList<>();
-            for (String element : from)
+            String characterListOffsetId = (String) ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData().get(0);
+            BINMap setInfo               = (BINMap) entry.getIfPresent("D2538E5A").getValue();
+            int    setNumber             = (Integer) ((BINStruct) setInfo.getIfPresent("SetNumber")).getData().get(0).getValue();
+            String setName               = (String) ((BINStruct) setInfo.getIfPresent("SetName")).getData().get(0).getValue();
+            
+            List<String> characters = new ArrayList<>();
+            for (BINEntry characterList : map22.getByType("MapCharacterList"))
             {
-                newFrom.add((int) itemLookup.get(element));
+                if (!characterList.getHash().equalsIgnoreCase(characterListOffsetId))
+                {
+                    continue;
+                }
+                
+                BINValue     cVal = characterList.getIfPresent("Characters");
+                BINContainer cont = (BINContainer) cVal.getValue();
+                for (Object l : cont.getData())
+                {
+                    String unhashedKey = HashHandler.getBinHashes().getOrDefault(String.valueOf(l), String.valueOf(l));
+                    characters.add(characterOffsetLookup.get(unhashedKey));
+                }
             }
             
-            fromObject.put("from", newFrom);
+            sets.put(setNumber, new TFTSetInfo(setName, characters));
         }
-        
-        Map<String, Object> obj = new LinkedHashMap<>();
-        obj.put("items", itemData);
-        
-        Map<Integer, Map<String, Object>> setMap = new HashMap<>();
-        for (Entry<Integer, TFTSetInfo> setInfoEntry : sets.entrySet())
+        return sets;
+    }
+    
+    private Map<String, String> parseCharacterOffsetLookup(BINFile map22)
+    {
+        Map<String, String> characterOffsetLookup = new HashMap<>();
+        for (BINEntry character : map22.getByType("character"))
         {
-            Map<String, Object> inf = new HashMap<>();
-            inf.put("name", setInfoEntry.getValue().setName);
-            
-            Set<Map<String, Object>> setTraitData = new HashSet<>();
-            for (Map<String, Object> champInfo : setInfoEntry.getValue().champData.values())
+            characterOffsetLookup.put(character.getHash(), character.getValue("name", "name"));
+        }
+        return characterOffsetLookup;
+    }
+    
+    private Map<String, Map<String, String>> parseTranslationMaps(Path fontConfig) throws IOException
+    {
+        Map<String, Map<String, String>> descs = new HashMap<>();
+        Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
+            try
             {
-                List<String> traitHashes   = (List<String>) champInfo.get("traits");
-                List<String> renamedHashes = new ArrayList<>();
-                for (String traitHash : traitHashes)
-                {
-                    setTraitData.add(traitLookup.get(traitHash));
-                    String traitName = (String) traitLookup.get(traitHash).get("name");
-                    renamedHashes.add(traitName);
-                }
-                champInfo.put("traits", renamedHashes);
+                Map<String, String> desc = Files.readAllLines(p)
+                                                .stream()
+                                                .filter(s -> s.startsWith("tr "))
+                                                .map(s -> s.substring(s.indexOf(" ") + 1))
+                                                .collect(Collectors.toMap(s -> {
+                                                    String part = s.split("=")[0];
+                                                    part = part.substring(part.indexOf("\"") + 1);
+                                                    part = part.substring(0, part.indexOf("\""));
+                                                    return part;
+                                                }, s -> {
+                                                    String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
+                                                    part = part.substring(part.indexOf("\"") + 1);
+                                                    part = part.substring(0, part.lastIndexOf("\""));
+                                                    return part;
+                                                }));
                 
+                descs.put(UtilHandler.pathToFilename(p).substring("fontconfig_".length()), desc);
+                
+            } catch (IOException e)
+            {
+                e.printStackTrace();
             }
-            inf.put("traits", setTraitData);
-            
-            Map<Integer, Map<String, Object>> champData = setInfoEntry.getValue().champData;
-            inf.put("champions", setInfoEntry.getValue().champData);
-            
-            setMap.put(setInfoEntry.getKey(), inf);
-        }
-        
-        obj.put("sets", setMap);
-        String data = UtilHandler.getGson().toJson(obj);
-        
-        if (exportImages)
-        {
-            DDSParser d = new DDSParser();
-            setMap.forEach((setId, setData) -> {
-                Map<Integer, Map<String, Object>> champInfo = (Map<Integer, Map<String, Object>>) setData.get("champions");
-                champInfo.forEach((k, v) -> {
-                    String splashPath  = (String) v.get("splash");
-                    Path   splash      = inputFolder.resolve(splashPath);
-                    String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
-                    Path   ability     = inputFolder.resolve(abilityPath);
-                    
-                    if (!Files.exists(splash))
-                    {
-                        splash = Paths.get(UtilHandler.replaceEnding(splash.toString(), "dds", "png"));
-                    }
-                    
-                    if (!Files.exists(ability))
-                    {
-                        ability = Paths.get(UtilHandler.replaceEnding(ability.toString(), "dds", "png"));
-                    }
-                    
-                    try
-                    {
-                        Files.createDirectories(outputFolder.resolve(splashPath).getParent());
-                        if (splash.toString().endsWith(".dds"))
-                        {
-                            splashPath = UtilHandler.replaceEnding(splashPath, "dds", "png");
-                            BufferedImage img = d.parse(splash);
-                            ImageIO.write(img, "png", outputFolder.resolve(splashPath).toFile());
-                        } else
-                        {
-                            Files.copy(splash, outputFolder.resolve(splashPath), StandardCopyOption.REPLACE_EXISTING);
-                        }
-                        
-                        Files.createDirectories(outputFolder.resolve(abilityPath).getParent());
-                        if (ability.toString().endsWith(".dds"))
-                        {
-                            abilityPath = UtilHandler.replaceEnding(abilityPath, "dds", "png");
-                            BufferedImage img = d.parse(ability);
-                            ImageIO.write(img, "png", outputFolder.resolve(abilityPath).toFile());
-                        } else
-                        {
-                            Files.copy(ability, outputFolder.resolve(abilityPath), StandardCopyOption.REPLACE_EXISTING);
-                        }
-                        
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                });
-                
-                Set<Map<String, Object>> traitInfo = (Set<Map<String, Object>>) setData.get("traits");
-                traitInfo.forEach((v) -> {
-                    String iconPath = (String) v.get("icon");
-                    Path   icon     = inputFolder.resolve(iconPath);
-                    if (!Files.exists(icon))
-                    {
-                        icon = Paths.get(UtilHandler.replaceEnding(icon.toString(), "dds", "png"));
-                    }
-                    
-                    try
-                    {
-                        Files.createDirectories(outputFolder.resolve(iconPath).getParent());
-                        if (icon.toString().endsWith(".dds"))
-                        {
-                            iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
-                            BufferedImage img = d.parse(icon);
-                            ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
-                        } else
-                        {
-                            Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    } catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
-                });
-            });
-            
-            itemData.forEach((k, v) -> {
-                String iconPath = (String) v.get("icon");
-                Path   icon     = inputFolder.resolve(iconPath);
-                
-                if (!Files.exists(icon))
-                {
-                    icon = Paths.get(UtilHandler.replaceEnding(icon.toString(), "dds", "png"));
-                }
-                
-                try
-                {
-                    Files.createDirectories(outputFolder.resolve(iconPath).getParent());
-                    if (icon.toString().endsWith(".dds"))
-                    {
-                        iconPath = UtilHandler.replaceEnding(iconPath, "dds", "png");
-                        BufferedImage img = d.parse(icon);
-                        ImageIO.write(img, "png", outputFolder.resolve(iconPath).toFile());
-                    } else
-                    {
-                        Files.copy(icon, outputFolder.resolve(iconPath), StandardCopyOption.REPLACE_EXISTING);
-                    }
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            });
-        }
-        
-        
-        Files.createDirectories(outputFolder.resolve("TFT"));
-        Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-        descs.keySet()
-             .stream()
-             .sorted()
-             .forEach(lang ->
-                      {
-                          Map<String, String> vals = descs.get(lang);
-                          try
-                          {
-                              System.out.println("Generating files for " + lang);
-                
-                              final String[] alteredData = {data};
-                              vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
-                              Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                          } catch (IOException e)
-                          {
-                              e.printStackTrace();
-                          }
-                      });
+        });
+        return descs;
     }
     
     private Path findClosestSubstring(Path champFileParent, String realName)
