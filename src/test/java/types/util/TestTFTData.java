@@ -118,8 +118,8 @@ public class TestTFTData
         private String       setName;
         private List<String> characters;
         
-        private Map<Integer, Map<String, Object>> champData = new TreeMap<>();
-        private List<Map<String, Object>>         traitData = new ArrayList<>();
+        private List<Map<String, Object>> champData = new ArrayList<>();
+        private List<Map<String, Object>> traitData = new ArrayList<>();
         
         public TFTSetInfo(String setName, List<String> characters)
         {
@@ -148,14 +148,13 @@ public class TestTFTData
         BINFile             map22        = parser.parse(traitFile);
         Map<String, Object> outputObject = new LinkedHashMap<>();
         
-        Map<String, String>               characterOffsetLookup = parseCharacterOffsetLookup(map22);
-        Map<Integer, TFTSetInfo>          setData               = parseSetInfo(map22, characterOffsetLookup);
-        Map<String, Map<String, Object>>  traitData             = parseTraitInfo(map22);
-        Map<Integer, Map<String, Object>> outputSetMap          = generateSetMap(setData, traitData, outputObject);
-        
+        Map<String, String>              characterOffsetLookup = parseCharacterOffsetLookup(map22);
+        Map<Integer, TFTSetInfo>         setData               = parseSetInfo(map22, characterOffsetLookup);
+        Map<String, Map<String, Object>> traitData             = parseTraitInfo(map22);
         parseChampionInfo(champFileParent, parser, map22, setData);
         
-        Map<Integer, Map<String, Object>> itemData = parseItemInfo(map22);
+        Map<Integer, Map<String, Object>> outputSetMap = generateSetMap(setData, traitData, outputObject);
+        Map<Integer, Map<String, Object>> itemData     = parseItemInfo(map22);
         outputObject.put("items", itemData);
         
         String data = UtilHandler.getGson().toJson(outputObject);
@@ -164,8 +163,8 @@ public class TestTFTData
         {
             DDSParser d = new DDSParser();
             outputSetMap.forEach((setId, setInfoData) -> {
-                Map<Integer, Map<String, Object>> champInfo = (Map<Integer, Map<String, Object>>) setInfoData.get("champions");
-                champInfo.forEach((k, v) -> {
+                List<Map<String, Object>> champInfo = (List<Map<String, Object>>) setInfoData.get("champions");
+                champInfo.forEach((v) -> {
                     String splashPath = (String) v.get("splash");
                     Path   splash     = inputFolder.resolve(splashPath);
                     splash = renameIfNotExists(splash);
@@ -257,7 +256,7 @@ public class TestTFTData
             inf.put("name", setInfoEntry.getValue().setName);
             
             Set<Map<String, Object>> setTraitData = new HashSet<>();
-            for (Map<String, Object> champInfo : setInfoEntry.getValue().champData.values())
+            for (Map<String, Object> champInfo : setInfoEntry.getValue().champData)
             {
                 List<String> traitHashes   = (List<String>) champInfo.get("traits");
                 List<String> renamedHashes = new ArrayList<>();
@@ -271,8 +270,6 @@ public class TestTFTData
                 
             }
             inf.put("traits", setTraitData);
-            
-            Map<Integer, Map<String, Object>> champData = setInfoEntry.getValue().champData;
             inf.put("champions", setInfoEntry.getValue().champData);
             
             setMap.put(setInfoEntry.getKey(), inf);
@@ -373,9 +370,13 @@ public class TestTFTData
             BINFile realData = parser.parse(closestPath);
             int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).getIfPresent("championId").getValue();
             
-            champion.put("name", champ.getIfPresent("C3143D66").getValue());
+            champion.put("name", realName); // dirty hack for lux having the same name key across elements
+            //champion.put("name", champ.getIfPresent("C3143D66").getValue());
+            
             champion.put("id", id);
-            champion.put("cost", 1 + champ.get("mRarity").map(BINValue::getValue).map(a -> (byte) a).orElse((byte) 0));
+            int rarity    = champ.get("mRarity").map(BINValue::getValue).map(a -> ((byte) a) + 1).orElse(1);
+            int increment = (int) Math.floor(rarity / 6f); // dirty hack for lux being a 7 cost
+            champion.put("cost", rarity + increment);
             champion.put("splash", champ.getIfPresent("mIconPath").getValue());
             
             abilities.put("name", champ.get("87A69A5E").map(BINValue::getValue).orElse("No ability name key present"));
@@ -470,7 +471,7 @@ public class TestTFTData
             {
                 if (setEntry.getValue().characters.contains(mName))
                 {
-                    setEntry.getValue().champData.put(id, champion);
+                    setEntry.getValue().champData.add(champion);
                 }
             }
         }
