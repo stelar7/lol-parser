@@ -290,6 +290,7 @@ public class TestTFTData
             
             if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
             {
+                System.out.println("Skipping item: " + mName);
                 continue;
             }
             
@@ -354,6 +355,7 @@ public class TestTFTData
             List<String> badKeys = Arrays.asList("TFT_Template", "Sold", "SellAction", "GetXPAction", "RerollAction", "LockAction");
             if (badKeys.contains(mName))
             {
+                System.out.println("Skipping shop item: " + mName);
                 continue;
             }
             
@@ -382,6 +384,7 @@ public class TestTFTData
             Path selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
             if (!Files.exists(selfBin))
             {
+                System.out.println("Unable to find bin file for: " + selfBin);
                 continue;
             }
             
@@ -484,6 +487,7 @@ public class TestTFTData
             
             if (mName.contains("Template"))
             {
+                System.out.println("Skipping trait: " + mName);
                 continue;
             }
             

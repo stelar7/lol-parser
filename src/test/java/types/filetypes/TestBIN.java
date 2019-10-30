@@ -538,7 +538,7 @@ public class TestBIN
     
     @Test
     public void testStuff() {
-        Path    file    = Paths.get("C:\\Riot Games\\LoR\\live\\Game\\LoR_Data\\StreamingAssets\\EmbeddedGamePlayData\\LocalizedText_en_us.bin");
+        Path    file    = Paths.get("D:\\pbe\\data\\maps\\shipping\\map22\\map22.bin");
         BINFile data    = parser.parse(file);
         System.out.println(data.toJson());
     }
