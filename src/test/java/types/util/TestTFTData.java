@@ -305,28 +305,24 @@ public class TestTFTData
             o.put("from", fromCont.map(a -> ((BINContainer) a.getValue()).getData()).orElse(new ArrayList<>()));
             
             
-            List<Map<String, Object>> effects = new ArrayList<>();
-            
-            Optional<BINValue> effectCont = item.get("EffectAmounts");
+            Map<String, Object> effects    = new HashMap<>();
+            Optional<BINValue>  effectCont = item.get("EffectAmounts");
             if (effectCont.isPresent())
             {
-                List<Object> effectContainer = ((BINContainer) effectCont.get().getValue()).getData();
-                for (Object effectObj : effectContainer)
+                List<Object> effectVars = ((BINContainer) effectCont.get().getValue()).getData();
+                for (Object var : effectVars)
                 {
-                    BINStruct effect = (BINStruct) effectObj;
-                    
-                    BINValue nameVal = effect.getIfPresent("name");
-                    String   nameKey = (String) nameVal.getValue();
-                    String   name    = nameKey;
-                    if (nameVal.getType() == BINValueType.STRING_HASH)
+                    BINStruct effectVar = (BINStruct) var;
+                    if (effectVar.getData().size() == 0)
                     {
-                        name = HashHandler.getBinHashes().getOrDefault(nameKey, nameKey);
+                        continue;
                     }
                     
-                    Map<String, Object> temp = new LinkedHashMap<>();
-                    temp.put("name", name);
-                    temp.put("value", effect.get("value").map(BINValue::getValue).orElse(null));
-                    effects.add(temp);
+                    String nameHash     = (String) effectVar.get("name").map(BINValue::getValue).orElse("null");
+                    String unhashedName = HashHandler.getBinHashes().getOrDefault(nameHash, nameHash);
+                    
+                    Object value = effectVar.get("value").map(BINValue::getValue).orElse("null");
+                    effects.put(unhashedName, value);
                 }
             }
             
@@ -515,33 +511,28 @@ public class TestTFTData
                 }
                 
                 
-                List<Map<String, Object>> vars          = new ArrayList<>();
-                Optional<BINValue>        effectVarsObj = effect.get("EffectAmounts");
+                Map<String, Object> inner         = new HashMap<>();
+                Optional<BINValue>  effectVarsObj = effect.get("EffectAmounts");
                 if (effectVarsObj.isPresent())
                 {
                     List<Object> effectVars = ((BINContainer) effect.getIfPresent("EffectAmounts").getValue()).getData();
                     for (Object var : effectVars)
                     {
-                        BINStruct           effectVar = (BINStruct) var;
-                        Map<String, Object> inner     = new LinkedHashMap<>();
-                        
-                        for (BINValue value : ((BINStruct) var).getData())
+                        BINStruct effectVar = (BINStruct) var;
+                        if (effectVar.getData().size() == 0)
                         {
-                            if (value.getType() == BINValueType.STRING_HASH)
-                            {
-                                String key = (String) value.getValue();
-                                inner.put(value.getHash(), HashHandler.getBinHashes().getOrDefault(key, key));
-                            } else
-                            {
-                                inner.put(value.getHash(), value.getValue());
-                            }
+                            continue;
                         }
                         
-                        vars.add(inner);
+                        String nameHash     = (String) effectVar.get("name").map(BINValue::getValue).orElse("null");
+                        String unhashedName = HashHandler.getBinHashes().getOrDefault(nameHash, nameHash);
+                        
+                        Object value = effectVar.get("value").map(BINValue::getValue).orElse("null");
+                        inner.put(unhashedName, value);
                     }
                 }
                 
-                data.put("vars", vars);
+                data.put("variables", inner);
                 effects.add(data);
             }
             
