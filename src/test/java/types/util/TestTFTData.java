@@ -468,7 +468,7 @@ public class TestTFTData
             
             for (Entry<Integer, TFTSetInfo> setEntry : sets.entrySet())
             {
-                if (setEntry.getValue().characters.contains(mName))
+                if (setEntry.getValue().characters.contains(mName.toLowerCase()))
                 {
                     setEntry.getValue().champData.add(champion);
                 }
@@ -571,7 +571,7 @@ public class TestTFTData
                 for (Object l : cont.getData())
                 {
                     String unhashedKey = HashHandler.getBinHashes().getOrDefault(String.valueOf(l), String.valueOf(l));
-                    characters.add(characterOffsetLookup.get(unhashedKey));
+                    characters.add(characterOffsetLookup.get(unhashedKey).toLowerCase());
                 }
             }
             
