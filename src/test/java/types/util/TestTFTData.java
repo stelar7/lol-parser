@@ -161,38 +161,7 @@ public class TestTFTData
         
         if (exportImages)
         {
-            DDSParser d = new DDSParser();
-            outputSetMap.forEach((setId, setInfoData) -> {
-                List<Map<String, Object>> champInfo = (List<Map<String, Object>>) setInfoData.get("champions");
-                champInfo.forEach((v) -> {
-                    String splashPath = (String) v.get("splash");
-                    Path   splash     = inputFolder.resolve(splashPath);
-                    splash = renameIfNotExists(splash);
-                    exportAndRenameIfNeeded(outputFolder, d, splashPath, splash);
-                    
-                    String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
-                    Path   ability     = inputFolder.resolve(abilityPath);
-                    ability = renameIfNotExists(ability);
-                    exportAndRenameIfNeeded(outputFolder, d, abilityPath, ability);
-                });
-                
-                Set<Map<String, Object>> traitInfo = (Set<Map<String, Object>>) setInfoData.get("traits");
-                traitInfo.forEach((v) -> {
-                    String iconPath = (String) v.get("icon");
-                    Path   icon     = inputFolder.resolve(iconPath);
-                    
-                    icon = renameIfNotExists(icon);
-                    exportAndRenameIfNeeded(outputFolder, d, iconPath, icon);
-                });
-            });
-            
-            itemData.forEach((k, v) -> {
-                String iconPath = (String) v.get("icon");
-                Path   icon     = inputFolder.resolve(iconPath);
-                
-                icon = renameIfNotExists(icon);
-                exportAndRenameIfNeeded(outputFolder, d, iconPath, icon);
-            });
+            exportImages(inputFolder, outputFolder, outputSetMap, itemData);
         }
         
         
@@ -216,6 +185,45 @@ public class TestTFTData
                               e.printStackTrace();
                           }
                       });
+    }
+    
+    private void exportImages(Path inputFolder, Path outputFolder, Map<Integer, Map<String, Object>> outputSetMap, Map<Integer, Map<String, Object>> itemData)
+    {
+        DDSParser ddsParser = new DDSParser();
+        
+        outputSetMap.forEach((setId, setInfoData) -> {
+            
+            List<Map<String, Object>> champInfo = (List<Map<String, Object>>) setInfoData.get("champions");
+            champInfo.forEach((v) -> {
+                String splashPath = (String) v.get("splash");
+                Path   splash     = inputFolder.resolve(splashPath);
+                splash = renameIfNotExists(splash);
+                exportAndRenameIfNeeded(outputFolder, ddsParser, splashPath, splash);
+                
+                String abilityPath = (String) ((Map<String, Object>) v.get("ability")).get("icon");
+                Path   ability     = inputFolder.resolve(abilityPath);
+                ability = renameIfNotExists(ability);
+                exportAndRenameIfNeeded(outputFolder, ddsParser, abilityPath, ability);
+            });
+            
+            List<Map<String, Object>> traitInfo = (List<Map<String, Object>>) setInfoData.get("traits");
+            traitInfo.forEach((v) -> {
+                String iconPath = (String) v.get("icon");
+                Path   icon     = inputFolder.resolve(iconPath);
+                
+                icon = renameIfNotExists(icon);
+                exportAndRenameIfNeeded(outputFolder, ddsParser, iconPath, icon);
+            });
+            
+        });
+        
+        itemData.forEach((k, v) -> {
+            String iconPath = (String) v.get("icon");
+            Path   icon     = inputFolder.resolve(iconPath);
+            
+            icon = renameIfNotExists(icon);
+            exportAndRenameIfNeeded(outputFolder, ddsParser, iconPath, icon);
+        });
     }
     
     private Path renameIfNotExists(Path path)
@@ -267,11 +275,16 @@ public class TestTFTData
                     renamedHashes.add(traitName);
                 }
                 champInfo.put("traits", renamedHashes);
-                
             }
-            inf.put("traits", setTraitData);
-            inf.put("champions", setInfoEntry.getValue().champData);
             
+            List<Map<String, Object>> champions = setInfoEntry.getValue().champData;
+            champions.sort(Comparator.comparing(a -> (int) a.get("id")));
+            
+            List<Map<String, Object>> traits = new ArrayList<>(setTraitData);
+            traits.sort(Comparator.comparing(a -> (String) a.get("name")));
+            
+            inf.put("traits", traits);
+            inf.put("champions", champions);
             setMap.put(setInfoEntry.getKey(), inf);
         }
         
@@ -368,10 +381,10 @@ public class TestTFTData
             BINFile realData = parser.parse(closestPath);
             int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).getIfPresent("championId").getValue();
             
-            champion.put("name", realName); // dirty hack for lux having the same name key across elements
-            //champion.put("name", champ.getIfPresent("C3143D66").getValue());
-            
+            champion.put("API_name", mName);
+            champion.put("name", champ.getIfPresent("C3143D66").getValue());
             champion.put("id", id);
+            
             int rarity    = champ.get("mRarity").map(BINValue::getValue).map(a -> ((byte) a) + 1).orElse(1);
             int increment = (int) Math.floor(rarity / 6f); // dirty hack for lux being a 7 cost
             champion.put("cost", rarity + increment);
