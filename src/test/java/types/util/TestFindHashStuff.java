@@ -73,6 +73,11 @@ public class TestFindHashStuff
     }
     
     @Test
+    public void testBinHash() {
+        System.out.println(HashHandler.getBINHash(""));
+    }
+    
+    @Test
     public void checkNewFiles() throws IOException
     {
         Path binPath      = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
