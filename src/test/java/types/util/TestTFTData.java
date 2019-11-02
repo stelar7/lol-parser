@@ -154,8 +154,15 @@ public class TestTFTData
         parseChampionInfo(champFileParent, parser, map22, setData);
         
         Map<Integer, Map<String, Object>> outputSetMap = generateSetMap(setData, traitData, outputObject);
-        Map<Integer, Map<String, Object>> itemData     = parseItemInfo(map22);
-        outputObject.put("items", itemData);
+        Map<Integer, Map<String, Object>> itemData     = parseItemInfo(map22, outputObject);
+        
+        Map<String, TFTRound> roundMap     = parseRoundInfo(map22);
+        Map<String, TFTStage> stageMap     = parseStageMap(map22);
+        List<String>          stageOffsets = parseStageList(map22);
+        
+        outputObject.put("rounds", roundMap);
+        outputObject.put("stages", stageMap);
+        outputObject.put("stageOrder", stageOffsets);
         
         String data = UtilHandler.getGson().toJson(outputObject);
         
@@ -185,6 +192,82 @@ public class TestTFTData
                               e.printStackTrace();
                           }
                       });
+    }
+    
+    private List<String> parseStageList(BINFile map22)
+    {
+        List<String> stages = new ArrayList<>();
+        
+        BINContainer stageOrderOffsetList = (BINContainer) map22.getByType("01D7548E").get(0).getIfPresent("4FF2F38F").getValue();
+        stageOrderOffsetList.getData().stream().map(a -> (String) a).forEach(stages::add);
+        
+        return stages;
+    }
+    
+    
+    static class TFTStage
+    {
+        String       name;
+        List<String> rounds = new ArrayList<>();
+    }
+    
+    private Map<String, TFTStage> parseStageMap(BINFile map22)
+    {
+        Map<String, TFTStage> stages = new HashMap<>();
+        
+        map22.getByType("F737DEF9").forEach(e -> {
+            TFTStage stage = new TFTStage();
+            stage.name = (String) e.getIfPresent("mName").getValue();
+            
+            BINContainer entries = (BINContainer) e.getIfPresent("20ABF669").getValue();
+            entries.getData().stream().map(a -> (String) a).forEach(a -> stage.rounds.add(a));
+            stages.put(e.getHash(), stage);
+        });
+        
+        return stages;
+    }
+    
+    static class TFTRound
+    {
+        String             name;
+        Map<String, Float> phases = new HashMap<>();
+        String             roundType;
+    }
+    
+    private Map<String, TFTRound> parseRoundInfo(BINFile map22)
+    {
+        Map<String, TFTRound> roundInfo = new HashMap<>();
+        
+        Map<String, String> phaseNames = new HashMap<>()
+        {{
+            put("0B0AE6F9", "TFT_phase_title_shopping");
+            put("A35DB49D", "TFT_phase_title_arrival");
+            put("FD870D28", "TFT_phase_title_overtime");
+            put("F84A6A84", "TFT_phase_title_departure");
+        }};
+        
+        map22.getByType("F4A6BB27").forEach(e -> {
+            TFTRound round = new TFTRound();
+            round.name = (String) e.getIfPresent("mName").getValue();
+            
+            
+            phaseNames.keySet().forEach(p -> {
+                BINStruct internal = (BINStruct) e.getIfPresent(p).getValue();
+                if (internal.get("mEnabled").map(BINValue::getValue).map(a -> (boolean) a).orElse(false))
+                {
+                    String name     = (String) internal.get("C5E20B46").map(BINValue::getValue).orElse(phaseNames.get(p));
+                    float  duration = (float) internal.getIfPresent("85F7D4C8").getValue();
+                    round.phases.put(name, duration);
+                }
+            });
+            
+            BINMap typeMap = (BINMap) e.getIfPresent("78F60753").getValue();
+            round.roundType = (String) typeMap.get("RoundType").map(a -> (BINStruct) a).map(a -> a.getIfPresent("mValue")).get().getValue();
+            
+            roundInfo.put(e.getHash(), round);
+        });
+        
+        return roundInfo;
     }
     
     private void exportImages(Path inputFolder, Path outputFolder, Map<Integer, Map<String, Object>> outputSetMap, Map<Integer, Map<String, Object>> itemData)
@@ -292,7 +375,7 @@ public class TestTFTData
         return setMap;
     }
     
-    private Map<Integer, Map<String, Object>> parseItemInfo(BINFile map22)
+    private Map<Integer, Map<String, Object>> parseItemInfo(BINFile map22, Map<String, Object> outputObject)
     {
         Map<String, Object>               itemLookup = new LinkedHashMap<>();
         Map<Integer, Map<String, Object>> itemData   = new TreeMap<>();
@@ -356,6 +439,8 @@ public class TestTFTData
             
             fromObject.put("from", newFrom);
         }
+        
+        outputObject.put("items", itemData);
         return itemData;
     }
     

@@ -74,7 +74,7 @@ public class TestFindHashStuff
     
     @Test
     public void testBinHash() {
-        System.out.println(HashHandler.getBINHash(""));
+        System.out.println(HashHandler.getBINHash("Loadouts/TFTMapSkins/Base_D"));
     }
     
     @Test
