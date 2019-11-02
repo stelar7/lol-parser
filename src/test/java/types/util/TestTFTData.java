@@ -444,8 +444,8 @@ public class TestTFTData
             
             String finalSpellName = spellName;
             
-            List<Map<String, Object>> abilityVars = new ArrayList<>();
-            List<BINEntry>            elems       = data.getByType("SpellObject");
+            Map<String, Object> abilityVars = new LinkedHashMap<>();
+            List<BINEntry>      elems       = data.getByType("SpellObject");
             for (BINEntry elem : elems)
             {
                 if (elem.getIfPresent("mScriptName").getValue().equals(spellName))
@@ -454,20 +454,10 @@ public class TestTFTData
                     List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
                     for (Object variableObj : dataValues)
                     {
-                        BINStruct variable = (BINStruct) variableObj;
-                        
-                        
-                        Map<String, Object> currentVar = new LinkedHashMap<>();
-                        currentVar.put("key", variable.getIfPresent("mName").getValue());
-                        
-                        Optional<BINValue> valuesContainer = variable.get("mValues");
-                        if (valuesContainer.isPresent())
-                        {
-                            BINContainer values = (BINContainer) variable.getIfPresent("mValues").getValue();
-                            currentVar.put("values", values.getData());
-                        }
-                        
-                        abilityVars.add(currentVar);
+                        BINStruct    variable = (BINStruct) variableObj;
+                        String       key      = (String) variable.getIfPresent("mName").getValue();
+                        List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
+                        abilityVars.put(key, values);
                     }
                     break;
                 }
