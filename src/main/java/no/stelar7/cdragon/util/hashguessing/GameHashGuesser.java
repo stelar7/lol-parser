@@ -31,6 +31,7 @@ public class GameHashGuesser extends HashGuesser
             Files.walk(pbe)
                  .filter(UtilHandler.IS_BIN_PREDICATE)
                  .map(parser::parse)
+                 .filter(Objects::nonNull)
                  .flatMap(b -> b.getLinkedFiles().stream())
                  .forEach(this::check);
         } catch (IOException e)

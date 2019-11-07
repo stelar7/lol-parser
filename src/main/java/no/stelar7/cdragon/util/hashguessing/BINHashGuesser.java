@@ -33,7 +33,9 @@ public class BINHashGuesser extends HashGuesser
                 BINParser parser = new BINParser();
                 files = Files.walk(dataPath)
                              .filter(UtilHandler.IS_BIN_PREDICATE)
-                             .map(parser::parse).collect(Collectors.toList());
+                             .map(parser::parse)
+                             .filter(Objects::nonNull)
+                             .collect(Collectors.toList());
                 
             } catch (Exception e)
             {
