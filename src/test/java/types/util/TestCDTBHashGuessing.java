@@ -59,6 +59,8 @@ public class TestCDTBHashGuessing
         guesser.substituteRegionLang();
         guesser.substituteBasenames();
         guesser.substitutePlugins();
+        guesser.saveToBackup();
+        
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
         guesser.saveToBackup();

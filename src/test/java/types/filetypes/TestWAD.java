@@ -388,6 +388,12 @@ public class TestWAD
                  try
                  {
                      BINFile parsed = bp.parse(file);
+                     
+                     if(parsed == null) {
+                         System.out.println();
+                         return;
+                     }
+                     
                      Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
                      //file.toFile().deleteOnExit();
