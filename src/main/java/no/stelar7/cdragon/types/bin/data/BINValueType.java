@@ -28,13 +28,21 @@ public enum BINValueType
     V3_SHORT(0),
     V4_FLOAT(13),
     EMBEDDED(20),
-    FLOAT(10),;
+    FLOAT(10),
+    ;
     
     public int value;
     
-    public static BINValueType valueOf(int value)
+    
+    public static BINValueType valueOf(byte value)
     {
-        return Stream.of(values()).filter(t -> t.value == value).findAny().orElseThrow(() -> new RuntimeException("Unknown Type: " + value));
+        // values greater than 128 have an extra bit set, so unset it and shift acordingly
+        int[] check = {Byte.toUnsignedInt(value)};
+        if (check[0] >= 128)
+        {
+            check[0] = check[0] - 110;
+        }
+        return Stream.of(values()).filter(t -> t.value == check[0]).findAny().orElseThrow(() -> new RuntimeException("Unknown Type: " + value));
     }
     
     BINValueType(int value)

@@ -59,4 +59,39 @@ public class BINStruct
     {
         this.data = data;
     }
+    
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        BINStruct binStruct = (BINStruct) o;
+        return size == binStruct.size &&
+               count == binStruct.count &&
+               Objects.equals(hash, binStruct.hash) &&
+               Objects.equals(data, binStruct.data);
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(hash, size, count, data);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "BINStruct{" +
+               "hash='" + hash + '\'' +
+               ", size=" + size +
+               ", count=" + count +
+               ", data=" + data +
+               '}';
+    }
 }

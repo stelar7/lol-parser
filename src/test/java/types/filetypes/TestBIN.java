@@ -33,6 +33,15 @@ public class TestBIN
     }
     
     @Test
+    public void testHeaderless() throws IOException
+    {
+        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("cdragon/bin/tftoutofgamecharacterdata.bin");
+        BINFile data    = parser.parse(file);
+        String  content = data.toJson();
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+    
+    @Test
     public void testBINCompare()
     {
         Path file  = UtilHandler.CDRAGON_FOLDER.resolve("anivia.bin");
@@ -537,9 +546,10 @@ public class TestBIN
     }
     
     @Test
-    public void testStuff() {
-        Path    file    = Paths.get("D:\\pbe\\data\\maps\\shipping\\map22\\map22.bin");
-        BINFile data    = parser.parse(file);
+    public void testStuff()
+    {
+        Path    file = Paths.get("D:\\pbe\\data\\maps\\shipping\\map22\\map22.bin");
+        BINFile data = parser.parse(file);
         System.out.println(data.toJson());
     }
 }

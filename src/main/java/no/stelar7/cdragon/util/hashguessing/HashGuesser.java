@@ -152,6 +152,8 @@ public abstract class HashGuesser
     
     public abstract String generateHash(String val);
     
+    boolean hasPrinted = false;
+    
     /**
      * returns false if there are no more hashes
      */
@@ -188,7 +190,11 @@ public abstract class HashGuesser
         
         if (this.unknown.isEmpty())
         {
-            System.out.println("No more unknown hashes!");
+            if (!hasPrinted)
+            {
+                System.out.println("No more unknown hashes!");
+                hasPrinted = false;
+            }
             return false;
         }
         return true;

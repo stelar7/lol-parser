@@ -2,9 +2,9 @@ package no.stelar7.cdragon.types.bin;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
-import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.nio.ByteOrder;
@@ -22,7 +22,30 @@ public class BINParser implements Parseable<BINFile>
         file.setHeader(parseHeader(file, raf));
         if (file.getHeader() == null)
         {
-            return null;
+            try
+            {
+                // some binfiles are just a container, so lets try to parse it...
+                raf.seek(0);
+                Object temp = readByType(BINValueType.CONTAINER, raf);
+                
+                BINValue value = new BINValue();
+                value.setType(BINValueType.CONTAINER);
+                value.setHash("00000000");
+                value.setValue(temp);
+                
+                BINEntry entry = new BINEntry();
+                entry.setType("headerless container");
+                entry.setHash("00000000");
+                entry.getValues().add(value);
+                
+                file.getEntries().add(entry);
+                
+                return file;
+            } catch (Exception e)
+            {
+                System.out.println(e.getMessage() + " at position " + raf.pos());
+                return null;
+            }
         }
         
         parseEntries(file, raf);
@@ -215,7 +238,9 @@ public class BINParser implements Parseable<BINFile>
             case BOOLEAN_FLAGS:
                 return raf.readBoolean();
             default:
-                throw new RuntimeException("Unknown type: " + type + " at location: " + (raf.pos() - 1));
+                int pos = raf.pos() - 1;
+                byte[] data = raf.readBytes(20);
+                throw new RuntimeException("Unknown type: " + type + " at location: " + pos + ": " + Arrays.toString(data));
         }
     }
     
