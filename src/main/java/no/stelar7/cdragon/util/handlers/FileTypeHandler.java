@@ -127,6 +127,12 @@ public final class FileTypeHandler
             return "wpk";
         }
         
+        if (FileTypeHandler.isProbableRST(magic))
+        {
+            // files are saved as txt, but should be rst?
+            return "txt";
+        }
+        
         String result = FileTypeHandler.getMagicNumbers().get(magic.copyOfRange(0, 4));
         if (result != null)
         {
