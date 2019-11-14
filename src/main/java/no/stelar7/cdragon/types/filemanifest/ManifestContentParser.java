@@ -15,7 +15,7 @@ public class ManifestContentParser
     
     public ManifestContentFileV0 parseV0(ByteArray data)
     {
-        return parseV0(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parseV0(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     public ManifestContentFileV0 parseV0(RandomAccessReader raf)
@@ -45,7 +45,7 @@ public class ManifestContentParser
     
     public ManifestContentFileV1 parseV1(ByteArray data)
     {
-        return parseV1(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parseV1(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     public ManifestContentFileV1 parseV1(RandomAccessReader raf)
@@ -74,7 +74,7 @@ public class ManifestContentParser
     
     public ManifestContentFileV2 parseV2(ByteArray data)
     {
-        return parseV2(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parseV2(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     public ManifestContentFileV2 parseV2(RandomAccessReader raf)

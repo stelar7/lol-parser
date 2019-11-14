@@ -39,7 +39,7 @@ public class DDSParser implements Parseable<BufferedImage>
                 data = new ByteArray(parser.parse(data).getMipMaps().getTextureData().get(0).getData());
             }
             
-            return ImageIO.read(new ByteArrayInputStream(data.getData()));
+            return ImageIO.read(new ByteArrayInputStream(data.getDataRaw()));
         } catch (IOException e)
         {
             e.printStackTrace();

@@ -21,7 +21,7 @@ public class ReleasemanifestParser implements Parseable<ReleasemanifestDirectory
     @Override
     public ReleasemanifestDirectory parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

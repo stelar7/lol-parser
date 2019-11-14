@@ -22,7 +22,7 @@ public class KTX2Parser implements Parseable<KTX2File>
     @Override
     public KTX2File parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

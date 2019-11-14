@@ -134,7 +134,7 @@ public class SwingViewer
                     {
                         if (FileTypeHandler.isImageFormat(file.getName()))
                         {
-                            try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ByteArrayInputStream bis = new ByteArrayInputStream(files.get(file).getData()))
+                            try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ByteArrayInputStream bis = new ByteArrayInputStream(files.get(file).getDataRaw()))
                             {
                                 BufferedImage image = ImageIO.read(bis);
                                 ImageIO.write(image, "png", bos);
@@ -142,7 +142,7 @@ public class SwingViewer
                             }
                         } else
                         {
-                            Files.write(parent.resolve(file.getName()), files.get(file).getData());
+                            Files.write(parent.resolve(file.getName()), files.get(file).getDataRaw());
                         }
                     }
                 }
@@ -308,7 +308,7 @@ public class SwingViewer
                     try
                     {
                         ByteArray            bContent = data.getContent();
-                        ByteArrayInputStream is       = new ByteArrayInputStream(bContent.getData());
+                        ByteArrayInputStream is       = new ByteArrayInputStream(bContent.getDataRaw());
                         BufferedImage        image    = ImageIO.read(is);
                         JLabel               label    = new JLabel(new ImageIcon(image));
                         contentPane.setViewportView(label);
@@ -319,7 +319,7 @@ public class SwingViewer
                 } else if (FileTypeHandler.isTextFormat(filename))
                 {
                     ByteArray bContent = data.getContent();
-                    JTextArea label    = new JTextArea(new String(data.getContent().getData(), StandardCharsets.UTF_8));
+                    JTextArea label    = new JTextArea(new String(data.getContent().getDataRaw(), StandardCharsets.UTF_8));
                     label.setEditable(false);
                     contentPane.setViewportView(label);
                 } else if (filename.endsWith(".bin"))

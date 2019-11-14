@@ -769,10 +769,10 @@ public class WEMData
             for (int i = 0; i < channels; i++)
             {
                 ByteArray baw = new ByteArray(data);
-                ba[offset + writes] = baw.copyOfRange(i * bps, 1).getData()[0];
-                ba[offset + writes + 1] = baw.copyOfRange(i * bps + 1, 1).getData()[0];
-                ba[offset + writes + 2] = baw.copyOfRange(i * bps + 2, 1).getData()[0];
-                ba[offset + writes + 3] = baw.copyOfRange(i * bps + 3, 1).getData()[0];
+                ba[offset + writes] = baw.copyOfRange(i * bps, 1).getDataRaw()[0];
+                ba[offset + writes + 1] = baw.copyOfRange(i * bps + 1, 1).getDataRaw()[0];
+                ba[offset + writes + 2] = baw.copyOfRange(i * bps + 2, 1).getDataRaw()[0];
+                ba[offset + writes + 3] = baw.copyOfRange(i * bps + 3, 1).getDataRaw()[0];
                 writes += 4;
             }
             
@@ -781,10 +781,10 @@ public class WEMData
                 for (int i = 0; i < channels; i++)
                 {
                     ByteArray baw = new ByteArray(data);
-                    ba[offset + writes] = baw.copyOfRange(i * bps + 4 + j + 0, 1).getData()[0];
-                    ba[offset + writes + 1] = baw.copyOfRange(i * bps + 4 + j + 1, 1).getData()[0];
-                    ba[offset + writes + 2] = baw.copyOfRange(i * bps + 4 + j + 2, 1).getData()[0];
-                    ba[offset + writes + 3] = baw.copyOfRange(i * bps + 4 + j + 3, 1).getData()[0];
+                    ba[offset + writes] = baw.copyOfRange(i * bps + 4 + j + 0, 1).getDataRaw()[0];
+                    ba[offset + writes + 1] = baw.copyOfRange(i * bps + 4 + j + 1, 1).getDataRaw()[0];
+                    ba[offset + writes + 2] = baw.copyOfRange(i * bps + 4 + j + 2, 1).getDataRaw()[0];
+                    ba[offset + writes + 3] = baw.copyOfRange(i * bps + 4 + j + 3, 1).getDataRaw()[0];
                     writes += 4;
                 }
             }

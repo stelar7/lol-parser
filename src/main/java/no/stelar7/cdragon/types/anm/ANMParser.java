@@ -21,7 +21,7 @@ public class ANMParser implements Parseable<ANMFile>
     @Override
     public ANMFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

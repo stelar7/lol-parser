@@ -188,7 +188,7 @@ public class WADParser implements Parseable<WADFile>
     @Override
     public WADFile parse(ByteArray data)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN))
+        try (RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN))
         {
             return parse(raf);
         }

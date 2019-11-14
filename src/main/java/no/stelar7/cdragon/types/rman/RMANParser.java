@@ -220,7 +220,7 @@ public class RMANParser implements Parseable<RMANFile>
     @Override
     public RMANFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

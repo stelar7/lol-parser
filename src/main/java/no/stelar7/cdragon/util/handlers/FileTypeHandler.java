@@ -25,10 +25,10 @@ public final class FileTypeHandler
         
         if (FileTypeHandler.isProbableBOM(magic))
         {
-            return findFileType(magic.copyOfRange(3, magic.getData().length));
+            return findFileType(magic.copyOfRange(3));
         }
         
-        if (!(magic.getData().length > 3))
+        if (!(magic.getDataRaw().length > 3))
         {
             if (isProbableJSON(magic))
             {
@@ -256,7 +256,7 @@ public final class FileTypeHandler
     private static boolean isProbableHLS(ByteArray magic)
     {
         boolean probableShader = false;
-        String  content        = new String(magic.getData());
+        String  content        = new String(magic.getDataRaw());
         probableShader |= content.contains("#include ");
         probableShader |= content.contains("void main(VERTEX");
         probableShader |= content.contains("// Shader");
@@ -266,12 +266,12 @@ public final class FileTypeHandler
     
     private static boolean isProbableGLSLV(ByteArray magic)
     {
-        return new String(magic.getData()).contains("// glslv output by Cg compiler");
+        return new String(magic.getDataRaw()).contains("// glslv output by Cg compiler");
     }
     
     private static boolean isProbableGLSLF(ByteArray magic)
     {
-        return new String(magic.getData()).contains("// glslf output by Cg compiler");
+        return new String(magic.getDataRaw()).contains("// glslf output by Cg compiler");
     }
     
     private static boolean isProbableKTX(ByteArray magic)
@@ -281,7 +281,7 @@ public final class FileTypeHandler
     
     private static boolean isProbableCSO(ByteArray magic)
     {
-        return new String(magic.getData()).contains("Microsoft (R) HLSL Shader Compiler");
+        return new String(magic.getDataRaw()).contains("Microsoft (R) HLSL Shader Compiler");
     }
     
     private static boolean isProbableCGC(ByteArray magic)
@@ -414,7 +414,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableBOM(ByteArray wrapper)
     {
-        byte[]  data       = wrapper.getData();
+        byte[]  data       = wrapper.getDataRaw();
         boolean isUTF8BOM  = isSame(data[0], (byte) 0xEF) && isSame(data[1], (byte) 0xBB) && isSame(data[2], (byte) 0xBF);
         boolean isUTF16BOM = isSame(data[0], (byte) 0xFE) && isSame(data[1], (byte) 0xFF);
         boolean isUTF32BOM = isSame(data[0], (byte) 0x00) && isSame(data[1], (byte) 0x00) && isSame(data[2], (byte) 0xFE) && isSame(data[3], (byte) 0xFF);
@@ -473,7 +473,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableCSS(ByteArray wrapper)
     {
-        byte[]  data  = wrapper.getData();
+        byte[]  data  = wrapper.getDataRaw();
         boolean isCSS = isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x62) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6F);
         
         isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x70) && isSame(data[2], (byte) 0x6C) && isSame(data[3], (byte) 0x6E);
@@ -500,7 +500,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableJavascript(ByteArray wrapper)
     {
-        byte[]  data = wrapper.getData();
+        byte[]  data = wrapper.getDataRaw();
         boolean isJS = isSame(data[0], (byte) 0x21) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x75) && isSame(data[3], (byte) 0x6E);
         
         isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x65) && isSame(data[2], (byte) 0x62) && isSame(data[3], (byte) 0x70);
@@ -515,7 +515,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableHTML(ByteArray wrapper)
     {
-        byte[]  data   = wrapper.getData();
+        byte[]  data   = wrapper.getDataRaw();
         boolean isHTML = isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x72);
         
         isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x21) && isSame(data[2], (byte) 0x64) && isSame(data[3], (byte) 0x6F);
@@ -539,7 +539,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableTXT(ByteArray wrapper)
     {
-        byte[]    data        = wrapper.getData();
+        byte[]    data        = wrapper.getDataRaw();
         ByteArray checkTarget = new ByteArray(Arrays.copyOf(data, 3));
         boolean   isTXT       = new String(data, StandardCharsets.UTF_8).isEmpty();
         
@@ -642,9 +642,9 @@ public final class FileTypeHandler
         if (!isSKL)
         {
             // edge case where the filetype is determined by the first bytes being equal to the filesize
-            ByteBuffer b     = ByteBuffer.wrap(wrapper.copyOfRange(0, 4).getData()).order(ByteOrder.LITTLE_ENDIAN);
+            ByteBuffer b     = ByteBuffer.wrap(wrapper.copyOfRange(0, 4).getDataRaw()).order(ByteOrder.LITTLE_ENDIAN);
             int        guess = b.getInt();
-            if (guess == wrapper.getData().length)
+            if (guess == wrapper.getDataRaw().length)
             {
                 return true;
             }
@@ -658,6 +658,11 @@ public final class FileTypeHandler
         boolean isEqual = wrapper.equals(new ByteArray("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
         isEqual |= wrapper.equals(new ByteArray("r3d2canm".getBytes(StandardCharsets.UTF_8)));
         return isEqual;
+    }
+    
+    public static boolean isProbableRST(ByteArray wrapper)
+    {
+        return wrapper.startsWith(new ByteArray("RST".getBytes(StandardCharsets.UTF_8)));
     }
     
     public static boolean isProbableBNK(ByteArray wrapper)
@@ -709,6 +714,7 @@ public final class FileTypeHandler
         List<String> types = Arrays.asList(".png", ".jpg", ".jpeg", ".dds");
         return types.stream().anyMatch(name.toLowerCase(Locale.ENGLISH)::endsWith);
     }
+    
     
     //</editor-fold>
     

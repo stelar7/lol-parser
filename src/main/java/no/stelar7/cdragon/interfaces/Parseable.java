@@ -16,7 +16,7 @@ public interface Parseable<T>
     
     default T parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     T parse(RandomAccessReader raf);

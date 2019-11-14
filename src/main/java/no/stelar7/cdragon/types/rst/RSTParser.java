@@ -20,7 +20,7 @@ public class RSTParser implements Parseable<RSTFile>
     @Override
     public RSTFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override
@@ -43,18 +43,25 @@ public class RSTParser implements Parseable<RSTFile>
             return null;
         }
         
+        file.setMagic(magic);
+        file.setMajor(major);
+        file.setMinor(minor);
+        
         if (minor == 1)
         {
             int    configLength = raf.readInt();
             String config       = raf.readString(configLength);
+            
+            file.setConfig(config);
         }
         
-        List<Pair<Long, Long>> entries    = new ArrayList<>();
-        int                    entryCount = raf.readInt();
+        List<Pair<Integer, Long>> entries = new ArrayList<>();
+        
+        int entryCount = raf.readInt();
         for (int i = 0; i < entryCount; i++)
         {
             long hash = raf.readLong();
-            entries.add(new Pair<>(hash >>> 40, hash & 0xFFFFFFFFFFL));
+            entries.add(new Pair<>(Math.toIntExact(hash >>> 40), hash & 0xFFFFFFFFFFL));
         }
         
         int endByte = raf.readByte();
@@ -63,19 +70,17 @@ public class RSTParser implements Parseable<RSTFile>
             System.out.println("End byte doesnt match minor");
         }
         
-        String            remaining = raf.readAsString();
-        Map<Long, String> result    = new HashMap<>();
-        entries.forEach(p -> {
-            int  offset = Math.toIntExact(p.getA());
-            long hash   = p.getB();
+        ByteArray remaining = new ByteArray(raf.readRemaining());
+        entries.stream()
+               .sorted(Comparator.comparing(Pair::getB))
+               .forEach(p -> {
+                   int  offset = Math.toIntExact(p.getA());
+                   long hash   = p.getB();
             
-            if (offset < remaining.length())
-            {
-                int    end   = remaining.indexOf('\0', offset);
-                String value = remaining.substring(offset, end > 0 ? end : remaining.length());
-                result.put(hash, value);
-            }
-        });
+                   ByteArray data  = remaining.copyOfRange(offset, remaining.indexOf(0x00, offset + 1));
+                   String    value = new String(data.getDataRaw());
+                   file.getEntries().put(hash, value);
+               });
         
         return file;
     }

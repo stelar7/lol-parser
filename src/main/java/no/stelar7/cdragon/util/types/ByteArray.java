@@ -1,5 +1,7 @@
 package no.stelar7.cdragon.util.types;
 
+import java.io.*;
+import java.nio.file.*;
 import java.util.Arrays;
 
 public final class ByteArray
@@ -15,6 +17,18 @@ public final class ByteArray
     {
         this.data = new byte[length];
         System.arraycopy(data, 0, this.data, 0, data.length);
+    }
+    
+    public static ByteArray fromFile(Path p)
+    {
+        try
+        {
+            return new ByteArray(Files.readAllBytes(p));
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public boolean indexMatch(int index, byte b)
@@ -59,17 +73,23 @@ public final class ByteArray
             return false;
         }
         
-        int len = Math.min(((ByteArray) other).data.length, data.length);
+        ByteArray otherObj = (ByteArray) other;
         
-        byte[] otherData = Arrays.copyOfRange(((ByteArray) other).data, 0, len);
+        int    len       = Math.min(otherObj.data.length, data.length);
+        byte[] otherData = Arrays.copyOfRange(otherObj.data, 0, len);
         byte[] selfData  = Arrays.copyOfRange(data, 0, len);
         
         return Arrays.equals(otherData, selfData);
     }
     
-    public byte[] getData()
+    public byte[] getDataCopy()
     {
         return Arrays.copyOf(data, data.length);
+    }
+    
+    public byte[] getDataRaw()
+    {
+        return data;
     }
     
     @Override
@@ -87,7 +107,15 @@ public final class ByteArray
     
     public ByteArray copyOfRange(int start, int end)
     {
-        return new ByteArray(Arrays.copyOfRange(getData(), start, end));
+        return new ByteArray(Arrays.copyOfRange(getDataRaw(), start, end));
+    }
+    
+    /**
+     * Returns the remaining bytes from start to data.length
+     */
+    public ByteArray copyOfRange(int start)
+    {
+        return copyOfRange(start, this.data.length);
     }
     
     public boolean endsWith(ByteArray bytes)
@@ -102,11 +130,23 @@ public final class ByteArray
     
     public int size()
     {
-        return this.getData().length;
+        return this.getDataRaw().length;
     }
     
     public boolean startsWith(ByteArray bytes)
     {
         return this.equals(bytes);
+    }
+    
+    public int indexOf(int value, int offset)
+    {
+        for (int j = offset; j < this.data.length; j++)
+        {
+            if (this.data[j] == value)
+            {
+                return j;
+            }
+        }
+        return -1;
     }
 }

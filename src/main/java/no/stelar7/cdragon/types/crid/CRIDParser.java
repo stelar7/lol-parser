@@ -68,7 +68,7 @@ public class CRIDParser implements Parseable<CRIDFile>
     @Override
     public CRIDFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.BIG_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.BIG_ENDIAN));
     }
     
     @Override

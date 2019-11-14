@@ -32,7 +32,7 @@ public class RBUNParser implements Parseable<RBUNFile>
     @Override
     public RBUNFile parse(ByteArray data)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN))
+        try (RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN))
         {
             return parse(raf);
         }

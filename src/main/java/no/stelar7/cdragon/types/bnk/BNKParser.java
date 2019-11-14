@@ -22,7 +22,7 @@ public class BNKParser implements Parseable<BNKFile>
     @Override
     public BNKFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

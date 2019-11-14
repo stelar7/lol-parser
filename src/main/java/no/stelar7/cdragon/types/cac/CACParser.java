@@ -20,7 +20,7 @@ public class CACParser implements Parseable<CACFile>
     @Override
     public CACFile parse(ByteArray data)
     {
-        return UtilHandler.getGson().fromJson(new String(data.getData(), StandardCharsets.UTF_8), CACFile.class);
+        return UtilHandler.getGson().fromJson(new String(data.getDataRaw(), StandardCharsets.UTF_8), CACFile.class);
     }
     
     @Override

@@ -15,7 +15,7 @@ public class BBQParser implements Parseable<BBQFile>
     @Override
     public BBQFile parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.BIG_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.BIG_ENDIAN));
     }
     
     @Override

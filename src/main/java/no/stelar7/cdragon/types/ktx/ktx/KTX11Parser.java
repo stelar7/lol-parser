@@ -21,7 +21,7 @@ public class KTX11Parser implements Parseable<KTX11File>
     @Override
     public KTX11File parse(ByteArray data)
     {
-        return parse(new RandomAccessReader(data.getData(), ByteOrder.LITTLE_ENDIAN));
+        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
     }
     
     @Override

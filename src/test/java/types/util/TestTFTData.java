@@ -3,10 +3,12 @@ package types.util;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.types.dds.DDSParser;
+import no.stelar7.cdragon.types.rst.*;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 import org.junit.jupiter.api.Test;
 
 import javax.imageio.ImageIO;
@@ -142,7 +144,7 @@ public class TestTFTData
         Path fontConfig      = inputFolder.resolve("data\\menu");
         Path champFileParent = inputFolder.resolve("data\\characters");
         
-        Map<String, Map<String, String>> descs = parseTranslationMaps(fontConfig);
+        Map<String, TranslationConfig> descs = parseTranslationMaps(fontConfig);
         
         BINParser           parser       = new BINParser();
         BINFile             map22        = parser.parse(traitFile);
@@ -164,33 +166,62 @@ public class TestTFTData
         outputObject.put("stages", stageMap);
         outputObject.put("stageOrder", stageOffsets);
         
-        String data = UtilHandler.getGson().toJson(outputObject);
-        
         if (exportImages)
         {
             exportImages(inputFolder, outputFolder, outputSetMap, itemData);
         }
         
+        String template = UtilHandler.getGson().toJson(outputObject);
         
         Files.createDirectories(outputFolder.resolve("TFT"));
-        Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), data.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), template.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         descs.keySet()
              .stream()
              .sorted()
              .forEach(lang ->
                       {
-                          Map<String, String> vals = descs.get(lang);
+                              /*
                           try
                           {
+                              todo
+                              TranslationConfig vals = descs.get(lang);
                               System.out.println("Generating files for " + lang);
                 
-                              final String[] alteredData = {data};
-                              vals.forEach((k, v) -> alteredData[0] = alteredData[0].replace(k, v));
-                              Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData[0].getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                              Map<String, Object> output = new HashMap<>(outputObject);
+                              ((Map<Integer, Map<String, Object>>) output.get("sets")).forEach((k, v) -> {
+                                  ((List<Map<String, Object>>) v.get("traits")).forEach(e -> {
+                                      e.put("name", vals.get((String) e.get("name")));
+                                      e.put("desc", vals.get((String) e.get("desc")));
+                                  });
+                    
+                                  ((List<Map<String, Object>>) v.get("champions")).forEach(e -> {
+                                      e.put("name", vals.get((String) e.get("name")));
+                        
+                                      List<String> clone = new ArrayList<>();
+                                      ((List<String>) e.get("traits")).forEach(e2 -> clone.add(vals.get((String) e2)));
+                                      e.put("traits", clone);
+                        
+                                      Map<String, Object> abs = (Map<String, Object>) e.get("ability");
+                                      abs.forEach((k2, v2) -> {
+                                          abs.put("name", vals.get((String) abs.get("name")));
+                                          abs.put("desc", vals.get((String) abs.get("desc")));
+                                      });
+                                  });
+                              });
+                
+                              ((Map<Integer, Map<String, Object>>) output.get("items")).forEach((k, v) -> {
+                                  v.put("name", vals.get((String) v.get("name")));
+                                  v.put("desc", vals.get((String) v.get("desc")));
+                              });
+                              System.out.println();
+                
+                              String alteredData = UtilHandler.getGson().toJson(output);
+                              Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
                           } catch (IOException e)
                           {
                               e.printStackTrace();
                           }
+                               */
                       });
     }
     
@@ -678,29 +709,52 @@ public class TestTFTData
         return characterOffsetLookup;
     }
     
-    private Map<String, Map<String, String>> parseTranslationMaps(Path fontConfig) throws IOException
+    static class TranslationConfig
     {
-        Map<String, Map<String, String>> descs = new HashMap<>();
+        RSTFile             file;
+        Map<String, String> rawData;
+        
+        public String get(String key)
+        {
+            return file != null ? file.getFromHash(key) : rawData.getOrDefault(key, key);
+        }
+        
+    }
+    
+    private Map<String, TranslationConfig> parseTranslationMaps(Path fontConfig) throws IOException
+    {
+        Map<String, TranslationConfig> descs  = new HashMap<>();
+        RSTParser                      parser = new RSTParser();
         Files.walk(fontConfig).filter(p -> p.toString().contains("fontconfig")).forEach(p -> {
             try
             {
-                Map<String, String> desc = Files.readAllLines(p)
-                                                .stream()
-                                                .filter(s -> s.startsWith("tr "))
-                                                .map(s -> s.substring(s.indexOf(" ") + 1))
-                                                .collect(Collectors.toMap(s -> {
-                                                    String part = s.split("=")[0];
-                                                    part = part.substring(part.indexOf("\"") + 1);
-                                                    part = part.substring(0, part.indexOf("\""));
-                                                    return part;
-                                                }, s -> {
-                                                    String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
-                                                    part = part.substring(part.indexOf("\"") + 1);
-                                                    part = part.substring(0, part.lastIndexOf("\""));
-                                                    return part;
-                                                }));
+                TranslationConfig config = new TranslationConfig();
                 
-                descs.put(UtilHandler.pathToFilename(p).substring("fontconfig_".length()), desc);
+                ByteArray data = ByteArray.fromFile(p);
+                if (FileTypeHandler.isProbableRST(data))
+                {
+                    RSTFile f = parser.parse(p);
+                    config.file = f;
+                } else
+                {
+                    config.rawData = Files.readAllLines(p)
+                                          .stream()
+                                          .filter(s -> s.startsWith("tr "))
+                                          .map(s -> s.substring(s.indexOf(" ") + 1))
+                                          .collect(Collectors.toMap(s -> {
+                                              String part = s.split("=")[0];
+                                              part = part.substring(part.indexOf("\"") + 1);
+                                              part = part.substring(0, part.indexOf("\""));
+                                              return part;
+                                          }, s -> {
+                                              String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
+                                              part = part.substring(part.indexOf("\"") + 1);
+                                              part = part.substring(0, part.lastIndexOf("\""));
+                                              return part;
+                                          }));
+                }
+                
+                descs.put(UtilHandler.pathToFilename(p).substring("fontconfig_".length()), config);
                 
             } catch (IOException e)
             {
