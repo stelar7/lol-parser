@@ -44,6 +44,14 @@ public class TestWAD
     }
     
     @Test
+    public void testLocal2()
+    {
+        long time = System.currentTimeMillis();
+        Path p    = Paths.get("D://extractedFiles//DATA//FINAL//DATA.wad.client");
+        extractWad(p, Paths.get("D://temp"));
+    }
+    
+    @Test
     public void testPBE() throws IOException
     {
         final BINParser bp = new BINParser();
@@ -388,13 +396,14 @@ public class TestWAD
                  try
                  {
                      BINFile parsed = bp.parse(file);
-                     
-                     if(parsed == null) {
+                
+                     if (parsed == null)
+                     {
                          System.out.println();
                          return;
                      }
-                     
-                     Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
+                
+                     Path output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)

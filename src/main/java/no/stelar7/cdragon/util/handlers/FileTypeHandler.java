@@ -130,7 +130,7 @@ public final class FileTypeHandler
         if (FileTypeHandler.isProbableRST(magic))
         {
             // files are saved as txt, but should be rst?
-            return "txt";
+            return "txt|rst";
         }
         
         String result = FileTypeHandler.getMagicNumbers().get(magic.copyOfRange(0, 4));
