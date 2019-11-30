@@ -51,8 +51,8 @@ public class TestFindHashStuff
             testHash(input, HashHandler::computeSDBMHash);
             testHash(input2, HashHandler::computeSDBMHash);
             
-            testHash(input, HashHandler::computeBINHash);
-            testHash(input2, HashHandler::computeBINHash);
+            testHash(input, HashHandler::computeFNV1A);
+            testHash(input2, HashHandler::computeFNV1A);
             
             testHash(input, HashHandler::computeELFHash);
             testHash(input2, HashHandler::computeELFHash);

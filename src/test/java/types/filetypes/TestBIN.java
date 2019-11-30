@@ -36,10 +36,10 @@ public class TestBIN
     @Test
     public void testBIN2() throws IOException
     {
-        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("cdragon/bin/GamePlayData.bin");
+        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("cdragon/bin/mobileshared.bin");
         BINFile data    = parser.parse(file);
         String  content = data.toJson();
-        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("mobileshared.json"), content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     
     @Test

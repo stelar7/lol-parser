@@ -217,7 +217,7 @@ public class BINHashGuesser extends HashGuesser
     @Override
     public String generateHash(String val)
     {
-        long hashNum = HashHandler.computeBINHash(val);
+        long hashNum = HashHandler.computeFNV1A(val);
         return HashHandler.toHex(hashNum, 8);
     }
     

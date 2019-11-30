@@ -133,8 +133,23 @@ public class HashHandler
         return toHex(computeXXHash32AsLong(text), 8);
     }
     
-    // FNV-1a
-    public static long computeBINHash(String input)
+    public static long computeFNV(String input)
+    {
+        String toHash = input.toLowerCase(Locale.ENGLISH);
+        int    hash   = Integer.parseUnsignedInt("2166136261");
+        int    mask   = Integer.parseUnsignedInt("16777619");
+        
+        for (int i = 0; i < toHash.length(); i++)
+        {
+            hash = hash * mask;
+            hash = hash ^ toHash.charAt(i);
+        }
+        
+        return Integer.toUnsignedLong(hash);
+    }
+    
+    // bin files
+    public static long computeFNV1A(String input)
     {
         String toHash = input.toLowerCase(Locale.ENGLISH);
         int    hash   = Integer.parseUnsignedInt("2166136261");
@@ -376,7 +391,7 @@ public class HashHandler
     
     public static String getBINHash(String hash)
     {
-        long   hashed = computeBINHash(hash);
+        long   hashed = computeFNV1A(hash);
         String hex    = toHex(hashed, 8);
         return getBinHashes().getOrDefault(hex, hex);
     }

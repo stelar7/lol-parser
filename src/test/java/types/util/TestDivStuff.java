@@ -47,7 +47,7 @@ public class TestDivStuff
     public void testBinHashSingle()
     {
         String toHash = "ADPerStack";
-        String output = HashHandler.toHex(HashHandler.computeBINHash(toHash), 8);
+        String output = HashHandler.toHex(HashHandler.computeFNV1A(toHash), 8);
         System.out.println(output);
     }
     
