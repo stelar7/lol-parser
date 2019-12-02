@@ -239,8 +239,7 @@ public class BINParser implements Parseable<BINFile>
                 return raf.readBoolean();
             default:
                 int pos = raf.pos() - 1;
-                byte[] data = raf.readBytes(20);
-                throw new RuntimeException("Unknown type: " + type + " at location: " + pos + ": " + Arrays.toString(data));
+                throw new RuntimeException("Unknown type: " + type + " at location: " + pos);
         }
     }
     
