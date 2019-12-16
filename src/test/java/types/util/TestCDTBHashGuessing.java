@@ -29,7 +29,7 @@ public class TestCDTBHashGuessing
         guesser.guessFromPets(dataPath);
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();
-        //guesser.guessFromFontFiles(); this is broken atm...
+        guesser.guessFromFontFiles();
         guesser.saveToBackup();
     }
     

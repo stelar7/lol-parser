@@ -3,7 +3,9 @@ package no.stelar7.cdragon.util.hashguessing;
 import com.google.common.collect.Sets;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
+import no.stelar7.cdragon.types.rst.*;
 import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.io.IOException;
@@ -154,23 +156,32 @@ public class BINHashGuesser extends HashGuesser
                  .forEach(p -> {
                      try
                      {
-                         Map<String, String> desc = Files.readAllLines(p)
-                                                         .stream()
-                                                         .filter(s -> s.startsWith("tr "))
-                                                         .map(s -> s.substring(s.indexOf(" ") + 1))
-                                                         .collect(Collectors.toMap(s -> {
-                                                             String part = s.split("=")[0];
-                                                             part = part.substring(part.indexOf("\"") + 1);
-                                                             part = part.substring(0, part.indexOf("\""));
-                                                             return part;
-                                                         }, s -> {
-                                                             String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
-                                                             part = part.substring(part.indexOf("\"") + 1);
-                                                             part = part.substring(0, part.lastIndexOf("\""));
-                                                             return part;
-                                                         }));
-                    
-                         descs.put(UtilHandler.pathToFilename(p).substring("fontconfig_".length()), desc);
+                         ByteArray ba = new ByteArray(Files.readAllBytes(p));
+                         if (FileTypeHandler.isProbableRST(ba))
+                         {
+                             RSTParser parser = new RSTParser();
+                             RSTFile   file   = parser.parse(p);
+                             file.getEntries().values().forEach(this::checkLine);
+                         } else
+                         {
+                             Map<String, String> desc = Files.readAllLines(p)
+                                                             .stream()
+                                                             .filter(s -> s.startsWith("tr "))
+                                                             .map(s -> s.substring(s.indexOf(" ") + 1))
+                                                             .collect(Collectors.toMap(s -> {
+                                                                 String part = s.split("=")[0];
+                                                                 part = part.substring(part.indexOf("\"") + 1);
+                                                                 part = part.substring(0, part.indexOf("\""));
+                                                                 return part;
+                                                             }, s -> {
+                                                                 String part = Arrays.stream(s.split("=")).skip(1).collect(Collectors.joining("="));
+                                                                 part = part.substring(part.indexOf("\"") + 1);
+                                                                 part = part.substring(0, part.lastIndexOf("\""));
+                                                                 return part;
+                                                             }));
+                        
+                             desc.values().forEach(this::checkLine);
+                         }
                     
                      } catch (IOException e)
                      {
@@ -182,20 +193,22 @@ public class BINHashGuesser extends HashGuesser
             e.printStackTrace();
         }
         
-        descs.values().forEach(d -> d.values().forEach(v -> {
-            String[] parts = v.split("@");
-            for (int i = 1; i < parts.length; i += 2)
+    }
+    
+    private void checkLine(String v)
+    {
+        String[] parts = v.split("@");
+        for (int i = 1; i < parts.length; i += 2)
+        {
+            String toHash = parts[i];
+            
+            if (toHash.contains("*"))
             {
-                String toHash = parts[i];
-                
-                if (toHash.contains("*"))
-                {
-                    toHash = toHash.substring(0, toHash.indexOf('*'));
-                }
-                
-                this.check(toHash);
+                toHash = toHash.substring(0, toHash.indexOf('*'));
             }
-        }));
+            
+            this.check(toHash);
+        }
     }
     
     public void pullCDTB()
