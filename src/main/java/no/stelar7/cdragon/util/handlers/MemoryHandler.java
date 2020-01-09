@@ -8,7 +8,7 @@ import com.sun.jna.platform.win32.WinBase.SYSTEM_INFO;
 import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinNT.*;
 import com.sun.jna.ptr.IntByReference;
-import no.stelar7.cdragon.util.types.Pointer;
+import no.stelar7.cdragon.util.types.*;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,13 +29,15 @@ public class MemoryHandler
         
         int     processId         = findProcessID(handleName);
         HANDLE  processHandle     = openProcess(processId);
-        Pointer memoryPagePointer = findPattern(processHandle, dataPattern, mask);
+        HMODULE processModule     = findModule(processHandle, handleName);
+        Pointer memoryPagePointer = findPattern(processHandle, processModule, dataPattern, mask);
         readGameObjects(processHandle, memoryPagePointer, dataPattern, mask);
         
     }
     
     private static void readGameObjects(HANDLE processHandle, Pointer startAddress, byte[] pattern, byte[] mask)
     {
+        System.out.println(Arrays.toString(startAddress.readArray(60)));
         byte[] data = startAddress.readArray(22);
         
         for (int i = 0; i < data.length; i++)
@@ -98,11 +100,12 @@ public class MemoryHandler
     }
     
     
-    private static Pointer findPattern(HANDLE handle, byte[] pattern, byte[] mask)
+    private static Pointer findPattern(HANDLE handle, HMODULE module, byte[] pattern, byte[] mask)
     {
         SYSTEM_INFO si             = getSystemInfo();
-        Pointer     scanAddress    = new Pointer(handle, si.lpMinimumApplicationAddress);
+        Pointer     scanAddress    = new Pointer(handle, module.getPointer());
         Pointer     maxScanAddress = new Pointer(handle, si.lpMaximumApplicationAddress);
+        
         while (scanAddress.getAddress() < maxScanAddress.getAddress())
         {
             MEMORY_BASIC_INFORMATION info = getMemoryInfo(handle, scanAddress);

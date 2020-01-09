@@ -59,8 +59,8 @@ public class TestDDS
     public void testSingle() throws IOException
     {
         DDSParser     parser = new DDSParser();
-        Path          file   = UtilHandler.CDRAGON_FOLDER.resolve("Baron_Minimap_Icon.DDS.compressed");
-        BufferedImage img    = parser.parseCompressed(file);
-        ImageIO.write(img, "png", file.resolveSibling("Baron_Minimap_Icon.png").toFile());
+        Path          file   = Paths.get("C:\\Users\\Steffen\\Downloads\\-1.dds");
+        BufferedImage img    = parser.parse(file);
+        ImageIO.write(img, "png", file.resolveSibling("out.png").toFile());
     }
 }
