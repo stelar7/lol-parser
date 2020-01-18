@@ -59,7 +59,7 @@ public class TestDDS
     public void testSingle() throws IOException
     {
         DDSParser     parser = new DDSParser();
-        Path          file   = Paths.get("C:\\Users\\Steffen\\Downloads\\-1.dds");
+        Path          file   = Paths.get("D:\\pbe\\assets\\loadouts\\summoneremotes\\flairs\\penguin_meme_dab_vfx.dds");
         BufferedImage img    = parser.parse(file);
         ImageIO.write(img, "png", file.resolveSibling("out.png").toFile());
     }
