@@ -251,7 +251,7 @@
                             <archive>
                                 <manifest>
                                     <mainClass>
-                                        no.stelar7.cdragon.viewer.RMANTool
+                                        no.stelar7.cdragon.viewer.BINtoJson
                                     </mainClass>
                                 </manifest>
                             </archive>

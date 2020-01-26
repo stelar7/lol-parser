@@ -347,6 +347,15 @@ public class LCUHashGuesser extends HashGuesser
         }
     }
     
+    public void guessStringTableFiles()
+    {
+        for (String language : LANGUAGES)
+        {
+            String hash = String.format("DATA/Menu/bootstrap_%s.stringtable", language);
+            check(hash);
+        }
+    }
+    
     public void guessPatterns()
     {
         Set<Integer> primary = IntStream.iterate(8000, i -> i < 8700, i -> i + 100).boxed().collect(Collectors.toSet());
@@ -545,6 +554,16 @@ public class LCUHashGuesser extends HashGuesser
                     }
                 }
             }
+        }
+    }
+    
+    public void guessManifestFiles()
+    {
+        check("DATA/FINAL/DATA.wad.LegacyDirListInfo");
+        for (int i = 0; i < 1000; i++)
+        {
+            String toCheck = "DATA/FINAL/Maps/Shipping/Map" + i + "LEVELS.wad.LegacyDirListInfo";
+            check(toCheck);
         }
     }
 }

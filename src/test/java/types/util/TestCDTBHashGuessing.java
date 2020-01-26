@@ -52,6 +52,8 @@ public class TestCDTBHashGuessing
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
+        guesser.guessStringTableFiles();
+        guesser.guessManifestFiles();
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessSanitizerHashes();
         guesser.saveToBackup();
