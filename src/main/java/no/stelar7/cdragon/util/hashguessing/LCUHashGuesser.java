@@ -566,4 +566,13 @@ public class LCUHashGuesser extends HashGuesser
             check(toCheck);
         }
     }
+    
+    public void guessHardcoded()
+    {
+        check("UX/RenderUI/Overrides/Default/PerkSummonerSpecialist.bin");
+        check("UX/RenderUI/Overrides/Default/SB_LtoR_NoNames.bin");
+        check("UX/RenderUI/Overrides/Default/SB_MirroredCenter_Names.bin");
+        check("UX/RenderUI/Overrides/Default/SB_MirroredCenter_NoNames.bin");
+        
+    }
 }

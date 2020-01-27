@@ -12,6 +12,7 @@ public class TestCDTBHashGuessing
 {
     private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
     
+    @Test
     public void doTests()
     {
         doBINTest();
@@ -52,6 +53,7 @@ public class TestCDTBHashGuessing
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
+        guesser.guessHardcoded();
         guesser.guessStringTableFiles();
         guesser.guessManifestFiles();
         guesser.guessAssetsBySearch(dataPath);
