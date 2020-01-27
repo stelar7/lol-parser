@@ -40,6 +40,8 @@ public class TestCDTBHashGuessing
     {
         GameHashGuesser guesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
+        guesser.guessHardcoded();
+        guesser.guessStringTableFiles();
         guesser.guessScripts(dataPath);
         guesser.guessShaderFiles(dataPath);
         guesser.guessAssetsBySearch(dataPath);
@@ -53,8 +55,6 @@ public class TestCDTBHashGuessing
     {
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
-        guesser.guessHardcoded();
-        guesser.guessStringTableFiles();
         guesser.guessManifestFiles();
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessSanitizerHashes();

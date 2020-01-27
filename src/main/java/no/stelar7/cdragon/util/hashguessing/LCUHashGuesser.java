@@ -98,24 +98,12 @@ public class LCUHashGuesser extends HashGuesser
         Set<String> paths = new HashSet<>(this.known.values());
         if (plugin != null)
         {
-            for (String path : new ArrayList<>(paths))
-            {
-                if (!path.startsWith("plugins/" + plugin))
-                {
-                    paths.remove(path);
-                }
-            }
+            paths.removeIf(path -> !path.startsWith("plugins/" + plugin));
         }
         
         if (ext != null)
         {
-            for (String path : new ArrayList<>(paths))
-            {
-                if (!path.endsWith(ext))
-                {
-                    paths.remove(path);
-                }
-            }
+            paths.removeIf(path -> !path.endsWith(ext));
         }
         
         if (words == null)
@@ -136,24 +124,12 @@ public class LCUHashGuesser extends HashGuesser
         Set<String> paths = new HashSet<>(this.known.values());
         if (plugin != null)
         {
-            for (String path : new ArrayList<>(paths))
-            {
-                if (!path.startsWith("plugins/" + plugin))
-                {
-                    paths.remove(path);
-                }
-            }
+            paths.removeIf(path -> !path.startsWith("plugins/" + plugin));
         }
         
         if (ext != null)
         {
-            for (String path : new ArrayList<>(paths))
-            {
-                if (!path.endsWith(ext))
-                {
-                    paths.remove(path);
-                }
-            }
+            paths.removeIf(path -> !path.endsWith(ext));
         }
         
         super.doubleSubstitution(paths, words);
@@ -344,15 +320,6 @@ public class LCUHashGuesser extends HashGuesser
             {
                 check(base + "/" + path);
             }
-        }
-    }
-    
-    public void guessStringTableFiles()
-    {
-        for (String language : LANGUAGES)
-        {
-            String hash = String.format("DATA/Menu/bootstrap_%s.stringtable", language);
-            check(hash);
         }
     }
     
@@ -565,14 +532,5 @@ public class LCUHashGuesser extends HashGuesser
             String toCheck = "DATA/FINAL/Maps/Shipping/Map" + i + "LEVELS.wad.LegacyDirListInfo";
             check(toCheck);
         }
-    }
-    
-    public void guessHardcoded()
-    {
-        check("UX/RenderUI/Overrides/Default/PerkSummonerSpecialist.bin");
-        check("UX/RenderUI/Overrides/Default/SB_LtoR_NoNames.bin");
-        check("UX/RenderUI/Overrides/Default/SB_MirroredCenter_Names.bin");
-        check("UX/RenderUI/Overrides/Default/SB_MirroredCenter_NoNames.bin");
-        
     }
 }

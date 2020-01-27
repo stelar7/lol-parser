@@ -185,6 +185,23 @@ public class GameHashGuesser extends HashGuesser
         }
     }
     
+    public void guessStringTableFiles()
+    {
+        for (String language : LANGUAGES)
+        {
+            String hash = String.format("DATA/Menu/bootstrap_%s.stringtable", language);
+            check(hash);
+        }
+    }
+    
+    public void guessHardcoded()
+    {
+        check("UX/RenderUI/Overrides/Default/PerkSummonerSpecialist.bin");
+        check("UX/RenderUI/Overrides/Default/SB_LtoR_NoNames.bin");
+        check("UX/RenderUI/Overrides/Default/SB_MirroredCenter_Names.bin");
+        check("UX/RenderUI/Overrides/Default/SB_MirroredCenter_NoNames.bin");
+    }
+    
     public void guessScripts(Path dataPath)
     {
         System.out.println("Guessing scripts by manifest");
