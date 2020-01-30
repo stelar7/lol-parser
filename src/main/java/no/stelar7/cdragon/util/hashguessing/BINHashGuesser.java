@@ -254,6 +254,11 @@ public class BINHashGuesser extends HashGuesser
             return true;
         }
         
+        if (!this.known.containsKey(hash))
+        {
+            this.addKnown(hash, path, lowerCased);
+        }
+        
         if (this.unknown.isEmpty())
         {
             System.out.println("No more unknown hashes!");
