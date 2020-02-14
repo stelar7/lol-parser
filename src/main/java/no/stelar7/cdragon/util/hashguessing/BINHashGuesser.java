@@ -214,16 +214,25 @@ public class BINHashGuesser extends HashGuesser
     public void pullCDTB()
     {
         System.out.println("Feching hashlists from CDTB");
-        String hashA = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.binentries.txt";
-        String hashB = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.binfields.txt";
-        String hashC = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.binhashes.txt";
-        String hashD = "https://raw.githubusercontent.com/CommunityDragon/CDTB/master/cdragontoolbox/hashes.bintypes.txt";
         
-        Set<String>  changedPlugins = new HashSet<>();
-        List<String> data           = WebHandler.readWeb(hashA);
-        data.addAll(WebHandler.readWeb(hashB));
-        data.addAll(WebHandler.readWeb(hashC));
-        data.addAll(WebHandler.readWeb(hashD));
+        List<String> bases = Arrays.asList("https://raw.githubusercontent.com/moonshadow565/CDTB/",
+                                           "https://raw.githubusercontent.com/CommunityDragon/CDTB/");
+        
+        List<String> files = Arrays.asList("master/cdragontoolbox/hashes.binentries.txt",
+                                           "master/cdragontoolbox/hashes.binfields.txt",
+                                           "master/cdragontoolbox/hashes.binhashes.txt",
+                                           "master/cdragontoolbox/hashes.bintypes.txt");
+        
+        List<String> data = new ArrayList<>();
+        for (String base : bases)
+        {
+            for (String file : files)
+            {
+                String url = base + file;
+                data.addAll(WebHandler.readWeb(url));
+            }
+        }
+        
         data.stream().map(line -> line.substring(line.indexOf(' ') + 1)).forEach(this::check);
     }
     
