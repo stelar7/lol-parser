@@ -52,7 +52,7 @@ public class TestWAD
     }
     
     @Test
-    public void testPBE() throws IOException
+    public void testPBE()
     {
         final BINParser bp = new BINParser();
         final DDSParser dp = new DDSParser();
@@ -463,7 +463,7 @@ public class TestWAD
                                  return null;
                              };
                         
-                             extracts.add(new Pair(size, export));
+                             extracts.add(new Pair<>(size, export));
                          }
                     
                          if (endsc.stream().anyMatch(child::endsWith))
@@ -475,7 +475,7 @@ public class TestWAD
                                  return null;
                              };
                         
-                             extracts.add(new Pair(size, export));
+                             extracts.add(new Pair<>(size, export));
                          }
                     
                          if (endsm.stream().anyMatch(child::endsWith))
@@ -487,7 +487,7 @@ public class TestWAD
                                  return null;
                              };
                         
-                             extracts.add(new Pair(size, export));
+                             extracts.add(new Pair<>(size, export));
                          }
                     
                      } catch (IOException e)
@@ -567,22 +567,26 @@ public class TestWAD
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
+                WADFile parsed = null;
+                
                 long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
                 long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
                 if (endsCount != 0)
                 {
-                    WADFile parsed   = parser.parseReadOnly(file);
-                    String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
-                    parsed.printUnknownFiles(filename, outputPath);
-                    return FileVisitResult.CONTINUE;
+                    parsed = parser.parseReadOnly(file);
                 }
                 
                 if (endscCount != 0)
                 {
-                    WADFile parsed   = parser.parseCompressed(file);
-                    String  filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
+                    parsed = parser.parseCompressed(file);
+                }
+                
+                if (parsed != null)
+                {
+                    String filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
                     parsed.printUnknownFiles(filename, outputPath);
                 }
+                
                 return FileVisitResult.CONTINUE;
             }
         });

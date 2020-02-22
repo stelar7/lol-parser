@@ -164,6 +164,7 @@ public class RMANFile
         } catch (IOException e1)
         {
             e1.printStackTrace();
+            throw new RuntimeException(e1);
         }
     }
     
