@@ -539,17 +539,17 @@ public class TestTFTData
             BINStruct manaContainer = (BINStruct) champItem.getIfPresent("PrimaryAbilityResource").getValue();
             
             Map<String, Object> stats = new LinkedHashMap<>();
-            stats.put("hp", champItem.getIfPresent("baseHP").getValue());
+            stats.put("hp", champItem.get("baseHP").map(a -> (float) a.getValue()).orElse(0f));
             stats.put("hpScaleFactor", 1.8f);
             stats.put("mana", manaContainer.get("arBase").map(a -> (float) a.getValue()).orElse(100f));
             stats.put("initalMana", champItem.get("mInitialMana").map(a -> (float) a.getValue()).orElse(0f));
-            stats.put("damage", champItem.getIfPresent("BaseDamage").getValue());
+            stats.put("damage", champItem.get("BaseDamage").map(a -> (float) a.getValue()).orElse(0f));
             stats.put("damageScaleFactor", 1.25f);
-            stats.put("armor", champItem.getIfPresent("baseArmor").getValue());
-            stats.put("magicResist", champItem.getIfPresent("baseSpellBlock").getValue());
-            stats.put("critMultiplier", champItem.getIfPresent("critDamageMultiplier").getValue());
-            stats.put("critChance", champItem.getIfPresent("BaseCritChance").getValue());
-            stats.put("attackSpeed", champItem.getIfPresent("AttackSpeed").getValue());
+            stats.put("armor", champItem.get("baseArmor").map(a -> (float) a.getValue()).orElse(0f));
+            stats.put("magicResist", champItem.get("baseSpellBlock").map(a -> (float) a.getValue()).orElse(0f));
+            stats.put("critMultiplier", champItem.get("critDamageMultiplier").map(a -> (float) a.getValue()).orElse(0f));
+            stats.put("critChance", champItem.get("BaseCritChance").map(a -> (float) a.getValue()).orElse(0.25f));
+            stats.put("attackSpeed", champItem.get("AttackSpeed").map(a -> (float) a.getValue()).orElse(0f));
             stats.put("range", champItem.get("attackRange").map(a -> Math.floor((float) a.getValue() / 180f)).get());
             
             String spellName = (String) ((BINContainer) champItem.getIfPresent("spellNames").getValue()).getData().get(0);
