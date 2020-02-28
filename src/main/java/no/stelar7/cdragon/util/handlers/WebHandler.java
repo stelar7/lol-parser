@@ -8,7 +8,6 @@ import java.io.*;
 import java.net.*;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.*;
 import java.security.cert.X509Certificate;
@@ -100,7 +99,7 @@ public class WebHandler
     {
         // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
         //System.out.println("Downloading bundle " + bundleId);
-        downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
+        downloadFile(output, "http://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
     
     public static void downloadFile(Path output, String url)
