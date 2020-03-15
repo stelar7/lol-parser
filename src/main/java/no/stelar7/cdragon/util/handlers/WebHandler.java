@@ -99,7 +99,7 @@ public class WebHandler
     {
         // https://lol.dyn.riotcdn.net/channels/public/bundles/bundleid.bundle
         //System.out.println("Downloading bundle " + bundleId);
-        downloadFile(output, "http://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
+        downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
     
     public static void downloadFile(Path output, String url)
