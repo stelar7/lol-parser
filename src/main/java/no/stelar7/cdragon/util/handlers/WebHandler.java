@@ -232,8 +232,7 @@ public class WebHandler
             }
         } catch (IOException | InterruptedException e)
         {
-            e.printStackTrace();
-            return null;
+            return Collections.emptyList();
         }
     }
     
