@@ -36,13 +36,22 @@ public enum BINValueType
     
     public static BINValueType valueOf(byte value)
     {
-        // values greater than 128 have an extra bit set, so unset it and shift acordingly
-        int[] check = {Byte.toUnsignedInt(value)};
-        if (check[0] >= 128)
+        // values greater than 128 needs to be transformed
+        int   check = Byte.toUnsignedInt(value);
+        int[] use   = {check};
+        if (check >= 128)
         {
-            check[0] = check[0] - 110;
+            use[0] -= 110;
         }
-        return Stream.of(values()).filter(t -> t.value == check[0]).findAny().orElseThrow(() -> new RuntimeException("Unknown Type: " + value));
+        
+        // for versions over 10.8..
+        // TODO: integrate this better, so it doesnt need to be changed for other versions...
+        if (check > 128)
+        {
+            use[0] -= 1;
+        }
+        
+        return Stream.of(values()).filter(t -> t.value == use[0]).findAny().orElseThrow(() -> new RuntimeException("Unknown Type: " + value));
     }
     
     BINValueType(int value)

@@ -49,4 +49,40 @@ public class BINContainer
     {
         this.data = data;
     }
+    
+    
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        BINContainer that = (BINContainer) o;
+        return size == that.size &&
+               count == that.count &&
+               type == that.type &&
+               Objects.equals(data, that.data);
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(type, size, count, data);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "BINContainer{" +
+               "type=" + type +
+               ", size=" + size +
+               ", count=" + count +
+               ", data=" + data +
+               '}';
+    }
 }
