@@ -78,6 +78,7 @@ public class RMANParser implements Parseable<RMANFile>
             
             System.out.println("Downloading patcher manifest");
             //String patcherUrl = "https://ks-foundation.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+            //String patcherUrl = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[artifact_type_id]=lol-game-client&q[platform]=windows&q[published]=true";
             String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
             //String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/macpbe-pbe-mac.json";
             WebHandler.downloadFile(downloadPath, patcherUrl);
