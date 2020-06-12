@@ -1,8 +1,6 @@
 package types.filetypes;
 
-import com.google.gson.JsonObject;
 import no.stelar7.cdragon.types.rman.RMANParser;
-import no.stelar7.cdragon.types.rman.RMANParser.RMANFileType;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Pair;
@@ -24,9 +22,13 @@ public class TestRMAN
     public void testRMAN() throws Exception
     {
         List<RMANFile> files = new ArrayList<>();
+        /*
         JsonObject     obj   = RMANParser.getPBEManifest();
         files.add(RMANParser.loadFromPBE(obj, RMANFileType.GAME));
         files.add(RMANParser.loadFromPBE(obj, RMANFileType.LCU));
+         */
+        
+        files.addAll(RMANParser.getSieveManifests());
         
         System.out.println("Writing manifest content to file");
         files.forEach(RMANFile::printFileList);
@@ -34,9 +36,9 @@ public class TestRMAN
         Path bundleFolder = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\bundles");
         Files.createDirectories(bundleFolder);
         
-        int     currentVersion = obj.get("version").getAsInt();
+        long    currentVersion = RMANParser.getSieveVersion();
         Path    lastVersion    = UtilHandler.CDRAGON_FOLDER.resolve("version");
-        boolean shouldDownload = !Files.exists(lastVersion) || Integer.parseInt(Files.readAllLines(lastVersion).get(0)) < currentVersion;
+        boolean shouldDownload = !Files.exists(lastVersion) || Long.parseLong(Files.readAllLines(lastVersion).get(0)) < currentVersion;
         if (shouldDownload)
         {
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);

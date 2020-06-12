@@ -124,7 +124,7 @@ public class GameHashGuesser extends HashGuesser
         
         try
         {
-            Path       manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("76EBE65321C56DD9.json")).findFirst().get();
+            Path       manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("shaderdefines.json")).findFirst().get();
             JsonObject shaders  = UtilHandler.getJsonParser().parse(Files.readString(manifest)).getAsJsonObject().getAsJsonObject("shaders");
             JsonArray  sections = shaders.getAsJsonArray("sections");
             

@@ -1,11 +1,11 @@
 package no.stelar7.cdragon.types.rman;
 
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.types.*;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -66,6 +66,82 @@ public class RMANParser implements Parseable<RMANFile>
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public static Long getSieveVersion()
+    {
+        List<Pair<String, String>> urls   = getPBEManifestFromSieve();
+        
+        int index = 0;
+        for (Pair<String, String> versionData : urls)
+        {
+            return Long.parseLong(versionData.getA());
+        }
+        
+        return null;
+    }
+    
+    public static List<RMANFile> getSieveManifests()
+    {
+        List<RMANFile>             files  = new ArrayList<>();
+        List<Pair<String, String>> urls   = getPBEManifestFromSieve();
+        RMANParser                 parser = new RMANParser();
+        
+        int index = 0;
+        for (Pair<String, String> versionData : urls)
+        {
+            String version = versionData.getA();
+            String url     = versionData.getB();
+            System.out.println("Downloading manifest " + version);
+            Path usedManfest = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests").resolve("sieve\\" + version + "-" + (index++) + ".rman");
+            System.out.println(usedManfest);
+            WebHandler.downloadFile(usedManfest, url);
+            files.add(parser.parse(usedManfest));
+        }
+        
+        return files;
+    }
+    
+    public static List<Pair<String, String>> getPBEManifestFromSieve()
+    {
+        String     url      = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[platform]=windows";
+        String     content  = String.join("\n", WebHandler.readWeb(url));
+        JsonObject obj      = (JsonObject) UtilHandler.getJsonParser().parse(content);
+        JsonArray  releases = obj.getAsJsonArray("releases");
+        
+        final long[]                            maxVersion      = {0};
+        Map<String, List<Pair<String, String>>> patchToManifest = new HashMap<>();
+        releases.forEach(e -> {
+            String type     = e.getAsJsonObject().getAsJsonObject("release").getAsJsonObject("labels").getAsJsonObject("riot:artifact_type_id").getAsJsonArray("values").get(0).getAsString();
+            String version  = e.getAsJsonObject().getAsJsonObject("compat_version").get("id").getAsString();
+            String manifest = e.getAsJsonObject().getAsJsonObject("download").get("url").getAsString();
+            
+            long intVersion = Long.parseLong(version.split("\\+")[0].replace(".", ""));
+            if (intVersion > maxVersion[0])
+            {
+                maxVersion[0] = intVersion;
+            }
+            
+            patchToManifest.putIfAbsent(version, new ArrayList<>());
+            patchToManifest.get(version).add(new Pair<>(type, manifest));
+        });
+        
+        List<Pair<String, String>> urls = new ArrayList<>();
+        patchToManifest.forEach((k, v) -> {
+            if (k.contains("releasedbg")) {
+                return;
+            }
+            
+            long intVersion = Long.parseLong(k.split("\\+")[0].replace(".", ""));
+            if (intVersion == maxVersion[0])
+            {
+                v.forEach(val -> {
+                    urls.add(new Pair<>(String.valueOf(intVersion), val.getB()));
+                });
+            }
+        });
+        
+        return urls;
     }
     
     
