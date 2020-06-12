@@ -250,11 +250,12 @@ public class TestWAD
         Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
         Path rito        = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
         
+        /*
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
-        
+        */
         transformBIN(extractPath);
-        generateUnknownBinHashList();
+        generateBinHashLists();
         
         transformManifest(extractPath);
         
@@ -265,27 +266,43 @@ public class TestWAD
         //transformSKN(extractPath);
     }
     
-    private void generateUnknownBinHashList() throws IOException
+    private void generateBinHashLists()
     {
         System.out.println("Generating list of unknown bin hashes");
-        Path binhash = UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt");
-        Files.write(binhash, "".getBytes(StandardCharsets.UTF_8));
-        List<String> sortedHashes = new ArrayList<>(BINParser.hashes).stream()
-                                                                     .filter(h -> {
-                                                                         try
-                                                                         {
-                                                                             Long.decode("0x" + h);
-                                                                             return true;
-                                                                         } catch (Exception e)
-                                                                         {
-                                                                             return false;
-                                                                         }
-                                                                     })
-                                                                     .sorted()
-                                                                     .filter(h -> HashHandler.getBinHashes().get(h) == null)
-                                                                     .collect(Collectors.toList());
-        
-        Files.write(binhash, sortedHashes, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+        BINParser.hashes.forEach((key, value) -> {
+            try
+            {
+                List<String> sortedUnknown = value.stream().filter(h -> {
+                    try
+                    {
+                        if(h.length() != 8) {
+                            return false;
+                        }
+                        
+                        Long.decode("0x" + h);
+                        return true;
+                    } catch (Exception e)
+                    {
+                        return false;
+                    }
+                }).sorted().collect(Collectors.toList());
+                String output     = String.join("\n", sortedUnknown);
+                Path   outputPath = UtilHandler.CDRAGON_FOLDER.resolve("bins").resolve("UnknownBinHash-" + key + ".txt");
+                Files.createDirectories(outputPath.getParent());
+                Files.write(outputPath, output.getBytes(StandardCharsets.UTF_8));
+                
+                List<String> sortedKnown = new ArrayList<>(value);
+                sortedKnown.removeAll(sortedUnknown);
+                Collections.sort(sortedKnown);
+                output = String.join("\n", sortedKnown);
+                outputPath = UtilHandler.CDRAGON_FOLDER.resolve("bins").resolve("BinHash-" + key + ".txt");
+                Files.createDirectories(outputPath.getParent());
+                Files.write(outputPath, output.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
     }
     
     private void transformManifest(Path extractPath) throws IOException
@@ -516,8 +533,8 @@ public class TestWAD
         UtilHandler.CDRAGON_FOLDER.resolve("hashes.txt").toFile().delete();
         Files.walkFileTree(UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles"), new SimpleFileVisitor<>()
         {
-            List<String> ends = Arrays.asList(".wad", ".wad.client");
-            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+            final List<String> ends = Arrays.asList(".wad", ".wad.client");
+            final List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
             
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
@@ -561,8 +578,8 @@ public class TestWAD
         outputPath.toFile().delete();
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
-            List<String> ends = Arrays.asList(".wad", ".wad.client");
-            List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
+            final List<String> ends = Arrays.asList(".wad", ".wad.client");
+            final List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
             
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)

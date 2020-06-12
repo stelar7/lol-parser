@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class RMANParser implements Parseable<RMANFile>
 {
@@ -70,39 +71,48 @@ public class RMANParser implements Parseable<RMANFile>
     
     public static Long getSieveVersion()
     {
-        List<Pair<String, String>> urls   = getPBEManifestFromSieve();
-        
-        int index = 0;
-        for (Pair<String, String> versionData : urls)
-        {
-            return Long.parseLong(versionData.getA());
-        }
-        
-        return null;
+        Pair<String, String> urls = getPBEManifestFromSieve();
+        return Long.parseLong(urls.getA());
     }
     
     public static List<RMANFile> getSieveManifests()
     {
-        List<RMANFile>             files  = new ArrayList<>();
-        List<Pair<String, String>> urls   = getPBEManifestFromSieve();
-        RMANParser                 parser = new RMANParser();
+        List<RMANFile>       files      = new ArrayList<>();
+        Pair<String, String> gameData   = getPBEManifestFromSieve();
+        String               clientData = getPBEManifestFromClientConfig();
+        RMANParser           parser     = new RMANParser();
         
-        int index = 0;
-        for (Pair<String, String> versionData : urls)
-        {
-            String version = versionData.getA();
-            String url     = versionData.getB();
-            System.out.println("Downloading manifest " + version);
-            Path usedManfest = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests").resolve("sieve\\" + version + "-" + (index++) + ".rman");
-            System.out.println(usedManfest);
-            WebHandler.downloadFile(usedManfest, url);
-            files.add(parser.parse(usedManfest));
-        }
+        String version = gameData.getA();
+        String url     = gameData.getB();
+        
+        System.out.println("Downloading manifest " + version);
+        Path usedManfest = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests").resolve("sieve\\" + version + "-game.rman");
+        System.out.println(usedManfest);
+        WebHandler.downloadFile(usedManfest, url);
+        files.add(parser.parse(usedManfest));
+        
+        url = clientData;
+        usedManfest = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests").resolve("sieve\\" + version + "-client.rman");
+        System.out.println(usedManfest);
+        WebHandler.downloadFile(usedManfest, url);
+        files.add(parser.parse(usedManfest));
         
         return files;
     }
     
-    public static List<Pair<String, String>> getPBEManifestFromSieve()
+    public static String getPBEManifestFromClientConfig()
+    {
+        String     url       = "https://clientconfig.rpg.riotgames.com/api/v1/config/public";
+        String     content   = String.join("\n", WebHandler.readWeb(url));
+        JsonObject obj       = (JsonObject) UtilHandler.getJsonParser().parse(content);
+        JsonObject patchline = obj.getAsJsonObject("keystone.products.league_of_legends.patchlines.pbe");
+        JsonObject windows   = patchline.getAsJsonObject("platforms").getAsJsonObject("win");
+        JsonObject config    = (JsonObject) windows.getAsJsonArray("configurations").get(0);
+        String     patchUrl  = config.get("patch_url").getAsString();
+        return patchUrl;
+    }
+    
+    public static Pair<String, String> getPBEManifestFromSieve()
     {
         String     url      = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[platform]=windows";
         String     content  = String.join("\n", WebHandler.readWeb(url));
@@ -126,9 +136,10 @@ public class RMANParser implements Parseable<RMANFile>
             patchToManifest.get(version).add(new Pair<>(type, manifest));
         });
         
-        List<Pair<String, String>> urls = new ArrayList<>();
+        AtomicReference<Pair<String, String>> target = new AtomicReference<>();
         patchToManifest.forEach((k, v) -> {
-            if (k.contains("releasedbg")) {
+            if (k.contains("releasedbg"))
+            {
                 return;
             }
             
@@ -136,12 +147,15 @@ public class RMANParser implements Parseable<RMANFile>
             if (intVersion == maxVersion[0])
             {
                 v.forEach(val -> {
-                    urls.add(new Pair<>(String.valueOf(intVersion), val.getB()));
+                    if (val.getA().equalsIgnoreCase("lol-game-client"))
+                    {
+                        target.set(new Pair<>(String.valueOf(intVersion), val.getB()));
+                    }
                 });
             }
         });
         
-        return urls;
+        return target.get();
     }
     
     

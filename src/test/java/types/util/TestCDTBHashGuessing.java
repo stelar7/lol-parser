@@ -5,7 +5,9 @@ import no.stelar7.cdragon.util.hashguessing.*;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.*;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 
 @TestMethodOrder(OrderAnnotation.class)
 public class TestCDTBHashGuessing
@@ -24,7 +26,18 @@ public class TestCDTBHashGuessing
     @Order(1)
     public void doBINTest()
     {
-        BINHashGuesser guesser = new BINHashGuesser(HashGuesser.unknownFromExportBIN(UtilHandler.CDRAGON_FOLDER.resolve("binHashUnknown.txt")), dataPath);
+        Set<String> unknowns = new HashSet<>();
+        try
+        {
+            Files.find(Paths.get("D:/bins/"), 2, (path, attr) -> path.toString().contains("UnknownBinHash")).forEach(p -> {
+                unknowns.addAll(HashGuesser.unknownFromExportBIN(p));
+            });
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    
+        BINHashGuesser guesser = new BINHashGuesser(unknowns, dataPath);
         guesser.pullCDTB();
         guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("binhashtest.txt"), "(.*)");
         guesser.guessFromPets(dataPath);

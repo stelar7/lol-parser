@@ -447,11 +447,18 @@ public class TestBIN
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(bp::parse);
         
-        List<String> sortedHashes = new ArrayList<>(BINParser.hashes);
-        Collections.sort(sortedHashes);
-        
-        String output = String.join("\n", sortedHashes);
-        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("binHashes.txt"), output.getBytes(StandardCharsets.UTF_8));
+        BINParser.hashes.forEach((key, value) -> {
+            try
+            {
+                List<String> sortedHashes = new ArrayList<>(value);
+                Collections.sort(sortedHashes);
+                String output = String.join("\n", sortedHashes);
+                Files.write(UtilHandler.CDRAGON_FOLDER.resolve("binHashes-" + key + ".txt"), output.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        });
     }
     
     @Test

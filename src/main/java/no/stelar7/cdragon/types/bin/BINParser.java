@@ -14,7 +14,7 @@ import java.util.*;
 @SuppressWarnings("ALL")
 public class BINParser implements Parseable<BINFile>
 {
-    public static Set<String> hashes = new HashSet<>();
+    public static final Map<String, Set<String>> hashes = new HashMap<>();
     
     public BINFile parse(RandomAccessReader raf)
     {
@@ -70,16 +70,16 @@ public class BINParser implements Parseable<BINFile>
         {
             BINEntry entry = new BINEntry();
             
-            int lengthCheck = raf.pos() + Integer.BYTES;
-            entry.setType(HashHandler.getBINHash(file.getHeader().getEntryTypes().get(i)));
+            int    lengthCheck = raf.pos() + Integer.BYTES;
+            String typeHash    = HashHandler.getBINHash(file.getHeader().getEntryTypes().get(i));
+            entry.setType(typeHash);
             entry.setLength(raf.readInt());
-            entry.setHash(HashHandler.getBINHash(raf.readInt()));
+            String entryHash = HashHandler.getBINHash(raf.readInt());
+            entry.setHash(entryHash);
             entry.setValueCount(raf.readShort());
             
-            long   val = Integer.toUnsignedLong(file.getHeader().getEntryTypes().get(i));
-            String hex = HashHandler.toHex(val, 8);
-            hashes.add(entry.getHash());
-            hashes.add(hex);
+            hashes.computeIfAbsent("type", (key) -> new HashSet<>()).add(typeHash);
+            hashes.computeIfAbsent("entry", (key) -> new HashSet<>()).add(entryHash);
             
             for (int j = 0; j < entry.getValueCount(); j++)
             {
@@ -101,8 +101,9 @@ public class BINParser implements Parseable<BINFile>
     {
         BINValue value = new BINValue();
         
-        value.setHash(HashHandler.getBINHash(raf.readInt()));
-        hashes.add(value.getHash());
+        String valueHash = HashHandler.getBINHash(raf.readInt());
+        value.setHash(valueHash);
+        hashes.computeIfAbsent("value", (key) -> new HashSet<>()).add(valueHash);
         value.setType(BINValueType.valueOf(raf.readByte()));
         value.setValue(readByType(value.getType(), raf));
         
@@ -149,13 +150,8 @@ public class BINParser implements Parseable<BINFile>
                 return raf.readString(raf.readShort());
             case STRING_HASH:
             {
-                String hash = HashHandler.toHex((long) raf.readInt(), 8);
-                if (hash.length() > 8)
-                {
-                    hash = hash.substring(8);
-                }
-                
-                hashes.add(hash);
+                String hash = HashHandler.getBINHash(raf.readInt());
+                hashes.computeIfAbsent("string", (key) -> new HashSet<>()).add(hash);
                 return hash;
             }
             case CONTAINER:
@@ -178,14 +174,14 @@ public class BINParser implements Parseable<BINFile>
             {
                 BINStruct bs = new BINStruct();
                 
-                bs.setHash(HashHandler.getBINHash(raf.readInt()));
-                hashes.add(bs.getHash());
-                
+                String structHash = HashHandler.getBINHash(raf.readInt());
+                bs.setHash(structHash);
                 if (bs.getHash().equalsIgnoreCase("00000000"))
                 {
                     return bs;
                 }
                 
+                hashes.computeIfAbsent("struct", (key) -> new HashSet<>()).add(structHash);
                 bs.setSize(raf.readInt());
                 bs.setCount(raf.readShort());
                 for (int i = 0; i < bs.getCount(); i++)
@@ -197,13 +193,8 @@ public class BINParser implements Parseable<BINFile>
             }
             case LINK_OFFSET:
             {
-                String hash = HashHandler.toHex((long) raf.readInt(), 8);
-                if (hash.length() > 8)
-                {
-                    hash = hash.substring(8);
-                }
-                
-                hashes.add(hash);
+                String hash = HashHandler.getBINHash(raf.readInt());
+                hashes.computeIfAbsent("offset", (key) -> new HashSet<>()).add(hash);
                 return hash;
             }
             case OPTIONAL_DATA:
