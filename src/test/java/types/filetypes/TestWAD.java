@@ -250,10 +250,9 @@ public class TestWAD
         Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
         Path rito        = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
         
-        /*
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
-        */
+        
         transformBIN(extractPath);
         generateBinHashLists();
         
@@ -287,7 +286,7 @@ public class TestWAD
                     }
                 }).sorted().collect(Collectors.toList());
                 String output     = String.join("\n", sortedUnknown);
-                Path   outputPath = UtilHandler.CDRAGON_FOLDER.resolve("bins").resolve("UnknownBinHash-" + key + ".txt");
+                Path   outputPath = UtilHandler.CDRAGON_FOLDER.resolve("hashbins").resolve("UnknownBinHash-" + key + ".txt");
                 Files.createDirectories(outputPath.getParent());
                 Files.write(outputPath, output.getBytes(StandardCharsets.UTF_8));
                 
@@ -295,7 +294,7 @@ public class TestWAD
                 sortedKnown.removeAll(sortedUnknown);
                 Collections.sort(sortedKnown);
                 output = String.join("\n", sortedKnown);
-                outputPath = UtilHandler.CDRAGON_FOLDER.resolve("bins").resolve("BinHash-" + key + ".txt");
+                outputPath = UtilHandler.CDRAGON_FOLDER.resolve("hashbins").resolve("BinHash-" + key + ".txt");
                 Files.createDirectories(outputPath.getParent());
                 Files.write(outputPath, output.getBytes(StandardCharsets.UTF_8));
             } catch (IOException e)
