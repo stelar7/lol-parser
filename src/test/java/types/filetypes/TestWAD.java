@@ -231,17 +231,8 @@ public class TestWAD
     {
         Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
-        
-        Path single = Paths.get("D:\\extractedFiles\\DATA\\FINAL\\Champions\\Zoe.wad.client");
-        extractWad(single, extractPath);
-        Files.walk(extractPath).filter(a -> a.getFileName().toString().endsWith(".skn")).forEach(f -> {
-            System.out.println(f);
-            SKNParser p   = new SKNParser();
-            SKNFile   skn = p.parse(f);
-            System.out.println(skn.toOBJ(skn.getMaterials().get(0)));
-        });
-        
-        //extractWads(rito, extractPath);
+        extractWads(rito, extractPath);
+        transformBIN(extractPath);
     }
     
     @Test
