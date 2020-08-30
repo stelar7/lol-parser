@@ -265,4 +265,28 @@ public class WebHandler
             e.printStackTrace();
         }
     }
+    
+    public static ByteArrayOutputStream downloadFileToMemory(String url)
+    {
+        try
+        {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            URL u = new URL(url);
+            try (InputStream is = u.openStream())
+            {
+                is.transferTo(bos);
+            }
+            
+            return bos;
+        } catch (SSLException e)
+        {
+            // try again
+            return downloadFileToMemory(url);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
 }

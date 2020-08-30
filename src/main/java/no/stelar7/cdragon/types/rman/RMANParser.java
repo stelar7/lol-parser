@@ -7,7 +7,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 import no.stelar7.cdragon.util.types.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
@@ -300,6 +300,14 @@ public class RMANParser implements Parseable<RMANFile>
             e.printStackTrace();
             return null;
         }
+    }
+    
+    public static RMANFile getFromURL(String url)
+    {
+        ByteArrayOutputStream stream = WebHandler.downloadFileToMemory(url);
+        ByteArray data = new ByteArray(stream.toByteArray());
+        
+        return new RMANParser().parse(data);
     }
     
     @Override
