@@ -99,7 +99,7 @@ public class TestTFTData
         
         Files.walkFileTree(outputFolder, new SimpleFileVisitor<>()
         {
-            BINParser parser = new BINParser();
+            final BINParser parser = new BINParser();
             
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
@@ -117,11 +117,11 @@ public class TestTFTData
     
     static class TFTSetInfo
     {
-        private String       setName;
-        private List<String> characters;
+        private final String       setName;
+        private final List<String> characters;
         
-        private List<Map<String, Object>> champData = new ArrayList<>();
-        private List<Map<String, Object>> traitData = new ArrayList<>();
+        private final List<Map<String, Object>> champData = new ArrayList<>();
+        private final List<Map<String, Object>> traitData = new ArrayList<>();
         
         public TFTSetInfo(String setName, List<String> characters)
         {
@@ -158,14 +158,6 @@ public class TestTFTData
         Map<Integer, Map<String, Object>> outputSetMap = generateSetMap(setData, traitData, outputObject);
         Map<Integer, Map<String, Object>> itemData     = parseItemInfo(map22, outputObject);
         
-        Map<String, TFTRound> roundMap     = parseRoundInfo(map22);
-        Map<String, TFTStage> stageMap     = parseStageMap(map22);
-        List<String>          stageOffsets = parseStageList(map22);
-        
-        outputObject.put("rounds", roundMap);
-        outputObject.put("stages", stageMap);
-        outputObject.put("stageOrder", stageOffsets);
-        
         if (exportImages)
         {
             exportImages(inputFolder, outputFolder, outputSetMap, itemData);
@@ -180,14 +172,14 @@ public class TestTFTData
              .sorted()
              .forEach(lang ->
                       {
-                              /*
                           try
                           {
-                              todo
-                              TranslationConfig vals = descs.get(lang);
+                              TranslationConfig vals = descs.get("en_us");
                               System.out.println("Generating files for " + lang);
                 
-                              Map<String, Object> output = new HashMap<>(outputObject);
+                              // todo; deep copy this map so values are correct
+                              Map<String, Object> output = outputObject.entrySet().stream().collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                
                               ((Map<Integer, Map<String, Object>>) output.get("sets")).forEach((k, v) -> {
                                   ((List<Map<String, Object>>) v.get("traits")).forEach(e -> {
                                       e.put("name", vals.get((String) e.get("name")));
@@ -213,7 +205,6 @@ public class TestTFTData
                                   v.put("name", vals.get((String) v.get("name")));
                                   v.put("desc", vals.get((String) v.get("desc")));
                               });
-                              System.out.println();
                 
                               String alteredData = UtilHandler.getGson().toJson(output);
                               Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -221,7 +212,6 @@ public class TestTFTData
                           {
                               e.printStackTrace();
                           }
-                               */
                       });
     }
     
@@ -229,7 +219,7 @@ public class TestTFTData
     {
         List<String> stages = new ArrayList<>();
         
-        BINContainer stageOrderOffsetList = (BINContainer) map22.getByType("01D7548E").get(0).getIfPresent("4FF2F38F").getValue();
+        BINContainer stageOrderOffsetList = (BINContainer) map22.getByType("tftmodedata").get(0).getIfPresent("4FF2F38F").getValue();
         stageOrderOffsetList.getData().stream().map(a -> (String) a).forEach(stages::add);
         
         return stages;
@@ -493,9 +483,14 @@ public class TestTFTData
             
             String realName    = mName.substring(mName.lastIndexOf("_") + 1);
             Path   closestPath = findClosestSubstring(champFileParent, realName);
+            if (closestPath == null || !Files.exists(closestPath))
+            {
+                System.out.println("Unable to find data for: " + realName);
+                continue;
+            }
             
             BINFile realData = parser.parse(closestPath);
-            int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).getIfPresent("championId").getValue();
+            int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).get("championId").map(BINValue::getValue).orElse(-1);
             
             champion.put("API_name", mName);
             champion.put("name", champ.getIfPresent("C3143D66").getValue());
@@ -511,6 +506,7 @@ public class TestTFTData
             abilities.put("icon", champ.get("mPortraitIconPath").map(BINValue::getValue).orElse("No ability icon key present.png"));
             
             Path selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
+            System.out.println(mName);
             if (!Files.exists(selfBin))
             {
                 System.out.println("Unable to find bin file for: " + selfBin);
@@ -521,18 +517,22 @@ public class TestTFTData
             
             BINEntry champItem = data.getByType("TFTCharacterRecord").get(0);
             
-            List<String> traitArray  = new ArrayList<>();
-            List<Object> champTraits = ((BINContainer) champItem.getIfPresent("mLinkedTraits").getValue()).getData();
-            for (Object traitObj : champTraits)
+            List<String>       traitArray           = new ArrayList<>();
+            Optional<BINValue> champTraitsContainer = champItem.get("mLinkedTraits");
+            if (champTraitsContainer.isPresent())
             {
-                if (traitObj instanceof BINStruct)
+                List<Object> champTraits = ((BINContainer) champTraitsContainer.get().getValue()).getData();
+                for (Object traitObj : champTraits)
                 {
-                    BINStruct trait = (BINStruct) traitObj;
-                    String    key   = (String) trait.getIfPresent("053A1F33").getValue();
-                    traitArray.add(key);
-                } else
-                {
-                    traitArray.add(String.valueOf(traitObj));
+                    if (traitObj instanceof BINStruct)
+                    {
+                        BINStruct trait = (BINStruct) traitObj;
+                        String    key   = (String) trait.getIfPresent("053A1F33").getValue();
+                        traitArray.add(key);
+                    } else
+                    {
+                        traitArray.add(String.valueOf(traitObj));
+                    }
                 }
             }
             
@@ -550,35 +550,39 @@ public class TestTFTData
             stats.put("critMultiplier", champItem.get("critDamageMultiplier").map(a -> (float) a.getValue()).orElse(0f));
             stats.put("critChance", champItem.get("BaseCritChance").map(a -> (float) a.getValue()).orElse(0.25f));
             stats.put("attackSpeed", champItem.get("AttackSpeed").map(a -> (float) a.getValue()).orElse(0f));
-            stats.put("range", champItem.get("attackRange").map(a -> Math.floor((float) a.getValue() / 180f)).get());
+            stats.put("range", champItem.get("attackRange").map(a -> (float) Math.floor((float) a.getValue() / 180f)).orElse(0f));
             
-            String spellName = (String) ((BINContainer) champItem.getIfPresent("spellNames").getValue()).getData().get(0);
-            if (spellName.contains("/"))
+            Optional<BINValue> spellNames = champItem.get("spellNames");
+            if (spellNames.isPresent())
             {
-                spellName = spellName.substring(spellName.indexOf('/') + 1);
-            }
-            
-            String finalSpellName = spellName;
-            
-            Map<String, Object> abilityVars = new LinkedHashMap<>();
-            List<BINEntry>      elems       = data.getByType("SpellObject");
-            for (BINEntry elem : elems)
-            {
-                if (elem.getIfPresent("mScriptName").getValue().equals(spellName))
+                String spellName = (String) ((BINContainer) spellNames.get().getValue()).getData().get(0);
+                if (spellName.contains("/"))
                 {
-                    BINStruct    spell      = (BINStruct) elem.getIfPresent("mSpell").getValue();
-                    List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
-                    for (Object variableObj : dataValues)
-                    {
-                        BINStruct    variable = (BINStruct) variableObj;
-                        String       key      = (String) variable.getIfPresent("mName").getValue();
-                        List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
-                        abilityVars.put(key, values);
-                    }
-                    break;
+                    spellName = spellName.substring(spellName.indexOf('/') + 1);
                 }
+                
+                String finalSpellName = spellName;
+                
+                Map<String, Object> abilityVars = new LinkedHashMap<>();
+                List<BINEntry>      elems       = data.getByType("SpellObject");
+                for (BINEntry elem : elems)
+                {
+                    if (elem.getIfPresent("mScriptName").getValue().equals(spellName))
+                    {
+                        BINStruct    spell      = (BINStruct) elem.getIfPresent("mSpell").getValue();
+                        List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
+                        for (Object variableObj : dataValues)
+                        {
+                            BINStruct    variable = (BINStruct) variableObj;
+                            String       key      = (String) variable.getIfPresent("mName").getValue();
+                            List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
+                            abilityVars.put(key, values);
+                        }
+                        break;
+                    }
+                }
+                abilities.put("variables", abilityVars);
             }
-            abilities.put("variables", abilityVars);
             
             
             champion.put("stats", stats);
@@ -669,7 +673,7 @@ public class TestTFTData
     private Map<Integer, TFTSetInfo> parseSetInfo(BINFile map22, Map<String, String> characterOffsetLookup)
     {
         Map<Integer, TFTSetInfo> sets       = new LinkedHashMap<>();
-        List<BINEntry>           TFTSetList = map22.getByType("438850FF");
+        List<BINEntry>           TFTSetList = map22.getByType("tftsetdata");
         for (BINEntry entry : TFTSetList)
         {
             String characterListOffsetId = (String) ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData().get(0);
@@ -716,7 +720,8 @@ public class TestTFTData
         
         public String get(String key)
         {
-            return file != null ? file.getFromHash(key) : rawData.getOrDefault(key, key);
+            String lowercase = key.toLowerCase();
+            return file != null ? file.getFromHash(lowercase) : rawData.getOrDefault(lowercase, lowercase);
         }
         
     }
