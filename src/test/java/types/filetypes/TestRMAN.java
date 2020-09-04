@@ -28,8 +28,8 @@ public class TestRMAN
         files.add(RMANParser.loadFromPBE(obj, RMANFileType.LCU));
          */
         
-        //files.addAll(RMANParser.getSieveManifests());
-        files.add(RMANParser.getFromURL("https://lol.secure.dyn.riotcdn.net/channels/public/releases/F5EFF59DBB492C6A.manifest"));
+        files.addAll(RMANParser.getSieveManifests());
+        //files.add(RMANParser.getFromURL("https://lol.secure.dyn.riotcdn.net/channels/public/releases/F5EFF59DBB492C6A.manifest"));
         
         System.out.println("Writing manifest content to file");
         files.forEach(RMANFile::printFileList);
