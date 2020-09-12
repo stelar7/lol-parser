@@ -114,20 +114,39 @@ public class BBQParser implements Parseable<BBQFile>
             throw new RuntimeException("Invalid file signature");
         }
         
-        header.setVersion(raf.readInt());
-        header.setPlayerVersion(raf.readString());
-        header.setFsVersion(raf.readString());
+        header.setFormatVersion(raf.readInt());
+        header.setUnityVersion(raf.readString());
+        header.setGeneratorVersion(raf.readString());
+        
+        if (header.isUnityFS()) {
+            loadUnityFS(header, raf);
+        } else if (header.isRAW() || header.isWEB()) {
+            throw new UnsupportedOperationException("Unable to parse RAW and WEB files");
+        } else {
+            throw new UnsupportedOperationException("Unable to parse RAW and WEB files");
+        }
+        
+        return header;
+    }
+    
+    private void loadRAW(BBQHeader header, RandomAccessReader raf)
+    {
+    
+    }
+    
+    private void loadUnityFS(BBQHeader header, RandomAccessReader raf)
+    {
         header.setTotalFileSize(raf.readLong());
         header.setMetadataCompressedSize(raf.readInt());
         header.setMetadataUncompressedSize(raf.readInt());
         header.setFlags(raf.readInt());
-        
+    
         header.setCompressionMode(BBQCompressionType.from(header.getFlags() & 0x3f));
         header.setHasEntryInfo((header.getFlags() & 0x40) == 0x40);
         header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
         
         header.setHeaderSize(raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
-        
-        return header;
     }
+    
+    
 }

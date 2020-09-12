@@ -14,7 +14,7 @@ public class TestBBQ
     @Test
     public void testBBQ() throws IOException
     {
-        Path file = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\bbq\\jinxemote.bbq");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("C:\\Users\\Steffen\\Desktop\\unitypack\\UnityPack-master\\00-79-29-4a-ee-19-7f-ff-6b-50-58-60-a1-16-f6-93.bbq");
         Files.createDirectories(file.resolveSibling("generated"));
         BBQFile data = parser.parse(file);
         

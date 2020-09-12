@@ -19,6 +19,26 @@ public class BBQAsset
         int                format     = raf.readInt();
         int                dataOffset = raf.readInt();
         
+        if (format >= 9) {
+            int endian = raf.readInt();
+            if(endian == 0) {
+                raf.setEndian(ByteOrder.LITTLE_ENDIAN);
+            }
+        }
+        
+        if(format >= 7 && format <= 13) {
+            boolean longObjectIds = raf.readInt() > 0;
+        }
+        
+        int objectCount = raf.readInt();
+        for (int i = 0; i < objectCount; i++)
+        {
+            if (format >= 14) {
+                System.out.println("TODO: align to byte boundary?");
+            }
+        }
+        
+        
         System.out.println();
     }
 }

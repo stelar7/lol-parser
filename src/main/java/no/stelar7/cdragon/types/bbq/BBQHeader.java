@@ -6,9 +6,9 @@ public class BBQHeader
 {
     
     private String signature;
-    private int    version;
-    private String playerVersion;
-    private String fsVersion;
+    private int    formatVersion;
+    private String unityVersion;
+    private String generatorVersion;
     private long   totalFileSize;
     private int    metadataCompressedSize;
     private int    metadataUncompressedSize;
@@ -29,34 +29,34 @@ public class BBQHeader
         this.signature = signature;
     }
     
-    public int getVersion()
+    public int getFormatVersion()
     {
-        return version;
+        return formatVersion;
     }
     
-    public void setVersion(int version)
+    public void setFormatVersion(int formatVersion)
     {
-        this.version = version;
+        this.formatVersion = formatVersion;
     }
     
-    public String getPlayerVersion()
+    public String getUnityVersion()
     {
-        return playerVersion;
+        return unityVersion;
     }
     
-    public void setPlayerVersion(String playerVersion)
+    public void setUnityVersion(String unityVersion)
     {
-        this.playerVersion = playerVersion;
+        this.unityVersion = unityVersion;
     }
     
-    public String getFsVersion()
+    public String getGeneratorVersion()
     {
-        return fsVersion;
+        return generatorVersion;
     }
     
-    public void setFsVersion(String fsVersion)
+    public void setGeneratorVersion(String generatorVersion)
     {
-        this.fsVersion = fsVersion;
+        this.generatorVersion = generatorVersion;
     }
     
     public long getTotalFileSize()
@@ -152,7 +152,7 @@ public class BBQHeader
         }
         BBQHeader bbqHeader = (BBQHeader) o;
         return signature.equals(bbqHeader.signature) &&
-               version == bbqHeader.version &&
+               formatVersion == bbqHeader.formatVersion &&
                totalFileSize == bbqHeader.totalFileSize &&
                metadataCompressedSize == bbqHeader.metadataCompressedSize &&
                metadataUncompressedSize == bbqHeader.metadataUncompressedSize &&
@@ -160,14 +160,14 @@ public class BBQHeader
                compressionMode == bbqHeader.compressionMode &&
                hasEntryInfo == bbqHeader.hasEntryInfo &&
                isMetadataAtEnd == bbqHeader.isMetadataAtEnd &&
-               Objects.equals(playerVersion, bbqHeader.playerVersion) &&
-               Objects.equals(fsVersion, bbqHeader.fsVersion);
+               Objects.equals(unityVersion, bbqHeader.unityVersion) &&
+               Objects.equals(generatorVersion, bbqHeader.generatorVersion);
     }
     
     @Override
     public int hashCode()
     {
-        return Objects.hash(signature, version, playerVersion, fsVersion, totalFileSize, metadataCompressedSize, metadataUncompressedSize, flags, compressionMode, hasEntryInfo, isMetadataAtEnd);
+        return Objects.hash(signature, formatVersion, unityVersion, generatorVersion, totalFileSize, metadataCompressedSize, metadataUncompressedSize, flags, compressionMode, hasEntryInfo, isMetadataAtEnd);
     }
     
     @Override
@@ -175,9 +175,9 @@ public class BBQHeader
     {
         return "BBQHeader{" +
                "signature=" + signature +
-               ", version=" + version +
-               ", playerVersion='" + playerVersion + '\'' +
-               ", fsVersion='" + fsVersion + '\'' +
+               ", version=" + formatVersion +
+               ", playerVersion='" + unityVersion + '\'' +
+               ", fsVersion='" + generatorVersion + '\'' +
                ", totalFileSize=" + totalFileSize +
                ", metadataCompressedSize=" + metadataCompressedSize +
                ", metadataUncompressedSize=" + metadataUncompressedSize +
@@ -186,5 +186,20 @@ public class BBQHeader
                ", hasDirectoryInfo=" + hasEntryInfo +
                ", isDirectoryAtEnd=" + isMetadataAtEnd +
                '}';
+    }
+    
+    public boolean isUnityFS()
+    {
+        return this.signature.equals("UnityFS");
+    }
+    
+    public boolean isRAW()
+    {
+        return this.signature.equals("UnityRaw");
+    }
+    
+    public boolean isWEB()
+    {
+        return this.signature.equals("UnityWeb");
     }
 }
