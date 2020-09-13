@@ -10,11 +10,17 @@ public class BBQAsset
 {
     int          bufferOffset = -1;
     int          offset       = -1;
-    String       name;
-    boolean      longObjectIds;
+    BBQHeader    bundle       = null;
+    BinaryReader buf          = null;
     boolean      loaded       = false;
-    BBQHeader    bundle;
-    BinaryReader buf;
+    
+    String               name;
+    int                  metadataSize;
+    int                  fileSize;
+    int                  format;
+    int                  dataOffset;
+    boolean              longObjectIds;
+    BBQAssetTypeMetadata tree;
     
     public static BBQAsset fromBundle(BBQBlockStore storage, BBQHeader header)
     {
@@ -79,10 +85,22 @@ public class BBQAsset
         buf.seek(this.bufferOffset);
         buf.setEndian(ByteOrder.BIG_ENDIAN);
         
-        int metadataSize = buf.readInt();
-        int fileSize     = buf.readInt();
-        int format       = buf.readInt();
-        int dataOffset   = buf.readInt();
+        this.metadataSize = buf.readInt();
+        this.fileSize = buf.readInt();
+        this.format = buf.readInt();
+        this.dataOffset = buf.readInt();
+        
+        if (this.format >= 9)
+        {
+            int endian = buf.readInt();
+            if (endian == 0)
+            {
+                buf.setEndian(ByteOrder.LITTLE_ENDIAN);
+            }
+        }
+        
+        this.tree = new BBQAssetTypeMetadata(this);
+        this.tree.load(buf);
         
         System.out.println();
     }

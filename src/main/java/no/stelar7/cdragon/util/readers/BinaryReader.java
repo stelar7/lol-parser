@@ -14,7 +14,13 @@ public interface BinaryReader
     
     short readShort();
     
+    byte[] readBytes(int i);
+    
     byte readByte();
+    
+    char readChar();
+    
+    boolean readBoolean();
     
     byte[] readRemaining();
     
@@ -23,4 +29,5 @@ public interface BinaryReader
     void seek(int pos);
     
     void setEndian(ByteOrder order);
+    
 }

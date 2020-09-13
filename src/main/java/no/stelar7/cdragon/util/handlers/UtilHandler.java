@@ -206,6 +206,27 @@ public final class UtilHandler
         return result.toString();
     }
     
+    public static byte[] readInternalAsBytes(String filename)
+    {
+        try
+        {
+            InputStream file = UtilHandler.class.getClassLoader().getResourceAsStream(filename);
+            if (file == null)
+            {
+                return new byte[0];
+            }
+            
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            file.transferTo(bos);
+            return bos.toByteArray();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return new byte[0];
+    }
+    
     
     public static JsonParser getJsonParser()
     {
@@ -669,5 +690,10 @@ public final class UtilHandler
         {
             zString.insert(0, "0");
         }
+    }
+    
+    public static byte[] getBBQStringData()
+    {
+        return UtilHandler.readInternalAsBytes("bbq/strings.dat");
     }
 }

@@ -44,7 +44,6 @@ public class BBQBlockStore
             {
                 seekToBlock(this.cursor);
             }
-            
             byte[] part = this.currentStream.readBytes(size);
             if (size > 0)
             {
@@ -130,7 +129,7 @@ public class BBQBlockStore
         if (!didBreak)
         {
             this.currentBlock = null;
-            this.currentStream = null;
+            this.currentStream = new RandomAccessReader(new byte[0]);
             return;
         }
         

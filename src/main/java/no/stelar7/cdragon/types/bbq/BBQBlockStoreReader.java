@@ -25,8 +25,8 @@ public class BBQBlockStoreReader implements BinaryReader
     public String readString()
     {
         StringBuilder sb   = new StringBuilder();
-        byte          data = 0;
-        while ((data = storage.read(1)[0]) != 0)
+        char          data = 0;
+        while ((data = readChar()) != 0)
         {
             sb.append(data);
         }
@@ -52,9 +52,27 @@ public class BBQBlockStoreReader implements BinaryReader
     }
     
     @Override
+    public byte[] readBytes(int i)
+    {
+        return storage.read(i);
+    }
+    
+    @Override
     public byte readByte()
     {
         return ByteBuffer.wrap(storage.read(1)).order(endian).get();
+    }
+    
+    @Override
+    public char readChar()
+    {
+        return (char) readByte();
+    }
+    
+    @Override
+    public boolean readBoolean()
+    {
+        return readByte() > 0;
     }
     
     @Override

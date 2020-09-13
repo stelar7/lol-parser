@@ -304,6 +304,12 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
         return buffer.get();
     }
     
+    @Override
+    public char readChar()
+    {
+        return buffer.getChar();
+    }
+    
     public byte[] readBytes(int length)
     {
         if (length > remaining())
