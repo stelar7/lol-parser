@@ -18,10 +18,9 @@ public class TestBBQ
         Files.createDirectories(file.resolveSibling("generated"));
         BBQFile data = parser.parse(file);
         
-        for (BBQBundleEntry entry : data.getEntries())
+        for (BBQAsset entry : data.getEntries())
         {
-            //data.export(file, entry, file.resolveSibling("generated\\" + entry.getName()));
-            data.getAsAsset(file, entry);
+            System.out.println();
         }
     }
 }

@@ -1,5 +1,8 @@
 package no.stelar7.cdragon.types.bbq;
 
+import no.stelar7.cdragon.util.handlers.CompressionHandler;
+import no.stelar7.cdragon.util.types.ByteArray;
+
 import java.util.Objects;
 
 public class BBQBlockInfo
@@ -43,6 +46,27 @@ public class BBQBlockInfo
         return BBQCompressionType.from(this.flags & 0x3f);
     }
     
+    public byte[] decompress(byte[] buffer)
+    {
+        if (this.getCompressionType() == BBQCompressionType.NONE) {
+            return buffer;
+        }
+        
+        if(this.getCompressionType() == BBQCompressionType.LZMA)
+        {
+            return CompressionHandler.uncompressLZMA(buffer);
+        }
+        
+        if(this.getCompressionType() == BBQCompressionType.LZ4 ||
+           this.getCompressionType() == BBQCompressionType.LZ4HC ||
+           this.getCompressionType() == BBQCompressionType.LZHAM) {
+            ByteArray array = new ByteArray(buffer);
+            ByteArray sized = array.copyOfRange(0, this.compressedSize);
+           return CompressionHandler.uncompressLZ4(sized.getDataRaw(), this.uncompressedSize);
+        }
+        
+        throw new UnsupportedOperationException("Unknown compression method in block info");
+    }
     
     @Override
     public boolean equals(Object o)

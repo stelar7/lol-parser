@@ -2,7 +2,7 @@ package no.stelar7.cdragon.util.readers;
 
 
 import com.google.common.collect.EvictingQueue;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.*;
 import org.joml.Quaternionf;
 
@@ -14,7 +14,7 @@ import java.nio.charset.*;
 import java.nio.file.Path;
 import java.util.*;
 
-public class RandomAccessReader implements AutoCloseable
+public class RandomAccessReader implements AutoCloseable, BinaryReader
 {
     private ByteBuffer       buffer;
     private MappedByteBuffer mappedBuffer;
@@ -150,9 +150,26 @@ public class RandomAccessReader implements AutoCloseable
     }
     
     
+    /**
+     * Sets the current position of the reader
+     */
     public void seek(int pos)
     {
         buffer.position(pos);
+    }
+    
+    /**
+     *
+     * to go backwards, you still need a negative input to this function
+     */
+    public void seekFromEnd(int pos)
+    {
+        buffer.position(buffer.limit() + pos);
+    }
+    
+    public void seekFromCurrentPosition(int pos)
+    {
+        buffer.position(this.pos() + pos);
     }
     
     public String readString(int length)
@@ -684,6 +701,22 @@ public class RandomAccessReader implements AutoCloseable
         buffer.get(tempData);
         buffer.position(buffer.position() - length);
         return Arrays.copyOf(tempData, length);
+    }
+    
+    public byte[] getBufferArray() {
+        return this.buffer.array();
+    }
+    
+    public byte[] getBufferData() {
+        int pos = buffer.position();
+        
+        buffer.position(0);
+        int size = buffer.limit();
+        byte[] data = new byte[size];
+        buffer.get(data);
+        
+        buffer.position(pos);
+        return data;
     }
     
     public int readIntReverse()

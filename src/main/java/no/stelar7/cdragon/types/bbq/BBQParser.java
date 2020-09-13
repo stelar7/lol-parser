@@ -28,46 +28,46 @@ public class BBQParser implements Parseable<BBQFile>
     {
         BBQFile file = new BBQFile();
         
-        BBQHeader            header = parseHeader(raf);
-        List<BBQBundleEntry> meta   = parseEntryList(raf, header);
+        BBQHeader      header = parseHeader(raf);
+        List<BBQAsset> assets = parseEntryList(raf, header);
         
         file.setHeader(header);
-        file.setEntries(meta);
-        
+        file.setEntries(assets);
         return file;
     }
     
-    private List<BBQBundleEntry> parseEntryList(RandomAccessReader raf, BBQHeader header)
+    private List<BBQAsset> parseEntryList(RandomAccessReader raf, BBQHeader header)
     {
-        int     headerSize = raf.pos();
+        int     currentPos = raf.pos();
         boolean metaAtEnd  = header.isMetadataAtEnd();
         
         if (metaAtEnd)
         {
-            raf.seek((int) (header.getTotalFileSize() - header.getMetadataCompressedSize()));
+            raf.seekFromEnd(-header.getMetadataCompressedSize());
         }
         
-        byte[] data = null;
+        byte[] data = raf.readBytes(header.getMetadataCompressedSize());
         switch (header.getCompressionMode())
         {
             case NONE:
             {
-                data = raf.readBytes(raf.remaining());
                 break;
             }
             case LZMA:
             {
-                data = CompressionHandler.uncompressLZMA(raf.readBytes(raf.remaining()));
+                data = CompressionHandler.uncompressLZMA(data);
                 break;
             }
             case LZ4:
             case LZ4HC:
             case LZHAM:
             {
-                data = CompressionHandler.uncompressLZ4(raf.readBytes(header.getMetadataCompressedSize()), header.getMetadataUncompressedSize());
+                data = CompressionHandler.uncompressLZ4(data, header.getMetadataUncompressedSize());
                 break;
             }
         }
+        
+        raf.seek(currentPos);
         
         RandomAccessReader metaReader = new RandomAccessReader(data, ByteOrder.BIG_ENDIAN);
         byte[]             guid       = metaReader.readBytes(16);
@@ -80,18 +80,30 @@ public class BBQParser implements Parseable<BBQFile>
             block.setUncompressedSize(metaReader.readInt());
             block.setCompressedSize(metaReader.readInt());
             block.setFlags(metaReader.readShort());
+            blockList.add(block);
         }
         
-        int                  nodes   = metaReader.readInt();
-        List<BBQBundleEntry> entries = new ArrayList<>();
-        for (int i = 0; i < nodes; i++)
+        BBQBlockStore storage = new BBQBlockStore(blockList, raf);
+        
+        int                  nodeCount   = metaReader.readInt();
+        List<BBQBundleEntry> nodes = new ArrayList<>();
+        for (int i = 0; i < nodeCount; i++)
         {
             BBQBundleEntry entry = parseMetaEntry(metaReader, raf);
-            entries.add(entry);
+            nodes.add(entry);
         }
-        entries.sort(Comparator.comparing(BBQBundleEntry::getOffset));
         
-        return entries;
+        nodes.sort(Comparator.comparing(BBQBundleEntry::getOffset));
+
+        List<BBQAsset> assets = new ArrayList<>();
+        for (BBQBundleEntry block : nodes) {
+            BBQAsset asset = BBQAsset.fromBundle(storage, header);
+            asset.name = block.getName();
+            asset.load();
+            assets.add(asset);
+        }
+        
+        return assets;
     }
     
     private BBQBundleEntry parseMetaEntry(RandomAccessReader meta, RandomAccessReader raf)
@@ -109,7 +121,7 @@ public class BBQParser implements Parseable<BBQFile>
         BBQHeader header = new BBQHeader();
         
         header.setSignature(raf.readString());
-        if (!header.getSignature().equalsIgnoreCase("UnityFS"))
+        if (!header.getSignature().startsWith("Unity"))
         {
             throw new RuntimeException("Invalid file signature");
         }
@@ -118,12 +130,15 @@ public class BBQParser implements Parseable<BBQFile>
         header.setUnityVersion(raf.readString());
         header.setGeneratorVersion(raf.readString());
         
-        if (header.isUnityFS()) {
+        if (header.isUnityFS())
+        {
             loadUnityFS(header, raf);
-        } else if (header.isRAW() || header.isWEB()) {
+        } else if (header.isRAW() || header.isWEB())
+        {
             throw new UnsupportedOperationException("Unable to parse RAW and WEB files");
-        } else {
-            throw new UnsupportedOperationException("Unable to parse RAW and WEB files");
+        } else
+        {
+            throw new UnsupportedOperationException("Unable to parse this type of file");
         }
         
         return header;
@@ -140,11 +155,9 @@ public class BBQParser implements Parseable<BBQFile>
         header.setMetadataCompressedSize(raf.readInt());
         header.setMetadataUncompressedSize(raf.readInt());
         header.setFlags(raf.readInt());
-    
         header.setCompressionMode(BBQCompressionType.from(header.getFlags() & 0x3f));
         header.setHasEntryInfo((header.getFlags() & 0x40) == 0x40);
         header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
-        
         header.setHeaderSize(raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
     }
     

@@ -9,8 +9,8 @@ import java.util.*;
 
 public class BBQFile
 {
-    private BBQHeader            header;
-    private List<BBQBundleEntry> entries;
+    private BBQHeader             header;
+    private List<BBQAsset> entries;
     
     public BBQHeader getHeader()
     {
@@ -22,12 +22,12 @@ public class BBQFile
         this.header = header;
     }
     
-    public List<BBQBundleEntry> getEntries()
+    public List<BBQAsset> getEntries()
     {
         return entries;
     }
     
-    public void setEntries(List<BBQBundleEntry> entries)
+    public void setEntries(List<BBQAsset> entries)
     {
         this.entries = entries;
     }
@@ -87,12 +87,6 @@ public class BBQFile
         
         return data;
     }
-    
-    public BBQAsset getAsAsset(Path bbqFile, BBQBundleEntry entry)
-    {
-        return new BBQAsset(entry, getAsBytes(bbqFile, entry));
-    }
-    
     
     public void export(Path bbqFile, BBQBundleEntry entry, Path output)
     {

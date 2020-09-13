@@ -6,7 +6,12 @@ import java.util.Arrays;
 
 public final class ByteArray
 {
-    private final byte[] data;
+    private byte[] data;
+    
+    public ByteArray()
+    {
+        this.data = new byte[0];
+    }
     
     public ByteArray(byte[] data)
     {
@@ -148,5 +153,13 @@ public final class ByteArray
             }
         }
         return -1;
+    }
+    
+    public void append(byte[] input)
+    {
+        byte[] newBuffer = new byte[this.data.length + input.length];
+        System.arraycopy(data, 0, newBuffer, 0, data.length);
+        System.arraycopy(input, 0, newBuffer, data.length, input.length);
+        this.data = newBuffer;
     }
 }

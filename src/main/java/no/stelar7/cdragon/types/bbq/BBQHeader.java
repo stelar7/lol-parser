@@ -139,6 +139,21 @@ public class BBQHeader
         this.headerSize = headerSize;
     }
     
+    public boolean isUnityFS()
+    {
+        return this.signature.equals("UnityFS");
+    }
+    
+    public boolean isRAW()
+    {
+        return this.signature.equals("UnityRaw");
+    }
+    
+    public boolean isWEB()
+    {
+        return this.signature.equals("UnityWeb");
+    }
+    
     @Override
     public boolean equals(Object o)
     {
@@ -174,32 +189,18 @@ public class BBQHeader
     public String toString()
     {
         return "BBQHeader{" +
-               "signature=" + signature +
-               ", version=" + formatVersion +
-               ", playerVersion='" + unityVersion + '\'' +
-               ", fsVersion='" + generatorVersion + '\'' +
+               "signature='" + signature + '\'' +
+               ", formatVersion=" + formatVersion +
+               ", unityVersion='" + unityVersion + '\'' +
+               ", generatorVersion='" + generatorVersion + '\'' +
                ", totalFileSize=" + totalFileSize +
                ", metadataCompressedSize=" + metadataCompressedSize +
                ", metadataUncompressedSize=" + metadataUncompressedSize +
                ", flags=" + flags +
+               ", headerSize=" + headerSize +
                ", compressionMode=" + compressionMode +
-               ", hasDirectoryInfo=" + hasEntryInfo +
-               ", isDirectoryAtEnd=" + isMetadataAtEnd +
+               ", hasEntryInfo=" + hasEntryInfo +
+               ", isMetadataAtEnd=" + isMetadataAtEnd +
                '}';
-    }
-    
-    public boolean isUnityFS()
-    {
-        return this.signature.equals("UnityFS");
-    }
-    
-    public boolean isRAW()
-    {
-        return this.signature.equals("UnityRaw");
-    }
-    
-    public boolean isWEB()
-    {
-        return this.signature.equals("UnityWeb");
     }
 }
