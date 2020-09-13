@@ -112,6 +112,12 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
     }
     
     @Override
+    public void align()
+    {
+        throw new UnsupportedOperationException("No align avaliable on RandomAccessReader");
+    }
+    
+    @Override
     public void close()
     {
         if (this.preventLockedFile)
@@ -307,7 +313,7 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
     @Override
     public char readChar()
     {
-        return buffer.getChar();
+        return (char) buffer.get();
     }
     
     public byte[] readBytes(int length)

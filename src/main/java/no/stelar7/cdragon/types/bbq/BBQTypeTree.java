@@ -69,14 +69,11 @@ public class BBQTypeTree
         Deque<BBQTypeTree> parents = new ArrayDeque<>();
         parents.add(this);
         
-        // TODO: something goes wrong here..?
         BinaryReader raf = new RandomAccessReader(nodeData);
         for (int i = 0; i < nodeCount; i++)
         {
             short version = raf.readShort();
             byte  depth   = raf.readByte();
-            
-            System.out.println(depth);
             
             BBQTypeTree current;
             
@@ -103,8 +100,6 @@ public class BBQTypeTree
             current.flags = raf.readInt();
     
             raf.readBytes(nodeBytes - 24);
-            System.out.println(raf.pos());
-            System.out.println(current);
         }
     }
     
@@ -126,7 +121,8 @@ public class BBQTypeTree
         ByteArray  dataReader = new ByteArray(data);
         int        endIndex   = dataReader.indexOf(0, offset);
         ByteBuffer bufferData = ByteBuffer.wrap(dataReader.copyOfRange(offset, endIndex).getDataRaw());
-        return StandardCharsets.UTF_8.decode(bufferData).toString();
+        String value = StandardCharsets.UTF_8.decode(bufferData).toString();
+        return value;
     }
     
     @Override

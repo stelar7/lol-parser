@@ -18,6 +18,11 @@ public class BBQAssetTypeMetadata
         this.asset = asset;
     }
     
+    public static BBQAssetTypeMetadata fromFile(String filename)
+    {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+    
     public void load(BinaryReader buf)
     {
         int format = this.asset.format;
@@ -82,6 +87,5 @@ public class BBQAssetTypeMetadata
                 typeTrees.put(classId, tree);
             }
         }
-        System.out.println();
     }
 }

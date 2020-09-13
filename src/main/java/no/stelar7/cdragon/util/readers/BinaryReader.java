@@ -30,4 +30,5 @@ public interface BinaryReader
     
     void setEndian(ByteOrder order);
     
+    void align();
 }

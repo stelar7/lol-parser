@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.bbq;
 
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.util.List;
@@ -8,13 +8,13 @@ import java.util.List;
 public class BBQBlockStore
 {
     private List<BBQBlockInfo> blockList;
-    private RandomAccessReader raf;
+    private BinaryReader       raf;
     private int                cursor            = 0;
     private int                basePos;
     private int                maxPos;
     private BBQBlockInfo       currentBlock;
     private int                currentBlockStart = 0;
-    private RandomAccessReader currentStream;
+    private BinaryReader       currentStream;
     
     public BBQBlockStore(List<BBQBlockInfo> blockList, RandomAccessReader raf)
     {
@@ -44,13 +44,16 @@ public class BBQBlockStore
             {
                 seekToBlock(this.cursor);
             }
+            
             byte[] part = this.currentStream.readBytes(size);
+            
             if (size > 0)
             {
                 if (part.length == 0)
                 {
                     throw new RuntimeException("Unexpected end of file?");
                 }
+                
                 size -= part.length;
             }
             
@@ -122,8 +125,9 @@ public class BBQBlockStore
                 didBreak = true;
                 break;
             }
+            
             baseOffset += block.getCompressedSize();
-            offset += block.getCompressedSize();
+            offset += block.getUncompressedSize();
         }
         
         if (!didBreak)

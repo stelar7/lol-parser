@@ -5,6 +5,7 @@ import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.ByteOrder;
+import java.util.*;
 
 public class BBQAsset
 {
@@ -14,13 +15,17 @@ public class BBQAsset
     BinaryReader buf          = null;
     boolean      loaded       = false;
     
-    String               name;
-    int                  metadataSize;
-    int                  fileSize;
-    int                  format;
-    int                  dataOffset;
-    boolean              longObjectIds;
-    BBQAssetTypeMetadata tree;
+    String                    name;
+    int                       metadataSize;
+    int                       fileSize;
+    int                       format;
+    int                       dataOffset;
+    boolean                   longObjectIds;
+    BBQAssetTypeMetadata      tree;
+    Map<Long, Integer>        adds            = new HashMap<>();
+    List<BBQAssetReference>   assetReferences = new ArrayList<>();
+    Map<Integer, BBQTypeTree> types;
+    Map<Long, BBQObjectInfo>  objects;
     
     public static BBQAsset fromBundle(BBQBlockStore storage, BBQHeader header)
     {
@@ -102,6 +107,88 @@ public class BBQAsset
         this.tree = new BBQAssetTypeMetadata(this);
         this.tree.load(buf);
         
-        System.out.println();
+        if (7 <= this.format && this.format <= 13)
+        {
+            this.longObjectIds = buf.readInt() > 0;
+        }
+        
+        // TODO: from here
+        int objectCount = buf.readInt();
+        for (int i = 0; i < objectCount; i++)
+        {
+            if (this.format >= 14)
+            {
+                buf.align();
+            }
+            
+            BBQObjectInfo info = new BBQObjectInfo(this);
+            info.load(buf);
+            registerObject(info);
+        }
+        
+        if (this.format >= 11)
+        {
+            int addCount = buf.readInt();
+            for (int i = 0; i < addCount; i++)
+            {
+                if (this.format >= 14)
+                {
+                    buf.align();
+                }
+                
+                long id    = readId(buf);
+                int  value = buf.readInt();
+                this.adds.put(id, value);
+            }
+        }
+        
+        if (this.format >= 6)
+        {
+            int refCount = buf.readInt();
+            for (int i = 0; i < refCount; i++)
+            {
+                BBQAssetReference ref = new BBQAssetReference(this);
+                ref.load(buf);
+                this.assetReferences.add(ref);
+            }
+        }
+        
+        String unknown = buf.readString();
+        this.loaded = true;
+    }
+    
+    private void registerObject(BBQObjectInfo info)
+    {
+        if (this.tree.typeTrees.containsKey(info.typeId))
+        {
+            this.types.put(info.typeId, this.tree.typeTrees.get(info.typeId));
+        } else if (!this.types.containsKey(info.typeId))
+        {
+            BBQAssetTypeMetadata trees = BBQAssetTypeMetadata.fromFile("bbq/structs.dat");
+            if (trees.typeTrees.containsKey(info.typeId))
+            {
+                this.types.put(info.typeId, trees.typeTrees.get(info.typeId));
+            } else
+            {
+                System.out.println("Unable to find class with id " + info.typeId + " in structs.dat");
+                this.types.put(info.typeId, null);
+            }
+        }
+        
+        if (this.objects.containsKey(info.pathId))
+        {
+            System.out.println("Duplicate asset object: " + info.pathId);
+        }
+        
+        this.objects.put(info.pathId, info);
+    }
+    
+    protected long readId(BinaryReader buf)
+    {
+        if (this.format >= 14)
+        {
+            return buf.readLong();
+        }
+        return buf.readInt();
     }
 }

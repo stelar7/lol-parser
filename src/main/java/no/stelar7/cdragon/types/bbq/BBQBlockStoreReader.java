@@ -103,4 +103,15 @@ public class BBQBlockStoreReader implements BinaryReader
     {
         this.endian = order;
     }
+    
+    @Override
+    public void align()
+    {
+        int current = pos();
+        int newPos  = (current + 4) & -4;
+        if (newPos > current)
+        {
+            this.seek(newPos - current, 1);
+        }
+    }
 }
