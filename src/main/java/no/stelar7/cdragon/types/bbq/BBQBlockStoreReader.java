@@ -108,7 +108,8 @@ public class BBQBlockStoreReader implements BinaryReader
     public void align()
     {
         int current = pos();
-        int newPos  = (current + 4) & -4;
+        int newPos  = (current + 3) & -4;
+        
         if (newPos > current)
         {
             this.seek(newPos - current, 1);

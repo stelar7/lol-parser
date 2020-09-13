@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.bbq;
 
-import no.stelar7.cdragon.util.handlers.CompressionHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
@@ -24,8 +24,8 @@ public class BBQAsset
     BBQAssetTypeMetadata      tree;
     Map<Long, Integer>        adds            = new HashMap<>();
     List<BBQAssetReference>   assetReferences = new ArrayList<>();
-    Map<Integer, BBQTypeTree> types;
-    Map<Long, BBQObjectInfo>  objects;
+    Map<Integer, BBQTypeTree> types           = new HashMap<>();
+    Map<Long, BBQObjectInfo>  objects         = new HashMap<>();
     
     public static BBQAsset fromBundle(BBQBlockStore storage, BBQHeader header)
     {
@@ -190,5 +190,65 @@ public class BBQAsset
             return buf.readLong();
         }
         return buf.readInt();
+    }
+    
+    public boolean isLoaded()
+    {
+        return loaded;
+    }
+    
+    public String getName()
+    {
+        return name;
+    }
+    
+    public int getMetadataSize()
+    {
+        return metadataSize;
+    }
+    
+    public int getFileSize()
+    {
+        return fileSize;
+    }
+    
+    public int getFormat()
+    {
+        return format;
+    }
+    
+    public int getDataOffset()
+    {
+        return dataOffset;
+    }
+    
+    public boolean isLongObjectIds()
+    {
+        return longObjectIds;
+    }
+    
+    public BBQAssetTypeMetadata getTree()
+    {
+        return tree;
+    }
+    
+    public Map<Long, Integer> getAdds()
+    {
+        return adds;
+    }
+    
+    public List<BBQAssetReference> getAssetReferences()
+    {
+        return assetReferences;
+    }
+    
+    public Map<Integer, BBQTypeTree> getTypes()
+    {
+        return types;
+    }
+    
+    public Map<Long, BBQObjectInfo> getObjects()
+    {
+        return objects;
     }
 }

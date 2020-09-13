@@ -1,6 +1,8 @@
 package no.stelar7.cdragon.types.bbq;
 
-import no.stelar7.cdragon.util.readers.BinaryReader;
+import no.stelar7.cdragon.util.readers.*;
+
+import java.util.*;
 
 public class BBQObjectInfo
 {
@@ -59,5 +61,44 @@ public class BBQObjectInfo
             return buf.readLong();
         }
         return this.asset.readId(buf);
+    }
+    
+    private BBQTypeTree getTypeTree()
+    {
+        if (this.typeId < 0)
+        {
+            Map<Integer, BBQTypeTree> tree = this.asset.tree.typeTrees;
+            if (tree.containsKey(this.typeId))
+            {
+                return tree.get(this.typeId);
+            } else if (tree.containsKey(this.classId))
+            {
+                return tree.get(this.classId);
+            }
+            
+            return BBQAssetTypeMetadata.fromFile("bbq/structs.dat").typeTrees.get(this.classId);
+        }
+        
+        return this.asset.types.get(this.typeId);
+    }
+    
+    public Object read()
+    {
+        this.asset.buf.seek(this.asset.bufferOffset + this.dataOffset);
+        byte[] data = this.asset.buf.readBytes(this.size);
+        return readValue(getTypeTree(), new RandomAccessReader(data));
+    }
+    
+    private Object readValue(BBQTypeTree type, RandomAccessReader buf)
+    {
+        boolean     align        = false;
+        int         expectedSize = type.size;
+        int         pos          = buf.pos();
+        String      t            = type.type;
+        BBQTypeTree firstChild   = type.children.size() > 0 ? type.children.get(0) : new BBQTypeTree(this.asset.format);
+        
+        // todo
+        
+        return null;
     }
 }

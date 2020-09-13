@@ -83,7 +83,7 @@ public class BBQBlockStore
         }
     }
     
-    public void seekFromStart(int pos)
+    public void seekFromCurrent(int pos)
     {
         int newCursor = this.cursor + pos;
         if (newCursor != this.cursor)
@@ -101,7 +101,7 @@ public class BBQBlockStore
         }
     }
     
-    public void seekFromCurrent(int pos)
+    public void seekFromStart(int pos)
     {
         int newCursor = pos;
         if (newCursor != this.cursor)

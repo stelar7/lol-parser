@@ -20,7 +20,11 @@ public class TestBBQ
         
         for (BBQAsset entry : data.getEntries())
         {
-            System.out.println();
+            for (BBQObjectInfo value : entry.getObjects().values())
+            {
+                value.read();
+                System.out.println();
+            }
         }
     }
 }
