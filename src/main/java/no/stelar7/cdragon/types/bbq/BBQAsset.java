@@ -25,6 +25,7 @@ public class BBQAsset
     Map<Long, Integer>        adds            = new HashMap<>();
     List<BBQAssetReference>   assetReferences = new ArrayList<>();
     Map<Integer, BBQTypeTree> types           = new HashMap<>();
+    Map<Integer, String>      typeNames       = new HashMap<>();
     Map<Long, BBQObjectInfo>  objects         = new TreeMap<>();
     
     public static BBQAsset fromBundle(BBQBlockStore storage, BBQHeader header)

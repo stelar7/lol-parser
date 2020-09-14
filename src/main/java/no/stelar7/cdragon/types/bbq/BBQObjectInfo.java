@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.bbq;
 
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.Pair;
 
@@ -83,6 +84,30 @@ public class BBQObjectInfo
         }
         
         return this.asset.types.get(this.typeId);
+    }
+    
+    public Object getType()
+    {
+        if (this.typeId > 0)
+        {
+            return UtilHandler.getBBQClassData().get(String.valueOf(this.typeId));
+        } else if (!this.asset.types.containsKey(this.typeId))
+        {
+            String typename = "(null)";
+            BBQObjectInfo script = ((Map<String, BBQObjectInfo>) this.read()).get("m_Script");
+            if (script != null)
+            {
+                BBQObjectInfo type = ((Map<String, BBQObjectInfo>) script.read()).get("m_ClassName");
+                System.out.println();
+            } else if(this.asset.tree.typeTrees.containsKey(this.typeId)) {
+                typename = this.asset.tree.typeTrees.get(this.typeId).type;
+            } else {
+                typename = String.valueOf(this.typeId);
+            }
+            this.asset.typeNames.put(this.typeId, typename);
+        }
+        
+        return this.asset.types.get(this.typeId).type;
     }
     
     public Object read()

@@ -696,4 +696,11 @@ public final class UtilHandler
     {
         return UtilHandler.readInternalAsBytes("bbq/strings.dat");
     }
+    
+    public static Map<String, String> getBBQClassData()
+    {
+        String              data = UtilHandler.readInternalAsString("bbq/classes.json");
+        Map<String, String> elem = UtilHandler.getGson().fromJson(data, Map.class);
+        return elem;
+    }
 }
