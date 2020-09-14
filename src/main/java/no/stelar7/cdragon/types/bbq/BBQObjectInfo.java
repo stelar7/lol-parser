@@ -1,8 +1,10 @@
 package no.stelar7.cdragon.types.bbq;
 
 import no.stelar7.cdragon.util.readers.*;
+import no.stelar7.cdragon.util.types.Pair;
 
 import java.util.*;
+import java.util.function.BiFunction;
 
 public class BBQObjectInfo
 {
@@ -16,9 +18,10 @@ public class BBQObjectInfo
     short    unknown0;
     short    unknown1;
     
-    public BBQObjectInfo(BBQAsset asset)
+    public BBQObjectInfo(BBQAsset asset, BinaryReader buf)
     {
         this.asset = asset;
+        load(buf);
     }
     
     public void load(BinaryReader buf)
@@ -89,7 +92,7 @@ public class BBQObjectInfo
         return readValue(getTypeTree(), new RandomAccessReader(data));
     }
     
-    private Object readValue(BBQTypeTree type, RandomAccessReader buf)
+    protected Object readValue(BBQTypeTree type, BinaryReader buf)
     {
         boolean     align        = false;
         int         expectedSize = type.size;
@@ -97,8 +100,156 @@ public class BBQObjectInfo
         String      t            = type.type;
         BBQTypeTree firstChild   = type.children.size() > 0 ? type.children.get(0) : new BBQTypeTree(this.asset.format);
         
-        // todo
+        Object  result      = null;
+        boolean shouldAlign = false;
         
-        return null;
+        if (t.equals("bool"))
+        {
+            result = buf.readBoolean();
+        } else if (t.equals("SInt8"))
+        {
+            result = buf.readByte();
+        } else if (t.equals("UInt8"))
+        {
+            result = buf.readByte();
+        } else if (t.equals("SInt16"))
+        {
+            result = buf.readShort();
+        } else if (t.equals("UInt16"))
+        {
+            result = buf.readShort();
+        } else if (t.equals("SInt64"))
+        {
+            result = buf.readLong();
+        } else if (t.equals("UInt64"))
+        {
+            result = buf.readLong();
+        } else if (t.equals("SInt32"))
+        {
+            result = buf.readInt();
+        } else if (t.equals("UInt32"))
+        {
+            result = buf.readInt();
+        } else if (t.equals("unsigned int"))
+        {
+            result = buf.readInt();
+        } else if (t.equals("int"))
+        {
+            result = buf.readInt();
+        } else if (t.equals("float"))
+        {
+            buf.align();
+            result = buf.readFloat();
+        } else if (t.equals("double"))
+        {
+            buf.align();
+            result = buf.readDouble();
+        } else if (t.equals("string"))
+        {
+            int size = type.size;
+            if (size == -1)
+            {
+                size = buf.readInt();
+            }
+            result = buf.readString(size);
+            shouldAlign = type.children.get(0).shouldAlign();
+        } else
+        {
+            if (type.isArray)
+            {
+                firstChild = type;
+            }
+            
+            if (t.startsWith("PPtr<"))
+            {
+                result = new BBQObjectPointer(type, this.asset, buf);
+            } else if (firstChild != null && firstChild.isArray)
+            {
+                align = firstChild.shouldAlign();
+                size = buf.readInt();
+                BBQTypeTree arrayType = firstChild.children.get(1);
+                if (arrayType.type.equals("char") || arrayType.type.equals("UInt8"))
+                {
+                    result = buf.readBytes(size);
+                } else
+                {
+                    result = new ArrayList<>();
+                    for (int i = 0; i < size; i++)
+                    {
+                        ((ArrayList<Object>) result).add(readValue(arrayType, buf));
+                    }
+                }
+            } else if (t.equals("pair"))
+            {
+                if (type.children.size() != 2)
+                {
+                    throw new UnsupportedOperationException("Pair type has too many children!");
+                }
+                
+                Object first  = readValue(type.children.get(0), buf);
+                Object second = readValue(type.children.get(1), buf);
+                result = new Pair<>(first, second);
+            } else if (t.startsWith("ExposedReference"))
+            {
+                BiFunction<BBQTypeTree, BinaryReader, Object> readValueExposed = (internalType, internalBuf) -> {
+                    if (internalType.name.equals("exposedName"))
+                    {
+                        internalBuf.readInt();
+                        return "";
+                    }
+                    
+                    return readValue(internalType, internalBuf);
+                };
+                
+                Map<String, Object> dataStore = new HashMap<>();
+                for (BBQTypeTree child : type.children)
+                {
+                    dataStore.put(child.name, readValueExposed.apply(child, buf));
+                }
+                
+                result = loadObject(type, dataStore);
+            } else
+            {
+                Map<String, Object> dataStore = new HashMap<>();
+                for (BBQTypeTree child : type.children)
+                {
+                    dataStore.put(child.name, readValue(child, buf));
+                }
+                
+                result = loadObject(type, dataStore);
+                if (t.equals("StreamedResource"))
+                {
+                    //((BBQObjectInfo)result).asset = resolveStreamingAsset(result.source);
+                } else if (t.equals("StreamingInfo"))
+                {
+                    //((BBQObjectInfo)result).asset = resolveStreamingAsset(result.path);
+                }
+            }
+        }
+        
+        int after = buf.pos();
+        int size  = after - pos;
+        if (expectedSize > 0 && size < expectedSize)
+        {
+            throw new RuntimeException("Expected to read " + expectedSize + " but only read " + size + " for type " + type.name);
+        }
+        
+        if (align || type.shouldAlign())
+        {
+            buf.align();
+        }
+        
+        return result;
+    }
+    
+    private Object loadObject(BBQTypeTree type, Map<String, Object> dataStore)
+    {
+        /*
+        String field = type.name;
+        if(UnityEngine.class.getDeclaredField(field)) {
+            return createObject(dataStore);
+        }
+        */
+        return dataStore;
     }
 }

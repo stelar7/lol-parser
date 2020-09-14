@@ -25,7 +25,7 @@ public class BBQAsset
     Map<Long, Integer>        adds            = new HashMap<>();
     List<BBQAssetReference>   assetReferences = new ArrayList<>();
     Map<Integer, BBQTypeTree> types           = new HashMap<>();
-    Map<Long, BBQObjectInfo>  objects         = new HashMap<>();
+    Map<Long, BBQObjectInfo>  objects         = new TreeMap<>();
     
     public static BBQAsset fromBundle(BBQBlockStore storage, BBQHeader header)
     {
@@ -121,8 +121,7 @@ public class BBQAsset
                 buf.align();
             }
             
-            BBQObjectInfo info = new BBQObjectInfo(this);
-            info.load(buf);
+            BBQObjectInfo info = new BBQObjectInfo(this, buf);
             registerObject(info);
         }
         
@@ -147,8 +146,7 @@ public class BBQAsset
             int refCount = buf.readInt();
             for (int i = 0; i < refCount; i++)
             {
-                BBQAssetReference ref = new BBQAssetReference(this);
-                ref.load(buf);
+                BBQAssetReference ref = new BBQAssetReference(this, buf);
                 this.assetReferences.add(ref);
             }
         }
@@ -250,5 +248,18 @@ public class BBQAsset
     public Map<Long, BBQObjectInfo> getObjects()
     {
         return objects;
+    }
+    
+    public BBQAsset getAsset(String filePath)
+    {
+        if (filePath.contains(":"))
+        {
+            return BBQGlobalLoader.getAsset(filePath);
+        } else if (filePath.equals("library/unity default resources"))
+        {
+            throw new UnsupportedOperationException("Unable to load unity default resources!");
+        }
+        
+        return BBQGlobalLoader.getAssetByFilename(filePath);
     }
 }

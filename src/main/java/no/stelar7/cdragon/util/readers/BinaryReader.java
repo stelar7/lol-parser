@@ -14,6 +14,10 @@ public interface BinaryReader
     
     short readShort();
     
+    double readDouble();
+    
+    float readFloat();
+    
     byte[] readBytes(int i);
     
     byte readByte();
@@ -31,4 +35,5 @@ public interface BinaryReader
     void setEndian(ByteOrder order);
     
     void align();
+    
 }

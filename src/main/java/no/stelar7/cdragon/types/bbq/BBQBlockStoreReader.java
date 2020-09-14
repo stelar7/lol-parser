@@ -52,6 +52,18 @@ public class BBQBlockStoreReader implements BinaryReader
     }
     
     @Override
+    public double readDouble()
+    {
+        return ByteBuffer.wrap(storage.read(8)).order(endian).getDouble();
+    }
+    
+    @Override
+    public float readFloat()
+    {
+        return ByteBuffer.wrap(storage.read(4)).order(endian).getFloat();
+    }
+    
+    @Override
     public byte[] readBytes(int i)
     {
         return storage.read(i);

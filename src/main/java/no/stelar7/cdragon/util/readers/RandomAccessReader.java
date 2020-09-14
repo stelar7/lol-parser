@@ -114,7 +114,13 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
     @Override
     public void align()
     {
-        throw new UnsupportedOperationException("No align avaliable on RandomAccessReader");
+        int current = pos();
+        int newPos  = (current + 3) & -4;
+    
+        if (newPos > current)
+        {
+            this.seekFromCurrentPosition(newPos - current);
+        }
     }
     
     @Override

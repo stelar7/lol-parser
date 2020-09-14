@@ -11,7 +11,7 @@ public class BBQAssetReference
     String   filePath;
     BBQAsset source;
     
-    public BBQAssetReference(BBQAsset asset)
+    public BBQAssetReference(BBQAsset asset, BinaryReader buf)
     {
         this.source = asset;
     }
@@ -22,5 +22,9 @@ public class BBQAssetReference
         this.guid = HashHandler.toHex(buf.readBytes(16));
         this.type = buf.readInt();
         this.filePath = buf.readString();
+    }
+    
+    public BBQAsset resolve() {
+        return this.source.getAsset(this.filePath);
     }
 }

@@ -22,8 +22,8 @@ public class TestBBQ
         {
             for (BBQObjectInfo value : entry.getObjects().values())
             {
-                value.read();
-                System.out.println();
+                Object read = value.read();
+                System.out.println(read);
             }
         }
     }

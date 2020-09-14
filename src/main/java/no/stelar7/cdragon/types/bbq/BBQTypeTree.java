@@ -84,8 +84,9 @@ public class BBQTypeTree
             {
                 while (parents.size() > depth)
                 {
-                    parents.pop();
+                    parents.removeLast();
                 }
+                
                 current = new BBQTypeTree(this.format);
                 parents.getLast().children.add(current);
                 parents.add(current);
@@ -98,7 +99,7 @@ public class BBQTypeTree
             current.size = raf.readInt();
             current.index = raf.readInt();
             current.flags = raf.readInt();
-    
+            
             raf.readBytes(nodeBytes - 24);
         }
     }
@@ -121,8 +122,13 @@ public class BBQTypeTree
         ByteArray  dataReader = new ByteArray(data);
         int        endIndex   = dataReader.indexOf(0, offset);
         ByteBuffer bufferData = ByteBuffer.wrap(dataReader.copyOfRange(offset, endIndex).getDataRaw());
-        String value = StandardCharsets.UTF_8.decode(bufferData).toString();
+        String     value      = StandardCharsets.UTF_8.decode(bufferData).toString();
         return value;
+    }
+    
+    boolean shouldAlign()
+    {
+        return (this.flags & 0x4000) > 0;
     }
     
     @Override

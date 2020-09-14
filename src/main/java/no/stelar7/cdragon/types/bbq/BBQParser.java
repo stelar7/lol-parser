@@ -26,8 +26,9 @@ public class BBQParser implements Parseable<BBQFile>
     
     public BBQFile parse(RandomAccessReader raf)
     {
-        BBQFile file = new BBQFile();
+        BBQGlobalLoader loader = new BBQGlobalLoader(null);
         
+        BBQFile file = new BBQFile();
         BBQHeader      header = parseHeader(raf);
         List<BBQAsset> assets = parseEntryList(raf, header);
         
@@ -160,6 +161,4 @@ public class BBQParser implements Parseable<BBQFile>
         header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
         header.setHeaderSize(raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
     }
-    
-    
 }
