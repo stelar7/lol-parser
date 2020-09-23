@@ -3,10 +3,13 @@ package no.stelar7.cdragon.util.handlers;
 import com.google.gson.reflect.TypeToken;
 import net.jpountz.xxhash.*;
 
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.security.*;
 import java.util.*;
 import java.util.function.Function;
 
@@ -555,5 +558,19 @@ public class HashHandler
     {
         wadHashNames = null;
         getWADHashes();
+    }
+    
+    public byte[] decryptAES(byte[] input, byte[] key)
+    {
+        try
+        {
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"));
+            return cipher.doFinal(input);
+        } catch (GeneralSecurityException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

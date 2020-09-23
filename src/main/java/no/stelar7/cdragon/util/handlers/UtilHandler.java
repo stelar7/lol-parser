@@ -703,4 +703,9 @@ public final class UtilHandler
         Map<String, String> elem = UtilHandler.getGson().fromJson(data, Map.class);
         return elem;
     }
+    
+    public byte[] getPAKKey()
+    {
+        return UtilHandler.readInternalAsBytes("pak/aes.key");
+    }
 }
