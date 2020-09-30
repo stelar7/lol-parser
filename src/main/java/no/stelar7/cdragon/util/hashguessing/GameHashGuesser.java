@@ -124,23 +124,26 @@ public class GameHashGuesser extends HashGuesser
         
         try
         {
-            Path       manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("shaderdefines.json")).findFirst().get();
-            JsonObject shaders  = UtilHandler.getJsonParser().parse(Files.readString(manifest)).getAsJsonObject().getAsJsonObject("shaders");
-            JsonArray  sections = shaders.getAsJsonArray("sections");
-            
-            for (JsonElement sectionEle : sections)
+            Optional<Path> manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("shaderdefines.json")).findFirst();
+            if(manifest.isPresent())
             {
-                JsonObject section = (JsonObject) sectionEle;
-                JsonArray  files   = section.getAsJsonArray("files");
-                
-                for (JsonElement fileEle : files)
+                JsonObject shaders  = UtilHandler.getJsonParser().parse(Files.readString(manifest.get())).getAsJsonObject().getAsJsonObject("shaders");
+                JsonArray  sections = shaders.getAsJsonArray("sections");
+    
+                for (JsonElement sectionEle : sections)
                 {
-                    for (String suffix : suffixes)
+                    JsonObject section = (JsonObject) sectionEle;
+                    JsonArray  files   = section.getAsJsonArray("files");
+        
+                    for (JsonElement fileEle : files)
                     {
-                        for (String prefix : prefixes)
+                        for (String suffix : suffixes)
                         {
-                            String toCheck = prefix + fileEle.getAsString() + suffix;
-                            check(toCheck);
+                            for (String prefix : prefixes)
+                            {
+                                String toCheck = prefix + fileEle.getAsString() + suffix;
+                                check(toCheck);
+                            }
                         }
                     }
                 }
