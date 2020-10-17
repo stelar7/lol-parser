@@ -5,7 +5,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.*;
 import no.stelar7.cdragon.util.writers.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
@@ -236,10 +236,10 @@ public class BINFile
     {
         if (json == null)
         {
+            JsonWriterWrapper jw = new JsonWriterWrapper();
             try
             {
                 Map<String, List<JsonElement>> content = new HashMap<>();
-                JsonWriterWrapper              jw      = new JsonWriterWrapper();
                 for (BINEntry entry : entries)
                 {
                     jw.beginObject();
@@ -268,6 +268,7 @@ public class BINFile
             } catch (IOException e)
             {
                 e.printStackTrace();
+                System.out.println(jw.toString());
             }
         }
         
@@ -298,6 +299,7 @@ public class BINFile
                 break;
             }
             case CONTAINER:
+            case CONTAINER2:
             {
                 printContainer((BINContainer) data, jw);
                 break;
@@ -322,6 +324,11 @@ public class BINFile
             case LINK_OFFSET:
             {
                 jw.value("LINK_OFFSET: " + HashHandler.getBinHashes().getOrDefault(data.toString(), data.toString()));
+                break;
+            }
+            case WAD_LINK:
+            {
+                jw.value("WAD_LINK: " + HashHandler.getWADHashes().getOrDefault(data.toString(), data.toString()));
                 break;
             }
             case STRING_HASH:

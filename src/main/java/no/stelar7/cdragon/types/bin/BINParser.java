@@ -154,7 +154,15 @@ public class BINParser implements Parseable<BINFile>
                 hashes.computeIfAbsent("string", (key) -> new HashSet<>()).add(hash);
                 return hash;
             }
+            case WAD_LINK:
+            {
+                Long value = raf.readLong();
+                String hexed = HashHandler.toHex(value, 16);
+                hashes.computeIfAbsent("wad", (key) -> new HashSet<>()).add(hexed);
+                return hexed;
+            }
             case CONTAINER:
+            case CONTAINER2:
             {
                 BINContainer bc = new BINContainer();
                 
