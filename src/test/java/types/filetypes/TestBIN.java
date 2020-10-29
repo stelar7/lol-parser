@@ -4,7 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonWriter;
 import no.stelar7.cdragon.types.bin.BINParser;
-import no.stelar7.cdragon.types.bin.data.BINFile;
+import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
@@ -568,5 +568,13 @@ public class TestBIN
         Path    file = Paths.get("D:\\pbe\\data\\maps\\shipping\\map22\\map22.bin");
         BINFile data = parser.parse(file);
         System.out.println(data.toJson());
+    }
+    
+    @Test
+    public void testOldStuff() throws IOException
+    {
+        Path    file = Paths.get("D:\\cdragon\\bin\\9.9.shaders.bin");
+        BINFile data = parser.parse(file);
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("dump.json"), data.toJson().getBytes(StandardCharsets.UTF_8));
     }
 }

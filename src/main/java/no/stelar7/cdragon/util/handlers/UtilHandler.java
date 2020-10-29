@@ -4,12 +4,14 @@ import com.google.common.collect.Sets;
 import com.google.gson.*;
 import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.Security;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.prefs.Preferences;
@@ -18,6 +20,9 @@ import java.util.stream.*;
 
 public final class UtilHandler
 {
+    
+    public static final String AES_KEY = "ab5678ed8ae01d46261da83fb22ad19c4475571c50721cfd4b6f5e10242894ee";
+    public static final String AES_IV = "6a100bf533ef469e0d3165fc1c71aff8";
     
     public static final String[] CHARS   = new String[]{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"};
     public static final String[] DIGITS  = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
@@ -28,6 +33,7 @@ public final class UtilHandler
     static
     {
         System.setProperty("joml.format", "false");
+        Security.addProvider(new BouncyCastleProvider());
     }
     
     
@@ -275,6 +281,7 @@ public final class UtilHandler
             lines.forEach(l -> sb.append(l).append("\n"));
         } catch (IOException e)
         {
+            System.out.println(path.toString());
             e.printStackTrace();
         }
         return sb.toString();

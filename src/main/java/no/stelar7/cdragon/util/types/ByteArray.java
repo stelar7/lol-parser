@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.types;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.Arrays;
 
@@ -35,6 +35,24 @@ public final class ByteArray
             return null;
         }
     }
+    
+    public static ByteArray fromString(String data)
+    {
+        String[] split = data.replaceAll("..(?!$)", "$0 ").split(" ");
+        
+        ByteArray array = new ByteArray();
+        array.data = new byte[split.length];
+    
+        for (int i = 0, splitLength = split.length; i < splitLength; i++)
+        {
+            String s      = split[i];
+            byte   inByte = Integer.decode("0x" + s).byteValue();
+            array.data[i] = inByte;
+        }
+        
+        return array;
+    }
+    
     
     public boolean indexMatch(int index, byte b)
     {

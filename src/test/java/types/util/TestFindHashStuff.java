@@ -11,7 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class TestFindHashStuff
 {
@@ -61,6 +61,24 @@ public class TestFindHashStuff
             testHash(input2, HashHandler::computeCCITT32);
             
         }
+    }
+    
+    @Test
+    public void testGuessing()
+    {
+    
+    
+        // one of these should map to 1036514714 or 3DC7F59A
+        testHash("assets/esports/sponsoredbanners/secret/srx_banner_flags_samsungssd.dds", HashHandler::computeXXHash64AsLong);
+    
+    
+        HashHandler.bruteForceHash(HashHandler::computeXXHash64AsLong,
+                                   List.of(62979898981692412L),
+                                   Arrays.asList(Stream.concat(Arrays.stream(UtilHandler.CHARS), Arrays.stream(new String[]{"_"})).toArray(String[]::new)),
+                                   "assets/esports/sponsoredbanners/secret/srx_banner_flags_",
+                                   ".dds",
+                                   "bruteforced.txt",
+                                   true);
     }
     
     private void testHash(String toHash, Function<String, Long> hashFunc)

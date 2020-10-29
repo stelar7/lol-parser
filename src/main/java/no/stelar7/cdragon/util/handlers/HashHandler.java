@@ -183,7 +183,7 @@ public class HashHandler
         return Integer.toUnsignedLong(hash);
     }
     
-    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes, List<String> words, String outputName, boolean reverse)
+    public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes, List<String> words, String prefix, String postfix, String outputName, boolean reverse)
     {
         int[] offsets = new int[20];
         Arrays.fill(offsets, -1);
@@ -241,6 +241,8 @@ public class HashHandler
                 }
                 sb.setLength(0);
                 
+                toHash = prefix + toHash + postfix;
+                
                 Long output = hashFunc.apply(toHash);
                 if (hashes.contains(output))
                 {
@@ -256,7 +258,7 @@ public class HashHandler
     
     public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes)
     {
-        bruteForceHash(hashFunc, hashes, Arrays.asList(UtilHandler.ALL), "bruteforced.txt", true);
+        bruteForceHash(hashFunc, hashes, Arrays.asList(UtilHandler.ALL), "", "", "bruteforced.txt", true);
     }
     
     public static long computeCCITT32(byte[] buffer, int size)
