@@ -143,6 +143,14 @@
             <version>3.9.0</version>
         </dependency>
 
+        <!-- used for js prettying -->
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>20.2.0</version>
+        </dependency>
+
+
         <!-- used to remove the NO-OP warning from slf4j
         <dependency>
             <groupId>org.slf4j</groupId>

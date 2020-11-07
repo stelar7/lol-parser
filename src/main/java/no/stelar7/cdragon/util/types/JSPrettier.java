@@ -14,7 +14,7 @@ public class JSPrettier
     
     public JSPrettier() throws ScriptException
     {
-        engine = new ScriptEngineManager().getEngineByName("nashorn");
+        engine = new ScriptEngineManager().getEngineByName("graal.js");
         
         // this is needed to make self invoking function modules work
         // otherwise you won't be able to invoke your function
