@@ -35,17 +35,15 @@ public abstract class HashGuesser
     
     private boolean foundNew = false;
     
-    protected Map<String, String> known;
-    protected Map<String, String> newHashes;
-    protected Set<String>         unknown;
-    protected Set<WADFile>        wads;
-    protected Set<String>         dirList;
+    protected Map<String, String>       known;
+    protected Set<String>               unknown;
+    protected Set<WADFile>              wads;
+    protected Set<String>               dirList;
     
     public HashGuesser(HashFile hashFile, Collection<String> hashes)
     {
         this.hashFile = hashFile;
         this.hashes = new HashSet<>(hashes);
-        this.newHashes = new HashMap<>();
         
         this.known = this.hashFile.load(true);
         this.unknown = new HashSet<>(hashes);
@@ -105,18 +103,6 @@ public abstract class HashGuesser
         this.hashFile.save(this.known);
     }
     
-    public void saveNew()
-    {
-        System.out.println("Saving new hashes as CDTB format");
-        this.hashFile.save(this.newHashes);
-    }
-    
-    public void saveNewAsJson()
-    {
-        System.out.println("Saving new hashes as JSON");
-        this.hashFile.saveAsJson(this.newHashes, hashFile.file);
-    }
-    
     public void saveAsJson()
     {
         System.out.println("Saving current hashes as JSON");
@@ -139,7 +125,6 @@ public abstract class HashGuesser
     {
         System.out.format(hashFile.printFormat, hash, printPath);
         this.known.put(hash, savePath);
-        this.newHashes.put(hash, savePath);
         this.unknown.remove(hash);
         this.foundNew = true;
         
@@ -503,13 +488,7 @@ public abstract class HashGuesser
         }
         
         Pattern reFilterWords = Pattern.compile("^[0-9]{3,}$");
-        for (String word : new ArrayList<>(words))
-        {
-            if (reFilterWords.matcher(word).find())
-            {
-                words.remove(word);
-            }
-        }
+        words.removeIf(word -> reFilterWords.matcher(word).find());
         
         return words;
     }

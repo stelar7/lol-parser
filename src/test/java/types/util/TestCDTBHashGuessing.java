@@ -35,11 +35,12 @@ public class TestCDTBHashGuessing
         } catch (IOException e)
         {
             e.printStackTrace();
+            System.exit(0);
         }
     
         BINHashGuesser guesser = new BINHashGuesser(unknowns, dataPath);
         guesser.pullCDTB();
-        guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("binhashtest.txt"), "(.*)");
+        //guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("sorted_real.txt"), "(.*)");
         guesser.guessFromPets(dataPath);
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();

@@ -123,7 +123,6 @@ public class BINHashGuesser extends HashGuesser
                 return;
             }
             
-            
             String  content = Files.readString(file);
             Pattern p       = Pattern.compile(pattern);
             Matcher m       = p.matcher(content);
@@ -283,7 +282,7 @@ public class BINHashGuesser extends HashGuesser
         try
         {
             Path chars = dataPath.resolve("data\\characters");
-            Files.walk(chars, 1).filter(f -> Files.isDirectory(f)).forEach(f -> check("characters/" + f.getFileName().toString()));
+            Files.walk(chars, 1).filter(Files::isDirectory).forEach(f -> check("characters/" + f.getFileName().toString()));
         } catch (IOException e)
         {
             e.printStackTrace();
