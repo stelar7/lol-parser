@@ -1,7 +1,5 @@
 package no.stelar7.cdragon.util.types;
 
-import no.stelar7.cdragon.util.handlers.UtilHandler;
-
 import javax.script.*;
 
 public class JSPrettier
@@ -16,10 +14,13 @@ public class JSPrettier
     {
         engine = new ScriptEngineManager().getEngineByName("graal.js");
         
+        /*
         // this is needed to make self invoking function modules work
         // otherwise you won't be able to invoke your function
         engine.eval("var global = this;");
+        
         engine.eval(UtilHandler.readInternalAsString(BEAUTIFY_JS_RESOURCE));
+         */
     }
     
     public String beautify(String javascriptCode) throws ScriptException, NoSuchMethodException
