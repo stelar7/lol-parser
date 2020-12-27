@@ -52,6 +52,15 @@ public class TestBIN
     }
     
     @Test
+    public void testNonUTF8() throws IOException
+    {
+        Path    file    = UtilHandler.CDRAGON_FOLDER.resolve("cdragon/bin/non-utf8.bin");
+        BINFile data    = parser.parse(file);
+        String  content = data.toJson();
+        Files.write(UtilHandler.CDRAGON_FOLDER.resolve("parsed.json"), content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+    
+    @Test
     public void testBINCompare()
     {
         Path file  = UtilHandler.CDRAGON_FOLDER.resolve("anivia.bin");
