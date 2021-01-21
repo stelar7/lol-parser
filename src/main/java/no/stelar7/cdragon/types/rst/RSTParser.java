@@ -35,19 +35,22 @@ public class RSTParser implements Parseable<RSTFile>
         }
         
         int major = raf.readByte();
-        int minor = raf.readByte();
+        file.setMagic(magic);
+        file.setMajor(major);
         
-        if (major != 2 || minor > 1)
+        if (major <= 2)
+        {
+            int minor = raf.readByte();
+            file.setMinor(minor);
+        }
+        
+        if ((major != 2 && major != 3) || file.getMinor() > 1)
         {
             System.out.println("Invalid major/minor version");
             return null;
         }
         
-        file.setMagic(magic);
-        file.setMajor(major);
-        file.setMinor(minor);
-        
-        if (minor == 1)
+        if (major <= 2)
         {
             int    configLength = raf.readInt();
             String config       = raf.readString(configLength);
@@ -63,11 +66,14 @@ public class RSTParser implements Parseable<RSTFile>
             long hash = raf.readLong();
             entries.add(new Pair<>(Math.toIntExact(hash >>> 40), hash & 0xFFFFFFFFFFL));
         }
-        
-        int endByte = raf.readByte();
-        if (endByte != minor)
+    
+        if (major <= 2)
         {
-            System.out.println("End byte doesnt match minor");
+            int endByte = raf.readByte();
+            if (endByte != file.getMinor())
+            {
+                System.out.println("End byte doesnt match minor");
+            }
         }
         
         ByteArray remaining = new ByteArray(raf.readRemaining());
@@ -78,7 +84,7 @@ public class RSTParser implements Parseable<RSTFile>
                    long hash   = p.getB();
             
                    ByteArray data  = remaining.copyOfRange(offset, remaining.indexOf(0x00, offset + 1));
-                   String    value = new String(data.getDataRaw());
+                   String    value = new String(data.getDataRaw()).replace("\u0000", "");
                    file.getEntries().put(hash, value);
                });
         

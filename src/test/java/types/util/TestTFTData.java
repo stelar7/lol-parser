@@ -20,7 +20,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class TestTFTData
 {
@@ -151,11 +151,11 @@ public class TestTFTData
         Map<String, Object> outputObject = new LinkedHashMap<>();
         
         Map<String, String>              characterOffsetLookup = parseCharacterOffsetLookup(map22);
-        Map<Integer, TFTSetInfo>         setData               = parseSetInfo(map22, characterOffsetLookup);
+        Map<String, TFTSetInfo>         setData               = parseSetInfo(map22, characterOffsetLookup);
         Map<String, Map<String, Object>> traitData             = parseTraitInfo(map22);
         parseChampionInfo(champFileParent, parser, map22, setData);
         
-        Map<Integer, Map<String, Object>> outputSetMap = generateSetMap(setData, traitData, outputObject);
+        Map<String, Map<String, Object>> outputSetMap = generateSetMap(setData, traitData, outputObject);
         Map<Integer, Map<String, Object>> itemData     = parseItemInfo(map22, outputObject);
         
         if (exportImages)
@@ -174,13 +174,11 @@ public class TestTFTData
                       {
                           try
                           {
-                              TranslationConfig vals = descs.get("en_us");
+                              TranslationConfig vals = descs.get(lang);
                               System.out.println("Generating files for " + lang);
                 
-                              // todo; deep copy this map so values are correct
-                              Map<String, Object> output = outputObject.entrySet().stream().collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-                
-                              ((Map<Integer, Map<String, Object>>) output.get("sets")).forEach((k, v) -> {
+                              Map<String, Object> output = UtilHandler.getGson().fromJson(template, Map.class);
+                              ((Map<String, Map<String, Object>>) output.get("sets")).forEach((k, v) -> {
                                   ((List<Map<String, Object>>) v.get("traits")).forEach(e -> {
                                       e.put("name", vals.get((String) e.get("name")));
                                       e.put("desc", vals.get((String) e.get("desc")));
@@ -190,7 +188,7 @@ public class TestTFTData
                                       e.put("name", vals.get((String) e.get("name")));
                         
                                       List<String> clone = new ArrayList<>();
-                                      ((List<String>) e.get("traits")).forEach(e2 -> clone.add(vals.get((String) e2)));
+                                      ((List<String>) e.get("traits")).forEach(e2 -> clone.add(vals.get(e2)));
                                       e.put("traits", clone);
                         
                                       Map<String, Object> abs = (Map<String, Object>) e.get("ability");
@@ -201,7 +199,7 @@ public class TestTFTData
                                   });
                               });
                 
-                              ((Map<Integer, Map<String, Object>>) output.get("items")).forEach((k, v) -> {
+                              ((Map<String, Map<String, Object>>) output.get("items")).forEach((k, v) -> {
                                   v.put("name", vals.get((String) v.get("name")));
                                   v.put("desc", vals.get((String) v.get("desc")));
                               });
@@ -291,7 +289,7 @@ public class TestTFTData
         return roundInfo;
     }
     
-    private void exportImages(Path inputFolder, Path outputFolder, Map<Integer, Map<String, Object>> outputSetMap, Map<Integer, Map<String, Object>> itemData)
+    private void exportImages(Path inputFolder, Path outputFolder, Map<String, Map<String, Object>> outputSetMap, Map<Integer, Map<String, Object>> itemData)
     {
         DDSParser ddsParser = new DDSParser();
         
@@ -359,10 +357,10 @@ public class TestTFTData
         }
     }
     
-    private Map<Integer, Map<String, Object>> generateSetMap(Map<Integer, TFTSetInfo> setData, Map<String, Map<String, Object>> traitData, Map<String, Object> obj)
+    private Map<String, Map<String, Object>> generateSetMap(Map<String, TFTSetInfo> setData, Map<String, Map<String, Object>> traitData, Map<String, Object> obj)
     {
-        Map<Integer, Map<String, Object>> setMap = new HashMap<>();
-        for (Entry<Integer, TFTSetInfo> setInfoEntry : setData.entrySet())
+        Map<String, Map<String, Object>> setMap = new HashMap<>();
+        for (Entry<String, TFTSetInfo> setInfoEntry : setData.entrySet())
         {
             Map<String, Object> inf = new HashMap<>();
             inf.put("name", setInfoEntry.getValue().setName);
@@ -375,7 +373,7 @@ public class TestTFTData
                 for (String traitHash : traitHashes)
                 {
                     setTraitData.add(traitData.get(traitHash));
-                    String traitName = (String) traitData.get(traitHash).get("name");
+                    String traitName = (String) traitData.getOrDefault(traitHash, Map.of("name", traitHash)).get("name");
                     renamedHashes.add(traitName);
                 }
                 champInfo.put("traits", renamedHashes);
@@ -385,6 +383,7 @@ public class TestTFTData
             champions.sort(Comparator.comparing(a -> (int) a.get("id")));
             
             List<Map<String, Object>> traits = new ArrayList<>(setTraitData);
+            traits.removeIf(Objects::isNull);
             traits.sort(Comparator.comparing(a -> (String) a.get("name")));
             
             inf.put("traits", traits);
@@ -465,7 +464,7 @@ public class TestTFTData
         return itemData;
     }
     
-    private void parseChampionInfo(Path champFileParent, BINParser parser, BINFile map22, Map<Integer, TFTSetInfo> sets)
+    private void parseChampionInfo(Path champFileParent, BINParser parser, BINFile map22, Map<String, TFTSetInfo> sets)
     {
         List<BINEntry> champs = map22.getByType("TftShopData");
         for (BINEntry champ : champs)
@@ -569,16 +568,19 @@ public class TestTFTData
                 {
                     if (elem.getIfPresent("mScriptName").getValue().equals(spellName))
                     {
-                        BINStruct    spell      = (BINStruct) elem.getIfPresent("mSpell").getValue();
-                        List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
-                        for (Object variableObj : dataValues)
+                        BINStruct spell = (BINStruct) elem.getIfPresent("mSpell").getValue();
+                        if (spell.get("mDataValues").isPresent())
                         {
-                            BINStruct    variable = (BINStruct) variableObj;
-                            String       key      = (String) variable.getIfPresent("mName").getValue();
-                            List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
-                            abilityVars.put(key, values);
+                            List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
+                            for (Object variableObj : dataValues)
+                            {
+                                BINStruct    variable = (BINStruct) variableObj;
+                                String       key      = (String) variable.getIfPresent("mName").getValue();
+                                List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
+                                abilityVars.put(key, values);
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
                 abilities.put("variables", abilityVars);
@@ -589,7 +591,7 @@ public class TestTFTData
             champion.put("traits", traitArray);
             champion.put("ability", abilities);
             
-            for (Entry<Integer, TFTSetInfo> setEntry : sets.entrySet())
+            for (Entry<String, TFTSetInfo> setEntry : sets.entrySet())
             {
                 if (setEntry.getValue().characters.contains(mName.toLowerCase()))
                 {
@@ -670,21 +672,24 @@ public class TestTFTData
         return traitLookup;
     }
     
-    private Map<Integer, TFTSetInfo> parseSetInfo(BINFile map22, Map<String, String> characterOffsetLookup)
+    private Map<String, TFTSetInfo> parseSetInfo(BINFile map22, Map<String, String> characterOffsetLookup)
     {
-        Map<Integer, TFTSetInfo> sets       = new LinkedHashMap<>();
+        Map<String, TFTSetInfo> sets       = new LinkedHashMap<>();
         List<BINEntry>           TFTSetList = map22.getByType("tftsetdata");
         for (BINEntry entry : TFTSetList)
         {
-            String characterListOffsetId = (String) ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData().get(0);
-            BINMap setInfo               = (BINMap) entry.getIfPresent("D2538E5A").getValue();
-            int    setNumber             = (Integer) ((BINStruct) setInfo.getIfPresent("SetNumber")).getData().get(0).getValue();
-            String setName               = (String) ((BINStruct) setInfo.getIfPresent("SetName")).getData().get(0).getValue();
+            List<Object> characterLists = ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData();
+            String       realId         = (String) characterLists.get(0);
+            
+            BINMap         setInfo    = (BINMap) entry.getIfPresent("D2538E5A").getValue();
+            String         setMutator = (String) (entry.getIfPresent("mutator")).getValue();
+            List<BINValue> setNames   = ((BINStruct) setInfo.getIfPresent("SetName")).getData();
+            String         setName    = setNames.size() > 0 ? (String) setNames.get(0).getValue() : "Original";
             
             List<String> characters = new ArrayList<>();
             for (BINEntry characterList : map22.getByType("MapCharacterList"))
             {
-                if (!characterList.getHash().equalsIgnoreCase(characterListOffsetId))
+                if (!characterList.getHash().equalsIgnoreCase(realId))
                 {
                     continue;
                 }
@@ -698,7 +703,7 @@ public class TestTFTData
                 }
             }
             
-            sets.put(setNumber, new TFTSetInfo(setName, characters));
+            sets.put(setMutator, new TFTSetInfo(setName, characters));
         }
         return sets;
     }
