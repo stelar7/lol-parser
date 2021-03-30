@@ -4,7 +4,7 @@ import java.util.*;
 
 public class ManifestContentFileV2
 {
-    private Map<String, List<String>> content = new HashMap<>();
+    private final Map<String, List<String>> content = new HashMap<>();
     
     public void addItem(String header, String item)
     {

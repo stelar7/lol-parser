@@ -4,7 +4,7 @@ import java.util.*;
 
 public class ManifestContentFileV1
 {
-    private List<String> content = new ArrayList<>();
+    private final List<String> content = new ArrayList<>();
     
     public void addItem(String item)
     {

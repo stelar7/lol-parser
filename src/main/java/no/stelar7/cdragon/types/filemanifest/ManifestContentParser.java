@@ -101,4 +101,44 @@ public class ManifestContentParser
         
         return file;
     }
+    
+    public ManifestContentFileAtlas parseAtlas(Path path)
+    {
+        return parseAtlas(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    public ManifestContentFileAtlas parseAtlas(ByteArray data)
+    {
+        return parseAtlas(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    public ManifestContentFileAtlas parseAtlas(RandomAccessReader raf)
+    {
+        ManifestContentFileAtlas file = new ManifestContentFileAtlas();
+        
+        int version = raf.readInt();
+        if (version != 1)
+        {
+            throw new RuntimeException("Invalid content");
+        }
+        
+        file.setAtlasFile(raf.readString(raf.readInt()));
+        
+        int count = raf.readInt();
+        for (int i = 0; i < count; i++)
+        {
+            raf.setEndian(ByteOrder.LITTLE_ENDIAN);
+            String entryName = raf.readString(raf.readInt());
+            raf.setEndian(ByteOrder.BIG_ENDIAN);
+            int x = raf.readInt();
+            int y = raf.readInt();
+            int w = raf.readInt();
+            int h = raf.readInt();
+            int z = raf.readInt();
+            
+            file.addItem(entryName, x, y, z, w, h);
+        }
+        
+        return file;
+    }
 }
