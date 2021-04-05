@@ -214,13 +214,14 @@ public class BINHashGuesser extends HashGuesser
     {
         System.out.println("Feching hashlists from CDTB");
         
-        List<String> bases = Arrays.asList("https://raw.githubusercontent.com/moonshadow565/CDTB/",
-                                           "https://raw.githubusercontent.com/CommunityDragon/CDTB/");
+        List<String> bases = Arrays.asList("https://raw.githubusercontent.com/CommunityDragon/CDTB/master/",
+                                           "https://raw.githubusercontent.com/moonshadow565/CDTB/master/",
+                                           "https://raw.githubusercontent.com/moonshadow565/CDTB/binhashes/");
         
-        List<String> files = Arrays.asList("master/cdragontoolbox/hashes.binentries.txt",
-                                           "master/cdragontoolbox/hashes.binfields.txt",
-                                           "master/cdragontoolbox/hashes.binhashes.txt",
-                                           "master/cdragontoolbox/hashes.bintypes.txt");
+        List<String> files = Arrays.asList("cdragontoolbox/hashes.binentries.txt",
+                                           "cdragontoolbox/hashes.binfields.txt",
+                                           "cdragontoolbox/hashes.binhashes.txt",
+                                           "cdragontoolbox/hashes.bintypes.txt");
         
         List<String> data = new ArrayList<>();
         for (String base : bases)

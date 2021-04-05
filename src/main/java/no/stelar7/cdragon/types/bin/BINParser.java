@@ -20,32 +20,30 @@ public class BINParser implements Parseable<BINFile>
     {
         BINFile file = new BINFile();
         file.setHeader(parseHeader(file, raf));
+        
+        // some binfiles are just a container, so lets try to parse it...
         if (file.getHeader() == null)
         {
-            try
+            BINEntry entry = new BINEntry();
+            entry.setType("headerless container");
+            entry.setHash("00000000");
+            
+            BINValue value;
+            value = parseToValue(raf, BINValueType.CONTAINER);
+            if (value == null)
             {
-                // some binfiles are just a container, so lets try to parse it...
-                raf.seek(0);
-                Object temp = readByType(BINValueType.CONTAINER, raf);
-                
-                BINValue value = new BINValue();
-                value.setType(BINValueType.CONTAINER);
-                value.setHash("00000000");
-                value.setValue(temp);
-                
-                BINEntry entry = new BINEntry();
-                entry.setType("headerless container");
-                entry.setHash("00000000");
-                entry.getValues().add(value);
-                
-                file.getEntries().add(entry);
-                
-                return file;
-            } catch (Exception e)
-            {
-                System.out.println(e.getMessage() + " at position " + raf.pos());
-                return null;
+                value = parseToValue(raf, BINValueType.STRUCTURE);
+                if (value == null)
+                {
+                    System.out.println("Failed to parse assumed headerless bin value in file: " + raf.getPath());
+                    return null;
+                }
             }
+            
+            entry.getValues().add(value);
+            file.getEntries().add(entry);
+            
+            return file;
         }
         
         parseEntries(file, raf);
@@ -62,6 +60,26 @@ public class BINParser implements Parseable<BINFile>
     public BINFile parse(Path path)
     {
         return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+    }
+    
+    private BINValue parseToValue(RandomAccessReader raf, BINValueType type)
+    {
+        Object temp;
+        raf.seek(0);
+        try
+        {
+            temp = readByType(type, raf);
+        } catch (Exception e)
+        {
+            return null;
+        }
+        
+        BINValue value = new BINValue();
+        value.setType(type);
+        value.setHash("00000000");
+        value.setValue(temp);
+        
+        return value;
     }
     
     private void parseEntries(BINFile file, RandomAccessReader raf)
@@ -156,7 +174,7 @@ public class BINParser implements Parseable<BINFile>
             }
             case WAD_LINK:
             {
-                Long value = raf.readLong();
+                Long   value = raf.readLong();
                 String hexed = HashHandler.toHex(value, 16);
                 hashes.computeIfAbsent("wad", (key) -> new HashSet<>()).add(hexed);
                 return hexed;
@@ -238,7 +256,7 @@ public class BINParser implements Parseable<BINFile>
                 return raf.readBoolean();
             default:
                 int pos = raf.pos() - 1;
-                throw new RuntimeException("Unknown type: " + type + " at location: " + pos);
+                throw new RuntimeException("Unknown type: " + type + " at location: " + pos + " in file: " + raf.getPath());
         }
     }
     
