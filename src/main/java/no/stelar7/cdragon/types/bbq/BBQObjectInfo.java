@@ -93,15 +93,16 @@ public class BBQObjectInfo
             return UtilHandler.getBBQClassData().get(String.valueOf(this.typeId));
         } else if (!this.asset.types.containsKey(this.typeId))
         {
-            String typename = "(null)";
-            BBQObjectInfo script = ((Map<String, BBQObjectInfo>) this.read()).get("m_Script");
+            String        typename = "(null)";
+            BBQObjectInfo script   = ((Map<String, BBQObjectInfo>) this.read()).get("m_Script");
             if (script != null)
             {
                 BBQObjectInfo type = ((Map<String, BBQObjectInfo>) script.read()).get("m_ClassName");
-                System.out.println();
-            } else if(this.asset.tree.typeTrees.containsKey(this.typeId)) {
+            } else if (this.asset.tree.typeTrees.containsKey(this.typeId))
+            {
                 typename = this.asset.tree.typeTrees.get(this.typeId).type;
-            } else {
+            } else
+            {
                 typename = String.valueOf(this.typeId);
             }
             this.asset.typeNames.put(this.typeId, typename);
@@ -119,14 +120,14 @@ public class BBQObjectInfo
     
     protected Object readValue(BBQTypeTree type, BinaryReader buf)
     {
-        boolean     align        = false;
+        // TODO: this is reading wrong somewhere
+        boolean     shouldAlign  = false;
         int         expectedSize = type.size;
         int         pos          = buf.pos();
         String      t            = type.type;
         BBQTypeTree firstChild   = type.children.size() > 0 ? type.children.get(0) : new BBQTypeTree(this.asset.format);
         
-        Object  result      = null;
-        boolean shouldAlign = false;
+        Object result = null;
         
         if (t.equals("bool"))
         {
@@ -190,8 +191,8 @@ public class BBQObjectInfo
                 result = new BBQObjectPointer(type, this.asset, buf);
             } else if (firstChild != null && firstChild.isArray)
             {
-                align = firstChild.shouldAlign();
-                size = buf.readInt();
+                shouldAlign = firstChild.shouldAlign();
+                int size = buf.readInt();
                 BBQTypeTree arrayType = firstChild.children.get(1);
                 if (arrayType.type.equals("char") || arrayType.type.equals("UInt8"))
                 {
@@ -236,8 +237,10 @@ public class BBQObjectInfo
             } else
             {
                 Map<String, Object> dataStore = new HashMap<>();
-                for (BBQTypeTree child : type.children)
+                List<BBQTypeTree>   children  = type.children;
+                for (int i = 0; i < children.size(); i++)
                 {
+                    BBQTypeTree child = children.get(i);
                     dataStore.put(child.name, readValue(child, buf));
                 }
                 
@@ -259,7 +262,7 @@ public class BBQObjectInfo
             throw new RuntimeException("Expected to read " + expectedSize + " but only read " + size + " for type " + type.name);
         }
         
-        if (align || type.shouldAlign())
+        if (shouldAlign || type.shouldAlign())
         {
             buf.align();
         }

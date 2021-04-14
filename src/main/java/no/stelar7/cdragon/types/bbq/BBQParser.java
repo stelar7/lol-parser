@@ -157,7 +157,7 @@ public class BBQParser implements Parseable<BBQFile>
         header.setMetadataUncompressedSize(raf.readInt());
         header.setFlags(raf.readInt());
         header.setCompressionMode(BBQCompressionType.from(header.getFlags() & 0x3f));
-        header.setHasEntryInfo((header.getFlags() & 0x40) == 0x40);
+        header.setBlockAndDirCombined((header.getFlags() & 0x40) == 0x40);
         header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
         header.setHeaderSize(raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
     }

@@ -9,11 +9,11 @@ import java.util.*;
 
 public class BBQAsset
 {
-    int          bufferOffset = -1;
-    int          offset       = -1;
-    BBQHeader    bundle       = null;
-    BinaryReader buf          = null;
-    boolean      loaded       = false;
+    public int bufferOffset = -1;
+    public int offset       = -1;
+    BBQHeader bundle = null;
+    public BinaryReader buf = null;
+    boolean loaded = false;
     
     String                    name;
     int                       metadataSize;
@@ -113,7 +113,6 @@ public class BBQAsset
             this.longObjectIds = buf.readInt() > 0;
         }
         
-        // TODO: from here
         int objectCount = buf.readInt();
         for (int i = 0; i < objectCount; i++)
         {

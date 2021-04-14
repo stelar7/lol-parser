@@ -7,6 +7,7 @@ public class BBQHeader
     
     private String signature;
     private int    formatVersion;
+    // https://github.com/mafaca/UtinyRipper/blob/8ca850c8fe3ac25659008aa6e80e0694675280d0/uTinyRipperCore/Parser/Files/BundleFile/BundleGeneration.cs
     private String unityVersion;
     private String generatorVersion;
     private long   totalFileSize;
@@ -16,7 +17,7 @@ public class BBQHeader
     private int    headerSize;
     
     private BBQCompressionType compressionMode;
-    private boolean            hasEntryInfo;
+    private boolean            blockAndDirCombined;
     private boolean            isMetadataAtEnd;
     
     public String getSignature()
@@ -109,14 +110,14 @@ public class BBQHeader
         this.compressionMode = compressionMode;
     }
     
-    public boolean isHasEntryInfo()
+    public boolean isBlockAndDirCombined()
     {
-        return hasEntryInfo;
+        return blockAndDirCombined;
     }
     
-    public void setHasEntryInfo(boolean hasEntryInfo)
+    public void setBlockAndDirCombined(boolean blockAndDirCombined)
     {
-        this.hasEntryInfo = hasEntryInfo;
+        this.blockAndDirCombined = blockAndDirCombined;
     }
     
     public boolean isMetadataAtEnd()
@@ -173,7 +174,7 @@ public class BBQHeader
                metadataUncompressedSize == bbqHeader.metadataUncompressedSize &&
                flags == bbqHeader.flags &&
                compressionMode == bbqHeader.compressionMode &&
-               hasEntryInfo == bbqHeader.hasEntryInfo &&
+               blockAndDirCombined == bbqHeader.blockAndDirCombined &&
                isMetadataAtEnd == bbqHeader.isMetadataAtEnd &&
                Objects.equals(unityVersion, bbqHeader.unityVersion) &&
                Objects.equals(generatorVersion, bbqHeader.generatorVersion);
@@ -182,7 +183,7 @@ public class BBQHeader
     @Override
     public int hashCode()
     {
-        return Objects.hash(signature, formatVersion, unityVersion, generatorVersion, totalFileSize, metadataCompressedSize, metadataUncompressedSize, flags, compressionMode, hasEntryInfo, isMetadataAtEnd);
+        return Objects.hash(signature, formatVersion, unityVersion, generatorVersion, totalFileSize, metadataCompressedSize, metadataUncompressedSize, flags, compressionMode, blockAndDirCombined, isMetadataAtEnd);
     }
     
     @Override
@@ -199,7 +200,7 @@ public class BBQHeader
                ", flags=" + flags +
                ", headerSize=" + headerSize +
                ", compressionMode=" + compressionMode +
-               ", hasEntryInfo=" + hasEntryInfo +
+               ", hasEntryInfo=" + blockAndDirCombined +
                ", isMetadataAtEnd=" + isMetadataAtEnd +
                '}';
     }

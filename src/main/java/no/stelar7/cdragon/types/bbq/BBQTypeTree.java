@@ -121,6 +121,14 @@ public class BBQTypeTree
         
         ByteArray  dataReader = new ByteArray(data);
         int        endIndex   = dataReader.indexOf(0, offset);
+        
+        if (offset > data.length) {
+            return "";
+        }
+        
+        if (endIndex == -1) {
+            endIndex = data.length;
+        }
         ByteBuffer bufferData = ByteBuffer.wrap(dataReader.copyOfRange(offset, endIndex).getDataRaw());
         String     value      = StandardCharsets.UTF_8.decode(bufferData).toString();
         return value;
