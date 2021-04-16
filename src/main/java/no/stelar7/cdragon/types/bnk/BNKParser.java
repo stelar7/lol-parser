@@ -38,7 +38,7 @@ public class BNKParser implements Parseable<BNKFile>
             raf.seek(raf.pos() + header.getLength());
         }
         
-        headers.sort((a, b) -> order.indexOf(a.getSection()) > order.indexOf(b.getSection()) ? 1 : -1);
+        headers.sort(Comparator.comparingInt(e -> order.indexOf(e.getSection())));
         
         for (BNKHeader header : headers)
         {

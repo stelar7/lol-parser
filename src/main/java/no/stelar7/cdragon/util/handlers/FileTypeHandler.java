@@ -541,7 +541,7 @@ public final class FileTypeHandler
         return isHTML;
     }
     
-    private static List<ByteArray> possibleTextTargets = loadTextTargets();
+    private static final List<ByteArray> possibleTextTargets = loadTextTargets();
     
     public static boolean isProbableTXT(ByteArray wrapper)
     {

@@ -18,9 +18,9 @@ public class SkinData
     private String simpleSkin;
     private String initialSubmeshToHide;
     
-    private Map<String, List<Pair<String, String>>> material         = new HashMap<>();
-    private Map<String, List<Pair<String, String>>> materialOverride = new HashMap<>();
-    private Map<String, ANMFile>                    animations       = new HashMap<>();
+    private       Map<String, List<Pair<String, String>>> material         = new HashMap<>();
+    private       Map<String, List<Pair<String, String>>> materialOverride = new HashMap<>();
+    private final Map<String, ANMFile>                    animations       = new HashMap<>();
     
     public Map<String, ANMFile> getAnimations()
     {

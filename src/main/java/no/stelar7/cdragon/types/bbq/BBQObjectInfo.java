@@ -129,130 +129,131 @@ public class BBQObjectInfo
         
         Object result = null;
         
-        if (t.equals("bool"))
+        switch (t)
         {
-            result = buf.readBoolean();
-        } else if (t.equals("SInt8"))
-        {
-            result = buf.readByte();
-        } else if (t.equals("UInt8"))
-        {
-            result = buf.readByte();
-        } else if (t.equals("SInt16"))
-        {
-            result = buf.readShort();
-        } else if (t.equals("UInt16"))
-        {
-            result = buf.readShort();
-        } else if (t.equals("SInt64"))
-        {
-            result = buf.readLong();
-        } else if (t.equals("UInt64"))
-        {
-            result = buf.readLong();
-        } else if (t.equals("SInt32"))
-        {
-            result = buf.readInt();
-        } else if (t.equals("UInt32"))
-        {
-            result = buf.readInt();
-        } else if (t.equals("unsigned int"))
-        {
-            result = buf.readInt();
-        } else if (t.equals("int"))
-        {
-            result = buf.readInt();
-        } else if (t.equals("float"))
-        {
-            buf.align();
-            result = buf.readFloat();
-        } else if (t.equals("double"))
-        {
-            buf.align();
-            result = buf.readDouble();
-        } else if (t.equals("string"))
-        {
-            int size = type.size;
-            if (size == -1)
-            {
-                size = buf.readInt();
-            }
-            result = buf.readString(size);
-            shouldAlign = type.children.get(0).shouldAlign();
-        } else
-        {
-            if (type.isArray)
-            {
-                firstChild = type;
-            }
-            
-            if (t.startsWith("PPtr<"))
-            {
-                result = new BBQObjectPointer(type, this.asset, buf);
-            } else if (firstChild != null && firstChild.isArray)
-            {
-                shouldAlign = firstChild.shouldAlign();
-                int size = buf.readInt();
-                BBQTypeTree arrayType = firstChild.children.get(1);
-                if (arrayType.type.equals("char") || arrayType.type.equals("UInt8"))
+            case "bool":
+                result = buf.readBoolean();
+                break;
+            case "SInt8":
+                result = buf.readByte();
+                break;
+            case "UInt8":
+                result = buf.readByte();
+                break;
+            case "SInt16":
+                result = buf.readShort();
+                break;
+            case "UInt16":
+                result = buf.readShort();
+                break;
+            case "SInt64":
+                result = buf.readLong();
+                break;
+            case "UInt64":
+                result = buf.readLong();
+                break;
+            case "SInt32":
+                result = buf.readInt();
+                break;
+            case "UInt32":
+                result = buf.readInt();
+                break;
+            case "unsigned int":
+                result = buf.readInt();
+                break;
+            case "int":
+                result = buf.readInt();
+                break;
+            case "float":
+                buf.align();
+                result = buf.readFloat();
+                break;
+            case "double":
+                buf.align();
+                result = buf.readDouble();
+                break;
+            case "string":
+                int stringSize = type.size;
+                if (stringSize == -1)
                 {
-                    result = buf.readBytes(size);
-                } else
-                {
-                    result = new ArrayList<>();
-                    for (int i = 0; i < size; i++)
-                    {
-                        ((ArrayList<Object>) result).add(readValue(arrayType, buf));
-                    }
+                    stringSize = buf.readInt();
                 }
-            } else if (t.equals("pair"))
-            {
-                if (type.children.size() != 2)
+                result = buf.readString(stringSize);
+                shouldAlign = type.children.get(0).shouldAlign();
+                break;
+            default:
+                if (type.isArray)
                 {
-                    throw new UnsupportedOperationException("Pair type has too many children!");
+                    firstChild = type;
                 }
                 
-                Object first  = readValue(type.children.get(0), buf);
-                Object second = readValue(type.children.get(1), buf);
-                result = new Pair<>(first, second);
-            } else if (t.startsWith("ExposedReference"))
-            {
-                BiFunction<BBQTypeTree, BinaryReader, Object> readValueExposed = (internalType, internalBuf) -> {
-                    if (internalType.name.equals("exposedName"))
+                if (t.startsWith("PPtr<"))
+                {
+                    result = new BBQObjectPointer(type, this.asset, buf);
+                } else if (firstChild != null && firstChild.isArray)
+                {
+                    shouldAlign = firstChild.shouldAlign();
+                    int         size      = buf.readInt();
+                    BBQTypeTree arrayType = firstChild.children.get(1);
+                    if (arrayType.type.equals("char") || arrayType.type.equals("UInt8"))
                     {
-                        internalBuf.readInt();
-                        return "";
+                        result = buf.readBytes(size);
+                    } else
+                    {
+                        result = new ArrayList<>();
+                        for (int i = 0; i < size; i++)
+                        {
+                            ((ArrayList<Object>) result).add(readValue(arrayType, buf));
+                        }
+                    }
+                } else if (t.equals("pair"))
+                {
+                    if (type.children.size() != 2)
+                    {
+                        throw new UnsupportedOperationException("Pair type has too many children!");
                     }
                     
-                    return readValue(internalType, internalBuf);
-                };
-                
-                Map<String, Object> dataStore = new HashMap<>();
-                for (BBQTypeTree child : type.children)
+                    Object first  = readValue(type.children.get(0), buf);
+                    Object second = readValue(type.children.get(1), buf);
+                    result = new Pair<>(first, second);
+                } else if (t.startsWith("ExposedReference"))
                 {
-                    dataStore.put(child.name, readValueExposed.apply(child, buf));
+                    BiFunction<BBQTypeTree, BinaryReader, Object> readValueExposed = (internalType, internalBuf) -> {
+                        if (internalType.name.equals("exposedName"))
+                        {
+                            internalBuf.readInt();
+                            return "";
+                        }
+                        
+                        return readValue(internalType, internalBuf);
+                    };
+                    
+                    Map<String, Object> dataStore = new HashMap<>();
+                    for (BBQTypeTree child : type.children)
+                    {
+                        dataStore.put(child.name, readValueExposed.apply(child, buf));
+                    }
+                    
+                    result = loadObject(type, dataStore);
+                } else
+                {
+                    Map<String, Object> dataStore = new HashMap<>();
+                    List<BBQTypeTree>   children  = type.children;
+                    for (BBQTypeTree child : children)
+                    {
+                        dataStore.put(child.name, readValue(child, buf));
+                    }
+                    
+                    result = loadObject(type, dataStore);
+                    if (t.equals("StreamedResource"))
+                    {
+                        //((BBQObjectInfo)result).asset = resolveStreamingAsset(result.source);
+                    } else if (t.equals("StreamingInfo"))
+                    {
+                        //((BBQObjectInfo)result).asset = resolveStreamingAsset(result.path);
+                    }
                 }
-                
-                result = loadObject(type, dataStore);
-            } else
-            {
-                Map<String, Object> dataStore = new HashMap<>();
-                List<BBQTypeTree>   children  = type.children;
-                for (int i = 0; i < children.size(); i++)
-                {
-                    BBQTypeTree child = children.get(i);
-                    dataStore.put(child.name, readValue(child, buf));
-                }
-                
-                result = loadObject(type, dataStore);
-                if (t.equals("StreamedResource"))
-                {
-                    //((BBQObjectInfo)result).asset = resolveStreamingAsset(result.source);
-                } else if (t.equals("StreamingInfo"))
-                {
-                    //((BBQObjectInfo)result).asset = resolveStreamingAsset(result.path);
-                }
-            }
+                break;
         }
         
         int after = buf.pos();

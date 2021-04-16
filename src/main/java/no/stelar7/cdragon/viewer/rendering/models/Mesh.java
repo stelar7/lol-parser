@@ -11,11 +11,11 @@ import static org.lwjgl.opengl.GL15.*;
 
 public class Mesh implements AutoCloseable
 {
-    private VBO vbo;
-    private VBO nbo;
-    private VBO ibo;
-    private VBO BIbo;
-    private VBO BWbo;
+    private final VBO vbo;
+    private final VBO nbo;
+    private final VBO ibo;
+    private final VBO BIbo;
+    private final VBO BWbo;
     
     
     public int indexCount;

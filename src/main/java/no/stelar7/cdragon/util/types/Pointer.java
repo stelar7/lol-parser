@@ -9,8 +9,8 @@ import java.nio.*;
 
 public class Pointer
 {
-    private long   address;
-    private HANDLE handle;
+    private       long   address;
+    private final HANDLE handle;
     
     public Pointer(HANDLE handle, long address)
     {

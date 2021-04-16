@@ -16,8 +16,8 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Texture implements AutoCloseable
 {
-    private int id;
-    private VBO tbo;
+    private final int id;
+    private final VBO tbo;
     
     public Texture()
     {

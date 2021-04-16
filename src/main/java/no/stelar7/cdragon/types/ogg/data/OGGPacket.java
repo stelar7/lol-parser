@@ -4,10 +4,10 @@ import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 public class OGGPacket
 {
-    private int     offset;
-    private int     size;
-    private int     absGranule;
-    private boolean noGranule;
+    private final int     offset;
+    private final int     size;
+    private       int     absGranule;
+    private final boolean noGranule;
     
     public OGGPacket(RandomAccessReader stream, int offset, boolean isNoGranule)
     {

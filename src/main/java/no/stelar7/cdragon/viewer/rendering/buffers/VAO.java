@@ -9,7 +9,7 @@ import static org.lwjgl.opengl.GL30.*;
 public class VAO implements AutoCloseable
 {
     
-    private int id;
+    private final int id;
     
     public VAO()
     {

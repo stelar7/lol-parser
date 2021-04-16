@@ -2,9 +2,9 @@ package no.stelar7.cdragon.types.crid.data;
 
 public class BlockType
 {
-    private String     blockKey;
-    private PacketType type;
-    private int        size;
+    private final String     blockKey;
+    private final PacketType type;
+    private final int        size;
     
     public BlockType(String blockKey, PacketType type, int size)
     {

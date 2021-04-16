@@ -181,7 +181,7 @@ public class KTX11File
         }
     }
     
-    private int[] modifierTable =
+    private final int[] modifierTable =
             {
                     2, 8, -2, -8,
                     5, 17, -5, -17,
@@ -193,7 +193,7 @@ public class KTX11File
                     47, 183, -47, -183
             };
     
-    private int[] lookupTable =
+    private final int[] lookupTable =
             {
                     0, 1, 2, 3, -4, -3, -2, -1
             };

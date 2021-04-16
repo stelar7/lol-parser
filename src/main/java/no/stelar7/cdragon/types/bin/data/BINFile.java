@@ -405,9 +405,8 @@ public class BINFile
         jw.beginObject();
         jw.name(value.getHash());
         jw.beginObject();
-        for (Object o : value.getData())
+        for (BINValue other : value.getData())
         {
-            BINValue other = (BINValue) o;
             jw.name(other.getHash());
             printType(other.getHash(), other.getType(), other.getValue(), jw);
         }

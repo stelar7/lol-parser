@@ -31,11 +31,11 @@ public class SwingViewer
         new SwingViewer();
     }
     
-    private JTree                  tree;
-    private List<Path>             singles     = new ArrayList<>();
-    private List<Path>             containers  = new ArrayList<>();
-    private NaturalOrderComparator comparator  = new NaturalOrderComparator();
-    private JScrollPane            contentPane = new JScrollPane();
+    private final JTree                  tree;
+    private final List<Path>             singles     = new ArrayList<>();
+    private final List<Path>             containers  = new ArrayList<>();
+    private final NaturalOrderComparator comparator  = new NaturalOrderComparator();
+    private final JScrollPane            contentPane = new JScrollPane();
     
     @SuppressWarnings("unchecked")
     public SwingViewer()
@@ -361,12 +361,7 @@ public class SwingViewer
             {
                 return 1;
             }
-            
-            if ((!own && !other) || (own && other))
-            {
-                return comparator.compare(name, o.name);
-            }
-            
+    
             return comparator.compare(name, o.name);
         }
         

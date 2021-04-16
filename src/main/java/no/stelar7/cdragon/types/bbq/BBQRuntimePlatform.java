@@ -36,7 +36,7 @@ public enum BBQRuntimePlatform
     XBOXONE(27),
     SAMSUNGTV_PLAYER(28);
     
-    private int flag;
+    private final int flag;
     
     BBQRuntimePlatform(int flag)
     {

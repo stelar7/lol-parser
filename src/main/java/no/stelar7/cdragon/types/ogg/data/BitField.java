@@ -4,8 +4,8 @@ import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 public class BitField
 {
-    private int size;
-    private int value;
+    private final int size;
+    private       int value;
     
     public BitField(int size)
     {

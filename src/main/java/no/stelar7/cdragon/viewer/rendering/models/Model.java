@@ -13,7 +13,7 @@ public class Model implements AutoCloseable
     private static final int TEXTURE_SIZE  = 2;
     private static final int SKELETON_SIZE = 4;
     
-    private VAO vao;
+    private final VAO vao;
     
     private Mesh     mesh;
     private Texture  texture;

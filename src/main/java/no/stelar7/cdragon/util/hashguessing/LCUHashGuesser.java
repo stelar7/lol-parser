@@ -29,7 +29,7 @@ public class LCUHashGuesser extends HashGuesser
     
     public Set<String> buildWordlist()
     {
-        Pattern     reFilterPath = Pattern.compile("(?:^plugins/rcp-be-lol-game-data/global/default/data/characters/|/[0-9a-f]{32}\\.)");
+        Pattern     reFilterPath = Pattern.compile("^plugins/rcp-be-lol-game-data/global/default/data/characters/|/[0-9a-f]{32}\\.");
         Set<String> paths        = new HashSet<>();
         for (String p : this.known.values())
         {
@@ -137,14 +137,14 @@ public class LCUHashGuesser extends HashGuesser
     
     public void substituteNumbers(int max, Optional<Integer> numbers)
     {
-        Pattern filter = Pattern.compile("(?:\n" +
-                                         "^(?:plugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champion-\n" +
-                                         "| plugins/rcp-be-lol-game-data/global/default/(?:data|assets)/characters/\n" +
-                                         "| plugins/rcp-be-lol-game-data/global/default/data/items/icons2d/\\d+_\n" +
-                                         "| plugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champions/-1.json\n" +
-                                         ")\n" +
-                                         "| /[0-9a-f]{32}\\.\n" +
-                                         ")");
+        Pattern filter = Pattern.compile("\n^(?" +
+                                         ":plugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champion-\n| p" +
+                                         "lugins/rcp-be-lol-game-data/global/default/(?:data|assets)/characters/\n| p" +
+                                         "lugins/rcp-be-lol-game-data/global/default/data/items/icons2d/\\d+_\n| p" +
+                                         "lugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champions/-1.json\n)\n" +
+                                         "| /" +
+                                         "[0-9a-f]{32}\\.\n" +
+                                         "");
         
         Set<String> paths = new HashSet<>();
         for (String value : new ArrayList<>(this.known.values()))
@@ -413,7 +413,7 @@ public class LCUHashGuesser extends HashGuesser
         List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.WEB_FILE_PREDICATE);
         
         // need a better regex for this :thinking:
-        Pattern p = Pattern.compile("(?:/)(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))(?:\")");
+        Pattern p = Pattern.compile("/(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))\"");
         
         readMe.stream()
               .map(UtilHandler::readAsString)

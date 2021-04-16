@@ -9,10 +9,10 @@ import java.nio.ByteOrder;
 public class CodebookLibrary
 {
     
-    private int   codebookCount;
-    private int[] codebookOffsets;
+    private final int   codebookCount;
+    private final int[] codebookOffsets;
     
-    private byte[] codebookData;
+    private final byte[] codebookData;
     
     public CodebookLibrary()
     {

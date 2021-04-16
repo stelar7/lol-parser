@@ -607,7 +607,7 @@ public class CRIDParser implements Parseable<CRIDFile>
             int headerEndOffset   = headEnd.pos();
             int metadataEndOffset = metaEnd.pos();
             
-            int headerSize = METADATA_END.length() + ((metadataEndOffset > headerEndOffset) ? metadataEndOffset : headerEndOffset);
+            int headerSize = METADATA_END.length() + Math.max(metadataEndOffset, headerEndOffset);
             
             RandomAccessReader footEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
             footEnd.readUntillString(CONTENTS_END);

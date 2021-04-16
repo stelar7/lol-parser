@@ -4,9 +4,9 @@ import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 public class OGGPacket8
 {
-    private int offset;
-    private int size;
-    private int absGranule;
+    private final int offset;
+    private final int size;
+    private final int absGranule;
     
     
     public OGGPacket8(RandomAccessReader stream, int offset)

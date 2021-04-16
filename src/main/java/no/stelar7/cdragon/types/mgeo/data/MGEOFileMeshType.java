@@ -9,7 +9,7 @@ public enum MGEOFileMeshType
     GROUND(4),
     SIMPLE_GEO_2(5);
     
-    private int value;
+    private final int value;
     
     MGEOFileMeshType(int value)
     {

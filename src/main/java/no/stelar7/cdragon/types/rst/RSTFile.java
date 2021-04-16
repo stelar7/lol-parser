@@ -6,11 +6,11 @@ import java.util.*;
 
 public class RSTFile
 {
-    private String            magic;
-    private int               major;
-    private int               minor;
-    private String            config;
-    private Map<Long, String> entries = new HashMap<>();
+    private       String            magic;
+    private       int               major;
+    private       int               minor;
+    private       String            config;
+    private final Map<Long, String> entries = new HashMap<>();
     
     public String getMagic()
     {

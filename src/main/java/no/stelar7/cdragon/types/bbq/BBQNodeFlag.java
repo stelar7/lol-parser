@@ -9,7 +9,7 @@ public enum BBQNodeFlag
     DELETED(2),
     SERIALIZED_FILE(3);
     
-    private int flag;
+    private final int flag;
     
     BBQNodeFlag(int flag)
     {

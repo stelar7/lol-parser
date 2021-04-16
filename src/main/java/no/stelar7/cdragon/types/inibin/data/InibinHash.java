@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 public final class InibinHash
 {
-    private static Map<String, Function<Object, Object>> transforms = new HashMap<>();
+    private static final Map<String, Function<Object, Object>> transforms = new HashMap<>();
     
     private InibinHash()
     {
@@ -27,11 +27,11 @@ public final class InibinHash
     private static final Function<Object, Object> percent          = (Object v) -> {
         if (v instanceof Integer)
         {
-            return (Integer.valueOf((String) v) * 10);
+            return (Integer.parseInt((String) v) * 10);
         }
         if (v instanceof Float)
         {
-            return (Float.valueOf((String) v) * 100f);
+            return (Float.parseFloat((String) v) * 100f);
         }
         
         return 0;

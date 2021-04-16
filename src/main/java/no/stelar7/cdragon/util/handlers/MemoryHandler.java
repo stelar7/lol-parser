@@ -1,12 +1,8 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.sun.jna.Native;
-import com.sun.jna.platform.win32.BaseTSD.SIZE_T;
 import com.sun.jna.platform.win32.*;
 import com.sun.jna.platform.win32.Tlhelp32.PROCESSENTRY32.ByReference;
-import com.sun.jna.platform.win32.WinBase.SYSTEM_INFO;
-import com.sun.jna.platform.win32.WinDef.DWORD;
-import com.sun.jna.platform.win32.WinNT.*;
 import com.sun.jna.ptr.IntByReference;
 import no.stelar7.cdragon.util.types.*;
 

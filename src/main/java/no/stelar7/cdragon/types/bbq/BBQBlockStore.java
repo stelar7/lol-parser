@@ -7,14 +7,14 @@ import java.util.List;
 
 public class BBQBlockStore
 {
-    private List<BBQBlockInfo> blockList;
-    private BinaryReader       raf;
-    private int                cursor            = 0;
-    private int                basePos;
-    private int                maxPos;
-    private BBQBlockInfo       currentBlock;
-    private int                currentBlockStart = 0;
-    private BinaryReader       currentStream;
+    private final List<BBQBlockInfo> blockList;
+    private final BinaryReader       raf;
+    private       int                cursor            = 0;
+    private final int                basePos;
+    private final int                maxPos;
+    private       BBQBlockInfo       currentBlock;
+    private       int                currentBlockStart = 0;
+    private       BinaryReader       currentStream;
     
     public BBQBlockStore(List<BBQBlockInfo> blockList, RandomAccessReader raf)
     {

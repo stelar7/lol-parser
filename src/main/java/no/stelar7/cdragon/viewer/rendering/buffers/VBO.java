@@ -6,8 +6,8 @@ import static org.lwjgl.opengl.GL15.*;
 
 public class VBO implements AutoCloseable
 {
-    private int id;
-    private int type;
+    private final int id;
+    private final int type;
     
     public VBO(int type)
     {

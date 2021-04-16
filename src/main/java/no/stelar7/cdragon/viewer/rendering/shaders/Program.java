@@ -13,7 +13,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Program implements AutoCloseable
 {
-    private int id;
+    private final int id;
     
     public Program()
     {

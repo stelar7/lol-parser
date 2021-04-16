@@ -16,8 +16,8 @@ public class LCUSocketReader
 {
     
     private WebSocket                           socket;
-    private Lockfile                            lockfile;
-    private Map<String, List<Consumer<String>>> handlers = new HashMap<>();
+    private       Lockfile                            lockfile;
+    private final Map<String, List<Consumer<String>>> handlers = new HashMap<>();
     
     
     public LCUSocketReader(Pair<String, String> params)

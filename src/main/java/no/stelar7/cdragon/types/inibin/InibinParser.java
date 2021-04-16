@@ -14,7 +14,7 @@ import java.util.function.BiFunction;
 
 public final class InibinParser implements Parseable<InibinFile>
 {
-    private static Map<BitSet, BiFunction<RandomAccessReader, Integer, Object>> maskBytes = new HashMap<>();
+    private static final Map<BitSet, BiFunction<RandomAccessReader, Integer, Object>> maskBytes = new HashMap<>();
     
     public InibinParser()
     {

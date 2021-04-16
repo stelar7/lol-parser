@@ -10,7 +10,7 @@ public enum BBQCompressionType
     LZ4HC(3),
     LZHAM(4);
     
-    private int flag;
+    private final int flag;
     
     BBQCompressionType(int flag)
     {

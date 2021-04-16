@@ -18,7 +18,7 @@ public class HashHandler
     private static final String HEXES    = "0123456789ABCDEF";
     private static final char[] hexArray = HEXES.toCharArray();
     
-    private static XXHashFactory xxHashFactory = XXHashFactory.fastestInstance();
+    private static final XXHashFactory xxHashFactory = XXHashFactory.fastestInstance();
     
     public static final Path WAD_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\wad");
     public static final Path BIN_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\bin\\binhash.json");
@@ -97,8 +97,8 @@ public class HashHandler
         return pre.toString();
     }
     
-    private static StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
-    private static StreamingXXHash32 hash32 = xxHashFactory.newStreamingHash32(0);
+    private static final StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
+    private static final StreamingXXHash32 hash32 = xxHashFactory.newStreamingHash32(0);
     
     public static long computeXXHash64AsLong(String text)
     {
@@ -477,7 +477,7 @@ public class HashHandler
         return getIniHashes();
     }
     
-    private static Map<String, String> reverseCache = new HashMap<>();
+    private static final Map<String, String> reverseCache = new HashMap<>();
     
     public static String getBinKeyForHash(String hash)
     {
@@ -488,7 +488,7 @@ public class HashHandler
         
         String value = getBinHashes().entrySet()
                                      .stream()
-                                     .filter(e -> e.getValue().toLowerCase().equalsIgnoreCase(hash.toLowerCase()))
+                                     .filter(e -> e.getValue().equalsIgnoreCase(hash))
                                      .findAny()
                                      .map(Map.Entry::getKey)
                                      .orElse(hash);

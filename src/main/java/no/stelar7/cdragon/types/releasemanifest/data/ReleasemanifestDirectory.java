@@ -5,10 +5,10 @@ import java.util.*;
 
 public class ReleasemanifestDirectory
 {
-    private String                           name;
-    private List<ReleasemanifestContentFile> files          = new ArrayList<>();
-    private List<ReleasemanifestDirectory>   subDirectories = new ArrayList<>();
-    private List<String>                     outputList     = new ArrayList<>();
+    private       String                           name;
+    private       List<ReleasemanifestContentFile> files          = new ArrayList<>();
+    private       List<ReleasemanifestDirectory>   subDirectories = new ArrayList<>();
+    private final List<String>                     outputList     = new ArrayList<>();
     
     public String getName()
     {

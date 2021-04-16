@@ -150,14 +150,14 @@ public class MGEOBucketGeometry
                Float.compare(that.centerz, centerz) == 0 &&
                Objects.equals(vertices, that.vertices) &&
                Objects.equals(indices, that.indices) &&
-               Arrays.equals(buckets, that.buckets);
+               Arrays.deepEquals(buckets, that.buckets);
     }
     
     @Override
     public int hashCode()
     {
         int result = Objects.hash(minx, maxx, miny, maxy, minz, maxz, centerx, centerz, vertices, indices);
-        result = 31 * result + Arrays.hashCode(buckets);
+        result = 31 * result + Arrays.deepHashCode(buckets);
         return result;
     }
     

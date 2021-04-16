@@ -240,21 +240,21 @@ public class NGridFile
                '}';
     }
     
-    private Color walkableColor                      = new Color(255, 255, 255);
-    private Color brushColor                         = new Color(0, 122, 14);
-    private Color wallColor                          = new Color(64, 64, 64);
-    private Color brushWallColor                     = new Color(0, 216, 111);
-    private Color transparentWallColor               = new Color(0, 210, 214);
-    private Color alwaysVisibleColor                 = new Color(192, 192, 0);
-    private Color blueTeamOnlyColor                  = new Color(87, 79, 255);
-    private Color redTeamOnlyColor                   = new Color(255, 124, 124);
-    private Color neutralZoneVisibilityColor         = new Color(255, 165, 0);
-    private Color blueTeamNeutralZoneVisibilityColor = new Color(12, 0, 255);
-    private Color redTeamNeutralZoneVisibilityColor  = new Color(255, 0, 0);
-    private Color heightSampleBaseColor              = new Color(255, 0, 0);
+    private final Color walkableColor                      = new Color(255, 255, 255);
+    private final Color brushColor                         = new Color(0, 122, 14);
+    private final Color wallColor                          = new Color(64, 64, 64);
+    private final Color brushWallColor                     = new Color(0, 216, 111);
+    private final Color transparentWallColor               = new Color(0, 210, 214);
+    private final Color alwaysVisibleColor                 = new Color(192, 192, 0);
+    private final Color blueTeamOnlyColor                  = new Color(87, 79, 255);
+    private final Color redTeamOnlyColor                   = new Color(255, 124, 124);
+    private final Color neutralZoneVisibilityColor         = new Color(255, 165, 0);
+    private final Color blueTeamNeutralZoneVisibilityColor = new Color(12, 0, 255);
+    private final Color redTeamNeutralZoneVisibilityColor  = new Color(255, 0, 0);
+    private final Color heightSampleBaseColor              = new Color(255, 0, 0);
     
     
-    private Color[] flagColors = new Color[]{
+    private final Color[] flagColors = new Color[]{
             new Color(64, 0, 0),
             new Color(140, 0, 0),
             new Color(240, 0, 0),

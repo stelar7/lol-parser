@@ -16,9 +16,9 @@ import java.util.*;
 
 public class RandomAccessReader implements AutoCloseable, BinaryReader
 {
-    private ByteBuffer       buffer;
-    private MappedByteBuffer mappedBuffer;
-    private boolean          preventLockedFile = false;
+    private final ByteBuffer       buffer;
+    private       MappedByteBuffer mappedBuffer;
+    private       boolean          preventLockedFile = false;
     
     private Path      path;
     private byte[]    rawBytes;
@@ -116,7 +116,7 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
     {
         int current = pos();
         int newPos  = (current + 3) & -4;
-    
+        
         if (newPos > current)
         {
             this.seekFromCurrentPosition(newPos - current);
@@ -171,7 +171,6 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
     }
     
     /**
-     *
      * to go backwards, you still need a negative input to this function
      */
     public void seekFromEnd(int pos)
@@ -721,15 +720,17 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
         return Arrays.copyOf(tempData, length);
     }
     
-    public byte[] getBufferArray() {
+    public byte[] getBufferArray()
+    {
         return this.buffer.array();
     }
     
-    public byte[] getBufferData() {
+    public byte[] getBufferData()
+    {
         int pos = buffer.position();
         
         buffer.position(0);
-        int size = buffer.limit();
+        int    size = buffer.limit();
         byte[] data = new byte[size];
         buffer.get(data);
         
