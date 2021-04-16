@@ -217,7 +217,7 @@ public class TestTFTData
     {
         List<String> stages = new ArrayList<>();
         
-        BINContainer stageOrderOffsetList = (BINContainer) map22.getByType("tftmodedata").get(0).getIfPresent("4FF2F38F").getValue();
+        BINContainer stageOrderOffsetList = (BINContainer) map22.getByType("tftmodedata").get(0).getIfPresent("mstages").getValue();
         stageOrderOffsetList.getData().stream().map(a -> (String) a).forEach(stages::add);
         
         return stages;
@@ -234,11 +234,11 @@ public class TestTFTData
     {
         Map<String, TFTStage> stages = new HashMap<>();
         
-        map22.getByType("F737DEF9").forEach(e -> {
+        map22.getByType("tftstagedata").forEach(e -> {
             TFTStage stage = new TFTStage();
             stage.name = (String) e.getIfPresent("mName").getValue();
             
-            BINContainer entries = (BINContainer) e.getIfPresent("20ABF669").getValue();
+            BINContainer entries = (BINContainer) e.getIfPresent("mrounds").getValue();
             entries.getData().stream().map(a -> (String) a).forEach(a -> stage.rounds.add(a));
             stages.put(e.getHash(), stage);
         });
@@ -265,7 +265,7 @@ public class TestTFTData
             put("F84A6A84", "TFT_phase_title_departure");
         }};
         
-        map22.getByType("F4A6BB27").forEach(e -> {
+        map22.getByType("tftrounddata").forEach(e -> {
             TFTRound round = new TFTRound();
             round.name = (String) e.getIfPresent("mName").getValue();
             
@@ -274,13 +274,13 @@ public class TestTFTData
                 BINStruct internal = (BINStruct) e.getIfPresent(p).getValue();
                 if (internal.get("mEnabled").map(BINValue::getValue).map(a -> (boolean) a).orElse(false))
                 {
-                    String name     = (String) internal.get("C5E20B46").map(BINValue::getValue).orElse(phaseNames.get(p));
-                    float  duration = (float) internal.getIfPresent("85F7D4C8").getValue();
+                    String name     = (String) internal.get("mlabel").map(BINValue::getValue).orElse(phaseNames.get(p));
+                    float  duration = (float) internal.getIfPresent("mduration").getValue();
                     round.phases.put(name, duration);
                 }
             });
             
-            BINMap typeMap = (BINMap) e.getIfPresent("78F60753").getValue();
+            BINMap typeMap = (BINMap) e.getIfPresent("mscriptdata").getValue();
             round.roundType = (String) typeMap.get("RoundType").map(a -> (BINStruct) a).map(a -> a.getIfPresent("mValue")).get().getValue();
             
             roundInfo.put(e.getHash(), round);
@@ -414,8 +414,8 @@ public class TestTFTData
             itemLookup.put(item.getHash(), mId);
             
             Map<String, Object> o = new LinkedHashMap<>();
-            o.put("name", item.getIfPresent("C3143D66").getValue());
-            o.put("desc", item.getIfPresent("765F18DA").getValue());
+            o.put("name", item.getIfPresent("mdisplaynametra").getValue());
+            o.put("desc", item.getIfPresent("mdescriptionnametra").getValue());
             o.put("icon", item.getIfPresent("mIconPath").getValue());
             
             Optional<BINValue> fromCont = item.get("mComposition");
@@ -492,7 +492,7 @@ public class TestTFTData
             int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).get("championId").map(BINValue::getValue).orElse(-1);
             
             champion.put("API_name", mName);
-            champion.put("name", champ.getIfPresent("C3143D66").getValue());
+            champion.put("name", champ.getIfPresent("mdisplaynametra").getValue());
             champion.put("id", id);
             
             int rarity    = champ.get("mRarity").map(BINValue::getValue).map(a -> ((byte) a) + 1).orElse(1);
@@ -500,8 +500,8 @@ public class TestTFTData
             champion.put("cost", rarity + increment);
             champion.put("splash", champ.getIfPresent("mIconPath").getValue());
             
-            abilities.put("name", champ.get("87A69A5E").map(BINValue::getValue).orElse("No ability name key present"));
-            abilities.put("desc", champ.get("BC4F18B3").map(BINValue::getValue).orElse("No ability description key present"));
+            abilities.put("name", champ.get("mabilitynametra").map(BINValue::getValue).orElse("No ability name key present"));
+            abilities.put("desc", champ.get("mdescriptiontra").map(BINValue::getValue).orElse("No ability description key present"));
             abilities.put("icon", champ.get("mPortraitIconPath").map(BINValue::getValue).orElse("No ability icon key present.png"));
             
             Path selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
@@ -526,7 +526,7 @@ public class TestTFTData
                     if (traitObj instanceof BINStruct)
                     {
                         BINStruct trait = (BINStruct) traitObj;
-                        String    key   = (String) trait.getIfPresent("053A1F33").getValue();
+                        String    key   = (String) trait.getIfPresent("traitdata").getValue();
                         traitArray.add(key);
                     } else
                     {
@@ -617,8 +617,8 @@ public class TestTFTData
             }
             
             Map<String, Object> o = new LinkedHashMap<>();
-            o.put("name", trait.getIfPresent("C3143D66").getValue());
-            o.put("desc", trait.get("765F18DA").map(BINValue::getValue).orElse("No description key found"));
+            o.put("name", trait.getIfPresent("mdisplaynametra").getValue());
+            o.put("desc", trait.get("mdescriptionnametra").map(BINValue::getValue).orElse("No description key found"));
             o.put("icon", trait.get("mIconPath").map(BINValue::getValue).orElse("No image key found.dds"));
             
             List<Map<String, Object>> effects              = new ArrayList<>();
@@ -681,7 +681,7 @@ public class TestTFTData
             List<Object> characterLists = ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData();
             String       realId         = (String) characterLists.get(0);
             
-            BINMap         setInfo    = (BINMap) entry.getIfPresent("D2538E5A").getValue();
+            BINMap         setInfo    = (BINMap) entry.getIfPresent("scriptdata").getValue();
             String         setMutator = (String) (entry.getIfPresent("mutator")).getValue();
             List<BINValue> setNames   = ((BINStruct) setInfo.getIfPresent("SetName")).getData();
             String         setName    = setNames.size() > 0 ? (String) setNames.get(0).getValue() : "Original";
