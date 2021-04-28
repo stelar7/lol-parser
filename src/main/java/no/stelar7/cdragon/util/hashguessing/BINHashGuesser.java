@@ -48,6 +48,43 @@ public class BINHashGuesser extends HashGuesser
         return files;
     }
     
+    public void guessTFTItems()
+    {
+        System.out.println("Guessing TFT items");
+        
+        String prefix = "maps/shipping/map22/items/";
+        
+        BINParser parser = new BINParser();
+        BINFile   parsed = parser.parse(UtilHandler.CDRAGON_FOLDER.resolve(Paths.get("pbe/data/maps/shipping/map22/map22.bin")));
+        
+        parsed.getEntries().stream()
+              .filter(b -> b.getType().equalsIgnoreCase("tftitemdata"))
+              .forEach(e -> {
+                  String name = (String) e.getIfPresent("mname").getValue();
+                  this.check(prefix + name);
+              });
+    }
+    
+    
+    public void guessTFTParticles()
+    {
+        System.out.println("Guessing TFT Particles");
+        
+        String prefix = "maps/shipping/map22/particles/";
+        
+        BINParser parser = new BINParser();
+        BINFile   parsed = parser.parse(UtilHandler.CDRAGON_FOLDER.resolve(Paths.get("pbe/data/maps/shipping/map22/map22.bin")));
+        
+        parsed.getEntries().stream()
+              .filter(b -> b.getType().equalsIgnoreCase("vfxsystemdefinitiondata"))
+              .forEach(e -> {
+                  String name = (String) e.getIfPresent("particleName").getValue();
+                  this.check(prefix + name);
+                  this.check(e.getValue("particlePath", ""));
+              });
+    }
+    
+    
     public void guessNewCharacters()
     {
         System.out.println("Guessing new characters");
