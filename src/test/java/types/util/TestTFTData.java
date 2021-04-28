@@ -416,11 +416,11 @@ public class TestTFTData
             Map<String, Object> o = new LinkedHashMap<>();
             o.put("name", item.getIfPresent("mdisplaynametra").getValue());
             o.put("desc", item.getIfPresent("mdescriptionnametra").getValue());
+            o.put("unique", item.getValue("misunique", false));
             o.put("icon", item.getIfPresent("mIconPath").getValue());
             
             Optional<BINValue> fromCont = item.get("mComposition");
             o.put("from", fromCont.map(a -> ((BINContainer) a.getValue()).getData()).orElse(new ArrayList<>()));
-            
             
             Map<String, Object> effects    = new HashMap<>();
             Optional<BINValue>  effectCont = item.get("EffectAmounts");
