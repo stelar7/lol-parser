@@ -47,7 +47,11 @@ public class BINParser implements Parseable<BINFile>
         }
         
         parseEntries(file, raf);
-        parsePatches(file, raf);
+        
+        if (file.getHeader().isPatch() && file.getHeader().getVersion() >= 3)
+        {
+            parsePatches(file, raf);
+        }
         return file;
     }
     
@@ -303,35 +307,31 @@ public class BINParser implements Parseable<BINFile>
     
     private void parsePatches(BINFile file, RandomAccessReader raf)
     {
-        if (file.getHeader().getVersion() >= 3)
+        int patchCount = raf.readInt();
+        for (int i = 0; i < patchCount; i++)
         {
-            int patchCount = raf.readInt();
-            for (int i = 0; i < patchCount; i++)
+            int hash        = raf.readInt();
+            int patchLength = raf.readInt();
+            
+            int pos = raf.pos();
+            
+            BINValueType type       = BINValueType.valueOf(raf.readByte());
+            int          nameLength = raf.readShort();
+            String       name       = raf.readString(nameLength);
+            
+            Object value = readByType(type, raf);
+            
+            if (type == BINValueType.LINK_OFFSET)
             {
-                int hash        = raf.readInt();
-                int patchLength = raf.readInt();
-                
-                int pos = raf.pos();
-                
-                BINValueType type       = BINValueType.valueOf(raf.readByte());
-                int          nameLength = raf.readShort();
-                String       name       = raf.readString(nameLength);
-                
-                Object value = readByType(type, raf);
-                
-                if (type == BINValueType.LINK_OFFSET)
-                {
-                    value = "LINK_OFFSET: " + value.toString();
-                }
-    
-                if (type == BINValueType.STRING_HASH)
-                {
-                    value = "STRING_HASH: " + value.toString();
-                }
-                
-                file.getPatches().add(new BINPatchEntry(hash, name, value));
+                value = "LINK_OFFSET: " + value.toString();
             }
+
+            if (type == BINValueType.STRING_HASH)
+            {
+                value = "STRING_HASH: " + value.toString();
+            }
+            
+            file.getPatches().add(new BINPatchEntry(hash, name, value));
         }
-        System.out.println();
     }
 }
