@@ -8,6 +8,7 @@ public class BINHeader
     private String        magic;
     private int           version;
     private int           entryCount;
+    private boolean       isPatch;
     private List<Integer> entryTypes = new ArrayList<>();
     
     public String getMagic()
@@ -28,6 +29,16 @@ public class BINHeader
     public void setVersion(int version)
     {
         this.version = version;
+    }
+    
+    public boolean isPatch()
+    {
+        return isPatch;
+    }
+    
+    public void setPatch(boolean patch)
+    {
+        isPatch = patch;
     }
     
     public int getEntryCount()

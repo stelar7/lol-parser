@@ -4,7 +4,7 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.types.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.nio.ByteOrder;
@@ -19,7 +19,7 @@ public class BINParser implements Parseable<BINFile>
     public BINFile parse(RandomAccessReader raf)
     {
         BINFile file = new BINFile();
-        file.setHeader(parseHeader(file, raf));
+        file.setHeader(parseHeader(file, raf, false));
         
         // some binfiles are just a container, so lets try to parse it...
         if (file.getHeader() == null)
@@ -47,8 +47,10 @@ public class BINParser implements Parseable<BINFile>
         }
         
         parseEntries(file, raf);
+        parsePatches(file, raf);
         return file;
     }
+    
     
     @Override
     public BINFile parse(ByteArray data)
@@ -260,7 +262,7 @@ public class BINParser implements Parseable<BINFile>
         }
     }
     
-    private BINHeader parseHeader(BINFile file, RandomAccessReader raf)
+    private BINHeader parseHeader(BINFile file, RandomAccessReader raf, boolean isPatch)
     {
         BINHeader header = new BINHeader();
         header.setMagic(raf.readString(4));
@@ -270,13 +272,14 @@ public class BINParser implements Parseable<BINFile>
             if ("PTCH".equalsIgnoreCase(header.getMagic()))
             {
                 long patchVersion = raf.readLong();
-                return parseHeader(file, raf);
+                return parseHeader(file, raf, true);
             }
             
             return null;
         }
         
         header.setVersion(raf.readInt());
+        header.setPatch(isPatch);
         
         if (header.getVersion() >= 2)
         {
@@ -296,5 +299,39 @@ public class BINParser implements Parseable<BINFile>
         }
         
         return header;
+    }
+    
+    private void parsePatches(BINFile file, RandomAccessReader raf)
+    {
+        if (file.getHeader().getVersion() >= 3)
+        {
+            int patchCount = raf.readInt();
+            for (int i = 0; i < patchCount; i++)
+            {
+                int hash        = raf.readInt();
+                int patchLength = raf.readInt();
+                
+                int pos = raf.pos();
+                
+                BINValueType type       = BINValueType.valueOf(raf.readByte());
+                int          nameLength = raf.readShort();
+                String       name       = raf.readString(nameLength);
+                
+                Object value = readByType(type, raf);
+                
+                if (type == BINValueType.LINK_OFFSET)
+                {
+                    value = "LINK_OFFSET: " + value.toString();
+                }
+    
+                if (type == BINValueType.STRING_HASH)
+                {
+                    value = "STRING_HASH: " + value.toString();
+                }
+                
+                file.getPatches().add(new BINPatchEntry(hash, name, value));
+            }
+        }
+        System.out.println();
     }
 }

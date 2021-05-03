@@ -5,16 +5,18 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.*;
 import no.stelar7.cdragon.util.writers.*;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
 public class BINFile
 {
-    private BINHeader      header;
-    private List<BINEntry> entries     = new ArrayList<>();
-    private List<String>   linkedFiles = new ArrayList<>();
+    private BINHeader           header;
+    private List<BINEntry>      entries     = new ArrayList<>();
+    private List<String>        linkedFiles = new ArrayList<>();
+    private List<BINPatchEntry> patches     = new ArrayList<>();
+    private String              json;
     
     public BINEntry getIfPresent(String hash)
     {
@@ -66,7 +68,15 @@ public class BINFile
         this.linkedFiles = linkedFiles;
     }
     
-    private String json;
+    public List<BINPatchEntry> getPatches()
+    {
+        return patches;
+    }
+    
+    public void setPatches(List<BINPatchEntry> patches)
+    {
+        this.patches = patches;
+    }
     
     public void write(Path output)
     {
@@ -268,7 +278,7 @@ public class BINFile
             } catch (IOException e)
             {
                 e.printStackTrace();
-                System.out.println(jw.toString());
+                System.out.println(jw);
             }
         }
         
