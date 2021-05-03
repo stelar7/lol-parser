@@ -183,6 +183,16 @@ public class RandomAccessReader implements AutoCloseable, BinaryReader
         buffer.position(this.pos() + pos);
     }
     
+    public String readShortString()
+    {
+        return readString(readShort());
+    }
+    
+    public String readIntString()
+    {
+        return readString(readInt());
+    }
+    
     public String readString(int length)
     {
         return new String(readBytes(length), StandardCharsets.UTF_8);

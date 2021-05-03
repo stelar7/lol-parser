@@ -263,13 +263,20 @@ public class BINFile
                     jw.clear();
                 }
                 
+                JsonObject entryJson = UtilHandler.getGson().toJsonTree(content).getAsJsonObject();
+                
                 JsonArray arr = new JsonArray();
                 for (String link : this.linkedFiles)
                 {
                     arr.add(link);
                 }
+    
+                JsonArray arr2 = new JsonArray();
+                for (BINPatchEntry entry : this.patches)
+                {
+                    arr2.add(UtilHandler.getGson().toJson(entry));
+                }
                 
-                JsonObject entryJson = UtilHandler.getJsonParser().parse(UtilHandler.getGson().toJson(content)).getAsJsonObject();
                 entryJson.add("linkedBinFiles", arr);
                 
                 json = UtilHandler.getGson().toJson(entryJson);
