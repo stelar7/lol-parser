@@ -274,10 +274,11 @@ public class BINFile
                 JsonArray arr2 = new JsonArray();
                 for (BINPatchEntry entry : this.patches)
                 {
-                    arr2.add(UtilHandler.getGson().toJson(entry));
+                    arr2.add(UtilHandler.getGson().toJsonTree(entry));
                 }
                 
                 entryJson.add("linkedBinFiles", arr);
+                entryJson.add("patches", arr2);
                 
                 json = UtilHandler.getGson().toJson(entryJson);
                 return json;
