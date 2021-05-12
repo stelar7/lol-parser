@@ -186,7 +186,7 @@ public class WADFile
                 
                 byte[] data     = readContentFromHeaderData(header);
                 String filetype = FileTypeHandler.findFileType(new ByteArray(data));
-                String output   = String.format("%s : %-10s : %s", filename, filetype, wadfilename);
+                String output   = String.format("%s : %-15s : %s", filename, filetype, wadfilename);
                 outputs.add(output);
             });
             
