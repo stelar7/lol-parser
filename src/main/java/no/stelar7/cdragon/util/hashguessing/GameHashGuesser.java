@@ -111,8 +111,8 @@ public class GameHashGuesser extends HashGuesser
         System.out.println("Guessing shaders by manifest");
         
         List<String> prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/");
-        List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".glsl"));
-        for (String s : Arrays.asList(".dx9_", ".glsl_"))
+        List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".glsl", ".metal"));
+        for (String s : Arrays.asList(".dx9_", ".glsl_", ".metal_"))
         {
             for (int i = 0; i < 100000; i += 100)
             {
@@ -125,16 +125,16 @@ public class GameHashGuesser extends HashGuesser
         try
         {
             Optional<Path> manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("shaderdefines.json")).findFirst();
-            if(manifest.isPresent())
+            if (manifest.isPresent())
             {
                 JsonObject shaders  = UtilHandler.getJsonParser().parse(Files.readString(manifest.get())).getAsJsonObject().getAsJsonObject("shaders");
                 JsonArray  sections = shaders.getAsJsonArray("sections");
-    
+                
                 for (JsonElement sectionEle : sections)
                 {
                     JsonObject section = (JsonObject) sectionEle;
                     JsonArray  files   = section.getAsJsonArray("files");
-        
+                    
                     for (JsonElement fileEle : files)
                     {
                         for (String suffix : suffixes)
@@ -154,8 +154,8 @@ public class GameHashGuesser extends HashGuesser
             Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
             
             prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/");
-            suffixes = new ArrayList<>(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.glsl", ".vs_2_0.glsl"));
-            for (String s : Arrays.asList(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.glsl_", ".vs_2_0.glsl_"))
+            suffixes = new ArrayList<>(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
+            for (String s : Arrays.asList(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_"))
             {
                 for (int i = 0; i < 100000; i += 100)
                 {
@@ -171,9 +171,9 @@ public class GameHashGuesser extends HashGuesser
                 JsonObject realObj = getFirstChildObject.apply(obj);
                 String     name    = realObj.get("objectPath").getAsString();
                 
-                for (String suffix : suffixes)
+                for (String prefix : prefixes)
                 {
-                    for (String prefix : prefixes)
+                    for (String suffix : suffixes)
                     {
                         String toCheck = prefix + name + suffix;
                         check(toCheck);
