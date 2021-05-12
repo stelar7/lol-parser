@@ -604,7 +604,7 @@ public class TestWAD
              .map(s -> new Triplet<>(s.substring(0, s.indexOf(":")).trim(), s.substring(s.indexOf(":") + 1, s.lastIndexOf(":")).trim(), s.substring(s.lastIndexOf(":") + 1).trim()))
              .collect(Collectors.groupingBy(Triplet::getA, Collectors.mapping(t -> new Pair<>(t.getC(), t.getB()), Collectors.toList())))
              .forEach((k, v) -> {
-                 String line = String.format("%s : %-10s : %s", k, v.get(0).getB(), v.stream().map(Pair::getA).collect(Collectors.joining(",")));
+                 String line = String.format("%s : %-15s : %s", k, v.get(0).getB(), v.stream().map(Pair::getA).collect(Collectors.joining(",")));
                  content.add(line);
              });
         
