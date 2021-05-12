@@ -42,20 +42,17 @@ public class RSTParser implements Parseable<RSTFile>
         {
             int minor = raf.readByte();
             file.setMinor(minor);
-        }
-        
-        if ((major != 2 && major != 3) || file.getMinor() > 1)
-        {
-            System.out.println("Invalid major/minor version");
-            return null;
-        }
-        
-        if (major <= 2)
-        {
+            
             int    configLength = raf.readInt();
             String config       = raf.readString(configLength);
             
             file.setConfig(config);
+        }
+        
+        if ((major != 2 && major != 3 && major != 4) || file.getMinor() > 1)
+        {
+            System.out.println("Invalid major/minor version");
+            return null;
         }
         
         List<Pair<Integer, Long>> entries = new ArrayList<>();
@@ -63,10 +60,24 @@ public class RSTParser implements Parseable<RSTFile>
         int entryCount = raf.readInt();
         for (int i = 0; i < entryCount; i++)
         {
-            long hash = raf.readLong();
-            entries.add(new Pair<>(Math.toIntExact(hash >>> 40), hash & 0xFFFFFFFFFFL));
+            long entryHash = raf.readLong();
+            
+            int  offset;
+            long valueHash;
+            
+            if (major == 4)
+            {
+                offset = (int) (entryHash >>> 39);
+                valueHash = entryHash & 0x1ffffffffffL;
+            } else
+            {
+                offset = (int) (entryHash >>> 40);
+                valueHash = entryHash & 0xffffffffffL;
+            }
+            
+            entries.add(new Pair<>(offset, valueHash));
         }
-    
+        
         if (major <= 2)
         {
             int endByte = raf.readByte();
@@ -77,16 +88,14 @@ public class RSTParser implements Parseable<RSTFile>
         }
         
         ByteArray remaining = new ByteArray(raf.readRemaining());
-        entries.stream()
-               .sorted(Comparator.comparing(Pair::getB))
-               .forEach(p -> {
-                   int  offset = Math.toIntExact(p.getA());
-                   long hash   = p.getB();
+        entries.forEach(p -> {
+            int  offset = p.getA();
+            long hash   = p.getB();
             
-                   ByteArray data  = remaining.copyOfRange(offset, remaining.indexOf(0x00, offset + 1));
-                   String    value = new String(data.getDataRaw()).replace("\u0000", "");
-                   file.getEntries().put(hash, value);
-               });
+            ByteArray data  = remaining.copyOfRange(offset, remaining.indexOf(0x00, offset + 1));
+            String    value = new String(data.getDataRaw()).replace("\u0000", "");
+            file.getEntries().put(hash, value);
+        });
         
         return file;
     }

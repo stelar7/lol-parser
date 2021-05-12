@@ -16,39 +16,122 @@ public class JsonWriterWrapper
         jw.setIndent("    ");
     }
     
-    public JsonWriter beginObject() throws IOException
+    public JsonWriter beginObject()
     {
-        return jw.beginObject();
+        try
+        {
+            return jw.beginObject();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
     }
     
-    public JsonWriter endObject() throws IOException
+    public JsonWriter endObject()
     {
-        return jw.endObject();
+        try
+        {
+            return jw.endObject();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
     }
     
-    public JsonWriter beginArray() throws IOException
+    public JsonWriter beginArray()
     {
-        return jw.beginArray();
+        try
+        {
+            return jw.beginArray();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    
+        return null;
     }
     
-    public JsonWriter endArray() throws IOException
+    public JsonWriter endArray()
     {
-        return jw.endArray();
+        try
+        {
+            return jw.endArray();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
     }
     
-    public JsonWriter name(String s) throws IOException
+    public JsonWriter name(String s)
     {
-        return jw.name(s);
+        try
+        {
+            return jw.name(s);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    
+        return null;
     }
     
-    public JsonWriter value(String s) throws IOException
+    public JsonWriter value(String s)
     {
-        return jw.value(s);
+        try
+        {
+            return jw.value(s);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    
+        return null;
     }
     
-    public JsonWriter jsonValue(String s) throws IOException
+    public JsonWriter value(long s)
     {
-        return jw.jsonValue(s);
+        try
+        {
+            return jw.value(s);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    
+    public JsonWriter value(int s)
+    {
+        try
+        {
+            return jw.value(s);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public JsonWriter jsonValue(String s)
+    {
+        try
+        {
+            return jw.jsonValue(s);
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+    
+        return null;
     }
     
     public JsonWriter clear()
