@@ -132,6 +132,12 @@ public final class FileTypeHandler
             // files are saved as txt, but should be rst?
             return "txt|rst";
         }
+    
+        if (FileTypeHandler.isProbableMTLB(magic))
+        {
+            // A list of metal shaders?
+            return "mtlb";
+        }
         
         String result = FileTypeHandler.getMagicNumbers().get(magic.copyOfRange(0, 4));
         if (result != null)
@@ -329,28 +335,29 @@ public final class FileTypeHandler
         {
             System.out.println("Loading magic numbers");
             
-            ByteArray oggMagic  = new ByteArray(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
-            ByteArray webmMagic = new ByteArray(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
-            ByteArray ddsMagic  = new ByteArray(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
-            ByteArray pngMagic  = new ByteArray(new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47});
-            ByteArray jpgMagic  = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
-            ByteArray jpg2Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
-            ByteArray jpg3Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
-            ByteArray jpg4Magic = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
-            ByteArray bnkMagic  = new ByteArray(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
-            ByteArray binMagic  = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
-            ByteArray lcovMagic = new ByteArray(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
-            ByteArray gifMagic  = new ByteArray(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
-            ByteArray zipMagic  = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04});
-            ByteArray ttfMagic  = new ByteArray(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00});
-            ByteArray otfMagic  = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x54, (byte) 0x54, (byte) 0x4F});
-            ByteArray sknMagic  = new ByteArray(new byte[]{(byte) 0x33, (byte) 0x22, (byte) 0x11, (byte) 0x00});
-            ByteArray objMagic  = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x4F, (byte) 0x62, (byte) 0x6A});
-            ByteArray unkMagic  = new ByteArray(new byte[]{(byte) 0x74, (byte) 0x22, (byte) 0x00, (byte) 0x00});
-            ByteArray luaMagic  = new ByteArray(new byte[]{(byte) 0x1B, (byte) 0x4C, (byte) 0x75, (byte) 0x61});
-            ByteArray hlslMagic = new ByteArray(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
-            ByteArray oegmMagic = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
-            ByteArray fcnfMagic = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
+            ByteArray oggMagic          = new ByteArray(new byte[]{(byte) 0x4f, (byte) 0x67, (byte) 0x67, (byte) 0x53});
+            ByteArray webmMagic         = new ByteArray(new byte[]{(byte) 0x1A, (byte) 0x45, (byte) 0xDF, (byte) 0xA3});
+            ByteArray ddsMagic          = new ByteArray(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
+            ByteArray encryptedDdsMagic = new ByteArray(new byte[]{(byte) 0x2A, (byte) 0x6C, (byte) 0x04, (byte) 0x50});
+            ByteArray pngMagic          = new ByteArray(new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47});
+            ByteArray jpgMagic          = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
+            ByteArray jpg2Magic         = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
+            ByteArray jpg3Magic         = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
+            ByteArray jpg4Magic         = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
+            ByteArray bnkMagic          = new ByteArray(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
+            ByteArray binMagic          = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
+            ByteArray lcovMagic         = new ByteArray(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
+            ByteArray gifMagic          = new ByteArray(new byte[]{(byte) 0x47, (byte) 0x49, (byte) 0x46, (byte) 0x38});
+            ByteArray zipMagic          = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x4B, (byte) 0x03, (byte) 0x04});
+            ByteArray ttfMagic          = new ByteArray(new byte[]{(byte) 0x00, (byte) 0x01, (byte) 0x00, (byte) 0x00});
+            ByteArray otfMagic          = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x54, (byte) 0x54, (byte) 0x4F});
+            ByteArray sknMagic          = new ByteArray(new byte[]{(byte) 0x33, (byte) 0x22, (byte) 0x11, (byte) 0x00});
+            ByteArray objMagic          = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x4F, (byte) 0x62, (byte) 0x6A});
+            ByteArray unkMagic          = new ByteArray(new byte[]{(byte) 0x74, (byte) 0x22, (byte) 0x00, (byte) 0x00});
+            ByteArray luaMagic          = new ByteArray(new byte[]{(byte) 0x1B, (byte) 0x4C, (byte) 0x75, (byte) 0x61});
+            ByteArray hlslMagic         = new ByteArray(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
+            ByteArray oegmMagic         = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
+            ByteArray fcnfMagic         = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
             
             
             magicNumbers = new HashMap<>();
@@ -380,6 +387,7 @@ public final class FileTypeHandler
             // 3D model
             magicNumbers.put(bnkMagic, "bnk");
             magicNumbers.put(ddsMagic, "dds");
+            magicNumbers.put(encryptedDdsMagic, "encrypted.dds");
             magicNumbers.put(binMagic, "bin");
             magicNumbers.put(lcovMagic, "info");
             magicNumbers.put(sknMagic, "skn");
@@ -455,6 +463,11 @@ public final class FileTypeHandler
     public static boolean isProbablePATCH(ByteArray magic)
     {
         return magic.indexMatch(0, (byte) 0x50) && magic.indexMatch(1, (byte) 0x54) && magic.indexMatch(2, (byte) 0x43) && magic.indexMatch(3, (byte) 0x48);
+    }
+    
+    public static boolean isProbableMTLB(ByteArray magic)
+    {
+        return magic.indexMatch(4, (byte) 0x4D) && magic.indexMatch(5, (byte) 0x54) && magic.indexMatch(6, (byte) 0x4C) && magic.indexMatch(7, (byte) 0x42);
     }
     
     public static boolean isProbableTROYBIN(ByteArray magic)
