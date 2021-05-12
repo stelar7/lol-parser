@@ -609,9 +609,9 @@ public class TestWAD
              });
         
         content.sort(
-                Comparator.comparing((String a) -> a.substring(32).toLowerCase())
-                          .thenComparing(Comparator.comparing((String a) -> a.substring(20, 30).toLowerCase()).reversed())
-                          .thenComparing((String a) -> a.substring(0, 18).toLowerCase())
+                Comparator.comparing((String a) -> a.substring(37).toLowerCase())
+                          .thenComparing(Comparator.comparing((String a) -> a.substring(19, 34).toLowerCase()).reversed())
+                          .thenComparing((String a) -> a.substring(0, 16).toLowerCase())
                     );
         Files.write(outputPath, content, StandardCharsets.UTF_8);
     }
