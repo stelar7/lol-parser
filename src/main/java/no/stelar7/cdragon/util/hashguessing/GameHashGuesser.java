@@ -111,8 +111,8 @@ public class GameHashGuesser extends HashGuesser
         System.out.println("Guessing shaders by manifest");
         
         List<String> prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/");
-        List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".glsl", ".metal"));
-        for (String s : Arrays.asList(".dx9_", ".glsl_", ".metal_"))
+        List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".dx11", ".glsl", ".metal"));
+        for (String s : Arrays.asList(".dx9_", ".dx11_", ".glsl_", ".metal_"))
         {
             for (int i = 0; i < 100000; i += 100)
             {
@@ -154,8 +154,8 @@ public class GameHashGuesser extends HashGuesser
             Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
             
             prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/");
-            suffixes = new ArrayList<>(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
-            for (String s : Arrays.asList(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_"))
+            suffixes = new ArrayList<>(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.dx11", ".vs_2_0.dx11", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
+            for (String s : Arrays.asList(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_"))
             {
                 for (int i = 0; i < 100000; i += 100)
                 {
