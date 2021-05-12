@@ -62,6 +62,7 @@ public class RSTParser implements Parseable<RSTFile>
         {
             long entryHash = raf.readLong();
             
+            // valueHash is a truncated xx64hash
             int  offset;
             long valueHash;
             
