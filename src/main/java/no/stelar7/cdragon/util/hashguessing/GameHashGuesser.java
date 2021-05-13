@@ -214,4 +214,12 @@ public class GameHashGuesser extends HashGuesser
         ManifestContentFileV1 v1          = parser.parseV1(luaManifest);
         v1.getItems().forEach(this::check);
     }
+    
+    public void guessByExistingWords()
+    {
+        Set<String> prefixes = new HashSet<>();
+        this.known.values().forEach(v -> prefixes.add(v.substring(0, v.indexOf('/', 10))));
+        
+        super.guessByExistingWords(Set.of(""));
+    }
 }

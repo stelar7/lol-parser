@@ -533,4 +533,13 @@ public class LCUHashGuesser extends HashGuesser
             check(toCheck);
         }
     }
+    
+    public void guessByExistingWords()
+    {
+        Set<String> plugins = new HashSet<>();
+        this.known.values().forEach(v -> plugins.add(v.substring(0, v.indexOf('/', 10)) + "/global/default/"));
+        plugins.removeIf(v -> !v.startsWith("plugin"));
+        
+        super.guessByExistingWords(plugins);
+    }
 }

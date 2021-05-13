@@ -35,10 +35,10 @@ public abstract class HashGuesser
     
     private boolean foundNew = false;
     
-    protected Map<String, String>       known;
-    protected Set<String>               unknown;
-    protected Set<WADFile>              wads;
-    protected Set<String>               dirList;
+    protected Map<String, String> known;
+    protected Set<String>         unknown;
+    protected Set<WADFile>        wads;
+    protected Set<String>         dirList;
     
     public HashGuesser(HashFile hashFile, Collection<String> hashes)
     {
@@ -493,6 +493,41 @@ public abstract class HashGuesser
         return words;
     }
     
+    public Set<String> generateWordListFromKnownHashes()
+    {
+        System.out.println("Generating word list from known hashes");
+        
+        Set<String> data = new HashSet<>();
+        this.known.values().forEach(v -> {
+            String[] parts = v.split("_|\\.|/|\\|-|-");
+            
+            for (String part : parts)
+            {
+                try
+                {
+                    // if its a number, add some numbers above and below it
+                    int value = Integer.parseInt(part);
+                    for (int i = value - 100; i < value + 100; i++)
+                    {
+                        if (i < 0)
+                        {
+                            continue;
+                        }
+                        
+                        data.add(String.valueOf(i));
+                    }
+                } catch (NumberFormatException e)
+                {
+                    // ignore
+                }
+                
+                data.add(part);
+            }
+        });
+        
+        return data;
+    }
+    
     /**
      * returns true if this hash is already known, or is a new valid hash
      */
@@ -511,5 +546,188 @@ public abstract class HashGuesser
         }
         
         return this.known.containsKey(hash);
+    }
+    
+    public void guessByExistingWords(Set<String> prefixes)
+    {
+        Set<String> separators = Set.of("", "_", ".", "/", "-");
+        Set<String> endings    = new HashSet<>();
+        Set<String> words      = this.generateWordListFromKnownHashes();
+        this.known.values().forEach(v -> endings.add(v.substring(v.lastIndexOf('.'))));
+        
+        System.out.println("Guessing by existing words");
+        
+        for (String plugin : prefixes)
+        {
+            for (String word : words)
+            {
+                for (String ending : endings)
+                {
+                    this.check(plugin + word + ending);
+                }
+                
+                if (word.isEmpty())
+                {
+                    continue;
+                }
+                
+                for (String separator : separators)
+                {
+                    String path1 = word + separator;
+                    
+                    for (String word2 : words)
+                    {
+                        for (String ending : endings)
+                        {
+                            this.check(plugin + path1 + word2 + ending);
+                        }
+                        
+                        if (word2.isEmpty())
+                        {
+                            continue;
+                        }
+                        
+                        for (String separator2 : separators)
+                        {
+                            String path2 = word2 + separator2;
+                            
+                            for (String word3 : words)
+                            {
+                                for (String ending : endings)
+                                {
+                                    this.check(plugin + path1 + path2 + word3 + ending);
+                                }
+                                
+                                if (word3.isEmpty())
+                                {
+                                    continue;
+                                }
+                                
+                                for (String separator3 : separators)
+                                {
+                                    String path3 = word3 + separator3;
+                                    
+                                    for (String word4 : words)
+                                    {
+                                        for (String ending : endings)
+                                        {
+                                            this.check(plugin + path1 + word2 + path3 + word4 + ending);
+                                        }
+                                        
+                                        if (word4.isEmpty())
+                                        {
+                                            continue;
+                                        }
+                                        
+                                        for (String separator4 : separators)
+                                        {
+                                            String path4 = word4 + separator4;
+                                            
+                                            for (String word5 : words)
+                                            {
+                                                for (String ending : endings)
+                                                {
+                                                    this.check(plugin + path1 + word2 + path3 + path4 + word5 + ending);
+                                                }
+                                                
+                                                if (word5.isEmpty())
+                                                {
+                                                    continue;
+                                                }
+                                                
+                                                for (String separator5 : separators)
+                                                {
+                                                    String path5 = word5 + separator5;
+                                                    
+                                                    for (String word6 : words)
+                                                    {
+                                                        for (String ending : endings)
+                                                        {
+                                                            this.check(plugin + path1 + word2 + path3 + path4 + path5 + word6 + ending);
+                                                        }
+                                                        
+                                                        if (word6.isEmpty())
+                                                        {
+                                                            continue;
+                                                        }
+                                                        
+                                                        for (String separator6 : separators)
+                                                        {
+                                                            String path6 = word6 + separator6;
+                                                            
+                                                            for (String word7 : words)
+                                                            {
+                                                                for (String ending : endings)
+                                                                {
+                                                                    this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + word7 + ending);
+                                                                }
+                                                                
+                                                                if (word7.isEmpty())
+                                                                {
+                                                                    continue;
+                                                                }
+                                                                
+                                                                for (String separator7 : separators)
+                                                                {
+                                                                    String path7 = word7 + separator7;
+                                                                    
+                                                                    for (String word8 : words)
+                                                                    {
+                                                                        for (String ending : endings)
+                                                                        {
+                                                                            this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + path7 + word8 + ending);
+                                                                        }
+                                                                        
+                                                                        if (word8.isEmpty())
+                                                                        {
+                                                                            continue;
+                                                                        }
+                                                                        
+                                                                        for (String separator8 : separators)
+                                                                        {
+                                                                            String path8 = word8 + separator8;
+                                                                            
+                                                                            for (String word9 : words)
+                                                                            {
+                                                                                for (String ending : endings)
+                                                                                {
+                                                                                    this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + path7 + path8 + word9 + ending);
+                                                                                }
+                                                                                
+                                                                                if (word9.isEmpty())
+                                                                                {
+                                                                                    continue;
+                                                                                }
+                                                                                
+                                                                                for (String separator9 : separators)
+                                                                                {
+                                                                                    String path9 = word9 + separator9;
+                                                                                    
+                                                                                    for (String word10 : words)
+                                                                                    {
+                                                                                        for (String ending : endings)
+                                                                                        {
+                                                                                            this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + path7 + path8 + path9 + word10 + ending);
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

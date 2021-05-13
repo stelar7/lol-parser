@@ -63,6 +63,9 @@ public class TestCDTBHashGuessing
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessBinByLinkedFiles(dataPath);
         guesser.saveToBackup();
+        
+        //guesser.guessByExistingWords();
+        //guesser.saveToBackup();
     }
     
     @Test
@@ -84,6 +87,9 @@ public class TestCDTBHashGuessing
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
         guesser.saveToBackup();
+    
+        //guesser.guessByExistingWords();
+        //guesser.saveToBackup();
     }
     
 }
