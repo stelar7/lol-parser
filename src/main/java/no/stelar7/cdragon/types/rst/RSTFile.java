@@ -59,7 +59,11 @@ public class RSTFile
     
     public String getFromHash(String hash)
     {
-        return entries.getOrDefault(HashHandler.computeXXHash64AsLong(hash) & 0xFFFFFFFFFFL, hash);
+        if (this.major < 4) {
+            return entries.getOrDefault(HashHandler.computeXXHash64AsLong(hash) & 0xFFFFFFFFFFL, hash);
+        }
+    
+        return entries.getOrDefault(HashHandler.computeXXHash64AsLong(hash) & 0x7FFFFFFFFFL, hash);
     }
     
     @Override

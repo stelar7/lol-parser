@@ -58,23 +58,13 @@ public class RSTParser implements Parseable<RSTFile>
         List<Pair<Integer, Long>> entries = new ArrayList<>();
         
         int entryCount = raf.readInt();
+        int hashBits   = major > 3 ? 39 : 40;
         for (int i = 0; i < entryCount; i++)
         {
             long entryHash = raf.readLong();
             
-            // valueHash is a truncated xx64hash
-            int  offset;
-            long valueHash;
-            
-            if (major == 4)
-            {
-                offset = (int) (entryHash >>> 39);
-                valueHash = entryHash & 0x1ffffffffffL;
-            } else
-            {
-                offset = (int) (entryHash >>> 40);
-                valueHash = entryHash & 0xffffffffffL;
-            }
+            int  offset    = (int) (entryHash >>> hashBits);
+            long valueHash = entryHash & ((1L << hashBits) - 1);
             
             entries.add(new Pair<>(offset, valueHash));
         }
