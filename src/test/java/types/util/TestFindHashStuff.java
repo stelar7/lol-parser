@@ -34,8 +34,7 @@ public class TestFindHashStuff
     public void testSDBM()
     {
         
-        // one of these should map to 1036514714 or 3DC7F59A
-        List<String> tests = Arrays.asList("Dialogue/Lissandra/freljordlore", "LoL_Audio_en_US/Dialogue/Lissandra/freljordlore", "LoL_Audio/Dialogue/Lissandra/freljordlore");
+        List<String> tests = Arrays.asList("mwinstreaks");
         
         for (String test : tests)
         {

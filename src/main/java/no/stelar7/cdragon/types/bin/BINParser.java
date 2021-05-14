@@ -328,7 +328,9 @@ public class BINParser implements Parseable<BINFile>
 
             if (type == BINValueType.STRING_HASH)
             {
-                value = "STRING_HASH: " + value.toString();
+                String testHash = HashHandler.getBinHashes().getOrDefault(value.toString(), value.toString());
+                String output   = (value.toString().equalsIgnoreCase(testHash)) ? "STRING_HASH: " : "";
+                value = output + value.toString();
             }
             
             file.getPatches().add(new BINPatchEntry(hash, name, value));
