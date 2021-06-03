@@ -22,6 +22,7 @@ public class TestRST
         Path      file   = Paths.get("D://cdragon/rst/v4_fontconfig_en_us.txt");
         RSTParser parser = new RSTParser();
         RSTFile   output = parser.parse(file);
+        String    generatedtip_spell_anniee_description = output.getFromHash("generatedtip_spell_anniee_description");
         System.out.println();
     }
 }
