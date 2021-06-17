@@ -53,12 +53,23 @@ public class TestParseChampionSpells
             List<BINEntry> spellObjects = parsed.getByType("SpellObject");
             for (BINEntry spellObject : spellObjects)
             {
+                Optional<BINValue> maybeName = spellObject.get("mScriptName");
+                if (maybeName.isEmpty())
+                {
+                    continue;
+                }
+                
                 Optional<BINValue> maybeSpell = spellObject.get("mSpell");
                 if (maybeSpell.isEmpty())
                 {
                     continue;
                 }
-                BINStruct          spell        = (BINStruct) maybeSpell.get().getValue();
+                
+                String scriptName = (String) maybeName.get().getValue();
+                System.out.println(scriptName);
+                
+                BINStruct spell = (BINStruct) maybeSpell.get().getValue();
+                
                 Optional<BINValue> calculations = spell.get("mspellcalculations");
                 if (calculations.isEmpty())
                 {
@@ -71,27 +82,50 @@ public class TestParseChampionSpells
                     String key = (String) entry.getFirst();
                     System.out.println("Spell " + key + ":");
                     
-                    List<BINValue> parts = ((BINStruct) entry.getSecond()).getData();
-                    for (BINValue part : parts)
+                    BINStruct value = (BINStruct) entry.getSecond();
+                    if (value.getHash().equalsIgnoreCase("gamecalculation"))
                     {
-                        if (part.getHash().equalsIgnoreCase("mDisplayAsPercent"))
+                        List<BINValue> parts = value.getData();
+                        for (BINValue part : parts)
                         {
-                            System.out.println("%");
+                            if (part.getHash().equalsIgnoreCase("mDisplayAsPercent"))
+                            {
+                                System.out.println("%");
+                            }
+                            
+                            if (part.getType() != BINValueType.CONTAINER)
+                            {
+                                continue;
+                            }
+                            
+                            BINContainer self = (BINContainer) part.getValue();
+                            
+                            for (Object partObject : self.getData())
+                            {
+                                System.out.println("+");
+                                BINStruct partEntry = (BINStruct) partObject;
+                                calculateFromType(spell, partEntry);
+                            }
+                        }
+                    } else if (value.getHash().equalsIgnoreCase("gamecalculationmodified"))
+                    {
+                        Optional<BINValue> multiplier = value.get("mMultiplier");
+                        if (multiplier.isEmpty())
+                        {
+                            throw new RuntimeException("Missing value!");
                         }
                         
-                        if (part.getType() != BINValueType.CONTAINER)
+                        Optional<BINValue> modifiedValue = value.get("mmodifiedgamecalculation");
+                        if (modifiedValue.isEmpty())
                         {
-                            continue;
+                            throw new RuntimeException("Missing value!");
                         }
                         
-                        BINContainer self = (BINContainer) part.getValue();
+                        System.out.println(modifiedValue.get().getValue());
+                        System.out.println("*");
                         
-                        for (Object partObject : self.getData())
-                        {
-                            System.out.println("+");
-                            BINStruct partEntry = (BINStruct) partObject;
-                            calculateFromType(spell, partEntry);
-                        }
+                        BINStruct multi = (BINStruct) multiplier.get().getValue();
+                        calculateFromType(spell, multi);
                     }
                 }
             }
