@@ -115,7 +115,6 @@ public class TestDivStuff
         });
     }
     
-    
     @Test
     public void readProcessMemory()
     {

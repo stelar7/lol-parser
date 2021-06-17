@@ -43,6 +43,7 @@ public class TestCDTBHashGuessing
         //guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("sorted_real.txt"), "(.*)");
         guesser.guessFromPets(dataPath);
         guesser.guessTFTItems();
+        guesser.guessSpellNames();
         guesser.guessTFTParticles();
         guesser.guessNewCharacters();
         guesser.guessNewAnimations();

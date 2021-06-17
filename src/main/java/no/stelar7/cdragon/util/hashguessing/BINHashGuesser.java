@@ -326,4 +326,24 @@ public class BINHashGuesser extends HashGuesser
             e.printStackTrace();
         }
     }
+    
+    public void guessSpellNames()
+    {
+        getFiles().stream()
+                  .flatMap(b -> b.getEntries().stream())
+                  .filter(b -> b.getType().equalsIgnoreCase("SpellObject"))
+                  .map(e -> e.get("mSpell"))
+                  .filter(Optional::isPresent)
+                  .map(e -> (BINStruct) e.get().getValue())
+                  .filter(Objects::nonNull)
+                  .map(s -> s.get("mDataValues"))
+                  .filter(Optional::isPresent)
+                  .map(s -> (BINContainer) s.get().getValue())
+                  .flatMap(s -> s.getData().stream())
+                  .map(s -> (BINStruct) s)
+                  .map(s -> s.get("mName"))
+                  .filter(Optional::isPresent)
+                  .map(s -> (String) s.get().getValue())
+                  .forEach(this::check);
+    }
 }

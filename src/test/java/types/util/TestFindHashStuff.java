@@ -34,29 +34,16 @@ public class TestFindHashStuff
     public void testSDBM()
     {
         
-        List<String> tests = Arrays.asList("mwinstreaks");
+        List<String> tests = Arrays.asList("Duration", "DecayTakes", "ASCoeff", "StartingAttacks");
         
         for (String test : tests)
         {
-            String input  = test;
             String input2 = test.toLowerCase();
-            
-            testHash(input, HashHandler::computeXXHash64AsLong);
             testHash(input2, HashHandler::computeXXHash64AsLong);
-            
-            testHash(input, HashHandler::computeXXHash32AsLong);
             testHash(input2, HashHandler::computeXXHash32AsLong);
-            
-            testHash(input, HashHandler::computeSDBMHash);
             testHash(input2, HashHandler::computeSDBMHash);
-            
-            testHash(input, HashHandler::computeFNV1A);
             testHash(input2, HashHandler::computeFNV1A);
-            
-            testHash(input, HashHandler::computeELFHash);
             testHash(input2, HashHandler::computeELFHash);
-            
-            testHash(input, HashHandler::computeCCITT32);
             testHash(input2, HashHandler::computeCCITT32);
             
         }
@@ -65,12 +52,12 @@ public class TestFindHashStuff
     @Test
     public void testGuessing()
     {
-    
-    
+        
+        
         // one of these should map to 1036514714 or 3DC7F59A
         testHash("assets/esports/sponsoredbanners/secret/srx_banner_flags_samsungssd.dds", HashHandler::computeXXHash64AsLong);
-    
-    
+        
+        
         HashHandler.bruteForceHash(HashHandler::computeXXHash64AsLong,
                                    List.of(62979898981692412L),
                                    Arrays.asList(Stream.concat(Arrays.stream(UtilHandler.CHARS), Arrays.stream(new String[]{"_"})).toArray(String[]::new)),
@@ -84,13 +71,12 @@ public class TestFindHashStuff
     {
         long   out1 = hashFunc.apply(toHash);
         String out2 = HashHandler.toHex(hashFunc.apply(toHash), 8);
-        
-        System.out.println(out1);
-        System.out.println(out2);
+        System.out.println('"' + out2 + '"' + ": " + '"' + toHash + '"' + ",");
     }
     
     @Test
-    public void testBinHash() {
+    public void testBinHash()
+    {
         System.out.println(HashHandler.getBINHash("Loadouts/TFTMapSkins/Base_D"));
     }
     

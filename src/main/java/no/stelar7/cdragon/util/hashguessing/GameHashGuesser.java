@@ -218,7 +218,12 @@ public class GameHashGuesser extends HashGuesser
     public void guessByExistingWords()
     {
         Set<String> prefixes = new HashSet<>();
-        this.known.values().forEach(v -> prefixes.add(v.substring(0, v.indexOf('/', 10))));
+        this.known.values().forEach(v -> {
+            if (v.indexOf('/', 10) > -1)
+            {
+                prefixes.add(v.substring(0, v.indexOf('/', 10)));
+            }
+        });
         
         super.guessByExistingWords(Set.of(""));
     }
