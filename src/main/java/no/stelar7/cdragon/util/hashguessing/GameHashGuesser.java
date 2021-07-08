@@ -29,6 +29,7 @@ public class GameHashGuesser extends HashGuesser
             System.out.println("Parsing bin files...");
             BINParser parser = new BINParser();
             Files.walk(pbe)
+                 .parallel()
                  .filter(UtilHandler.IS_BIN_PREDICATE)
                  .map(parser::parse)
                  .filter(Objects::nonNull)
@@ -163,7 +164,7 @@ public class GameHashGuesser extends HashGuesser
                 }
             }
             
-            Path      shaderJson = Paths.get("D:\\pbe\\data\\shaders\\shaders.json");
+            Path      shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\shaders\\shaders.json");
             JsonArray shaderObj  = UtilHandler.getJsonParser().parse(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
             for (JsonElement elem : shaderObj)
             {

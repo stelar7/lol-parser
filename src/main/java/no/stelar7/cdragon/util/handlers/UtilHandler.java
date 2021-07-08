@@ -47,7 +47,7 @@ public final class UtilHandler
     private static Preferences preferences;
     private static JSPrettier  jsPretty;
     
-    public static Path CDRAGON_FOLDER = new File("D:\\").toPath();
+    public static Path CDRAGON_FOLDER = new File("C:\\cdragon").toPath();
     
     public static String pathToFilename(Path path)
     {

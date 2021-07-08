@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import types.util.TestCDTBHashGuessing;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -45,7 +44,7 @@ public class TestRMAN
             List<String> removedBundles = getRemovedBundleIds(files, bundleFolder);
             removeOldBundles(removedBundles, bundleFolder);
             downloadAllBundles(files, bundleFolder);
-            Files.write(lastVersion, String.valueOf(currentVersion).getBytes(StandardCharsets.UTF_8));
+            Files.writeString(lastVersion, String.valueOf(currentVersion));
         } else
         {
             System.out.println("This version is already downloaded, skipping download step");

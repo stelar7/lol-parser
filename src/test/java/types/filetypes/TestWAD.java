@@ -47,8 +47,8 @@ public class TestWAD
     public void testLocal2()
     {
         long time = System.currentTimeMillis();
-        Path p    = Paths.get("D://extractedFiles//DATA//FINAL//DATA.wad.client");
-        extractWad(p, Paths.get("D://temp"));
+        Path      p   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//DATA//FINAL//DATA.wad.client");
+        extractWad(p, UtilHandler.CDRAGON_FOLDER.resolve("temp"));
     }
     
     @Test
