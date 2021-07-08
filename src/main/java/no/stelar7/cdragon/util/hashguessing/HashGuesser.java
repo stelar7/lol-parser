@@ -340,15 +340,16 @@ public abstract class HashGuesser
         
         System.out.format("add basename word: %s formats, %s words%n", formats.size(), words.size());
         
-        for (String fmt : formats)
-        {
-            for (String w : words)
-            {
-                String[] parts   = fmt.split("%s");
-                String   toCheck = parts[0] + w + parts[1];
-                check(toCheck);
-            }
-        }
+        formats.stream()
+               .parallel()
+               .forEach(fmt -> words
+                       .stream()
+                       .parallel()
+                       .forEach(w -> {
+                           String[] parts   = fmt.split("%s");
+                           String   toCheck = parts[0] + w + parts[1];
+                           check(toCheck);
+                       }));
     }
     
     
