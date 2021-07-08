@@ -58,17 +58,20 @@ public class LCUHashGuesser extends HashGuesser
         
         System.out.format("Substitute region, and language: %s region/languages, %s hashes%n", regionLang.size(), this.known.size());
         
-        for (String rl : regionLang)
-        {
-            for (String value : new ArrayList<>(this.known.values()))
-            {
-                String prefix  = value.substring(0, ordinalIndexOf(value, "/", 2) + 1);
-                String suffix  = value.substring(ordinalIndexOf(value, "/", 4) + 1);
-                String toCheck = prefix + rl + "/" + suffix;
+        regionLang.stream()
+                  .parallel()
+                  .forEach(rl -> {
+                      this.known.values()
+                                .stream()
+                                .parallel()
+                                .forEach(value -> {
+                                    String prefix  = value.substring(0, ordinalIndexOf(value, "/", 2) + 1);
+                                    String suffix  = value.substring(ordinalIndexOf(value, "/", 4) + 1);
+                                    String toCheck = prefix + rl + "/" + suffix;
                 
-                check(toCheck);
-            }
-        }
+                                    check(toCheck);
+                                });
+                  });
     }
     
     public void substitutePlugins()
@@ -416,6 +419,7 @@ public class LCUHashGuesser extends HashGuesser
         Pattern p = Pattern.compile("/(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))\"");
         
         readMe.stream()
+              .parallel()
               .map(UtilHandler::readAsString)
               .forEach(e -> {
                   Matcher m = p.matcher(e);

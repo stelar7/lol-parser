@@ -188,6 +188,7 @@ public class BINHashGuesser extends HashGuesser
         try
         {
             Files.walk(dataPath.resolve("data\\menu"))
+                 .parallel()
                  .filter(p -> p.getFileName().toString().contains("fontconfig"))
                  .filter(UtilHandler.filetypePredicate(".txt"))
                  .forEach(p -> {
@@ -203,6 +204,7 @@ public class BINHashGuesser extends HashGuesser
                          {
                              Map<String, String> desc = Files.readAllLines(p)
                                                              .stream()
+                                                             .parallel()
                                                              .filter(s -> s.startsWith("tr "))
                                                              .map(s -> s.substring(s.indexOf(" ") + 1))
                                                              .collect(Collectors.toMap(s -> {
@@ -217,7 +219,7 @@ public class BINHashGuesser extends HashGuesser
                                                                  return part;
                                                              }));
                         
-                             desc.values().forEach(this::checkLine);
+                             desc.values().stream().parallel().forEach(this::checkLine);
                          }
                     
                      } catch (IOException e)

@@ -37,7 +37,7 @@ public class TestCDTBHashGuessing
             e.printStackTrace();
             System.exit(0);
         }
-    
+        
         BINHashGuesser guesser = new BINHashGuesser(unknowns, dataPath);
         guesser.pullCDTB();
         //guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("sorted_real.txt"), "(.*)");
@@ -88,7 +88,7 @@ public class TestCDTBHashGuessing
         guesser.substituteBasenameWords(null, null, null, 1);
         guesser.addBasenameWord();
         guesser.saveToBackup();
-    
+        
         //guesser.guessByExistingWords();
         //guesser.saveToBackup();
     }

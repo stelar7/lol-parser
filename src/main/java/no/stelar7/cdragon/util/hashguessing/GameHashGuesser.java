@@ -10,7 +10,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.function.*;
 import java.util.regex.*;
-import java.util.stream.Stream;
+import java.util.stream.*;
 
 public class GameHashGuesser extends HashGuesser
 {
@@ -51,6 +51,7 @@ public class GameHashGuesser extends HashGuesser
         Pattern p = Pattern.compile("(/.*?/).*?\\..*\"");
         
         readMe.stream()
+              .parallel()
               .map(UtilHandler::readAsString)
               .forEach(e -> {
                   Matcher m = p.matcher(e);
@@ -111,17 +112,16 @@ public class GameHashGuesser extends HashGuesser
     {
         System.out.println("Guessing shaders by manifest");
         
-        List<String> prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/");
-        List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".dx11", ".glsl", ".metal"));
-        for (String s : Arrays.asList(".dx9_", ".dx11_", ".glsl_", ".metal_"))
-        {
-            for (int i = 0; i < 100000; i += 100)
-            {
-                suffixes.add(s + i);
-            }
-        }
+        final List<String> prefixes = new ArrayList<>(Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/"));
+        final List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".dx11", ".glsl", ".metal"));
         
-        Collections.sort(suffixes);
+        Stream.of(".dx9_", ".dx11_", ".glsl_", ".metal_")
+              .parallel()
+              .forEach(s -> IntStream
+                      .rangeClosed(0, 100_000)
+                      .parallel()
+                      .filter(i -> i % 100 == 0)
+                      .forEach(i -> suffixes.add(s + i)));
         
         try
         {
@@ -154,15 +154,19 @@ public class GameHashGuesser extends HashGuesser
             Function<JsonElement, JsonElement> getFirstChildElement = obj -> obj.getAsJsonObject().get(getFirstChildKey.apply(obj));
             Function<JsonElement, JsonObject>  getFirstChildObject  = obj -> getFirstChildElement.apply(obj).getAsJsonObject();
             
-            prefixes = Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/");
-            suffixes = new ArrayList<>(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.dx11", ".vs_2_0.dx11", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
-            for (String s : Arrays.asList(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_"))
-            {
-                for (int i = 0; i < 100000; i += 100)
-                {
-                    suffixes.add(s + i);
-                }
-            }
+            prefixes.clear();
+            prefixes.addAll(Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/"));
+            
+            suffixes.clear();
+            suffixes.addAll(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.dx11", ".vs_2_0.dx11", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
+            
+            Stream.of(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_")
+                  .parallel()
+                  .forEach(s -> IntStream
+                          .rangeClosed(0, 100_000)
+                          .parallel()
+                          .filter(i -> i % 100 == 0)
+                          .forEach(i -> suffixes.add(s + i)));
             
             Path      shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\shaders\\shaders.json");
             JsonArray shaderObj  = UtilHandler.getJsonParser().parse(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
