@@ -58,20 +58,14 @@ public class LCUHashGuesser extends HashGuesser
         
         System.out.format("Substitute region, and language: %s region/languages, %s hashes%n", regionLang.size(), this.known.size());
         
-        regionLang.stream()
-                  .parallel()
-                  .forEach(rl -> {
-                      this.known.values()
-                                .stream()
-                                .parallel()
-                                .forEach(value -> {
-                                    String prefix  = value.substring(0, ordinalIndexOf(value, "/", 2) + 1);
-                                    String suffix  = value.substring(ordinalIndexOf(value, "/", 4) + 1);
-                                    String toCheck = prefix + rl + "/" + suffix;
-                
-                                    check(toCheck);
-                                });
-                  });
+        new ArrayList<>(this.known.values()).parallelStream().forEach(value -> {
+            regionLang.parallelStream().forEach(rl -> {
+                String prefix  = value.substring(0, ordinalIndexOf(value, "/", 2) + 1);
+                String suffix  = value.substring(ordinalIndexOf(value, "/", 4) + 1);
+                String toCheck = prefix + rl + "/" + suffix;
+                check(toCheck);
+            });
+        });
     }
     
     public void substitutePlugins()
