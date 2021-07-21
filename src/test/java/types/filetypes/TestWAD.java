@@ -279,7 +279,7 @@ public class TestWAD
                 String output     = String.join("\n", sortedUnknown);
                 Path   outputPath = UtilHandler.CDRAGON_FOLDER.resolve("hashbins").resolve("UnknownBinHash-" + key + ".txt");
                 Files.createDirectories(outputPath.getParent());
-                Files.write(outputPath, output.getBytes(StandardCharsets.UTF_8));
+                Files.writeString(outputPath, output);
                 
                 List<String> sortedKnown = new ArrayList<>(value);
                 sortedKnown.removeAll(sortedUnknown);
@@ -287,7 +287,7 @@ public class TestWAD
                 output = String.join("\n", sortedKnown);
                 outputPath = UtilHandler.CDRAGON_FOLDER.resolve("hashbins").resolve("BinHash-" + key + ".txt");
                 Files.createDirectories(outputPath.getParent());
-                Files.write(outputPath, output.getBytes(StandardCharsets.UTF_8));
+                Files.writeString(outputPath, output);
             } catch (IOException e)
             {
                 e.printStackTrace();
@@ -309,7 +309,7 @@ public class TestWAD
                  {
                      Path               output  = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Collection<String> content = dp.parseV1(file).getItems();
-                     Files.write(output, UtilHandler.getGson().toJson(content).getBytes(StandardCharsets.UTF_8));
+                     Files.writeString(output, UtilHandler.getGson().toJson(content));
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
@@ -326,7 +326,7 @@ public class TestWAD
                  {
                      Path                      output  = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Map<String, List<String>> content = dp.parseV2(file).getItems();
-                     Files.write(output, UtilHandler.getGson().toJson(content).getBytes(StandardCharsets.UTF_8));
+                     Files.writeString(output, UtilHandler.getGson().toJson(content));
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
@@ -355,7 +355,7 @@ public class TestWAD
                          {
                              Path   output = outputFolder.resolve(m.getName().replace(":", "-") + ".obj");
                              String obj    = skn.toOBJ(m);
-                             Files.write(output, obj.getBytes(StandardCharsets.UTF_8));
+                             Files.writeString(output, obj);
                          } catch (IOException e)
                          {
                              System.out.println(file);
@@ -406,12 +406,11 @@ public class TestWAD
                 
                      if (parsed == null)
                      {
-                         System.out.println();
                          return;
                      }
                 
                      Path output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
-                     Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
+                     Files.writeString(output, parsed.toJson());
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
