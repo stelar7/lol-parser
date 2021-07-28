@@ -15,7 +15,7 @@ public class TestBBQ
     @Test
     public void testBBQ() throws IOException
     {
-        Path file = UtilHandler.CDRAGON_FOLDER.resolve("C:\\Users\\Steffen\\Desktop\\unitypack\\UnityPack-master\\alwaysloaded.bbq");
+        Path file = UtilHandler.CDRAGON_FOLDER.resolve("C:\\cdragon\\cdragon\\bbq\\test\\jinxemote.bbq");
         Files.createDirectories(file.resolveSibling("generated"));
         BBQFile data = parser.parse(file);
         
@@ -23,9 +23,9 @@ public class TestBBQ
         {
             for (BBQObjectInfo value : entry.getObjects().values())
             {
+                Map<String, Object> temp = (Map<String, Object>) value.read();
                 if (value.getType().equals("Texture2D"))
                 {
-                    Map<String, Object> temp   = (Map<String, Object>) value.read();
                     BBQTextureFormat    format = BBQTextureFormat.getFromId((Integer) temp.get("m_TextureFormat"));
                     
                     Map<String, Object> streamData = (Map<String, Object>) temp.get("m_StreamData");
@@ -48,6 +48,7 @@ public class TestBBQ
                     
                     System.out.println();
                 }
+                
                 System.out.println(value.getType());
             }
         }
