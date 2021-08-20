@@ -180,6 +180,13 @@
             <version>2.0.3</version>
         </dependency>
 
+        <!-- used for >2GB mmap -->
+        <dependency>
+            <groupId>org.xerial.larray</groupId>
+            <artifactId>larray_2.12</artifactId>
+            <version>0.4.1</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>
