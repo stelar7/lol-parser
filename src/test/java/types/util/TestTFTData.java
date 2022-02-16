@@ -151,11 +151,11 @@ public class TestTFTData
         Map<String, Object> outputObject = new LinkedHashMap<>();
         
         Map<String, String>              characterOffsetLookup = parseCharacterOffsetLookup(map22);
-        Map<String, TFTSetInfo>         setData               = parseSetInfo(map22, characterOffsetLookup);
+        Map<String, TFTSetInfo>          setData               = parseSetInfo(map22, characterOffsetLookup);
         Map<String, Map<String, Object>> traitData             = parseTraitInfo(map22);
         parseChampionInfo(champFileParent, parser, map22, setData);
         
-        Map<String, Map<String, Object>> outputSetMap = generateSetMap(setData, traitData, outputObject);
+        Map<String, Map<String, Object>>  outputSetMap = generateSetMap(setData, traitData, outputObject);
         Map<Integer, Map<String, Object>> itemData     = parseItemInfo(map22, outputObject);
         
         if (exportImages)
@@ -495,9 +495,12 @@ public class TestTFTData
             champion.put("name", champ.getIfPresent("mdisplaynametra").getValue());
             champion.put("id", id);
             
-            int rarity    = champ.get("mRarity").map(BINValue::getValue).map(a -> ((byte) a) + 1).orElse(1);
-            int increment = (int) Math.floor(rarity / 6f); // dirty hack for lux being a 7 cost
-            champion.put("cost", rarity + increment);
+            int rarity      = champ.get("mRarity").map(BINValue::getValue).map(a -> ((byte) a) + 1).orElse(1);
+            int increment   = (int) Math.floor(rarity / 6f);
+            int rarityWorth = rarity + increment;
+    
+            int tier = champ.get("tier").map(BINValue::getValue).map(a -> (int) a).orElse(rarityWorth);
+            champion.put("cost", tier);
             champion.put("splash", champ.getIfPresent("mIconPath").getValue());
             
             abilities.put("name", champ.get("mabilitynametra").map(BINValue::getValue).orElse("No ability name key present"));
@@ -675,7 +678,7 @@ public class TestTFTData
     private Map<String, TFTSetInfo> parseSetInfo(BINFile map22, Map<String, String> characterOffsetLookup)
     {
         Map<String, TFTSetInfo> sets       = new LinkedHashMap<>();
-        List<BINEntry>           TFTSetList = map22.getByType("tftsetdata");
+        List<BINEntry>          TFTSetList = map22.getByType("tftsetdata");
         for (BINEntry entry : TFTSetList)
         {
             List<Object> characterLists = ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData();
