@@ -232,7 +232,17 @@ public class WADParser implements Parseable<WADFile>
                 
                 if (base.getMajor() > 1)
                 {
-                    header.setCompressionType(WADCompressionType.valueOf(raf.readByte()));
+                    if (base.getMajor() > 3 && base.getMinor() > 3)
+                    {
+                        byte dataAndChunkCount = raf.readByte();
+                        int  type              = dataAndChunkCount & 0xF;
+                        int  count             = dataAndChunkCount >> 4;
+                        header.setCompressionType(WADCompressionType.valueOf(type));
+                        header.setSubChunkCount(count);
+                    } else
+                    {
+                        header.setCompressionType(WADCompressionType.valueOf(raf.readByte()));
+                    }
                 } else
                 {
                     header.setCompressionType(WADCompressionType.valueOf((byte) raf.readInt()));
@@ -242,7 +252,7 @@ public class WADParser implements Parseable<WADFile>
                 {
                     WADContentHeaderV2 headerv2 = new WADContentHeaderV2(header);
                     headerv2.setDuplicate(raf.readByte() > 0);
-                    headerv2.setPadding(raf.readShort());
+                    headerv2.setSubChunkOffset(raf.readShort());
                     headerv2.setSha256(raf.readLong());
                     
                     content.add(headerv2);

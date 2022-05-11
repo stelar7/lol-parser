@@ -31,7 +31,7 @@ public class TestTFTData
     public void extractTFTData() throws IOException
     {
         Path leagueInstallFolder = Paths.get("C:\\Riot Games\\League of Legends");
-        Path outputFolder        = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        Path outputFolder        = Paths.get("C:\\Users\\stelar7\\Desktop\\tftdata");
         
         WADParser parser    = new WADParser();
         Pattern   filenames = Pattern.compile("data/characters/(.*)/\\1\\.bin");
@@ -136,7 +136,7 @@ public class TestTFTData
         // only set this to true if you have exported the images aswell!
         boolean exportImages = true;
         
-        Path inputFolder = Paths.get("D:\\pbe");
+        Path inputFolder = Paths.get("C:\\cdragon\\pbe");
         //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
         

@@ -7,7 +7,8 @@ public enum WADCompressionType
     NONE(0),
     GZIP(1),
     REFERENCE(2),
-    ZSTD(3),;
+    ZSTD(3),
+    ZSTD_MULTI(4);
     
     int code;
     

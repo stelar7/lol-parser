@@ -112,6 +112,7 @@ public class WADFile
                 findFileTypeAndRename(data, filename, savePath, wadName);
             } else
             {
+                Files.createDirectories(self.getParent());
                 Files.write(self, data);
             }
             

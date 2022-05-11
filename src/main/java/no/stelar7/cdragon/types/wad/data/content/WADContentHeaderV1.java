@@ -9,6 +9,8 @@ public class WADContentHeaderV1
     protected int                compressedFileSize;
     protected int                fileSize;
     protected WADCompressionType compressionType;
+    protected int               subChunkCount;
+    
     
     public boolean isCompressed()
     {
@@ -63,6 +65,16 @@ public class WADContentHeaderV1
     public void setCompressionType(WADCompressionType compressionType)
     {
         this.compressionType = compressionType;
+    }
+    
+    public int getSubChunkCount()
+    {
+        return subChunkCount;
+    }
+    
+    public void setSubChunkCount(int subChunkCount)
+    {
+        this.subChunkCount = subChunkCount;
     }
     
     @Override

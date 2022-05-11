@@ -3,7 +3,7 @@ package no.stelar7.cdragon.types.wad.data.content;
 public class WADContentHeaderV2 extends WADContentHeaderV1
 {
     private boolean duplicate;
-    private short   padding;
+    private short   subChunkOffset;
     private long    sha256;
     
     public WADContentHeaderV2(WADContentHeaderV1 header)
@@ -13,7 +13,9 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
         this.compressedFileSize = header.compressedFileSize;
         this.fileSize = header.fileSize;
         this.compressionType = header.compressionType;
+        this.subChunkCount = header.subChunkCount;
     }
+    
     
     public boolean isDuplicate()
     {
@@ -25,15 +27,6 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
         this.duplicate = duplicate;
     }
     
-    public short getPadding()
-    {
-        return padding;
-    }
-    
-    public void setPadding(short padding)
-    {
-        this.padding = padding;
-    }
     
     public long getSha256()
     {
@@ -45,18 +38,29 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
         this.sha256 = sha256;
     }
     
+    public short getSubChunkOffset()
+    {
+        return subChunkOffset;
+    }
+    
+    public void setSubChunkOffset(short subChunkOffset)
+    {
+        this.subChunkOffset = subChunkOffset;
+    }
+    
     @Override
     public String toString()
     {
         return "WADContentHeaderV2{" +
                "duplicate=" + duplicate +
-               ", padding=" + padding +
+               ", subChunkOffset=" + subChunkOffset +
                ", sha256=" + sha256 +
-               ", pathHash=" + pathHash +
+               ", pathHash='" + pathHash + '\'' +
                ", offset=" + offset +
                ", compressedFileSize=" + compressedFileSize +
                ", fileSize=" + fileSize +
                ", compressionType=" + compressionType +
+               ", subChunkCount=" + subChunkCount +
                '}';
     }
 }
