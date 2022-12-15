@@ -47,7 +47,7 @@ public class TestWAD
     public void testLocal2()
     {
         long time = System.currentTimeMillis();
-        Path      p   = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//DATA//FINAL//Maps//Shipping//Map11.wad.client");
+        Path p    = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//DATA//FINAL//Maps//Shipping//Map11.wad.client");
         extractWad(p, UtilHandler.CDRAGON_FOLDER.resolve("temp"));
     }
     
@@ -265,7 +265,8 @@ public class TestWAD
                 List<String> sortedUnknown = value.stream().filter(h -> {
                     try
                     {
-                        if(h.length() != 8) {
+                        if (h.length() != 8)
+                        {
                             return false;
                         }
                         
@@ -573,6 +574,18 @@ public class TestWAD
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
+                try
+                {
+                    if (Files.size(file) > Integer.MAX_VALUE)
+                    {
+                        System.out.println("Skipping " + file + " since its too large to parse");
+                        return FileVisitResult.CONTINUE;
+                    }
+                } catch (IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
+                
                 WADFile parsed = null;
                 
                 long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();

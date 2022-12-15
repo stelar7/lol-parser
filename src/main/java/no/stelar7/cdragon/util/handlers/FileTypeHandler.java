@@ -496,7 +496,8 @@ public final class FileTypeHandler
     
     public static boolean isProbableJSON(ByteArray wrapper)
     {
-        return (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B));
+        return (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B)) &&
+               (wrapper.indexMatch(wrapper.size() - 1, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 1, (byte) 0x5D));
     }
     
     public static boolean isProbableCSS(ByteArray wrapper)

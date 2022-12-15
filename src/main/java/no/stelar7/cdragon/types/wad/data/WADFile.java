@@ -99,6 +99,9 @@ public class WADFile
                     SubChunkInfo chunkMap     = new SubChunkInfo(uncompressed, compressed, hash);
                     chunks.add(chunkMap);
                     
+                    // todo: also check this
+                    // compressed size of subchunk has to be smaller or equal than zstd_compressBound of uncompressed size
+                    // https://github.com/facebook/zstd/blob/dev/lib/zstd.h#L204
                     if (compressed > uncompressed)
                     {
                         isBad = true;
