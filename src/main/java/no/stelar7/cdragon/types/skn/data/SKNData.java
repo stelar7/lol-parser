@@ -9,21 +9,32 @@ public class SKNData
     private Vector4f weight;
     private Vector3f normals;
     private Vector2f uv;
-    private Vector4b tangent;
+    private Vector4f tangent;
+    private Vector4b color;
     
     public Vector3f getPosition()
     {
         return position;
     }
     
-    public Vector4b getTangent()
-    {
-        return tangent;
-    }
-    
-    public void setTangent(Vector4b tangent)
+    public void setTangent(Vector4f tangent)
     {
         this.tangent = tangent;
+    }
+    
+    public Vector4b getColor()
+    {
+        return color;
+    }
+    
+    public void setColor(Vector4b color)
+    {
+        this.color = color;
+    }
+    
+    public Vector4f getTangent()
+    {
+        return tangent;
     }
     
     public void setPosition(Vector3f position)

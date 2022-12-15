@@ -20,7 +20,8 @@ public class SKNFile
     private int    unknown;
     private byte[] unknown2;
     
-    private int      containsTangent;
+    private int vertexType;
+    
     private Vector3f boundingBoxMin;
     private Vector3f boundingBoxMax;
     private Vector3f boundingSphereLocation;
@@ -130,16 +131,6 @@ public class SKNFile
         this.unknown2 = unknown2;
     }
     
-    public boolean containsTangent()
-    {
-        return containsTangent == 1;
-    }
-    
-    public void setContainsTangent(int containsTangent)
-    {
-        this.containsTangent = containsTangent;
-    }
-    
     public Vector3f getBoundingBoxMin()
     {
         return boundingBoxMin;
@@ -178,6 +169,16 @@ public class SKNFile
     public void setBoundingSphereRadius(float boundingSphereRadius)
     {
         this.boundingSphereRadius = boundingSphereRadius;
+    }
+    
+    public int getVertexType()
+    {
+        return vertexType;
+    }
+    
+    public void setVertexType(int vertexType)
+    {
+        this.vertexType = vertexType;
     }
     
     public List<Short> getIndecies()

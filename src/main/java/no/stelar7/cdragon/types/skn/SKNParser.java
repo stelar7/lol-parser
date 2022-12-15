@@ -75,7 +75,7 @@ public class SKNParser implements Parseable<SKNFile>
         if (file.getMajor() == 4)
         {
             file.setVertexSize(raf.readInt());
-            file.setContainsTangent(raf.readInt());
+            file.setVertexType(raf.readInt());
             file.setBoundingBoxMin(raf.readVec3F());
             file.setBoundingBoxMax(raf.readVec3F());
             file.setBoundingSphereLocation(raf.readVec3F());
@@ -134,9 +134,13 @@ public class SKNParser implements Parseable<SKNFile>
             data.setWeight(raf.readVec4F());
             data.setNormals(raf.readVec3F());
             data.setUv(raf.readVec2F());
-            if (file.containsTangent())
+            if (file.getVertexType() >= 1)
             {
-                data.setTangent(raf.readVec4B());
+                data.setColor(raf.readVec4B());
+            }
+            if (file.getVertexType() == 2)
+            {
+                data.setTangent(raf.readVec4F());
             }
             
             datas.add(data);
