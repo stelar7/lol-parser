@@ -29,7 +29,9 @@ public class TestCDTBHashGuessing
         Set<String> unknowns = new HashSet<>();
         try
         {
-            Files.find(UtilHandler.CDRAGON_FOLDER.resolve("hashbins"), 2, (path, attr) -> path.toString().contains("UnknownBinHash")).forEach(p -> {
+            Path hashBinPath = UtilHandler.CDRAGON_FOLDER.resolve("hashbins");
+            Files.createDirectories(hashBinPath);
+            Files.find(hashBinPath, 2, (path, attr) -> path.toString().contains("UnknownBinHash")).forEach(p -> {
                 unknowns.addAll(HashGuesser.unknownFromExportBIN(p));
             });
         } catch (IOException e)

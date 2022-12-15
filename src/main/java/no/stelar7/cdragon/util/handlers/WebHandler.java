@@ -109,15 +109,10 @@ public class WebHandler
     {
         try
         {
-            // Force http so we always go via lancache.
-            if (url.startsWith("https://")) {
-                url = url.replace("https://", "http://");
-            }
-            
             Files.createDirectories(output.getParent());
             HttpRequest request = HttpRequest.newBuilder()
                                              .uri(new URI(url))
-                                             .version(Version.HTTP_1_1)
+                                             .version(Version.HTTP_2)
                                              .GET()
                                              .build();
             
@@ -130,11 +125,11 @@ public class WebHandler
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
             
-        } catch (SSLException e)
+        } catch (IOException e)
         {
             // try again
             downloadFile(output, url);
-        } catch (IOException | URISyntaxException | InterruptedException e)
+        } catch ( URISyntaxException | InterruptedException e)
         {
             e.printStackTrace();
         }

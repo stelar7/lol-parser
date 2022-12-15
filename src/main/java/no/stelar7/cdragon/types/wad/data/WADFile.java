@@ -2,7 +2,7 @@ package no.stelar7.cdragon.types.wad.data;
 
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.dds.DDSParser;
-import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
+import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
@@ -17,6 +17,8 @@ public class WADFile
 {
     private final RandomAccessReader fileReader;
     private       WADHeaderBase      header;
+    
+    private List<SubChunkInfo> subChunkContent;
     
     private List<WADContentHeaderV1> contentHeaders = new ArrayList<>();
     
@@ -48,6 +50,81 @@ public class WADFile
     public void setContentHeaders(List<WADContentHeaderV1> contentHeaders)
     {
         this.contentHeaders = contentHeaders;
+    }
+    
+    public boolean hasSubChunks()
+    {
+        return getContentHeaders().stream().anyMatch(h -> h.getSubChunkCount() > 0);
+    }
+    
+    public int getTotalSubChunkCount()
+    {
+        return getContentHeaders()
+                .stream()
+                .mapToInt(c -> ((WADContentHeaderV2) c).getSubChunkOffset() + c.getSubChunkCount())
+                .max()
+                .getAsInt();
+    }
+    
+    public List<SubChunkInfo> getSubChunkMap(int expectedChunkCount)
+    {
+        if (subChunkContent != null)
+        {
+            return subChunkContent;
+        }
+        
+        int startPos = fileReader.pos();
+        
+        List<WADContentHeaderV1> possibleChoices = getContentHeaders()
+                .stream()
+                .filter(c -> c.getFileSize() % 16 == 0)
+                .filter(c -> c.getFileSize() / 16 == expectedChunkCount)
+                .sorted(Comparator.comparing(WADContentHeaderV1::getFileSize))
+                .toList();
+        
+        List<List<SubChunkInfo>> chunkLists = new ArrayList<>();
+        
+        for (WADContentHeaderV1 possibleChoice : possibleChoices)
+        {
+            List<SubChunkInfo> chunks = new ArrayList<>();
+            byte[]             bytes  = readContentFromHeaderData(possibleChoice);
+            try (RandomAccessReader reader = new RandomAccessReader(bytes))
+            {
+                boolean isBad = false;
+                while (!reader.isEOF())
+                {
+                    int          compressed   = reader.readInt();
+                    int          uncompressed = reader.readInt();
+                    long         hash         = reader.readLong();
+                    SubChunkInfo chunkMap     = new SubChunkInfo(uncompressed, compressed, hash);
+                    chunks.add(chunkMap);
+                    
+                    if (compressed > uncompressed)
+                    {
+                        isBad = true;
+                    }
+                }
+                
+                // There should be a better way of doing this..
+                // xxHash the chunk content, and compare to hash possibly?
+                if (isBad)
+                {
+                    continue;
+                }
+                
+                chunkLists.add(chunks);
+            }
+        }
+        
+        fileReader.seek(startPos);
+        
+        if (chunkLists.size() == 1)
+        {
+            subChunkContent = chunkLists.get(0);
+            return subChunkContent;
+        }
+        
+        throw new RuntimeException("Unable to determine subchunk file");
     }
     
     public void extractFiles(Path path, String wadName)
@@ -137,8 +214,29 @@ public class WADFile
                 return fileReader.readString(fileReader.readInt()).getBytes(StandardCharsets.UTF_8);
             case ZSTD:
                 return CompressionHandler.uncompressZSTD(fileReader.readBytes(header.getCompressedFileSize()), header.getFileSize());
+            case ZSTD_MULTI:
+                List<SubChunkInfo> chunks = getSubChunkMap(getTotalSubChunkCount());
+                
+                WADContentHeaderV2 realHeader = (WADContentHeaderV2) header;
+                
+                ByteArray array = new ByteArray();
+                int start = realHeader.getSubChunkOffset();
+                int end = start + realHeader.getSubChunkCount();
+                for (int i = start; i < end; i++)
+                {
+                    SubChunkInfo chunk = chunks.get(i);
+                    if (chunk.compressed == chunk.uncompressed)
+                    {
+                        throw new RuntimeException("Compressed == uncompressed.. just append?");
+                    }
+                    
+                    byte[] data         = fileReader.readBytes(chunk.compressed);
+                    byte[] uncompressed = CompressionHandler.uncompressZSTD(data, chunk.uncompressed);
+                    array.append(uncompressed);
+                }
+                return array.getDataRaw();
             default:
-                return null;
+                throw new RuntimeException(header.getCompressionType().name() + " NOT HANDLED in readContentFromHeaderData");
         }
     }
     

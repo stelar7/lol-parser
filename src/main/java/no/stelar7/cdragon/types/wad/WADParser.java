@@ -232,7 +232,7 @@ public class WADParser implements Parseable<WADFile>
                 
                 if (base.getMajor() > 1)
                 {
-                    if (base.getMajor() > 3 && base.getMinor() > 3)
+                    if (base.getMajor() >= 3 && base.getMinor() >= 3)
                     {
                         byte dataAndChunkCount = raf.readByte();
                         int  type              = dataAndChunkCount & 0xF;

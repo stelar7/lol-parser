@@ -200,6 +200,10 @@ public final class FileTypeHandler
             return "manifestv0";
         }
         
+        if (FileTypeHandler.isProbableTEX(magic)) {
+            return "tex";
+        }
+        
         if (FileTypeHandler.isProbableTXT(magic))
         {
             return "txt";
@@ -299,6 +303,11 @@ public final class FileTypeHandler
     private static boolean isProbableCGC(ByteArray magic)
     {
         return magic.startsWith(new ByteArray(new byte[]{(byte) 0x06, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x54, (byte) 0x4F, (byte) 0x43, (byte) 0x33}));
+    }
+    
+    private static boolean isProbableTEX(ByteArray magic)
+    {
+        return magic.startsWith(new ByteArray(new byte[]{(byte) 0x54, (byte) 0x45, (byte) 0x58, (byte) 0x00}));
     }
     
     public static byte[] makePrettyJson(byte[] jsonString)
