@@ -6,6 +6,9 @@ import no.stelar7.cdragon.util.types.*;
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.*;
+import java.net.http.*;
+import java.net.http.HttpClient.Version;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.*;
 import java.nio.file.*;
@@ -106,19 +109,32 @@ public class WebHandler
     {
         try
         {
+            // Force http so we always go via lancache.
+            if (url.startsWith("https://")) {
+                url = url.replace("https://", "http://");
+            }
+            
             Files.createDirectories(output.getParent());
-            URL u = new URL(url);
-            try (InputStream is = u.openStream();
+            HttpRequest request = HttpRequest.newBuilder()
+                                             .uri(new URI(url))
+                                             .version(Version.HTTP_1_1)
+                                             .GET()
+                                             .build();
+            
+            HttpResponse<InputStream> response = HttpClient.newHttpClient().send(request, BodyHandlers.ofInputStream());
+            
+            try (InputStream is = response.body();
                  ReadableByteChannel rbc = Channels.newChannel(is);
                  FileOutputStream fos = new FileOutputStream(output.toFile()))
             {
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             }
+            
         } catch (SSLException e)
         {
             // try again
             downloadFile(output, url);
-        } catch (IOException e)
+        } catch (IOException | URISyntaxException | InterruptedException e)
         {
             e.printStackTrace();
         }
@@ -271,7 +287,7 @@ public class WebHandler
         try
         {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            URL u = new URL(url);
+            URL                   u   = new URL(url);
             try (InputStream is = u.openStream())
             {
                 is.transferTo(bos);
