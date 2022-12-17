@@ -161,10 +161,8 @@ public class GameHashGuesser extends HashGuesser
             suffixes.addAll(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.dx11", ".vs_2_0.dx11", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
             
             Stream.of(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_")
-                  .parallel()
                   .forEach(s -> IntStream
                           .rangeClosed(0, 100_000)
-                          .parallel()
                           .filter(i -> i % 100 == 0)
                           .forEach(i -> suffixes.add(s + i)));
             

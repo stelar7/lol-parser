@@ -47,7 +47,7 @@ public class TestWAD
     public void testLocal2()
     {
         long time = System.currentTimeMillis();
-        Path p    = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//DATA//FINAL//Maps//Shipping//Map11.wad.client");
+        Path p    = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//Plugins//rcp-be-lol-game-data//default-assets.wad");
         extractWad(p, UtilHandler.CDRAGON_FOLDER.resolve("temp"));
     }
     
