@@ -8,6 +8,7 @@ import no.stelar7.cdragon.util.handlers.*;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.*;
 import java.util.regex.*;
 import java.util.stream.*;
@@ -18,7 +19,6 @@ public class GameHashGuesser extends HashGuesser
     public GameHashGuesser(Set<String> hashes)
     {
         super(HashGuesser.hashFileGAME, hashes);
-        System.out.println("Started guessing GAME hashes");
     }
     
     public void guessBinByLinkedFiles(Path pbe)
@@ -28,13 +28,7 @@ public class GameHashGuesser extends HashGuesser
         {
             System.out.println("Parsing bin files...");
             BINParser parser = new BINParser();
-            Files.walk(pbe)
-                 .parallel()
-                 .filter(UtilHandler.IS_BIN_PREDICATE)
-                 .map(parser::parse)
-                 .filter(Objects::nonNull)
-                 .flatMap(b -> b.getLinkedFiles().stream())
-                 .forEach(this::check);
+            Files.walk(pbe).parallel().filter(UtilHandler.IS_BIN_PREDICATE).map(parser::parse).filter(Objects::nonNull).flatMap(b -> b.getLinkedFiles().stream()).forEach(this::check);
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -42,48 +36,52 @@ public class GameHashGuesser extends HashGuesser
     }
     
     
-    public void guessAssetsBySearch(Path pbe)
+    public void guessAssetsBySearch(Path pbe) throws InterruptedException
     {
         System.out.println("Guessing assets by searching strings");
-        List<Path> readMe = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
         
-        // need a better regex for this :thinking:
-        Pattern p = Pattern.compile("(/.*?/).*?\\..*\"");
+        // use one thread per core, and leave one free for the OS
+        ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
         
-        readMe.stream()
-              .parallel()
-              .map(UtilHandler::readAsString)
-              .forEach(e -> {
-                  Matcher m = p.matcher(e);
-                  while (m.find())
-                  {
-                      int lastStart = 0;
-                      for (int i = 0; i <= m.groupCount(); i++)
-                      {
-                          int start = m.start(i);
-                          int end   = m.end(i) - 1;
+        List<Path> files = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
+        Pattern    p     = Pattern.compile("(/.*?/).*?\\..*\"");
+        
+        files.stream()
+             .map(UtilHandler::readAsString)
+             .forEach(e -> service.submit(() -> {
+                 Matcher m = p.matcher(e);
+                 while (m.find())
+                 {
+                     int lastStart = 0;
+                     for (int i = 0; i <= m.groupCount(); i++)
+                     {
+                         int start = m.start(i);
+                         int end   = m.end(i) - 1;
                     
-                          if (start == lastStart)
-                          {
-                              continue;
-                          }
+                         if (start == lastStart)
+                         {
+                             continue;
+                         }
                     
-                          lastStart = start;
-                          while (e.charAt(start - 1) != '"')
-                          {
-                              start--;
-                          }
+                         lastStart = start;
+                         while (e.charAt(start - 1) != '"')
+                         {
+                             start--;
+                         }
                     
-                          while (e.charAt(end) != '"')
-                          {
-                              end++;
-                          }
+                         while (e.charAt(end) != '"')
+                         {
+                             end++;
+                         }
                     
-                          String toCheck = e.substring(start, end).toLowerCase();
-                          this.check(toCheck);
-                      }
-                  }
-              });
+                         String toCheck = e.substring(start, end).toLowerCase();
+                         this.check(toCheck);
+                     }
+                 }
+             }));
+        
+        service.shutdown();
+        service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
     }
     
     private final Predicate<String> isGameHash = s -> !s.startsWith("plugins/");
@@ -94,11 +92,7 @@ public class GameHashGuesser extends HashGuesser
         String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.game.txt";
         String hashB = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.game.txt";
         
-        Stream.of(WebHandler.readWeb(hashA).stream(), WebHandler.readWeb(hashB).stream())
-              .flatMap(a -> a)
-              .map(line -> line.substring(line.indexOf(' ') + 1))
-              .filter(isGameHash)
-              .forEach(this::check);
+        Stream.of(WebHandler.readWeb(hashA).stream(), WebHandler.readWeb(hashB).stream()).flatMap(a -> a).map(line -> line.substring(line.indexOf(' ') + 1)).filter(isGameHash).forEach(this::check);
     }
     
     @Override
@@ -115,13 +109,7 @@ public class GameHashGuesser extends HashGuesser
         final List<String> prefixes = new ArrayList<>(Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/"));
         final List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".dx11", ".glsl", ".metal"));
         
-        Stream.of(".dx9_", ".dx11_", ".glsl_", ".metal_")
-              .parallel()
-              .forEach(s -> IntStream
-                      .rangeClosed(0, 100_000)
-                      .parallel()
-                      .filter(i -> i % 100 == 0)
-                      .forEach(i -> suffixes.add(s + i)));
+        Stream.of(".dx9_", ".dx11_", ".glsl_", ".metal_").parallel().forEach(s -> IntStream.rangeClosed(0, 100_000).parallel().filter(i -> i % 100 == 0).forEach(i -> suffixes.add(s + i)));
         
         try
         {
@@ -160,11 +148,7 @@ public class GameHashGuesser extends HashGuesser
             suffixes.clear();
             suffixes.addAll(Arrays.asList(".ps_2_0", ".vs_2_0", ".ps_2_0.dx9", ".vs_2_0.dx9", ".ps_2_0.dx11", ".vs_2_0.dx11", ".ps_2_0.glsl", ".vs_2_0.glsl", ".ps_2_0.metal", ".vs_2_0.metal"));
             
-            Stream.of(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_")
-                  .forEach(s -> IntStream
-                          .rangeClosed(0, 100_000)
-                          .filter(i -> i % 100 == 0)
-                          .forEach(i -> suffixes.add(s + i)));
+            Stream.of(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_").forEach(s -> IntStream.rangeClosed(0, 100_000).filter(i -> i % 100 == 0).forEach(i -> suffixes.add(s + i)));
             
             Path      shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\shaders\\shaders.json");
             JsonArray shaderObj  = UtilHandler.getJsonParser().parse(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");

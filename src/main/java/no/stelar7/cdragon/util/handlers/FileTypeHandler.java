@@ -132,7 +132,7 @@ public final class FileTypeHandler
             // files are saved as txt, but should be rst?
             return "txt|rst";
         }
-    
+        
         if (FileTypeHandler.isProbableMTLB(magic))
         {
             // A list of metal shaders?
@@ -200,7 +200,8 @@ public final class FileTypeHandler
             return "manifestv0";
         }
         
-        if (FileTypeHandler.isProbableTEX(magic)) {
+        if (FileTypeHandler.isProbableTEX(magic))
+        {
             return "tex";
         }
         
@@ -496,8 +497,12 @@ public final class FileTypeHandler
     
     public static boolean isProbableJSON(ByteArray wrapper)
     {
-        return (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B)) &&
-               (wrapper.indexMatch(wrapper.size() - 1, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 1, (byte) 0x5D));
+        boolean startsWithJson                    = (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B));
+        boolean endsWithJson                      = (wrapper.indexMatch(wrapper.size() - 1, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 1, (byte) 0x5D));
+        boolean endsWithJsonMinusLinefeed         = (wrapper.indexMatch(wrapper.size() - 2, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 2, (byte) 0x5D));
+        boolean endsWithJsonMinusLinefeedAndBreak = (wrapper.indexMatch(wrapper.size() - 3, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 3, (byte) 0x5D));
+        
+        return startsWithJson && (endsWithJson || endsWithJsonMinusLinefeed || endsWithJsonMinusLinefeedAndBreak);
     }
     
     public static boolean isProbableCSS(ByteArray wrapper)
@@ -642,7 +647,7 @@ public final class FileTypeHandler
                 (byte) 0x61, (byte) 0x6c, (byte) 0x6a, (byte) 0x0d, (byte) 0x0a, (byte) 0x0d,
                 (byte) 0x73, (byte) 0x72, (byte) 0x75, (byte) 0xe8, (byte) 0x94, (byte) 0xa1,
                 (byte) 0x67, (byte) 0x61, (byte) 0x73, (byte) 0x65, (byte) 0x73, (byte) 0x74,
-                (byte) 0x74, (byte) 0x72, (byte) 0x20,
+                (byte) 0x74, (byte) 0x72, (byte) 0x20,(byte) 0x40, (byte) 0x73, (byte) 0x65,
                 };
         
         

@@ -17,7 +17,6 @@ public class LCUHashGuesser extends HashGuesser
     public LCUHashGuesser(Set<String> hashes)
     {
         super(HashGuesser.hashFileLCU, hashes);
-        System.out.println("Started guessing LCU hashes");
     }
     
     @Override

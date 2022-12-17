@@ -15,8 +15,10 @@ public class TestCDTBHashGuessing
     private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
     
     @Test
-    public void doTests()
+    public void doTests() throws Exception
     {
+        doSubchunkTocTest();
+        
         doBINTest();
         doGameTest();
         doLCUTest();
@@ -24,6 +26,26 @@ public class TestCDTBHashGuessing
     
     @Test
     @Order(1)
+    public void doSubchunkTocTest() throws IOException
+    {
+        System.out.println("Started guessing subchunk hashes");
+        
+        GameHashGuesser game = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
+        
+        Files.find(UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles"), 50, (path, attr) -> path.toString().contains("wad"))
+             .map(Path::toString)
+             .map(p -> p.replace("C:\\cdragon\\extractedFiles\\", ""))
+             .map(p -> p.replace("\\", "/"))
+             .forEach(p -> {
+                 game.check(p + ".subchunktoc");
+                 game.check(p.replace(".client", "") + ".subchunktoc");
+             });
+        
+        game.saveToBackup();
+    }
+    
+    @Test
+    @Order(10)
     public void doBINTest()
     {
         Set<String> unknowns = new HashSet<>();
@@ -39,7 +61,8 @@ public class TestCDTBHashGuessing
             e.printStackTrace();
             System.exit(0);
         }
-        
+    
+        System.out.println("Started guessing BIN hashes");
         BINHashGuesser guesser = new BINHashGuesser(unknowns, dataPath);
         guesser.pullCDTB();
         //guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("sorted_real.txt"), "(.*)");
@@ -54,9 +77,10 @@ public class TestCDTBHashGuessing
     }
     
     @Test
-    @Order(10)
-    public void doGameTest()
+    @Order(20)
+    public void doGameTest() throws InterruptedException
     {
+        System.out.println("Started guessing GAME hashes");
         GameHashGuesser guesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
         guesser.guessHardcoded();
@@ -72,9 +96,10 @@ public class TestCDTBHashGuessing
     }
     
     @Test
-    @Order(20)
+    @Order(30)
     public void doLCUTest()
     {
+        System.out.println("Started guessing LCU hashes");
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
         guesser.guessManifestFiles();
