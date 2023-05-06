@@ -71,4 +71,37 @@ public class BINMap
     {
         this.data = data;
     }
+    
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o)
+        {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass())
+        {
+            return false;
+        }
+        BINMap binMap = (BINMap) o;
+        return size == binMap.size && count == binMap.count && type1 == binMap.type1 && type2 == binMap.type2 && Objects.equals(data, binMap.data);
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(type1, type2, size, count, data);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "BINMap{" +
+               "type1=" + type1 +
+               ", type2=" + type2 +
+               ", size=" + size +
+               ", count=" + count +
+               ", data=" + data +
+               '}';
+    }
 }

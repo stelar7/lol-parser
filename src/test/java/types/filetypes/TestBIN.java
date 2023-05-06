@@ -604,4 +604,99 @@ public class TestBIN
         BINFile data = parser.parse(file);
         Files.write(UtilHandler.CDRAGON_FOLDER.resolve("dump.json"), data.toJson().getBytes(StandardCharsets.UTF_8));
     }
+    
+    
+    @Test
+    @Disabled
+    public void parseChampionAbilities()
+    {
+        String character = "aphelios";
+        String prefix    = "Characters/Aphelios/Spells/";
+        
+        Path    file = Paths.get("C:\\Users\\stelar7\\Downloads\\aphelios.bin");
+        BINFile data = parser.parse(file);
+        
+        Map<String, Set<String>> finalIcons = new HashMap<>();
+        List<String>             validKeys  = List.of("q", "w", "e", "r");
+        
+        BINEntry     characterRecord = data.getByType("CharacterRecord").get(0);
+        BINValue     baseSpells      = characterRecord.getIfPresent("spellNames");
+        List<Object> spellNames      = ((BINContainer) baseSpells.getValue()).getData();
+        
+        for (Object suffixObject : spellNames)
+        {
+            String suffix = (String) suffixObject;
+            String hash   = prefix + suffix;
+            
+            Optional<BINEntry> spellEntry = data.get(hash);
+            if (spellEntry.isEmpty())
+            {
+                System.out.println("No data for entry " + hash);
+                continue;
+            }
+            
+            BINStruct    spellData = (BINStruct) spellEntry.get().getIfPresent("mSpell").getValue();
+            BINContainer iconData  = (BINContainer) spellData.getIfPresent("mImgIconName").getValue();
+            
+            List<Object> iconValues  = iconData.getData();
+            Set<String>  uniqueIcons = new HashSet<>();
+            iconValues.forEach(i -> uniqueIcons.add((String) i));
+            for (String iconValue : uniqueIcons)
+            {
+                String charKey = String.valueOf(suffix.charAt(character.length())).toLowerCase();
+                if (!validKeys.contains(charKey))
+                {
+                    charKey = String.valueOf(suffix.charAt(0)).toLowerCase();
+                    if (!validKeys.contains(charKey))
+                    {
+                        charKey = String.valueOf(suffix.charAt(suffix.length() - 1)).toLowerCase();
+                    }
+                }
+                
+                finalIcons.put(charKey, new HashSet<>(List.of(iconValue)));
+            }
+        }
+        
+        BINValue     extraSpells     = characterRecord.getIfPresent("extraSpells");
+        List<Object> extraSpellNames = ((BINContainer) extraSpells.getValue()).getData();
+        
+        for (Object suffixObject : extraSpellNames)
+        {
+            String suffix = (String) suffixObject;
+            String hash   = prefix + suffix;
+            
+            Optional<BINEntry> spellEntry = data.get(hash);
+            if (spellEntry.isEmpty())
+            {
+                System.out.println("No data for entry " + hash);
+                continue;
+            }
+            
+            BINStruct    spellData = (BINStruct) spellEntry.get().getIfPresent("mSpell").getValue();
+            BINContainer iconData  = (BINContainer) spellData.getIfPresent("mImgIconName").getValue();
+            
+            List<Object> iconValues  = iconData.getData();
+            Set<String>  uniqueIcons = new HashSet<>();
+            iconValues.forEach(i -> uniqueIcons.add((String) i));
+            for (String iconValue : uniqueIcons)
+            {
+                String charKey = String.valueOf(suffix.charAt(character.length())).toLowerCase();
+                if (!validKeys.contains(charKey))
+                {
+                    charKey = String.valueOf(suffix.charAt(0)).toLowerCase();
+                    if (!validKeys.contains(charKey))
+                    {
+                        charKey = String.valueOf(suffix.charAt(suffix.length() - 1)).toLowerCase();
+                    }
+                }
+                
+                finalIcons.get(charKey).add(iconValue);
+            }
+        }
+        
+        finalIcons.entrySet().stream().sorted(Comparator.comparingInt(a -> validKeys.indexOf(a.getKey()))).forEach(e -> {
+            System.out.println(e.getKey().toUpperCase());
+            e.getValue().stream().sorted().forEach(val -> System.out.println("\t" + val));
+        });
+    }
 }
