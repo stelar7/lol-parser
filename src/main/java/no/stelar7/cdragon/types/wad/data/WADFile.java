@@ -193,11 +193,19 @@ public class WADFile
             } else
             {
                 Files.createDirectories(self.getParent());
-                Files.write(self, data);
+                if (!filename.contains("."))
+                {
+                    self = savePath.resolve(filename + ".bin");
+                    Files.write(self, data);
+                } else
+                {
+                    Files.write(self, data);
+                }
             }
             
         } catch (IOException e)
         {
+            System.out.println("Failed to write " + self);
             e.printStackTrace();
         }
     }

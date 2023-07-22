@@ -56,7 +56,7 @@ public class BINHashGuesser extends HashGuesser
         String prefix = "maps/shipping/map22/items/";
         
         BINParser parser = new BINParser();
-        BINFile   parsed = parser.parse(UtilHandler.CDRAGON_FOLDER.resolve(Paths.get("pbe/data/maps/shipping/map22/map22.bin")));
+        BINFile   parsed = parser.parse(UtilHandler.CDRAGON_FOLDER.resolve(Paths.get("extractedFiles/data/maps/shipping/map22/map22.bin")));
         
         parsed.getEntries().stream()
               .filter(b -> b.getType().equalsIgnoreCase("tftitemdata"))
@@ -74,7 +74,7 @@ public class BINHashGuesser extends HashGuesser
         String prefix = "maps/shipping/map22/particles/";
         
         BINParser parser = new BINParser();
-        BINFile   parsed = parser.parse(UtilHandler.CDRAGON_FOLDER.resolve(Paths.get("pbe/data/maps/shipping/map22/map22.bin")));
+        BINFile   parsed = parser.parse(UtilHandler.CDRAGON_FOLDER.resolve(Paths.get("extractedFiles/data/maps/shipping/map22/map22.bin")));
         
         parsed.getEntries().stream()
               .filter(b -> b.getType().equalsIgnoreCase("vfxsystemdefinitiondata"))

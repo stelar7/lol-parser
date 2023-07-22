@@ -12,7 +12,7 @@ import java.util.*;
 @TestMethodOrder(OrderAnnotation.class)
 public class TestCDTBHashGuessing
 {
-    private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
+    private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
     
     @Test
     public void doTests() throws Exception

@@ -231,7 +231,7 @@ public class TestWAD
     @Test
     public void testClientWAD() throws Exception
     {
-        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("temp");
+        Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
         generateUnknownFileList(rito);
         extractWads(rito, extractPath);
