@@ -14,6 +14,7 @@ import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
 import org.junit.jupiter.api.Test;
+import types.util.TestCDTBHashGuessing;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -47,7 +48,8 @@ public class TestWAD
     public void testLocal2()
     {
         long time = System.currentTimeMillis();
-        Path p    = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//Plugins//rcp-be-lol-game-data//default-assets.wad");
+        Path p    = Paths.get("C:\\Riot Games\\League of Legends\\Game\\DATA\\FINAL\\Maps\\Shipping\\Map30.wad.client");
+        //Path p    = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles//Plugins//rcp-be-lol-game-data//default-assets.wad");
         extractWad(p, UtilHandler.CDRAGON_FOLDER.resolve("temp"));
     }
     
@@ -192,33 +194,33 @@ public class TestWAD
                  {
                      return;
                  }
-            
+                 
                  String parent   = file.getParent().getFileName().toString();
                  String child    = file.getFileName().toString();
                  String filename = parent + "/" + child;
-            
+                 
                  WADFile parsed = null;
                  if (ends.stream().anyMatch(child::endsWith))
                  {
                      parsed = parser.parseReadOnly(file);
                  }
-            
+                 
                  if (endsc.stream().anyMatch(child::endsWith))
                  {
                      parsed = parser.parseCompressed(file);
                  }
-            
+                 
                  if (parsed == null)
                  {
                      return;
                  }
-            
+                 
                  boolean containsSearch = parsed.getContentHeaders()
                                                 .stream()
                                                 .map(WADContentHeaderV1::getPathHash)
                                                 .map(HashHandler::getWadHash)
                                                 .anyMatch(s -> s.contains(search));
-            
+                 
                  if (containsSearch)
                  {
                      System.out.println(filename + " contains a filename containing " + search);
@@ -231,8 +233,14 @@ public class TestWAD
     {
         Path extractPath = UtilHandler.CDRAGON_FOLDER.resolve("temp");
         Path rito        = Paths.get("C:\\Riot Games\\League of Legends");
+        generateUnknownFileList(rito);
         extractWads(rito, extractPath);
         transformBIN(extractPath);
+        generateBinHashLists();
+        transformManifest(extractPath);
+        
+        TestCDTBHashGuessing hashes = new TestCDTBHashGuessing();
+        hashes.doTests();
     }
     
     @Test
@@ -404,12 +412,12 @@ public class TestWAD
                  try
                  {
                      BINFile parsed = bp.parse(file);
-                
+                     
                      if (parsed == null)
                      {
                          return;
                      }
-                
+                     
                      Path output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Files.writeString(output, parsed.toJson());
                      //file.toFile().deleteOnExit();
@@ -460,7 +468,7 @@ public class TestWAD
                          String child    = file.getFileName().toString();
                          String filename = parent + "/" + child;
                          long   size     = Files.size(file);
-                    
+                         
                          if (ends.stream().anyMatch(child::endsWith))
                          {
                              Function<Void, Void> export = a -> {
@@ -469,10 +477,10 @@ public class TestWAD
                                  parsed.extractFiles(to, parent);
                                  return null;
                              };
-                        
+                             
                              extracts.add(new Pair<>(size, export));
                          }
-                    
+                         
                          if (endsc.stream().anyMatch(child::endsWith))
                          {
                              Function<Void, Void> export = a -> {
@@ -481,10 +489,10 @@ public class TestWAD
                                  parsed.extractFiles(to, parent);
                                  return null;
                              };
-                        
+                             
                              extracts.add(new Pair<>(size, export));
                          }
-                    
+                         
                          if (endsm.stream().anyMatch(child::endsWith))
                          {
                              Function<Void, Void> export = a -> {
@@ -493,10 +501,10 @@ public class TestWAD
                                  parsed.extractFiles(to.resolveSibling("mobile"), parent);
                                  return null;
                              };
-                        
+                             
                              extracts.add(new Pair<>(size, export));
                          }
-                    
+                         
                      } catch (IOException e)
                      {
                          e.printStackTrace();

@@ -65,6 +65,7 @@ public class TestCDTBHashGuessing
         System.out.println("Started guessing BIN hashes");
         BINHashGuesser guesser = new BINHashGuesser(unknowns, dataPath);
         guesser.pullCDTB();
+        guesser.saveToBackup();
         //guesser.guessFromFile(UtilHandler.CDRAGON_FOLDER.resolve("sorted_real.txt"), "(.*)");
         guesser.guessFromPets(dataPath);
         guesser.guessTFTItems();
@@ -83,6 +84,7 @@ public class TestCDTBHashGuessing
         System.out.println("Started guessing GAME hashes");
         GameHashGuesser guesser = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
+        guesser.saveToBackup();
         guesser.guessHardcoded();
         guesser.guessStringTableFiles();
         guesser.guessScripts(dataPath);
@@ -102,6 +104,7 @@ public class TestCDTBHashGuessing
         System.out.println("Started guessing LCU hashes");
         LCUHashGuesser guesser = new LCUHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         guesser.pullCDTB();
+        guesser.saveToBackup();
         guesser.guessManifestFiles();
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessSanitizerHashes();

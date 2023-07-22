@@ -228,15 +228,17 @@ public class WADFile
                 for (int i = start; i < end; i++)
                 {
                     SubChunkInfo chunk = chunks.get(i);
-                    if (chunk.compressed == chunk.uncompressed)
+                    byte[]       data  = fileReader.readBytes(chunk.compressed);
+                    if (FileTypeHandler.isProbableZSTD(data))
                     {
-                        throw new RuntimeException("Compressed == uncompressed.. just append?");
+                        byte[] uncompressed = CompressionHandler.uncompressZSTD(data, chunk.uncompressed);
+                        array.append(uncompressed);
+                    } else
+                    {
+                        array.append(data);
                     }
-                    
-                    byte[] data         = fileReader.readBytes(chunk.compressed);
-                    byte[] uncompressed = CompressionHandler.uncompressZSTD(data, chunk.uncompressed);
-                    array.append(uncompressed);
                 }
+                
                 return array.getDataRaw();
             default:
                 throw new RuntimeException(header.getCompressionType().name() + " NOT HANDLED in readContentFromHeaderData");

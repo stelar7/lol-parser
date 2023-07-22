@@ -102,6 +102,7 @@ public class RMANParser implements Parseable<RMANFile>
     
     public static String getPBEManifestFromClientConfig()
     {
+        System.out.println("Getting PBE manifest from client config");
         String     url       = "https://clientconfig.rpg.riotgames.com/api/v1/config/public";
         String     content   = String.join("\n", WebHandler.readWeb(url));
         JsonObject obj       = (JsonObject) UtilHandler.getJsonParser().parse(content);
@@ -114,6 +115,7 @@ public class RMANParser implements Parseable<RMANFile>
     
     public static Pair<String, String> getPBEManifestFromSieve()
     {
+        System.out.println("Getting PBE manifest from sieve");
         String     url      = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[platform]=windows";
         String     content  = String.join("\n", WebHandler.readWeb(url));
         JsonObject obj      = (JsonObject) UtilHandler.getJsonParser().parse(content);
@@ -305,7 +307,7 @@ public class RMANParser implements Parseable<RMANFile>
     public static RMANFile getFromURL(String url)
     {
         ByteArrayOutputStream stream = WebHandler.downloadFileToMemory(url);
-        ByteArray data = new ByteArray(stream.toByteArray());
+        ByteArray             data   = new ByteArray(stream.toByteArray());
         
         return new RMANParser().parse(data);
     }
