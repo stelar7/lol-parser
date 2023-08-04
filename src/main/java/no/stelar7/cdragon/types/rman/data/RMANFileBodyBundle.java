@@ -9,6 +9,7 @@ public class RMANFileBodyBundle
     private int                           headerSize;
     private String                        bundleId;
     private byte[]                        skipped;
+    private RMANVTable                    vTable;
     private List<RMANFileBodyBundleChunk> chunks;
     
     public int getOffset()
@@ -70,7 +71,17 @@ public class RMANFileBodyBundle
     {
         this.chunks = chunks;
     }
-    
+
+    public RMANVTable getVTable()
+    {
+        return vTable;
+    }
+
+    public void setVTable(RMANVTable vTable)
+    {
+        this.vTable = vTable;
+    }
+
     @Override
     public boolean equals(Object o)
     {
