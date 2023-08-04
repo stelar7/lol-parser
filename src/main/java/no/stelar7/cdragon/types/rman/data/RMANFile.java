@@ -175,12 +175,13 @@ public class RMANFile
         
         bundles.parallelStream().forEach(bundle -> {
             
-            String  bundleId              = bundle.getBundleId();
-            Path    bundlePath            = bundleFolder.resolve(bundleId + ".bundle");
-            long    bundleSize            = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
-            boolean shouldPrintBundleInfo = count.get() % 100 == 0;
+            String bundleId   = bundle.getBundleId();
+            Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
+            long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             
-            int current = count.incrementAndGet();
+            int     current               = count.incrementAndGet();
+            boolean shouldPrintBundleInfo = current % 100 == 0 || current == bundles.size();
+            
             
             if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
