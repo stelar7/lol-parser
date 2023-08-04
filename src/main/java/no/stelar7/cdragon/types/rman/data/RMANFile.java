@@ -180,11 +180,13 @@ public class RMANFile
             long    bundleSize            = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             boolean shouldPrintBundleInfo = count.get() % 100 == 0;
             
+            int current = count.incrementAndGet();
+            
             if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
                 if (shouldPrintBundleInfo)
                 {
-                    System.out.println("Skipping bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
+                    System.out.println("Skipping bundle: " + bundleId + " (" + current + "/" + bundles.size() + ")");
                 }
                 
                 return;
@@ -192,7 +194,7 @@ public class RMANFile
             
             if (shouldPrintBundleInfo)
             {
-                System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
+                System.out.println("Downloading bundle: " + bundleId + " (" + current + "/" + bundles.size() + ")");
             }
             
             bundlePath.toFile().delete();
