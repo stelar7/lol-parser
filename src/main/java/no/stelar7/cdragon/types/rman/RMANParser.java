@@ -34,28 +34,25 @@ public class RMANParser implements Parseable<RMANFile>
             }
             
             String     patchManifest = String.join("\n", Files.readAllLines(realPath));
-            JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+            JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
             
             Path usedManfest = null;
             switch (type)
             {
-                case GAME:
+                case GAME ->
                 {
                     System.out.println("Downloading game manifest");
                     String url = obj.get("game_patch_url").getAsString();
                     usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
                     WebHandler.downloadFile(usedManfest, url);
-                    break;
                 }
-                
-                case LCU:
+                case LCU ->
                 {
                     System.out.println("Downloading lcu manifest");
                     String url = obj.get("client_patch_url").getAsString();
                     usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
                     WebHandler.downloadFile(usedManfest, url);
                     
-                    break;
                 }
             }
             
@@ -105,7 +102,7 @@ public class RMANParser implements Parseable<RMANFile>
         System.out.println("Getting PBE manifest from client config");
         String     url       = "https://clientconfig.rpg.riotgames.com/api/v1/config/public";
         String     content   = String.join("\n", WebHandler.readWeb(url));
-        JsonObject obj       = (JsonObject) UtilHandler.getJsonParser().parse(content);
+        JsonObject obj       = (JsonObject) JsonParser.parseString(content);
         JsonObject patchline = obj.getAsJsonObject("keystone.products.league_of_legends.patchlines.pbe");
         JsonObject windows   = patchline.getAsJsonObject("platforms").getAsJsonObject("win");
         JsonObject config    = (JsonObject) windows.getAsJsonArray("configurations").get(0);
@@ -118,7 +115,7 @@ public class RMANParser implements Parseable<RMANFile>
         System.out.println("Getting PBE manifest from sieve");
         String     url      = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[platform]=windows";
         String     content  = String.join("\n", WebHandler.readWeb(url));
-        JsonObject obj      = (JsonObject) UtilHandler.getJsonParser().parse(content);
+        JsonObject obj      = (JsonObject) JsonParser.parseString(content);
         JsonArray  releases = obj.getAsJsonArray("releases");
         
         final long[]                            maxVersion      = {0};
@@ -176,7 +173,7 @@ public class RMANParser implements Parseable<RMANFile>
             WebHandler.downloadFile(downloadPath, patcherUrl);
             
             String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
-            JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+            JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
             int        version       = obj.get("version").getAsInt();
             System.out.println("Found patch version " + version);
             
@@ -209,23 +206,20 @@ public class RMANParser implements Parseable<RMANFile>
         Path usedManfest = null;
         switch (type)
         {
-            case GAME:
+            case GAME ->
             {
                 System.out.println("Downloading game manifest");
                 String url = obj.get("game_patch_url").getAsString();
                 usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
                 WebHandler.downloadFile(usedManfest, url);
-                break;
             }
-            
-            case LCU:
+            case LCU ->
             {
                 System.out.println("Downloading lcu manifest");
                 String url = obj.get("client_patch_url").getAsString();
                 usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
                 WebHandler.downloadFile(usedManfest, url);
                 
-                break;
             }
         }
         
@@ -247,7 +241,7 @@ public class RMANParser implements Parseable<RMANFile>
             WebHandler.downloadFile(downloadPath, patcherUrl);
             
             String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
-            JsonObject obj           = UtilHandler.getJsonParser().parse(patchManifest).getAsJsonObject();
+            JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
             int        version       = obj.get("version").getAsInt();
             System.out.println("Found patch version " + version);
             
@@ -265,22 +259,19 @@ public class RMANParser implements Parseable<RMANFile>
             Path usedManfest = null;
             switch (type)
             {
-                case GAME:
+                case GAME ->
                 {
                     System.out.println("Downloading game manifest");
                     String url = obj.get("game_patch_url").getAsString();
                     usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
                     WebHandler.downloadFile(usedManfest, url);
-                    break;
                 }
-                
-                case LCU:
+                case LCU ->
                 {
                     System.out.println("Downloading lcu manifest");
                     String url = obj.get("client_patch_url").getAsString();
                     usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
                     WebHandler.downloadFile(usedManfest, url);
-                    break;
                 }
             }
             
@@ -347,44 +338,28 @@ public class RMANParser implements Parseable<RMANFile>
     
     private RMANFileBody parseCompressedBody(RMANFile file)
     {
-        byte[]             uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody(), file.getHeader().getDecompressedLength());
-        RandomAccessReader raf          = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
-        RMANFileBody       body         = new RMANFileBody();
+        byte[] uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody(), file.getHeader().getDecompressedLength());
+        try
+        {
+            Files.write(Paths.get("C:\\cdragon\\cdragon\\patcher\\manifests\\sieve\\temp"), uncompressed);
+        } catch (IOException e)
+        {
+            throw new RuntimeException(e);
+        }
+        RandomAccessReader raf  = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
+        RMANFileBody       body = new RMANFileBody();
         body.setHeaderOffset(raf.readInt());
         raf.seek(body.getHeaderOffset());
         
         RMANFileBodyHeader header = new RMANFileBodyHeader();
         header.setOffsetTableOffset(raf.readInt());
         
-        int offset = raf.readInt();
-        raf.seek(raf.pos() + offset);
-        header.setBundleListOffset(raf.pos() - 4);
-        raf.seek(raf.pos() - offset);
-        
-        offset = raf.readInt();
-        raf.seek(raf.pos() + offset);
-        header.setLanguageListOffset(raf.pos() - 4);
-        raf.seek(raf.pos() - offset);
-        
-        offset = raf.readInt();
-        raf.seek(raf.pos() + offset);
-        header.setFileListOffset(raf.pos() - 4);
-        raf.seek(raf.pos() - offset);
-        
-        offset = raf.readInt();
-        raf.seek(raf.pos() + offset);
-        header.setFolderListOffset(raf.pos() - 4);
-        raf.seek(raf.pos() - offset);
-        
-        offset = raf.readInt();
-        raf.seek(raf.pos() + offset);
-        header.setKeyHeaderOffset(raf.pos() - 4);
-        raf.seek(raf.pos() - offset);
-        
-        offset = raf.readInt();
-        raf.seek(raf.pos() + offset);
-        header.setUnknownOffset(raf.pos() - 4);
-        raf.seek(raf.pos() - offset);
+        header.setBundleListOffset(raf.pos() + raf.readInt());
+        header.setLanguageListOffset(raf.pos() + raf.readInt());
+        header.setFileListOffset(raf.pos() + raf.readInt());
+        header.setFolderListOffset(raf.pos() + raf.readInt());
+        header.setKeyHeaderOffset(raf.pos() + raf.readInt());
+        header.setUnknownOffset(raf.pos() + raf.readInt());
         
         body.setHeader(header);
         body.setBundles(parseBundles(raf, header));
@@ -400,37 +375,15 @@ public class RMANParser implements Parseable<RMANFile>
         List<RMANFileBodyDirectory> data = new ArrayList<>();
         raf.seek(header.getFolderListOffset());
         
-        int count = raf.readInt();
-        for (int i = 0; i < count; i++)
+        List<Map<String, Object>> unmappedDirectories = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getDirectoryFields(), RMANVTable::parseVTable);
+        for (Map<String, Object> entry : unmappedDirectories)
         {
             RMANFileBodyDirectory dir = new RMANFileBodyDirectory();
             
-            dir.setOffset(raf.readInt());
-            int nextFileOffset = raf.pos();
-            raf.seek(nextFileOffset + dir.getOffset() - 4);
+            dir.setDirectoryId((Long) entry.get("directory_id"));
+            dir.setParentId((Long) entry.get("parent_id"));
+            dir.setName((String) entry.get("name"));
             
-            dir.setOffsetTableOffset(raf.readInt());
-            int resumeOffset = raf.pos();
-            raf.seek(raf.pos() - dir.getOffsetTableOffset());
-            dir.setDirectoryIdOffset(raf.readShort());
-            dir.setParentIdOffset(raf.readShort());
-            raf.seek(resumeOffset);
-            dir.setNameOffset(raf.readInt());
-            raf.seek(raf.pos() + dir.getNameOffset() - 4);
-            dir.setName(raf.readString(raf.readInt()));
-            raf.seek(nextFileOffset + dir.getOffset() + 4);
-            
-            if (dir.getDirectoryIdOffset() > 0)
-            {
-                dir.setDirectoryId(raf.readLong());
-            }
-            
-            if (dir.getParentIdOffset() > 0)
-            {
-                dir.setParentId(raf.readLong());
-            }
-            
-            raf.seek(nextFileOffset);
             data.add(dir);
         }
         
@@ -442,73 +395,19 @@ public class RMANParser implements Parseable<RMANFile>
         List<RMANFileBodyFile> data = new ArrayList<>();
         raf.seek(header.getFileListOffset());
         
-        int count = raf.readInt();
-        for (int i = 0; i < count; i++)
+        List<Map<String, Object>> unmappedDirectories = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getFileFields(), RMANVTable::parseVTable);
+        for (Map<String, Object> entry : unmappedDirectories)
         {
-            RMANFileBodyFile bfile = new RMANFileBodyFile();
+            RMANFileBodyFile file = new RMANFileBodyFile();
             
-            bfile.setOffset(raf.readInt());
-            int nextFileOffset = raf.pos();
-            raf.seek(nextFileOffset + bfile.getOffset() - 4);
+            file.setFileId((Long) entry.get("file_id"));
+            file.setDirectoryId((Long) entry.get("directory_id"));
+            file.setFileSize((Integer) entry.get("file_size"));
+            file.setName((String) entry.get("name"));
+            file.setSymlink((String) entry.get("symlink"));
+            file.setChunkIds((List<Long>) entry.get("chunks"));
             
-            bfile.setOffsetTableOffset(raf.readInt());
-            
-            int tempA         = raf.readInt();
-            int restoreOffset = 4;
-            
-            bfile.setCustomNameOffset(tempA & 0xFFFFFF);
-            bfile.setFiletypeFlag(tempA >> 24);
-            boolean hasInlineName = raf.readInt() < 100;
-            raf.seek(raf.pos() - 4);
-            if (hasInlineName)
-            {
-                bfile.setNameOffset(bfile.getCustomNameOffset());
-            } else
-            {
-                bfile.setNameOffset(raf.readInt());
-                restoreOffset = 8;
-            }
-            
-            raf.seek(raf.pos() + bfile.getNameOffset() - 4);
-            bfile.setName(raf.readString(raf.readInt()));
-            raf.seek(nextFileOffset + bfile.getOffset() + restoreOffset);
-            
-            bfile.setStructSize(raf.readInt());
-            
-            bfile.setSymlinkOffset(raf.readInt());
-            raf.seek(raf.pos() + bfile.getSymlinkOffset() - 4);
-            bfile.setSymlink(raf.readString(raf.readInt()));
-            raf.seek(nextFileOffset + bfile.getOffset() + 8 + restoreOffset);
-            
-            bfile.setFileId(raf.readLong());
-            
-            if (bfile.getStructSize() > 28)
-            {
-                bfile.setDirectoryId(raf.readLong());
-            }
-            
-            bfile.setFileSize(raf.readInt());
-            bfile.setPermissions(raf.readInt());
-            
-            if (bfile.getStructSize() > 36)
-            {
-                bfile.setLanguageId(raf.readInt());
-                bfile.setUnknown2(raf.readInt());
-            }
-            
-            
-            bfile.setSingleChunk(raf.readInt());
-            if (!bfile.isSingleChunk())
-            {
-                bfile.setChunkIds(raf.readLongs(raf.readInt()));
-            } else
-            {
-                bfile.setChunkIds(Collections.singletonList(raf.readLong()));
-                bfile.setUnknown3(raf.readInt());
-            }
-            
-            raf.seek(nextFileOffset);
-            data.add(bfile);
+            data.add(file);
         }
         
         return data;
@@ -519,23 +418,15 @@ public class RMANParser implements Parseable<RMANFile>
         List<RMANFileBodyLanguage> data = new ArrayList<>();
         raf.seek(header.getLanguageListOffset());
         
-        int count = raf.readInt();
-        for (int i = 0; i < count; i++)
+        List<Map<String, Object>> unmappedLanguages = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getLanguageFields(), RMANVTable::parseVTable);
+        for (Map<String, Object> entry : unmappedLanguages)
         {
-            RMANFileBodyLanguage language = new RMANFileBodyLanguage();
+            RMANFileBodyLanguage dir = new RMANFileBodyLanguage();
             
-            language.setOffset(raf.readInt());
-            int nextLanguageOffset = raf.pos();
-            raf.seek(nextLanguageOffset + language.getOffset() - 4);
+            dir.setId((Integer) entry.get("language_id"));
+            dir.setName((String) entry.get("name"));
             
-            language.setOffsetTableOffset(raf.readInt());
-            language.setId(raf.readInt());
-            language.setNameOffset(raf.readInt());
-            raf.seek(raf.pos() + language.getNameOffset() - 4);
-            language.setName(raf.readString(raf.readInt()));
-            
-            raf.seek(nextLanguageOffset);
-            data.add(language);
+            data.add(dir);
         }
         
         return data;
@@ -546,43 +437,25 @@ public class RMANParser implements Parseable<RMANFile>
         List<RMANFileBodyBundle> data = new ArrayList<>();
         raf.seek(header.getBundleListOffset());
         
-        int count = raf.readInt();
-        for (int i = 0; i < count; i++)
+        List<Map<String, Object>> unmappedBundles = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getBundleFields(), RMANVTable::parseVTable);
+        for (Map<String, Object> entry : unmappedBundles)
         {
             RMANFileBodyBundle bundle = new RMANFileBodyBundle();
+            bundle.setBundleId(HashHandler.toHex((Long) entry.get("bundle_id"), 16));
             
-            bundle.setOffset(raf.readInt());
-            int nextBundleOffset = raf.pos();
-            raf.seek(nextBundleOffset + bundle.getOffset() - 4);
-            
-            bundle.setOffsetTableOffset(raf.readInt());
-            bundle.setHeaderSize(raf.readInt());
-            bundle.setBundleId(HashHandler.toHex(raf.readLong(), 16));
-            if (bundle.getHeaderSize() > 12)
+            List<RMANFileBodyBundleChunk> chunks = new ArrayList<>();
+            raf.seek((Integer) entry.get("chunks_offset"));
+            List<Map<String, Object>> unmappedChunks = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getChunkFields(), RMANVTable::parseVTable);
+            for (Map<String, Object> chunkInfo : unmappedChunks)
             {
-                bundle.setSkipped(raf.readBytes(bundle.getHeaderSize() - 12));
-            }
-            
-            List<RMANFileBodyBundleChunk> chunks     = new ArrayList<>();
-            int                           chunkCount = raf.readInt();
-            for (int j = 0; j < chunkCount; j++)
-            {
-                int chunkOffset     = raf.readInt();
-                int nextChunkOffset = raf.pos();
-                raf.seek(chunkOffset + nextChunkOffset - 4);
-                
                 RMANFileBodyBundleChunk chunk = new RMANFileBodyBundleChunk();
-                chunk.setOffsetTableOffset(raf.readInt());
-                chunk.setCompressedSize(raf.readInt());
-                chunk.setUncompressedSize(raf.readInt());
-                chunk.setChunkId(HashHandler.toHex(raf.readLong(), 16));
+                chunk.setCompressedSize((Integer) chunkInfo.get("compressed_size"));
+                chunk.setUncompressedSize((Integer) chunkInfo.get("uncompressed_size"));
+                chunk.setChunkId(HashHandler.toHex((Long) chunkInfo.get("chunk_id"), 16));
                 chunks.add(chunk);
-                
-                raf.seek(nextChunkOffset);
             }
             
             bundle.setChunks(chunks);
-            raf.seek(nextBundleOffset);
             data.add(bundle);
         }
         

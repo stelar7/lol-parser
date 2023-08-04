@@ -4,32 +4,10 @@ import java.util.*;
 
 public class RMANFileBodyBundle
 {
-    private int                           offset;
-    private int                           offsetTableOffset;
     private int                           headerSize;
     private String                        bundleId;
     private byte[]                        skipped;
     private List<RMANFileBodyBundleChunk> chunks;
-    
-    public int getOffset()
-    {
-        return offset;
-    }
-    
-    public void setOffset(int offset)
-    {
-        this.offset = offset;
-    }
-    
-    public int getOffsetTableOffset()
-    {
-        return offsetTableOffset;
-    }
-    
-    public void setOffsetTableOffset(int offsetTableOffset)
-    {
-        this.offsetTableOffset = offsetTableOffset;
-    }
     
     public int getHeaderSize()
     {
@@ -83,9 +61,7 @@ public class RMANFileBodyBundle
             return false;
         }
         RMANFileBodyBundle that = (RMANFileBodyBundle) o;
-        return offset == that.offset &&
-               offsetTableOffset == that.offsetTableOffset &&
-               headerSize == that.headerSize &&
+        return headerSize == that.headerSize &&
                Objects.equals(bundleId, that.bundleId) &&
                Arrays.equals(skipped, that.skipped) &&
                Objects.equals(chunks, that.chunks);

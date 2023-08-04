@@ -1,67 +1,39 @@
 package no.stelar7.cdragon.types.rman.data;
 
-import java.util.Objects;
+import java.util.*;
 
 public class RMANFileBodyDirectory
 {
-    
-    private int    offset;
-    private int    offsetTableOffset;
-    private short  directoryIdOffset;
-    private short  parentIdOffset;
-    private int    nameOffset;
     private String name;
     private long   directoryId;
     private long   parentId;
     
-    public int getOffset()
-    {
-        return offset;
-    }
+    private static String fullPath;
     
-    public void setOffset(int offset)
+    public String getFullPath(List<RMANFileBodyDirectory> folders)
     {
-        this.offset = offset;
-    }
-    
-    public int getOffsetTableOffset()
-    {
-        return offsetTableOffset;
-    }
-    
-    public void setOffsetTableOffset(int offsetTableOffset)
-    {
-        this.offsetTableOffset = offsetTableOffset;
-    }
-    
-    public short getDirectoryIdOffset()
-    {
-        return directoryIdOffset;
-    }
-    
-    public void setDirectoryIdOffset(short directoryIdOffset)
-    {
-        this.directoryIdOffset = directoryIdOffset;
-    }
-    
-    public short getParentIdOffset()
-    {
-        return parentIdOffset;
-    }
-    
-    public void setParentIdOffset(short parentIdOffset)
-    {
-        this.parentIdOffset = parentIdOffset;
-    }
-    
-    public int getNameOffset()
-    {
-        return nameOffset;
-    }
-    
-    public void setNameOffset(int nameOffset)
-    {
-        this.nameOffset = nameOffset;
+        if (fullPath != null)
+        {
+            return fullPath;
+        }
+        
+        StringBuilder                   output      = new StringBuilder(getName());
+        Optional<RMANFileBodyDirectory> maybeParent = folders.stream().filter(d -> d.getDirectoryId() == getParentId()).findAny();
+        while (maybeParent.isPresent())
+        {
+            RMANFileBodyDirectory parent = maybeParent.get();
+            if (parent.directoryId == 0)
+            {
+                break;
+            }
+            
+            output.insert(0, parent.getName() + "/");
+            maybeParent = folders.stream().filter(d -> d.getDirectoryId() == parent.getParentId()).findAny();
+        }
+        
+        fullPath = output.toString();
+        
+        return getFullPath(folders);
     }
     
     public String getName()
@@ -106,12 +78,7 @@ public class RMANFileBodyDirectory
             return false;
         }
         RMANFileBodyDirectory that = (RMANFileBodyDirectory) o;
-        return offset == that.offset &&
-               offsetTableOffset == that.offsetTableOffset &&
-               directoryIdOffset == that.directoryIdOffset &&
-               parentIdOffset == that.parentIdOffset &&
-               nameOffset == that.nameOffset &&
-               directoryId == that.directoryId &&
+        return directoryId == that.directoryId &&
                parentId == that.parentId &&
                Objects.equals(name, that.name);
     }
@@ -119,19 +86,14 @@ public class RMANFileBodyDirectory
     @Override
     public int hashCode()
     {
-        return Objects.hash(offset, offsetTableOffset, directoryIdOffset, parentIdOffset, nameOffset, name, directoryId, parentId);
+        return Objects.hash(name, directoryId, parentId);
     }
     
     @Override
     public String toString()
     {
         return "RMANFileBodyDirectory{" +
-               "offset=" + offset +
-               ", offsetTableOffset=" + offsetTableOffset +
-               ", directoryIdOffset=" + directoryIdOffset +
-               ", parentIdOffset=" + parentIdOffset +
-               ", nameOffset=" + nameOffset +
-               ", name='" + name + '\'' +
+               "name='" + name + '\'' +
                ", directoryId=" + directoryId +
                ", parentId=" + parentId +
                '}';

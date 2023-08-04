@@ -4,20 +4,9 @@ import java.util.Objects;
 
 public class RMANFileBodyBundleChunk
 {
-    private int    offsetTableOffset;
     private int    compressedSize;
     private int    uncompressedSize;
     private String chunkId;
-    
-    public int getOffsetTableOffset()
-    {
-        return offsetTableOffset;
-    }
-    
-    public void setOffsetTableOffset(int offsetTableOffset)
-    {
-        this.offsetTableOffset = offsetTableOffset;
-    }
     
     public int getCompressedSize()
     {
@@ -61,8 +50,7 @@ public class RMANFileBodyBundleChunk
             return false;
         }
         RMANFileBodyBundleChunk that = (RMANFileBodyBundleChunk) o;
-        return offsetTableOffset == that.offsetTableOffset &&
-               compressedSize == that.compressedSize &&
+        return compressedSize == that.compressedSize &&
                uncompressedSize == that.uncompressedSize &&
                Objects.equals(chunkId, that.chunkId);
     }

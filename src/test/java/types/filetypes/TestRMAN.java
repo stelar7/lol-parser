@@ -2,7 +2,7 @@ package types.filetypes;
 
 import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.data.*;
-import no.stelar7.cdragon.util.handlers.*;
+import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.types.Pair;
 import org.junit.jupiter.api.Test;
 import types.util.TestCDTBHashGuessing;
@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class TestRMAN
@@ -59,8 +59,7 @@ public class TestRMAN
             // use one thread per core, and leave one free for the OS
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             
-            // sort content based on filesize
-            Set<Pair<Integer, Function<Void, Void>>> extracts = new TreeSet<>(Comparator.comparingInt((ToIntFunction<Pair<Integer, Function<Void, Void>>>) Pair::getA).reversed());
+            Set<Pair<Integer, Function<Void, Void>>> extracts = new HashSet<>();
             files.forEach(manifest -> manifest.getBody()
                                               .getFiles()
                                               .forEach(f -> {
@@ -70,7 +69,11 @@ public class TestRMAN
                                                   }));
                                               }));
             
-            extracts.forEach(e -> service.submit(() -> e.getB().apply(null)));
+            // extract content based on filesize (largest first)
+            extracts.stream()
+                    .sorted(Comparator.comparing(Pair::getA, Comparator.reverseOrder()))
+                    .forEach(e -> service.submit(() -> e.getB().apply(null)));
+            
             service.shutdown();
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
         } else
@@ -134,8 +137,8 @@ public class TestRMAN
                                 .filter(s -> s.endsWith(".bundle"))
                                 .map(s -> s.substring(0, 16))
                                 .map(s -> s.toUpperCase(Locale.ENGLISH))
-                                .collect(Collectors.toList());
-        keep.removeAll(has);
+                                .toList();
+        has.forEach(keep::remove);
         return new ArrayList<>(keep);
     }
     
@@ -181,7 +184,8 @@ public class TestRMAN
         
         //RMANFile file = new RMANParser().parse(WebHandler.readBytes("https://bacon.secure.dyn.riotcdn.net/channels/public/releases/2A3F9712EE141A58.manifest"));
         //RMANFile file = new RMANParser().parse(Paths.get("C:\\Riot Games\\LoR\\live\\PatcherData.manifest"));
-        RMANFile file = new RMANParser().parse(Paths.get("C:\\cdragon\\cdragon\\rman\\DC9F6F78A04934D6.manifest"));
+        //RMANFile file = new RMANParser().parse(Paths.get("C:\\cdragon\\cdragon\\rman\\DC9F6F78A04934D6.manifest"));
+        RMANFile file = new RMANParser().parse(Paths.get("C:\\cdragon\\cdragon\\patcher\\manifests\\sieve\\13165241453-game.rman"));
         System.out.println();
     }
 }

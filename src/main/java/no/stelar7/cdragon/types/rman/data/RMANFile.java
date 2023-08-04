@@ -1,7 +1,7 @@
 package no.stelar7.cdragon.types.rman.data;
 
 import com.github.luben.zstd.ZstdInputStream;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
@@ -53,7 +53,7 @@ public class RMANFile
     {
         return file.getChunkIds()
                    .stream()
-                   .map(getChunkMap()::get).collect(Collectors.toList())
+                   .map(getChunkMap()::get).toList()
                    .stream()
                    .map(RMANFileBodyBundleChunkInfo::getBundleId)
                    .map(getBundleMap()::get)
@@ -175,18 +175,27 @@ public class RMANFile
         
         bundles.parallelStream().forEach(bundle -> {
             
-            String bundleId   = bundle.getBundleId();
-            Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
-            long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
+            String  bundleId              = bundle.getBundleId();
+            Path    bundlePath            = bundleFolder.resolve(bundleId + ".bundle");
+            long    bundleSize            = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
+            boolean shouldPrintBundleInfo = count.get() % 100 == 0;
             
             if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
-                System.out.println("Skipping bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
+                if (shouldPrintBundleInfo)
+                {
+                    System.out.println("Skipping bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
+                }
+                
                 return;
             }
             
+            if (shouldPrintBundleInfo)
+            {
+                System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
+            }
+            
             bundlePath.toFile().delete();
-            System.out.println("Downloading bundle: " + bundleId + " (" + count.incrementAndGet() + "/" + bundles.size() + ")");
             WebHandler.downloadBundle(bundleId, bundlePath);
         });
     }
@@ -196,8 +205,8 @@ public class RMANFile
     {
         List<String> champKeys = new ArrayList<>();
         
-        String chamsum = String.join("", WebHandler.readWeb("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json"));
-        for (JsonElement element : UtilHandler.getJsonParser().parse(chamsum).getAsJsonArray())
+        String champSum = String.join("", WebHandler.readWeb("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-summary.json"));
+        for (JsonElement element : JsonParser.parseString(champSum).getAsJsonArray())
         {
             champKeys.add(element.getAsJsonObject().get("alias").getAsString());
         }
@@ -205,7 +214,7 @@ public class RMANFile
         List<RMANFileBodyFile> files = getBody().getFiles()
                                                 .stream()
                                                 .filter(a -> champKeys.stream().anyMatch(k -> a.getName().startsWith(k)))
-                                                .collect(Collectors.toList());
+                                                .toList();
         
         Function<String, String> fixName = (input) -> {
             
