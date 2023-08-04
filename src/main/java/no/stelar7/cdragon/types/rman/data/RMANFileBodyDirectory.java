@@ -8,7 +8,7 @@ public class RMANFileBodyDirectory
     private long   directoryId;
     private long   parentId;
     
-    private static String fullPath;
+    private String fullPath;
     
     public String getFullPath(List<RMANFileBodyDirectory> folders)
     {
