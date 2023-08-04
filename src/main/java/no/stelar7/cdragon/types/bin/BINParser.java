@@ -41,7 +41,6 @@ public class BINParser implements Parseable<BINFile>
                 value = parseToValue(raf, BINValueType.STRUCTURE);
                 if (value == null)
                 {
-                    System.out.println("Failed to parse assumed headerless bin value in file: " + raf.getPath());
                     return null;
                 }
             }

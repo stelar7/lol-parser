@@ -1,7 +1,9 @@
 package no.stelar7.cdragon.types.wad.data;
 
+import no.stelar7.cdragon.types.atlas.AtlasParser;
+import no.stelar7.cdragon.types.atlas.data.AtlasFile;
 import no.stelar7.cdragon.types.bin.BINParser;
-import no.stelar7.cdragon.types.dds.DDSParser;
+import no.stelar7.cdragon.types.bin.data.BINFile;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
 import no.stelar7.cdragon.util.handlers.*;
@@ -59,11 +61,7 @@ public class WADFile
     
     public int getTotalSubChunkCount()
     {
-        return getContentHeaders()
-                .stream()
-                .mapToInt(c -> ((WADContentHeaderV2) c).getSubChunkOffset() + c.getSubChunkCount())
-                .max()
-                .getAsInt();
+        return getContentHeaders().stream().mapToInt(c -> ((WADContentHeaderV2) c).getSubChunkOffset() + c.getSubChunkCount()).max().getAsInt();
     }
     
     public List<SubChunkInfo> getSubChunkMap(int expectedChunkCount)
@@ -75,12 +73,7 @@ public class WADFile
         
         int startPos = fileReader.pos();
         
-        List<WADContentHeaderV1> possibleChoices = getContentHeaders()
-                .stream()
-                .filter(c -> c.getFileSize() % 16 == 0)
-                .filter(c -> c.getFileSize() / 16 == expectedChunkCount)
-                .sorted(Comparator.comparing(WADContentHeaderV1::getFileSize))
-                .toList();
+        List<WADContentHeaderV1> possibleChoices = getContentHeaders().stream().filter(c -> c.getFileSize() % 16 == 0).filter(c -> c.getFileSize() / 16 == expectedChunkCount).sorted(Comparator.comparing(WADContentHeaderV1::getFileSize)).toList();
         
         List<List<SubChunkInfo>> chunkLists = new ArrayList<>();
         
@@ -151,9 +144,6 @@ public class WADFile
     
     public void saveFile(WADContentHeaderV1 header, Path savePath, String wadName)
     {
-        BINParser bp = new BINParser();
-        DDSParser dp = new DDSParser();
-        
         String unhashed = HashHandler.getWadHash(header.getPathHash());
         String filename = unhashed.equals(header.getPathHash()) ? header.getPathHash() : unhashed;
         Path   self     = savePath.resolve(filename);
@@ -195,8 +185,26 @@ public class WADFile
                 Files.createDirectories(self.getParent());
                 if (!filename.contains("."))
                 {
-                    self = savePath.resolve(filename + ".bin");
-                    Files.write(self, data);
+                    {
+                        BINParser bp     = new BINParser();
+                        BINFile   parsed = bp.parse(new ByteArray(data));
+                        if (parsed != null)
+                        {
+                            self = savePath.resolve(filename + ".bin");
+                            Files.write(self, data);
+                            return;
+                        }
+                    }
+                    {
+                        AtlasParser ap     = new AtlasParser();
+                        AtlasFile   parsed = ap.parse(new ByteArray(data));
+                        if (parsed != null)
+                        {
+                            self = savePath.resolve(filename + ".atlas");
+                            Files.write(self, data);
+                            return;
+                        }
+                    }
                 } else
                 {
                     Files.write(self, data);
