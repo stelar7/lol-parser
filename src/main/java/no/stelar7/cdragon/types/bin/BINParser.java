@@ -4,7 +4,7 @@ import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.*;
+import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.nio.ByteOrder;
@@ -15,6 +15,12 @@ import java.util.*;
 public class BINParser implements Parseable<BINFile>
 {
     public static final Map<String, Set<String>> hashes = new HashMap<>();
+    
+    static
+    {
+        // Preload bin hashes
+        HashHandler.getBinHashes();
+    }
     
     public BINFile parse(RandomAccessReader raf)
     {
@@ -325,7 +331,7 @@ public class BINParser implements Parseable<BINFile>
             {
                 value = "LINK_OFFSET: " + value.toString();
             }
-
+            
             if (type == BINValueType.STRING_HASH)
             {
                 String testHash = HashHandler.getBinHashes().getOrDefault(value.toString(), value.toString());
