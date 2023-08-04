@@ -338,16 +338,9 @@ public class RMANParser implements Parseable<RMANFile>
     
     private RMANFileBody parseCompressedBody(RMANFile file)
     {
-        byte[] uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody(), file.getHeader().getDecompressedLength());
-        try
-        {
-            Files.write(Paths.get("C:\\cdragon\\cdragon\\patcher\\manifests\\sieve\\temp"), uncompressed);
-        } catch (IOException e)
-        {
-            throw new RuntimeException(e);
-        }
-        RandomAccessReader raf  = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
-        RMANFileBody       body = new RMANFileBody();
+        byte[]             uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody(), file.getHeader().getDecompressedLength());
+        RandomAccessReader raf          = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
+        RMANFileBody       body         = new RMANFileBody();
         body.setHeaderOffset(raf.readInt());
         raf.seek(body.getHeaderOffset());
         
