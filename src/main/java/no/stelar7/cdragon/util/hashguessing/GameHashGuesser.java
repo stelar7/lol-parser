@@ -57,23 +57,23 @@ public class GameHashGuesser extends HashGuesser
                      {
                          int start = m.start(i);
                          int end   = m.end(i) - 1;
-                    
+                         
                          if (start == lastStart)
                          {
                              continue;
                          }
-                    
+                         
                          lastStart = start;
                          while (e.charAt(start - 1) != '"')
                          {
                              start--;
                          }
-                    
+                         
                          while (e.charAt(end) != '"')
                          {
                              end++;
                          }
-                    
+                         
                          String toCheck = e.substring(start, end).toLowerCase();
                          this.check(toCheck);
                      }
@@ -150,8 +150,13 @@ public class GameHashGuesser extends HashGuesser
             
             Stream.of(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_").forEach(s -> IntStream.rangeClosed(0, 100_000).filter(i -> i % 100 == 0).forEach(i -> suffixes.add(s + i)));
             
-            Path      shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles\\data\\shaders\\shaders.json");
-            JsonArray shaderObj  = UtilHandler.getJsonParser().parse(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
+            Path shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\shaders\\shaders.json");
+            if (!Files.exists(shaderJson))
+            {
+                return;
+            }
+            
+            JsonArray shaderObj = JsonParser.parseString(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
             for (JsonElement elem : shaderObj)
             {
                 JsonObject obj     = (JsonObject) elem;

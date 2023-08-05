@@ -50,6 +50,11 @@ public class AtlasParser implements Parseable<AtlasFile>
             data.put(bundleName, entries);
         }
         
+        if (!raf.isEOF())
+        {
+            return null;
+        }
+        
         AtlasFile file = new AtlasFile();
         file.setData(data);
         return file;

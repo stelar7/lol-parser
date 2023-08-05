@@ -61,7 +61,7 @@ public class TestCDTBHashGuessing
             e.printStackTrace();
             System.exit(0);
         }
-    
+        
         System.out.println("Started guessing BIN hashes");
         BINHashGuesser guesser = new BINHashGuesser(unknowns, dataPath);
         guesser.pullCDTB();
@@ -89,6 +89,7 @@ public class TestCDTBHashGuessing
         guesser.guessStringTableFiles();
         guesser.guessScripts(dataPath);
         guesser.guessShaderFiles(dataPath);
+        guesser.saveToBackup();
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessBinByLinkedFiles(dataPath);
         guesser.saveToBackup();

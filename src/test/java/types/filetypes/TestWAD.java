@@ -415,6 +415,7 @@ public class TestWAD
                      
                      if (parsed == null)
                      {
+                         System.out.println("File with .bin extension didnt parse as .bin (" + file + ")");
                          return;
                      }
                      

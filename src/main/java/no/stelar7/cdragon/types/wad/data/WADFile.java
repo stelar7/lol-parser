@@ -169,14 +169,6 @@ public class WADFile
         
         try
         {
-            if (Files.exists(self))
-            {
-                if (Files.size(self) > data.length)
-                {
-                    return;
-                }
-            }
-            
             if (header.getPathHash().equals(filename))
             {
                 findFileTypeAndRename(data, filename, savePath, wadName);
@@ -185,26 +177,7 @@ public class WADFile
                 Files.createDirectories(self.getParent());
                 if (!filename.contains("."))
                 {
-                    {
-                        BINParser bp     = new BINParser();
-                        BINFile   parsed = bp.parse(new ByteArray(data));
-                        if (parsed != null)
-                        {
-                            self = savePath.resolve(filename + ".bin");
-                            Files.write(self, data);
-                            return;
-                        }
-                    }
-                    {
-                        AtlasParser ap     = new AtlasParser();
-                        AtlasFile   parsed = ap.parse(new ByteArray(data));
-                        if (parsed != null)
-                        {
-                            self = savePath.resolve(filename + ".atlas");
-                            Files.write(self, data);
-                            return;
-                        }
-                    }
+                    saveFileWithNoExtension(filename, savePath, data);
                 } else
                 {
                     Files.write(self, data);
@@ -216,6 +189,32 @@ public class WADFile
             System.out.println("Failed to write " + self);
             e.printStackTrace();
         }
+    }
+    
+    private void saveFileWithNoExtension(String filename, Path savePath, byte[] data) throws IOException
+    {
+        {
+            AtlasParser ap     = new AtlasParser();
+            AtlasFile   parsed = ap.parse(new ByteArray(data));
+            if (parsed != null)
+            {
+                Path output = savePath.resolve(filename + ".atlas");
+                Files.write(output, data);
+                return;
+            }
+        }
+        {
+            BINParser bp     = new BINParser();
+            BINFile   parsed = bp.parse(new ByteArray(data));
+            if (parsed != null)
+            {
+                Path output = savePath.resolve(filename + ".bin");
+                Files.write(output, data);
+                return;
+            }
+        }
+        
+        System.out.println("Unable to determine the type of file " + savePath + "/" + filename);
     }
     
     
