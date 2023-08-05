@@ -214,6 +214,7 @@ public class WADFile
             }
         }
         
+        Files.write(savePath.resolve(filename + ".unknown"), data);
         System.out.println("Unable to determine the type of file " + savePath + "/" + filename);
     }
     
