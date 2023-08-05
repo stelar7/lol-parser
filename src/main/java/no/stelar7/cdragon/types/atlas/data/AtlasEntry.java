@@ -9,7 +9,7 @@ public class AtlasEntry
     private float  startY;
     private float  endX;
     private float  endY;
-    private float  unknown;
+    private int    bundleIndex;
     
     public String getName()
     {
@@ -61,27 +61,14 @@ public class AtlasEntry
         this.endY = endY;
     }
     
-    public float getUnknown()
+    public int getBundleIndex()
     {
-        return unknown;
+        return bundleIndex;
     }
     
-    public void setUnknown(float unknown)
+    public void setBundleIndex(int bundleIndex)
     {
-        this.unknown = unknown;
-    }
-    
-    @Override
-    public String toString()
-    {
-        return "AtlasEntry{" +
-               "name='" + name + '\'' +
-               ", startX=" + startX +
-               ", startY=" + startY +
-               ", endX=" + endX +
-               ", endY=" + endY +
-               ", unknown=" + unknown +
-               '}';
+        this.bundleIndex = bundleIndex;
     }
     
     @Override
@@ -96,12 +83,25 @@ public class AtlasEntry
             return false;
         }
         AtlasEntry that = (AtlasEntry) o;
-        return Float.compare(that.startX, startX) == 0 && Float.compare(that.startY, startY) == 0 && Float.compare(that.endX, endX) == 0 && Float.compare(that.endY, endY) == 0 && Float.compare(that.unknown, unknown) == 0 && Objects.equals(name, that.name);
+        return Float.compare(that.startX, startX) == 0 && Float.compare(that.startY, startY) == 0 && Float.compare(that.endX, endX) == 0 && Float.compare(that.endY, endY) == 0 && bundleIndex == that.bundleIndex && Objects.equals(name, that.name);
     }
     
     @Override
     public int hashCode()
     {
-        return Objects.hash(name, startX, startY, endX, endY, unknown);
+        return Objects.hash(name, startX, startY, endX, endY, bundleIndex);
+    }
+    
+    @Override
+    public String toString()
+    {
+        return "AtlasEntry{" +
+               "name='" + name + '\'' +
+               ", startX=" + startX +
+               ", startY=" + startY +
+               ", endX=" + endX +
+               ", endY=" + endY +
+               ", bundleIndex=" + bundleIndex +
+               '}';
     }
 }

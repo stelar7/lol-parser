@@ -31,11 +31,17 @@ public class AtlasParser implements Parseable<AtlasFile>
         {
             Map<String, List<AtlasEntry>> data        = new HashMap<>();
             int                           bundleCount = raf.readInt();
+            List<String>                  bundleNames = new ArrayList<>();
             for (int i = 0; i < bundleCount; i++)
             {
-                String           bundleName = raf.readIntString();
-                List<AtlasEntry> entries    = parseEntries(raf);
-                data.put(bundleName, entries);
+                String bundleName = raf.readIntString();
+                bundleNames.add(bundleName);
+            }
+            
+            List<AtlasEntry> entries = parseEntries(raf);
+            for (AtlasEntry entry : entries)
+            {
+                data.computeIfAbsent(bundleNames.get(entry.getBundleIndex()), k -> new ArrayList<>()).add(entry);
             }
             
             AtlasFile file = new AtlasFile();
@@ -60,7 +66,7 @@ public class AtlasParser implements Parseable<AtlasFile>
             entry.setStartY(raf.readFloat());
             entry.setEndX(raf.readFloat());
             entry.setEndY(raf.readFloat());
-            entry.setUnknown(raf.readFloat());
+            entry.setBundleIndex(raf.readInt());
             entries.add(entry);
         }
         

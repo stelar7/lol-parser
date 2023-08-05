@@ -14,7 +14,7 @@ public class TestAtlas
     @Test
     public void testAtlas()
     {
-        Path      file = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\assets\\items\\icons2d\\autoatlas\\smallicons\\atlas_info.bin");
+        Path      file = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\clientstates\\gameplay\\ux\\tft\\tftmatchupbanner.unknown");
         AtlasFile data = parser.parse(file);
         System.out.println();
     }
