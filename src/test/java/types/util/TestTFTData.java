@@ -14,13 +14,12 @@ import org.junit.jupiter.api.Test;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
 public class TestTFTData
 {
@@ -107,7 +106,7 @@ public class TestTFTData
                 if (file.toString().endsWith(".bin"))
                 {
                     String json = parser.parse(file).toJson();
-                    Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), json.getBytes(StandardCharsets.UTF_8));
+                    Files.writeString(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), json);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -134,11 +133,11 @@ public class TestTFTData
     public void buildTFTDataFiles() throws IOException
     {
         // only set this to true if you have exported the images aswell!
-        boolean exportImages = true;
+        boolean exportImages = false;
         
         Path inputFolder = Paths.get("C:\\cdragon\\pbe");
-        //Path inputFolder  = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
-        Path outputFolder = Paths.get("C:\\Users\\Steffen\\Desktop\\tftdata");
+        //Path inputFolder  = Paths.get("C:\\Users\\stelar7\\Desktop\\tftdata");
+        Path outputFolder = Paths.get("C:\\Users\\stelar7\\Desktop\\tftdata");
         
         Path traitFile       = inputFolder.resolve("data\\maps\\shipping\\map22\\map22.bin");
         Path fontConfig      = inputFolder.resolve("data\\menu");
@@ -166,7 +165,10 @@ public class TestTFTData
         String template = UtilHandler.getGson().toJson(outputObject);
         
         Files.createDirectories(outputFolder.resolve("TFT"));
-        Files.write(outputFolder.resolve("TFT").resolve("template_TFT.json"), template.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        Files.writeString(outputFolder.resolve("TFT").resolve("template_TFT.json"),
+                          template,
+                          StandardOpenOption.CREATE,
+                          StandardOpenOption.TRUNCATE_EXISTING);
         descs.keySet()
              .stream()
              .sorted()
@@ -176,21 +178,21 @@ public class TestTFTData
                           {
                               TranslationConfig vals = descs.get(lang);
                               System.out.println("Generating files for " + lang);
-                
+                              
                               Map<String, Object> output = UtilHandler.getGson().fromJson(template, Map.class);
                               ((Map<String, Map<String, Object>>) output.get("sets")).forEach((k, v) -> {
                                   ((List<Map<String, Object>>) v.get("traits")).forEach(e -> {
                                       e.put("name", vals.get((String) e.get("name")));
                                       e.put("desc", vals.get((String) e.get("desc")));
                                   });
-                    
+                                  
                                   ((List<Map<String, Object>>) v.get("champions")).forEach(e -> {
                                       e.put("name", vals.get((String) e.get("name")));
-                        
+                                      
                                       List<String> clone = new ArrayList<>();
                                       ((List<String>) e.get("traits")).forEach(e2 -> clone.add(vals.get(e2)));
                                       e.put("traits", clone);
-                        
+                                      
                                       Map<String, Object> abs = (Map<String, Object>) e.get("ability");
                                       abs.forEach((k2, v2) -> {
                                           abs.put("name", vals.get((String) abs.get("name")));
@@ -198,14 +200,17 @@ public class TestTFTData
                                       });
                                   });
                               });
-                
+                              
                               ((Map<String, Map<String, Object>>) output.get("items")).forEach((k, v) -> {
                                   v.put("name", vals.get((String) v.get("name")));
                                   v.put("desc", vals.get((String) v.get("desc")));
                               });
-                
+                              
                               String alteredData = UtilHandler.getGson().toJson(output);
-                              Files.write(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"), alteredData.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                              Files.writeString(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"),
+                                                alteredData,
+                                                StandardOpenOption.CREATE,
+                                                StandardOpenOption.TRUNCATE_EXISTING);
                           } catch (IOException e)
                           {
                               e.printStackTrace();
@@ -404,9 +409,16 @@ public class TestTFTData
         {
             String mName = (String) item.getIfPresent("mName").getValue();
             
-            if (mName.contains("Template") || mName.equals("TFT_Item_Null"))
+            if (mName.contains("Template") || mName.equals("TFT_Item_Null") || !item.has("mID"))
             {
                 System.out.println("Skipping item: " + mName);
+                continue;
+            }
+            
+            boolean isAugment = ((BINContainer) item.getIfPresent("itemTags").getValue()).getData().contains("B72BD3BF");
+            if (isAugment)
+            {
+                System.out.println("Skipping augment: " + mName);
                 continue;
             }
             
@@ -430,7 +442,7 @@ public class TestTFTData
                 for (Object var : effectVars)
                 {
                     BINStruct effectVar = (BINStruct) var;
-                    if (effectVar.getData().size() == 0)
+                    if (effectVar.getData().isEmpty())
                     {
                         continue;
                     }
@@ -477,8 +489,8 @@ public class TestTFTData
                 continue;
             }
             
-            Map<String, Object> champion  = new LinkedHashMap<>();
-            Map<String, Object> abilities = new LinkedHashMap<>();
+            Map<String, Object>       champion  = new LinkedHashMap<>();
+            List<Map<String, Object>> abilities = new ArrayList<>();
             
             String realName    = mName.substring(mName.lastIndexOf("_") + 1);
             Path   closestPath = findClosestSubstring(champFileParent, realName);
@@ -489,23 +501,30 @@ public class TestTFTData
             }
             
             BINFile realData = parser.parse(closestPath);
-            int     id       = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).get("championId").map(BINValue::getValue).orElse(-1);
+            int id = (int) ((BINStruct) realData.getByType("CharacterRecord").get(0).getIfPresent("characterToolData").getValue()).get("championId")
+                                                                                                                                  .map(BINValue::getValue)
+                                                                                                                                  .orElse(-1);
+            
+            if (!realData.getByType("CharacterRecord").get(0).has("spellNames"))
+            {
+                System.out.println("Skipping champion: " + mName + " - (no spell names)");
+                continue;
+            }
+            
+            if (!champ.has("mdisplaynametra"))
+            {
+                System.out.println("Skipping champion: " + mName + " - (no display name)");
+                continue;
+            }
             
             champion.put("API_name", mName);
             champion.put("name", champ.getIfPresent("mdisplaynametra").getValue());
             champion.put("id", id);
             
-            int rarity      = champ.get("mRarity").map(BINValue::getValue).map(a -> ((byte) a) + 1).orElse(1);
-            int increment   = (int) Math.floor(rarity / 6f);
-            int rarityWorth = rarity + increment;
-    
-            int tier = champ.get("tier").map(BINValue::getValue).map(a -> (int) a).orElse(rarityWorth);
-            champion.put("cost", tier);
-            champion.put("splash", champ.getIfPresent("mIconPath").getValue());
-            
-            abilities.put("name", champ.get("mabilitynametra").map(BINValue::getValue).orElse("No ability name key present"));
-            abilities.put("desc", champ.get("mdescriptiontra").map(BINValue::getValue).orElse("No ability description key present"));
-            abilities.put("icon", champ.get("mPortraitIconPath").map(BINValue::getValue).orElse("No ability icon key present.png"));
+            int rarity = champ.getValue("mRarity", (byte) 0) + 1;
+            int cost   = champ.getValue("tier", rarity / 6);
+            champion.put("cost", cost);
+            champion.put("splash", champ.getValue("mIconPath", champ.getIfPresent("466DC3CC").getValue()));
             
             Path selfBin = champFileParent.resolve(mName).resolve(mName + ".bin");
             System.out.println(mName);
@@ -526,10 +545,9 @@ public class TestTFTData
                 List<Object> champTraits = ((BINContainer) champTraitsContainer.get().getValue()).getData();
                 for (Object traitObj : champTraits)
                 {
-                    if (traitObj instanceof BINStruct)
+                    if (traitObj instanceof BINStruct trait)
                     {
-                        BINStruct trait = (BINStruct) traitObj;
-                        String    key   = (String) trait.getIfPresent("traitdata").getValue();
+                        String key = (String) trait.getIfPresent("traitdata").getValue();
                         traitArray.add(key);
                     } else
                     {
@@ -557,36 +575,48 @@ public class TestTFTData
             Optional<BINValue> spellNames = champItem.get("spellNames");
             if (spellNames.isPresent())
             {
-                String spellName = (String) ((BINContainer) spellNames.get().getValue()).getData().get(0);
-                if (spellName.contains("/"))
-                {
-                    spellName = spellName.substring(spellName.indexOf('/') + 1);
-                }
-                
-                String finalSpellName = spellName;
-                
-                Map<String, Object> abilityVars = new LinkedHashMap<>();
-                List<BINEntry>      elems       = data.getByType("SpellObject");
+                List<BINEntry> elems = data.getByType("SpellObject");
                 for (BINEntry elem : elems)
                 {
-                    if (elem.getIfPresent("mScriptName").getValue().equals(spellName))
+                    Map<String, Object> abilityVars = new LinkedHashMap<>();
+                    if (!elem.has("mSpell"))
                     {
-                        BINStruct spell = (BINStruct) elem.getIfPresent("mSpell").getValue();
-                        if (spell.get("mDataValues").isPresent())
-                        {
-                            List<Object> dataValues = ((BINContainer) spell.getIfPresent("mDataValues").getValue()).getData();
-                            for (Object variableObj : dataValues)
-                            {
-                                BINStruct    variable = (BINStruct) variableObj;
-                                String       key      = (String) variable.getIfPresent("mName").getValue();
-                                List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
-                                abilityVars.put(key, values);
-                            }
-                            break;
-                        }
+                        continue;
                     }
+                    
+                    BINStruct spellContainer = (BINStruct) elem.getIfPresent("mSpell").getValue();
+                    if (!spellContainer.has("mClientData"))
+                    {
+                        continue;
+                    }
+                    
+                    BINStruct mClientData = (BINStruct) spellContainer.getIfPresent("mClientData").getValue();
+                    if (!spellContainer.has("mDataValues"))
+                    {
+                        continue;
+                    }
+                    
+                    List<Object> dataValues = ((BINContainer) spellContainer.getIfPresent("mDataValues").getValue()).getData();
+                    for (Object variableObj : dataValues)
+                    {
+                        BINStruct    variable = (BINStruct) variableObj;
+                        String       key      = (String) variable.getIfPresent("mName").getValue();
+                        List<Object> values   = variable.get("mValues").map(a -> (BINContainer) a.getValue()).map(BINContainer::getData).orElse(null);
+                        abilityVars.put(key, values);
+                    }
+                    
+                    BINStruct mTooltipData = (BINStruct) mClientData.getIfPresent("mTooltipData").getValue();
+                    BINMap    mLocKeys     = (BINMap) mTooltipData.getIfPresent("mLocKeys").getValue();
+                    
+                    Map<String, Object> ability = new LinkedHashMap<>();
+                    ability.put("name", mLocKeys.get("keyName").orElse("No ability name key present"));
+                    ability.put("desc", mLocKeys.get("keyTooltip").orElse("No ability description key present"));
+                    ability.put("icon",
+                                spellContainer.get("mImgIconName").map(a -> (BINContainer) a.getValue()).map(a -> a.getData().get(0)).orElse("No ability icon key present.png"));
+                    ability.put("variables", abilityVars);
+                    
+                    abilities.add(ability);
                 }
-                abilities.put("variables", abilityVars);
             }
             
             
@@ -625,16 +655,17 @@ public class TestTFTData
             o.put("icon", trait.get("mIconPath").map(BINValue::getValue).orElse("No image key found.dds"));
             
             List<Map<String, Object>> effects              = new ArrayList<>();
-            List<Object>              traitEffectContainer = ((BINContainer) trait.getIfPresent("mTraitsSets").getValue()).getData();
+            String                    key                  = trait.has("mTraitsSets") ? "mTraitsSets" : "mConditionalTraitSets";
+            List<Object>              traitEffectContainer = ((BINContainer) trait.getIfPresent(key).getValue()).getData();
             for (Object effectObj : traitEffectContainer)
             {
                 BINStruct effect = (BINStruct) effectObj;
                 
                 Map<String, Object> data = new LinkedHashMap<>();
-                data.put("minUnits", effect.getIfPresent("mMinUnits").getValue());
+                data.put("minUnits", effect.getOrDefault("mMinUnits", effect.getIfPresent("MinUnits").getValue()));
                 
-                List<Object> mMaxUnitsList = effect.get("mMaxUnits").map(m -> ((BINData) m.getValue()).getData()).orElse(new ArrayList<>());
-                if (mMaxUnitsList.size() > 0)
+                List<Object> mMaxUnitsList = effect.getOrDefault("mMaxUnits", effect.get("MaxUnits")).map(m -> ((BINData) m.getValue()).getData()).orElse(new ArrayList<>());
+                if (!mMaxUnitsList.isEmpty())
                 {
                     data.put("maxUnits", mMaxUnitsList.get(0));
                 } else
@@ -651,7 +682,7 @@ public class TestTFTData
                     for (Object var : effectVars)
                     {
                         BINStruct effectVar = (BINStruct) var;
-                        if (effectVar.getData().size() == 0)
+                        if (effectVar.getData().isEmpty())
                         {
                             continue;
                         }
@@ -681,28 +712,31 @@ public class TestTFTData
         List<BINEntry>          TFTSetList = map22.getByType("tftsetdata");
         for (BINEntry entry : TFTSetList)
         {
+            if (!entry.has("CharacterLists"))
+            {
+                continue;
+            }
+            
             List<Object> characterLists = ((BINContainer) entry.getIfPresent("CharacterLists").getValue()).getData();
-            String       realId         = (String) characterLists.get(0);
             
             BINMap         setInfo    = (BINMap) entry.getIfPresent("scriptdata").getValue();
-            String         setMutator = (String) (entry.getIfPresent("mutator")).getValue();
+            String         setMutator = (String) entry.getValue("mutator", entry.getIfPresent("name").getValue());
             List<BINValue> setNames   = ((BINStruct) setInfo.getIfPresent("SetName")).getData();
-            String         setName    = setNames.size() > 0 ? (String) setNames.get(0).getValue() : "Original";
+            String         setName    = !setNames.isEmpty() ? (String) setNames.get(0).getValue() : "Original";
             
             List<String> characters = new ArrayList<>();
             for (BINEntry characterList : map22.getByType("MapCharacterList"))
             {
-                if (!characterList.getHash().equalsIgnoreCase(realId))
-                {
-                    continue;
-                }
-                
                 BINValue     cVal = characterList.getIfPresent("Characters");
                 BINContainer cont = (BINContainer) cVal.getValue();
                 for (Object l : cont.getData())
                 {
                     String unhashedKey = HashHandler.getBinHashes().getOrDefault(String.valueOf(l), String.valueOf(l));
-                    characters.add(characterOffsetLookup.get(unhashedKey).toLowerCase());
+                    String lookupValue = characterOffsetLookup.get(unhashedKey);
+                    if (lookupValue != null)
+                    {
+                        characters.add(lookupValue.toLowerCase());
+                    }
                 }
             }
             
@@ -781,7 +815,7 @@ public class TestTFTData
     {
         String test = realName;
         
-        while (test.length() > 0)
+        while (!test.isEmpty())
         {
             Path toTest = champFileParent.resolve(test).resolve(test + ".bin");
             if (Files.exists(toTest))

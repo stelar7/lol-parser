@@ -20,6 +20,11 @@ public class BINStruct
         return data.stream().filter(v -> v.getHash().equalsIgnoreCase(hash)).findFirst();
     }
     
+    public boolean has(String hash)
+    {
+        return data.stream().anyMatch(v -> v.getHash().equalsIgnoreCase(hash));
+    }
+    
     public <T> T getOrDefault(String hash, T other)
     {
         Optional<BINValue> maybe = get(hash);
