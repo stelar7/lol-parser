@@ -258,6 +258,20 @@ public class WADParser implements Parseable<WADFile>
                     content.add(headerv2);
                     continue;
                 }
+
+                if (base.getMajor() == 3 && base.getMinor() > 3)
+                {
+                    WADContentHeaderV2 headerv3 = new WADContentHeaderV2(header);
+                    headerv3.setDuplicate(false);
+                    byte chunkOffsetHigh = raf.readByte();
+                    short chunkOffsetLow = raf.readShort();
+                    int chunkOffset = chunkOffsetLow + (chunkOffsetHigh << 16);
+                    headerv3.setSubChunkOffset(chunkOffset);
+                    headerv3.setSha256(raf.readLong());
+
+                    content.add(headerv3);
+                    continue;
+                }
                 
                 if (header.getCompressionType() == WADCompressionType.REFERENCE)
                 {

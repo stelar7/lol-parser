@@ -3,7 +3,7 @@ package no.stelar7.cdragon.types.wad.data.content;
 public class WADContentHeaderV2 extends WADContentHeaderV1
 {
     private boolean duplicate;
-    private short   subChunkOffset;
+    private int   subChunkOffset;
     private long    sha256;
     
     public WADContentHeaderV2(WADContentHeaderV1 header)
@@ -38,12 +38,12 @@ public class WADContentHeaderV2 extends WADContentHeaderV1
         this.sha256 = sha256;
     }
     
-    public short getSubChunkOffset()
+    public int getSubChunkOffset()
     {
         return subChunkOffset;
     }
     
-    public void setSubChunkOffset(short subChunkOffset)
+    public void setSubChunkOffset(int subChunkOffset)
     {
         this.subChunkOffset = subChunkOffset;
     }

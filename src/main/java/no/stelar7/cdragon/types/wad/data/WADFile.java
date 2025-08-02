@@ -72,11 +72,15 @@ public class WADFile
         }
         
         int startPos = fileReader.pos();
-        
-        List<WADContentHeaderV1> possibleChoices = getContentHeaders().stream().filter(c -> c.getFileSize() % 16 == 0).filter(c -> c.getFileSize() / 16 == expectedChunkCount).sorted(Comparator.comparing(WADContentHeaderV1::getFileSize)).toList();
+
+        List<WADContentHeaderV1> possibleChoices = getContentHeaders().stream()
+                .filter(c -> c.getFileSize() % 16 == 0)
+                .filter(c -> c.getFileSize() / 16 == expectedChunkCount)
+                .sorted(Comparator.comparing(WADContentHeaderV1::getFileSize))
+                .toList();
         
         List<List<SubChunkInfo>> chunkLists = new ArrayList<>();
-        
+
         for (WADContentHeaderV1 possibleChoice : possibleChoices)
         {
             List<SubChunkInfo> chunks = new ArrayList<>();
@@ -91,23 +95,20 @@ public class WADFile
                     long         hash         = reader.readLong();
                     SubChunkInfo chunkMap     = new SubChunkInfo(uncompressed, compressed, hash);
                     chunks.add(chunkMap);
-                    
-                    // todo: also check this
-                    // compressed size of subchunk has to be smaller or equal than zstd_compressBound of uncompressed size
-                    // https://github.com/facebook/zstd/blob/dev/lib/zstd.h#L204
+
                     if (compressed > uncompressed)
                     {
                         isBad = true;
                     }
                 }
-                
+
                 // There should be a better way of doing this..
                 // xxHash the chunk content, and compare to hash possibly?
                 if (isBad)
                 {
                     continue;
                 }
-                
+
                 chunkLists.add(chunks);
             }
         }
