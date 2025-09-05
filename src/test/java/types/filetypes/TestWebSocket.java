@@ -14,7 +14,7 @@ public class TestWebSocket
     public void testWebSocket() throws InterruptedException, IOException
     {
         String    data   = String.join("", Files.readAllLines(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/events.json")));
-        JsonArray events = new JsonParser().parse(data).getAsJsonObject().get("events").getAsJsonArray();
+        JsonArray events = JsonParser.parseString(data).getAsJsonObject().get("events").getAsJsonArray();
         
         Thread th = new Thread(() -> {
             LCUSocketReader reader = new LCUSocketReader(UtilHandler.getLCUConnectionData());

@@ -120,9 +120,6 @@ public class RAFFile implements Extractable
         } catch (IOException e)
         {
             e.printStackTrace();
-        } finally
-        {
-            datReader.close();
         }
     }
     

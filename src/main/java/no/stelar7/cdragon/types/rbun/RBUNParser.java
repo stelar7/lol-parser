@@ -15,27 +15,15 @@ public class RBUNParser implements Parseable<RBUNFile>
     @Override
     public RBUNFile parse(Path path)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN))
-        {
-            return parse(raf);
-        }
-    }
-    
-    public RBUNFile parseReadOnly(Path path)
-    {
-        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN, false))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     @Override
     public RBUNFile parse(ByteArray data)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     @Override
@@ -59,7 +47,6 @@ public class RBUNParser implements Parseable<RBUNFile>
         }
         
         file.setChunks(chunkInfos);
-        raf.close();
         return file;
     }
 }

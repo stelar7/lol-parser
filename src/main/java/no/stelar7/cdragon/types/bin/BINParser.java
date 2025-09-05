@@ -99,7 +99,7 @@ public class BINParser implements Parseable<BINFile>
         {
             BINEntry entry = new BINEntry();
             
-            int    lengthCheck = raf.pos() + Integer.BYTES;
+            int    lengthCheck = (int) raf.pos() + Integer.BYTES;
             String typeHash    = HashHandler.getBINHash(file.getHeader().getEntryTypes().get(i));
             entry.setType(typeHash);
             entry.setLength(raf.readInt());
@@ -266,7 +266,7 @@ public class BINParser implements Parseable<BINFile>
             case BOOLEAN_FLAGS:
                 return raf.readBoolean();
             default:
-                int pos = raf.pos() - 1;
+                int pos = (int) raf.pos() - 1;
                 throw new RuntimeException("Unknown type: " + type + " at location: " + pos + " in file: " + raf.getPath());
         }
     }
@@ -318,7 +318,7 @@ public class BINParser implements Parseable<BINFile>
             int hash        = raf.readInt();
             int patchLength = raf.readInt();
             
-            int pos = raf.pos();
+            int pos = (int) raf.pos();
             
             BINValueType type       = BINValueType.valueOf(raf.readByte());
             int          nameLength = raf.readShort();

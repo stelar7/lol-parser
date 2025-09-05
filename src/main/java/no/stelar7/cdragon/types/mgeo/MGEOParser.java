@@ -114,7 +114,7 @@ public class MGEOParser implements Parseable<MGEOFile>
         for (int i = 0; i < vertexBufferCount; i++)
         {
             int size = raf.readInt();
-            vertexBufferOffsets.add(raf.pos() - 4);
+            vertexBufferOffsets.add((int) raf.pos() - 4);
             raf.seek(raf.pos() + size);
         }
         
@@ -123,7 +123,7 @@ public class MGEOParser implements Parseable<MGEOFile>
         for (int i = 0; i < indexBufferCount; i++)
         {
             int size = raf.readInt();
-            indexBufferOffsets.add(raf.pos() - 4);
+            indexBufferOffsets.add((int) raf.pos() - 4);
             raf.seek(raf.pos() + size);
         }
         
@@ -152,7 +152,7 @@ public class MGEOParser implements Parseable<MGEOFile>
         {
             if (i == 0)
             {
-                int originalPos = raf.pos() + 4;
+                int originalPos = (int) raf.pos() + 4;
                 raf.seek(vertexBufferOffsets.get(raf.readInt()));
                 
                 int vertexCountInBuffer = raf.readInt() / 32;
@@ -168,7 +168,7 @@ public class MGEOParser implements Parseable<MGEOFile>
                 raf.seek(originalPos);
             } else
             {
-                int originalPos = raf.pos() + 4;
+                int originalPos = (int) raf.pos() + 4;
                 raf.seek(vertexBufferOffsets.get(raf.readInt()));
                 
                 int vertexCountInBuffer = raf.readInt() / 16;
@@ -186,7 +186,7 @@ public class MGEOParser implements Parseable<MGEOFile>
         int indexCount  = raf.readInt();
         int indexBuffer = raf.readInt();
         
-        int originalPos = raf.pos();
+        int originalPos = (int) raf.pos();
         raf.seek(indexBufferOffsets.get(indexBuffer));
         int indexCountInBuffer = raf.readInt();
         for (int i = 0; i < indexCount; i++)

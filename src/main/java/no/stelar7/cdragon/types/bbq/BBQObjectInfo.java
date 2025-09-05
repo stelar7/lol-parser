@@ -123,9 +123,9 @@ public class BBQObjectInfo
         // TODO: this is reading wrong somewhere
         boolean     shouldAlign  = false;
         int         expectedSize = type.size;
-        int         pos          = buf.pos();
+        int         pos          = (int) buf.pos();
         String      t            = type.type;
-        BBQTypeTree firstChild   = type.children.size() > 0 ? type.children.get(0) : new BBQTypeTree(this.asset.format);
+        BBQTypeTree firstChild   = !type.children.isEmpty() ? type.children.get(0) : new BBQTypeTree(this.asset.format);
         
         Object result = null;
         
@@ -256,7 +256,7 @@ public class BBQObjectInfo
                 break;
         }
         
-        int after = buf.pos();
+        int after = (int) buf.pos();
         int size  = after - pos;
         if (expectedSize > 0 && size < expectedSize)
         {

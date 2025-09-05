@@ -347,12 +347,12 @@ public class RMANParser implements Parseable<RMANFile>
         RMANFileBodyHeader header = new RMANFileBodyHeader();
         header.setOffsetTableOffset(raf.readInt());
         
-        header.setBundleListOffset(raf.pos() + raf.readInt());
-        header.setLanguageListOffset(raf.pos() + raf.readInt());
-        header.setFileListOffset(raf.pos() + raf.readInt());
-        header.setFolderListOffset(raf.pos() + raf.readInt());
-        header.setKeyHeaderOffset(raf.pos() + raf.readInt());
-        header.setUnknownOffset(raf.pos() + raf.readInt());
+        header.setBundleListOffset((int) raf.pos() + raf.readInt());
+        header.setLanguageListOffset((int) raf.pos() + raf.readInt());
+        header.setFileListOffset((int) raf.pos() + raf.readInt());
+        header.setFolderListOffset((int) raf.pos() + raf.readInt());
+        header.setKeyHeaderOffset((int) raf.pos() + raf.readInt());
+        header.setUnknownOffset((int) raf.pos() + raf.readInt());
         
         body.setHeader(header);
         body.setBundles(parseBundles(raf, header));

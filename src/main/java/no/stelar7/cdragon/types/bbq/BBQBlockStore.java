@@ -20,7 +20,7 @@ public class BBQBlockStore
     {
         this.blockList = blockList;
         this.raf = raf;
-        this.basePos = raf.pos();
+        this.basePos = (int) raf.pos();
         this.maxPos = blockList.stream().mapToInt(BBQBlockInfo::getUncompressedSize).sum();
         seekInternal(0);
     }

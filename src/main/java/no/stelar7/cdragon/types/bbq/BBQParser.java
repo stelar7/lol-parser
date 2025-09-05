@@ -39,7 +39,7 @@ public class BBQParser implements Parseable<BBQFile>
     
     private List<BBQAsset> parseEntryList(RandomAccessReader raf, BBQHeader header)
     {
-        int     currentPos = raf.pos();
+        int     currentPos = (int) raf.pos();
         boolean metaAtEnd  = header.isMetadataAtEnd();
         
         if (metaAtEnd)
@@ -159,6 +159,6 @@ public class BBQParser implements Parseable<BBQFile>
         header.setCompressionMode(BBQCompressionType.from(header.getFlags() & 0x3f));
         header.setBlockAndDirCombined((header.getFlags() & 0x40) == 0x40);
         header.setMetadataAtEnd((header.getFlags() & 0x80) == 0x80);
-        header.setHeaderSize(raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
+        header.setHeaderSize((int) raf.pos() + (header.isMetadataAtEnd() ? 0 : header.getMetadataCompressedSize()));
     }
 }

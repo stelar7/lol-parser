@@ -60,7 +60,7 @@ public final class InibinParser implements Parseable<InibinFile>
     {
         if (stringStart == -1)
         {
-            stringStart = raf.pos() + segmentKeyCount * 2;
+            stringStart = (int) raf.pos() + segmentKeyCount * 2;
         }
         
         int offset = raf.readShort();

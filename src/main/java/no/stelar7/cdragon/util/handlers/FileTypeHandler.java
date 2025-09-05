@@ -328,7 +328,7 @@ public final class FileTypeHandler
         
         try
         {
-            JsonElement obj    = new JsonParser().parse(dataString);
+            JsonElement obj    = JsonParser.parseString(dataString);
             String      pretty = UtilHandler.getGson().toJson(obj);
             return pretty.getBytes(StandardCharsets.UTF_8);
         } catch (JsonSyntaxException e)

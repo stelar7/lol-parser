@@ -301,7 +301,7 @@ public class TestExtractImages
             return;
         }
         
-        JsonObject elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
+        JsonObject elem = JsonParser.parseString(UtilHandler.readAsString(path)).getAsJsonObject();
         
         for (String key : elem.keySet())
         {
@@ -365,7 +365,7 @@ public class TestExtractImages
             return;
         }
         
-        JsonObject elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
+        JsonObject elem = JsonParser.parseString(UtilHandler.readAsString(path)).getAsJsonObject();
         
         JsonArray bflags = elem.getAsJsonArray("BannerFlags");
         for (JsonElement element : bflags)
@@ -423,7 +423,7 @@ public class TestExtractImages
             return;
         }
         
-        JsonArray elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonArray();
+        JsonArray elem = JsonParser.parseString(UtilHandler.readAsString(path)).getAsJsonArray();
         
         for (JsonElement element : elem)
         {
@@ -449,7 +449,7 @@ public class TestExtractImages
             return;
         }
         
-        JsonObject elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject().getAsJsonObject("data");
+        JsonObject elem = JsonParser.parseString(UtilHandler.readAsString(path)).getAsJsonObject().getAsJsonObject("data");
         
         for (String key : elem.keySet())
         {
@@ -504,7 +504,7 @@ public class TestExtractImages
             return;
         }
         
-        JsonArray elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonArray();
+        JsonArray elem = JsonParser.parseString(UtilHandler.readAsString(path)).getAsJsonArray();
         
         for (JsonElement element : elem)
         {
@@ -530,7 +530,7 @@ public class TestExtractImages
             return;
         }
         
-        JsonObject elem = new JsonParser().parse(UtilHandler.readAsString(path)).getAsJsonObject();
+        JsonObject elem = JsonParser.parseString(UtilHandler.readAsString(path)).getAsJsonObject();
         int        id   = elem.get("id").getAsInt();
         
         String passive = elem.getAsJsonObject("passive").get("abilityIconPath").getAsString().toLowerCase(Locale.ENGLISH);
@@ -653,7 +653,7 @@ public class TestExtractImages
         }
         
         
-        JsonElement elem = new JsonParser().parse(UtilHandler.readAsString(path));
+        JsonElement elem = JsonParser.parseString(UtilHandler.readAsString(path));
         if (elem.isJsonNull())
         {
             return;

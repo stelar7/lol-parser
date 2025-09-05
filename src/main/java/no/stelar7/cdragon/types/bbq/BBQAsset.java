@@ -39,7 +39,7 @@ public class BBQAsset
         
         if (header.isUnityFS())
         {
-            asset.bufferOffset = buf.pos();
+            asset.bufferOffset = (int) buf.pos();
             return asset;
         }
         
@@ -55,7 +55,7 @@ public class BBQAsset
             headerSize = header.getHeaderSize();
         }
         
-        int currentPos = buf.pos();
+        int currentPos = (int) buf.pos();
         if (header.getCompressionMode() != BBQCompressionType.NONE)
         {
             byte[]    data  = CompressionHandler.uncompressLZMA(buf.readRemaining());

@@ -31,7 +31,7 @@ public class BNKParser implements Parseable<BNKFile>
         BNKFile file = new BNKFile();
         
         List<BNKHeader> headers = new ArrayList<>();
-        while (!raf.isEOF())
+        while (raf.hasMoreBytes())
         {
             BNKHeader header = parseHeader(raf);
             headers.add(header);
@@ -124,7 +124,7 @@ public class BNKParser implements Parseable<BNKFile>
     {
         BNKDATA data = new BNKDATA(header);
         raf.seek(header.getDataStart());
-        int pos = raf.pos();
+        int pos = (int) raf.pos();
         
         for (BNKDIDXEntry entry : file.getDataIndex().getEntries())
         {
@@ -180,7 +180,7 @@ public class BNKParser implements Parseable<BNKFile>
         BNKHeader header = new BNKHeader();
         header.setSection(raf.readString(4));
         header.setLength(raf.readInt());
-        header.setDataStart(raf.pos());
+        header.setDataStart((int) raf.pos());
         return header;
     }
 }

@@ -4,7 +4,7 @@ import java.nio.ByteOrder;
 
 public interface BinaryReader
 {
-    String readString(int length);
+    String readString(long length);
     
     String readString();
     
@@ -18,7 +18,7 @@ public interface BinaryReader
     
     float readFloat();
     
-    byte[] readBytes(int i);
+    byte[] readBytes(long i);
     
     byte readByte();
     
@@ -28,9 +28,9 @@ public interface BinaryReader
     
     byte[] readRemaining();
     
-    int pos();
+    long pos();
     
-    void seek(int pos);
+    void seek(long pos);
     
     void setEndian(ByteOrder order);
     

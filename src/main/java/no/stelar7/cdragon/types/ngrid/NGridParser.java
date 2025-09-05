@@ -14,19 +14,15 @@ public class NGridParser implements Parseable<NGridFile>
     @Override
     public NGridFile parse(Path path)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     @Override
     public NGridFile parse(ByteArray data)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     @Override

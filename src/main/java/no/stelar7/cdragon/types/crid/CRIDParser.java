@@ -77,7 +77,7 @@ public class CRIDParser implements Parseable<CRIDFile>
         CRIDFile file = new CRIDFile();
         file.setHeader(parseHeader(raf));
         
-        int endOfHeader = raf.pos();
+        int endOfHeader = (int) raf.pos();
         
         file.setMetadata(parseUTF(raf, endOfHeader));
         if (file.getMetadata().getRows() < 1)
@@ -205,7 +205,7 @@ public class CRIDParser implements Parseable<CRIDFile>
         int                      stringTableSize = table.getDataOffset() - table.getStringTableOffset();
         List<CRIDUTFTableColumn> schema          = new ArrayList<>(table.getColumns());
         
-        int pos = raf.pos();
+        int pos = (int) raf.pos();
         raf.seek(offset + table.getStringTableOffset() + 8);
         table.setStringTable(raf.readString(stringTableSize));
         table.setTableName(table.getStringTable().substring(tableNameStringIndex, table.getStringTable().indexOf('\0', tableNameStringIndex)));
@@ -220,7 +220,7 @@ public class CRIDParser implements Parseable<CRIDFile>
             int maskedType = column.getTypeFlags() & CRIDUTFTableColumnType.COLUMN_TYPE_MASK.getValue();
             if (maskedType == 0x30)
             {
-                column.setConstantOffset(raf.pos());
+                column.setConstantOffset((int) raf.pos());
                 switch (CRIDUTFTableColumnType.valueOf(maskedType))
                 {
                     case COLUMN_TYPE_STRING:
@@ -421,7 +421,7 @@ public class CRIDParser implements Parseable<CRIDFile>
             Map<Integer, NamedByteWriter> streamOutputWriters = new HashMap<>();
             Map<Integer, String>          streamIdFileType    = new HashMap<>();
             
-            int currentPos = reader.pos();
+            int currentPos = (int) reader.pos();
             outer:
             while (reader.remaining() > 0)
             {
@@ -503,7 +503,7 @@ public class CRIDParser implements Parseable<CRIDFile>
                             int cutSize = blockSize - skipSize - footerSkipSize;
                             if (cutSize > 0)
                             {
-                                int pos = reader.pos();
+                                int pos = (int) reader.pos();
                                 reader.seek(currentPos + currentBlockId.length + blockSizeArray.length + skipSize);
                                 byte[] data = reader.readBytes(blockSize - skipSize);
                                 streamOutputWriters.get(currentStreamKey).writeByteArray(data, cutSize);
@@ -556,10 +556,10 @@ public class CRIDParser implements Parseable<CRIDFile>
         
         if (negative && (valueOffset < 0))
         {
-            valueOffset = reader.pos() + valueOffset;
+            valueOffset = (int) reader.pos() + valueOffset;
         }
         
-        int pos = reader.pos();
+        int pos = (int) reader.pos();
         reader.seek(valueOffset);
         byte[] newValueBytes = ByteBuffer.wrap(reader.readBytes(valueLength)).order(ByteOrder.LITTLE_ENDIAN).array();
         reader.seek(pos);
@@ -604,14 +604,14 @@ public class CRIDParser implements Parseable<CRIDFile>
             headEnd.readUntillString(HEADER_END);
             metaEnd.readUntillString(METADATA_END);
             
-            int headerEndOffset   = headEnd.pos();
-            int metadataEndOffset = metaEnd.pos();
+            int headerEndOffset   = (int) headEnd.pos();
+            int metadataEndOffset = (int) metaEnd.pos();
             
             int headerSize = METADATA_END.length() + Math.max(metadataEndOffset, headerEndOffset);
             
             RandomAccessReader footEnd = new RandomAccessReader(value.toByteArray(), ByteOrder.LITTLE_ENDIAN);
             footEnd.readUntillString(CONTENTS_END);
-            int footerOffset = footEnd.pos() - headerSize;
+            int footerOffset = (int) footEnd.pos() - headerSize;
             int footerSize   = value.toByteArray().length - footerOffset;
             
             String fileExt = "";

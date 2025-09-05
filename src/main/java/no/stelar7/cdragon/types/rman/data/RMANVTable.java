@@ -9,7 +9,7 @@ public class RMANVTable
 {
     public static Map<String, Object> parseVTable(RandomAccessReader raf, Map<String, String> tableDefinition)
     {
-        int startPos = raf.pos();
+        int startPos = (int) raf.pos();
         
         int vTableOffset = startPos - raf.readInt();
         raf.seek(vTableOffset);

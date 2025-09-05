@@ -71,7 +71,7 @@ public class WADFile
             return subChunkContent;
         }
         
-        int startPos = fileReader.pos();
+        int startPos = (int) fileReader.pos();
 
         List<WADContentHeaderV1> possibleChoices = getContentHeaders().stream()
                 .filter(c -> c.getFileSize() % 16 == 0)
@@ -85,32 +85,30 @@ public class WADFile
         {
             List<SubChunkInfo> chunks = new ArrayList<>();
             byte[]             bytes  = readContentFromHeaderData(possibleChoice);
-            try (RandomAccessReader reader = new RandomAccessReader(bytes))
+            RandomAccessReader reader = new RandomAccessReader(bytes);
+            boolean isBad = false;
+            while (reader.hasMoreBytes())
             {
-                boolean isBad = false;
-                while (!reader.isEOF())
+                int          compressed   = reader.readInt();
+                int          uncompressed = reader.readInt();
+                long         hash         = reader.readLong();
+                SubChunkInfo chunkMap     = new SubChunkInfo(uncompressed, compressed, hash);
+                chunks.add(chunkMap);
+
+                if (compressed > uncompressed)
                 {
-                    int          compressed   = reader.readInt();
-                    int          uncompressed = reader.readInt();
-                    long         hash         = reader.readLong();
-                    SubChunkInfo chunkMap     = new SubChunkInfo(uncompressed, compressed, hash);
-                    chunks.add(chunkMap);
-
-                    if (compressed > uncompressed)
-                    {
-                        isBad = true;
-                    }
+                    isBad = true;
                 }
-
-                // There should be a better way of doing this..
-                // xxHash the chunk content, and compare to hash possibly?
-                if (isBad)
-                {
-                    continue;
-                }
-
-                chunkLists.add(chunks);
             }
+
+            // There should be a better way of doing this..
+            // xxHash the chunk content, and compare to hash possibly?
+            if (isBad)
+            {
+                continue;
+            }
+
+            chunkLists.add(chunks);
         }
         
         fileReader.seek(startPos);

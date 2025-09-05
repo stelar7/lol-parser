@@ -46,7 +46,7 @@ public class LCUSocketReader
                 @Override
                 public void onTextMessage(WebSocket websocket, String text)
                 {
-                    JsonElement elem = new JsonParser().parse(text);
+                    JsonElement elem = JsonParser.parseString(text);
                     JsonArray   data = elem.getAsJsonArray();
                     
                     String id      = data.get(0).toString();

@@ -151,10 +151,8 @@ public class WADParser implements Parseable<WADFile>
     @Override
     public WADFile parse(Path path)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     /**
@@ -166,10 +164,8 @@ public class WADParser implements Parseable<WADFile>
      */
     public WADFile parseReadOnly(Path path)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN, false))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     public WADFile parseCompressed(Path path)
@@ -188,10 +184,8 @@ public class WADParser implements Parseable<WADFile>
     @Override
     public WADFile parse(ByteArray data)
     {
-        try (RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN))
-        {
-            return parse(raf);
-        }
+        RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN);
+        return parse(raf);
     }
     
     @Override

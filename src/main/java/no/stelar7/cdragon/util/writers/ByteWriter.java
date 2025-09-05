@@ -233,7 +233,7 @@ public class ByteWriter implements AutoCloseable
     {
         try
         {
-            int pos = raf.pos();
+            long pos = raf.pos();
             stream.write(raf.readBytes(raf.remaining()));
             raf.seek(pos);
         } catch (IOException e)

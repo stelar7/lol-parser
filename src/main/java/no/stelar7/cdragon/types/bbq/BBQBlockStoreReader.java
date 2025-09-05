@@ -16,9 +16,9 @@ public class BBQBlockStoreReader implements BinaryReader
     }
     
     @Override
-    public String readString(int length)
+    public String readString(long length)
     {
-        return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(storage.read(length)).order(endian)).toString();
+        return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(storage.read((int) length)).order(endian)).toString();
     }
     
     @Override
@@ -64,9 +64,9 @@ public class BBQBlockStoreReader implements BinaryReader
     }
     
     @Override
-    public byte[] readBytes(int i)
+    public byte[] readBytes(long i)
     {
-        return storage.read(i);
+        return storage.read((int) i);
     }
     
     @Override
@@ -94,20 +94,20 @@ public class BBQBlockStoreReader implements BinaryReader
     }
     
     @Override
-    public int pos()
+    public long pos()
     {
         return storage.pos();
     }
     
     @Override
-    public void seek(int pos)
+    public void seek(long pos)
     {
-        storage.seek(pos, 0);
+        storage.seek((int) pos, 0);
     }
     
-    public void seek(int pos, int direction)
+    public void seek(long pos, int direction)
     {
-        storage.seek(pos, direction);
+        storage.seek((int) pos, direction);
     }
     
     @Override
@@ -119,7 +119,7 @@ public class BBQBlockStoreReader implements BinaryReader
     @Override
     public void align()
     {
-        int current = pos();
+        int current = (int) pos();
         int newPos  = (current + 3) & -4;
         
         if (newPos > current)

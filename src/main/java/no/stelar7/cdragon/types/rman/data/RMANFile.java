@@ -152,15 +152,12 @@ public class RMANFile
                 RMANFileBodyBundleChunkInfo next = getChunkMap().get(chunkIds.get(i + 1));
                 if (!current.getBundleId().equals(next.getBundleId()))
                 {
-                    raf.close();
-                    
                     Path nextBundle = bundleFolder.resolve(next.getBundleId() + ".bundle");
                     raf = new RandomAccessReader(nextBundle, ByteOrder.LITTLE_ENDIAN);
                 }
                 
                 current = next;
             }
-            raf.close();
         } catch (IOException e1)
         {
             e1.printStackTrace();

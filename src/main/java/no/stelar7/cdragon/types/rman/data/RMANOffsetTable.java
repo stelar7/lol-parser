@@ -14,7 +14,7 @@ public class RMANOffsetTable
         int count = raf.readInt();
         for (int i = 0; i < count; i++)
         {
-            int current = raf.pos();
+            int current = (int) raf.pos();
             int offset  = raf.readInt();
             raf.seek(current + offset);
             offsetEntries.add(parseFunction.apply(raf, fieldsToParse));
