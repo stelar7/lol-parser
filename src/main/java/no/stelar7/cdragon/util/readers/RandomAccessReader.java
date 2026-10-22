@@ -1,7 +1,6 @@
 package no.stelar7.cdragon.util.readers;
 
 
-import com.google.common.collect.EvictingQueue;
 import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.*;
 import org.joml.Quaternionf;
@@ -48,14 +47,12 @@ public class RandomAccessReader implements BinaryReader
 
     public RandomAccessReader(Path path, ByteOrder order)
     {
-        try (Arena arena = Arena.ofShared())
+        // The segment must outlive the constructor, so let the GC unmap it once the reader is unreachable
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
         {
-            try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
-            {
-                this.segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), arena);
-                this.byteOrder = order;
-                this.path = path;
-            }
+            this.segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), Arena.ofAuto());
+            this.byteOrder = order;
+            this.path = path;
         } catch (IOException e)
         {
             throw new RuntimeException(e);
@@ -228,7 +225,7 @@ public class RandomAccessReader implements BinaryReader
 
     public long readLong()
     {
-        long value = this.segment.get(ValueLayout.JAVA_LONG, pos());
+        long value = this.segment.get(ValueLayout.JAVA_LONG_UNALIGNED.withOrder(byteOrder), pos());
         pos += Long.BYTES;
         return value;
     }
@@ -245,7 +242,7 @@ public class RandomAccessReader implements BinaryReader
 
     public int readInt()
     {
-        int value = this.segment.get(ValueLayout.JAVA_INT, pos());
+        int value = this.segment.get(ValueLayout.JAVA_INT_UNALIGNED.withOrder(byteOrder), pos());
         pos += Integer.BYTES;
         return value;
     }
@@ -262,7 +259,7 @@ public class RandomAccessReader implements BinaryReader
 
     public short readShort()
     {
-        short value = this.segment.get(ValueLayout.JAVA_SHORT, pos());
+        short value = this.segment.get(ValueLayout.JAVA_SHORT_UNALIGNED.withOrder(byteOrder), pos());
         pos += Short.BYTES;
         return value;
     }
@@ -287,7 +284,7 @@ public class RandomAccessReader implements BinaryReader
     @Override
     public char readChar()
     {
-        char value = this.segment.get(ValueLayout.JAVA_CHAR, pos());
+        char value = this.segment.get(ValueLayout.JAVA_CHAR_UNALIGNED.withOrder(byteOrder), pos());
         pos += Character.BYTES;
         return value;
     }
@@ -309,7 +306,7 @@ public class RandomAccessReader implements BinaryReader
 
     public double readDouble()
     {
-        double value = this.segment.get(ValueLayout.JAVA_DOUBLE, pos());
+        double value = this.segment.get(ValueLayout.JAVA_DOUBLE_UNALIGNED.withOrder(byteOrder), pos());
         pos += Double.BYTES;
         return value;
     }
@@ -326,7 +323,7 @@ public class RandomAccessReader implements BinaryReader
 
     public float readFloat()
     {
-        float value = this.segment.get(ValueLayout.JAVA_FLOAT, pos());
+        float value = this.segment.get(ValueLayout.JAVA_FLOAT_UNALIGNED.withOrder(byteOrder), pos());
         pos += Float.BYTES;
         return value;
     }
@@ -365,18 +362,11 @@ public class RandomAccessReader implements BinaryReader
     public String readFromOffset(int offset)
     {
         long currentPos = pos();
-        byte[] tempData = readRemaining();
+        seek(currentPos + offset);
+        String value = readString();
         seek(currentPos);
 
-        byte[] temp = new byte[65536];
-        byte b;
-        int index = offset;
-        while ((b = tempData[index++]) != 0)
-        {
-            temp[index - offset] = b;
-        }
-
-        return new String(temp, StandardCharsets.UTF_8).trim();
+        return value.trim();
     }
 
     public Vector3f readVec3F()
@@ -513,52 +503,33 @@ public class RandomAccessReader implements BinaryReader
 
     public boolean hasMoreBytes()
     {
-        return pos() < remaining();
+        return remaining() > 0;
     }
 
+    /**
+     * Moves the position to the start of the next occurrence of data, if found.
+     */
     public boolean readUntillString(String data)
     {
-        long pos = pos();
-        String content = new String(readRemaining(), StandardCharsets.UTF_8);
+        byte[] needle = data.getBytes(StandardCharsets.UTF_8);
+        long last = this.segment.byteSize() - needle.length;
 
-        int index = content.indexOf(data);
-        if (index != -1)
+        outer:
+        for (long i = pos(); i <= last; i++)
         {
-            seek(index);
-            // indexOf doesnt count the null bytes in the string, so the posision can be way earlier than what it really is..
-            readUntillStringAccurate(data);
+            for (int j = 0; j < needle.length; j++)
+            {
+                if (this.segment.get(ValueLayout.JAVA_BYTE, i + j) != needle[j])
+                {
+                    continue outer;
+                }
+            }
+
+            seek(i);
             return true;
         }
 
         return false;
-    }
-
-    private void readUntillStringAccurate(String data)
-    {
-        // Is there a better way to do this?
-        // String.join() is really slow, so we want to avoid calling it...
-        EvictingQueue<String> queue = EvictingQueue.create(data.length());
-        String dataString = "";
-        do
-        {
-            dataString = new String(readBytes(data.length() - 1), StandardCharsets.UTF_8);
-        } while (!dataString.contains(data.substring(0, 3)));
-
-        for (char c : dataString.toCharArray())
-        {
-            queue.add("" + c);
-        }
-
-        while (hasMoreBytes())
-        {
-            queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
-            String internal = String.join("", queue);
-            if (internal.equalsIgnoreCase(data))
-            {
-                seek(pos() - data.length());
-                return;
-            }
-        }
     }
 
     public List<?> readPattern(String pattern)
