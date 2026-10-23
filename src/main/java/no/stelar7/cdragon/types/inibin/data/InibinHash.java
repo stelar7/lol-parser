@@ -27,11 +27,11 @@ public final class InibinHash
     private static final Function<Object, Object> percent          = (Object v) -> {
         if (v instanceof Integer)
         {
-            return (Integer.parseInt((String) v) * 10);
+            return ((Integer) v) * 10;
         }
         if (v instanceof Float)
         {
-            return (Float.parseFloat((String) v) * 100f);
+            return ((Float) v) * 100f;
         }
         
         return 0;

@@ -1,19 +1,21 @@
 package no.stelar7.cdragon.types.bnk.data;
 
-public class BNKDIDXEntry
+public final class BNKDIDXEntry
 {
-    private int fileId;
-    private int fileOffset;
-    private int fileSize;
+    private final int fileId;
+    private final int fileOffset;
+    private final int fileSize;
+    
+    public BNKDIDXEntry(int fileId, int fileOffset, int fileSize)
+    {
+        this.fileId = fileId;
+        this.fileOffset = fileOffset;
+        this.fileSize = fileSize;
+    }
     
     public int getFileId()
     {
         return fileId;
-    }
-    
-    public void setFileId(int fileId)
-    {
-        this.fileId = fileId;
     }
     
     public int getFileOffset()
@@ -21,18 +23,8 @@ public class BNKDIDXEntry
         return fileOffset;
     }
     
-    public void setFileOffset(int fileOffset)
-    {
-        this.fileOffset = fileOffset;
-    }
-    
     public int getFileSize()
     {
         return fileSize;
-    }
-    
-    public void setFileSize(int fileSize)
-    {
-        this.fileSize = fileSize;
     }
 }

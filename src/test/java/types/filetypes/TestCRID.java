@@ -14,6 +14,6 @@ public class TestCRID
     {
         CRIDParser p    = new CRIDParser();
         CRIDFile   crid = p.parse(UtilHandler.CDRAGON_FOLDER.resolve("cdragon/9fbb7f50baf65f23.crid"));
-        crid.extractStreams(UtilHandler.CDRAGON_FOLDER);
+        crid.extractStreams(UtilHandler.CDRAGON_FOLDER, CRIDFile.findFFmpeg().isPresent());
     }
 }

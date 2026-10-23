@@ -2,11 +2,21 @@ package no.stelar7.cdragon.types.mgeo.data;
 
 import java.util.*;
 
+/**
+ * Map geometry (.mapgeo) file
+ */
 public class MGEOFile
 {
-    private MGEOFileHeader     header;
-    private List<MGEOFileMesh> meshes;
-    private MGEOBucketGeometry bucketGeometry;
+    private MGEOFileHeader              header;
+    // only versions below 7
+    private boolean                     useSeparatePointLights;
+    private List<MGEOTextureOverride>   shaderTextureOverrides = new ArrayList<>();
+    private List<MGEOVertexDeclaration> vertexDeclarations = new ArrayList<>();
+    private List<MGEOFileMesh>          meshes = new ArrayList<>();
+    // the first entry of bucketGeometries
+    private MGEOBucketGeometry          bucketGeometry;
+    private List<MGEOBucketGeometry>    bucketGeometries = new ArrayList<>();
+    private List<MGEOPlanarReflector>   planarReflectors = new ArrayList<>();
     
     public MGEOFileHeader getHeader()
     {
@@ -16,6 +26,36 @@ public class MGEOFile
     public void setHeader(MGEOFileHeader header)
     {
         this.header = header;
+    }
+    
+    public boolean isUseSeparatePointLights()
+    {
+        return useSeparatePointLights;
+    }
+    
+    public void setUseSeparatePointLights(boolean useSeparatePointLights)
+    {
+        this.useSeparatePointLights = useSeparatePointLights;
+    }
+    
+    public List<MGEOTextureOverride> getShaderTextureOverrides()
+    {
+        return shaderTextureOverrides;
+    }
+    
+    public void setShaderTextureOverrides(List<MGEOTextureOverride> shaderTextureOverrides)
+    {
+        this.shaderTextureOverrides = shaderTextureOverrides;
+    }
+    
+    public List<MGEOVertexDeclaration> getVertexDeclarations()
+    {
+        return vertexDeclarations;
+    }
+    
+    public void setVertexDeclarations(List<MGEOVertexDeclaration> vertexDeclarations)
+    {
+        this.vertexDeclarations = vertexDeclarations;
     }
     
     public List<MGEOFileMesh> getMeshes()
@@ -38,36 +78,23 @@ public class MGEOFile
         this.bucketGeometry = bucketGeometry;
     }
     
-    @Override
-    public boolean equals(Object o)
+    public List<MGEOBucketGeometry> getBucketGeometries()
     {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        MGEOFile mgeoFile = (MGEOFile) o;
-        return Objects.equals(header, mgeoFile.header) &&
-               Objects.equals(meshes, mgeoFile.meshes) &&
-               Objects.equals(bucketGeometry, mgeoFile.bucketGeometry);
+        return bucketGeometries;
     }
     
-    @Override
-    public int hashCode()
+    public void setBucketGeometries(List<MGEOBucketGeometry> bucketGeometries)
     {
-        return Objects.hash(header, meshes, bucketGeometry);
+        this.bucketGeometries = bucketGeometries;
     }
     
-    @Override
-    public String toString()
+    public List<MGEOPlanarReflector> getPlanarReflectors()
     {
-        return "MGEOFile{" +
-               "header=" + header +
-               ", meshes=" + meshes +
-               ", bucketGeometry=" + bucketGeometry +
-               '}';
+        return planarReflectors;
+    }
+    
+    public void setPlanarReflectors(List<MGEOPlanarReflector> planarReflectors)
+    {
+        this.planarReflectors = planarReflectors;
     }
 }

@@ -1,19 +1,21 @@
 package no.stelar7.cdragon.types.bin.data;
 
-public class BINValue
+public final class BINValue
 {
-    private String       hash;
-    private BINValueType type;
-    private Object       value;
+    private final String       hash;
+    private final BINValueType type;
+    private final Object       value;
+    
+    public BINValue(String hash, BINValueType type, Object value)
+    {
+        this.hash = hash;
+        this.type = type;
+        this.value = value;
+    }
     
     public String getHash()
     {
         return hash;
-    }
-    
-    public void setHash(String hash)
-    {
-        this.hash = hash;
     }
     
     public BINValueType getType()
@@ -21,19 +23,9 @@ public class BINValue
         return type;
     }
     
-    public void setType(BINValueType type)
-    {
-        this.type = type;
-    }
-    
     public Object getValue()
     {
         return value;
-    }
-    
-    public void setValue(Object value)
-    {
-        this.value = value;
     }
     
     @Override

@@ -2,185 +2,247 @@ package no.stelar7.cdragon.types.bnk;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bnk.data.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.readers.*;
 
-import java.nio.ByteOrder;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+/**
+ * Wwise soundbank parser. Section layouts follow wwiser (wwiser/parser/wparser.py)
+ */
 public class BNKParser implements Parseable<BNKFile>
 {
+    // DIDX must come before DATA, BKHD (bank version) before HIRC/STID
     private final List<String> order = Arrays.asList("BKHD", "DIDX", "DATA", "ENVS", "FXPR", "HIRC", "STID", "STMG");
-    
-    @Override
-    public BNKFile parse(Path path)
-    {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    @Override
-    public BNKFile parse(ByteArray data)
-    {
-        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
-    }
-    
+
     @Override
     public BNKFile parse(RandomAccessReader raf)
     {
         BNKFile file = new BNKFile();
-        
+
         List<BNKHeader> headers = new ArrayList<>();
-        while (raf.hasMoreBytes())
+        while (raf.remaining() >= 8)
         {
             BNKHeader header = parseHeader(raf);
+            long      end    = header.getDataStart() + Integer.toUnsignedLong(header.getLength());
+            if (end > raf.size())
+            {
+                throw new ParseException("Section " + header.getSection() + " truncated", header.getDataStart() - 8);
+            }
             headers.add(header);
-            raf.seek(raf.pos() + header.getLength());
+            raf.seek(end);
         }
-        
-        headers.sort(Comparator.comparingInt(e -> order.indexOf(e.getSection())));
-        
+
+        headers.sort(Comparator.comparingInt(e -> {
+            int index = order.indexOf(e.getSection());
+            return index < 0 ? Integer.MAX_VALUE : index;
+        }));
+
         for (BNKHeader header : headers)
         {
-            parseSection(header, raf, file);
+            try
+            {
+                parseSection(header, raf, file);
+            } catch (IndexOutOfBoundsException e)
+            {
+                throw new ParseException("Section " + header.getSection() + " truncated", raf.pos(), e);
+            }
         }
-        
+
         return file;
     }
-    
+
     private void parseSection(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
         switch (header.getSection())
         {
-            case "BKHD":
-                parseBKDH(header, raf, file);
-                break;
-            case "DIDX":
-                parseDIDX(header, raf, file);
-                break;
-            case "DATA":
-                parseDATA(header, raf, file);
-                break;
-            case "ENVS":
-                parseENVS(header, raf, file);
-                break;
-            case "FXPR":
-                parseFXPR(header, raf, file);
-                break;
-            case "HIRC":
-                parseHIRC(header, raf, file);
-                break;
-            case "STID":
-                parseSTID(header, raf, file);
-                break;
-            case "STMG":
-                parseSTMG(header, raf, file);
-                break;
-            default:
-                throw new RuntimeException("Invalid header section");
+            case "BKHD" -> parseBKDH(header, raf, file);
+            case "DIDX" -> parseDIDX(header, raf, file);
+            case "DATA" -> parseDATA(header, raf, file);
+            case "HIRC" -> parseHIRC(header, raf, file);
+            case "STID" -> parseSTID(header, raf, file);
+            // ENVS, FXPR, STMG, INIT, PLAT and anything unknown
+            default -> parseRaw(header, raf, file);
         }
     }
-    
-    private void parseSTMG(BNKHeader header, RandomAccessReader raf, BNKFile file)
+
+    private void parseRaw(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("STMG PARSING NOT IMPLEMENTED" + header + raf + file);
+        raf.seek(header.getDataStart());
+        file.getOtherSections().add(new BNKRawSection(header, raf.readBytes(Integer.toUnsignedLong(header.getLength()))));
     }
-    
+
+    private int getBankVersion(BNKFile file)
+    {
+        // assume a modern bank when there is no header
+        return file.getBankHeader() == null ? Integer.MAX_VALUE : file.getBankHeader().getBankVersion();
+    }
+
+    // CAkBankMgr__ProcessStringMappingChunk
     private void parseSTID(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        throw new UnsupportedOperationException("STID PARSING NOT IMPLEMENTED" + header + raf + file);
+        if (getBankVersion(file) <= 26)
+        {
+            // the old string format is a tree that is not understood, keep it as is
+            parseRaw(header, raf, file);
+            return;
+        }
+
+        raf.seek(header.getDataStart());
+        long end = header.getDataStart() + Integer.toUnsignedLong(header.getLength());
+
+        int                  stringType = raf.readInt();
+        Map<Integer, String> bankNames  = new LinkedHashMap<>();
+        long                 count      = raf.readU32();
+        for (long i = 0; i < count; i++)
+        {
+            if (raf.pos() + 5 > end)
+            {
+                throw new ParseException("STID entry out of range", raf);
+            }
+
+            int bankId     = raf.readInt();
+            int nameLength = raf.readU8();
+            if (raf.pos() + nameLength > end)
+            {
+                throw new ParseException("STID name out of range", raf);
+            }
+
+            bankNames.put(bankId, raf.readString(nameLength));
+        }
+
+        file.setBankIds(new BNKSTID(header, stringType, bankNames));
     }
-    
+
+    // CAkBankMgr__ProcessHircChunk
     private void parseHIRC(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        BNKHIRC hirc = new BNKHIRC(header);
+        List<BNKHIRCObject> objects = new ArrayList<>();
         raf.seek(header.getDataStart());
-        
-        int objectCount = raf.readInt();
-        for (int i = 0; i < objectCount; i++)
+
+        long    end       = header.getDataStart() + Integer.toUnsignedLong(header.getLength());
+        int     version   = getBankVersion(file);
+        boolean wideType  = version <= 48;
+        int     typeBytes = wideType ? 4 : 1;
+
+        long objectCount = raf.readU32();
+        for (long i = 0; i < objectCount; i++)
         {
+            long objectStart = raf.pos();
+            if (objectStart + typeBytes + 4 > end)
+            {
+                throw new ParseException("HIRC object " + i + " header out of range", objectStart);
+            }
+
             BNKHIRCObject ho = new BNKHIRCObject();
-            ho.setType(raf.readByte());
-            ho.setLength(raf.readInt());
-            // the length includes the id, so we skip it for the data bytes
-            ho.setId(raf.readInt());
-            ho.setData(raf.readBytes(ho.getLength() - 4));
+            ho.setType(wideType ? raf.readInt() : raf.readU8(), version);
+
+            // the length includes the id
+            long length     = raf.readU32();
+            long nextObject = raf.pos() + length;
+            if (nextObject > end)
+            {
+                throw new ParseException("HIRC object " + i + " out of range", objectStart);
+            }
+
+            ho.setLength((int) length);
+            if (length >= 4)
+            {
+                ho.setId(raf.readInt());
+                ho.setData(raf.readBytes(length - 4));
+            } else
+            {
+                ho.setData(raf.readBytes(length));
+            }
+
+            // the object internals are parsed from the (bounded) object data only; on failure the raw data is kept and getParseError() is set
             ho.parse();
+
+            objects.add(ho);
+
+            // never trust the object internals to leave the stream at the next object
+            raf.seek(nextObject);
         }
+
+        file.setObjectHierarchy(new BNKHIRC(header, objects));
     }
-    
-    private void parseFXPR(BNKHeader header, RandomAccessReader raf, BNKFile file)
-    {
-        throw new UnsupportedOperationException("FXPR PARSING NOT IMPLEMENTED" + header + raf + file);
-    }
-    
-    private void parseENVS(BNKHeader header, RandomAccessReader raf, BNKFile file)
-    {
-        throw new UnsupportedOperationException("ENVS PARSING NOT IMPLEMENTED" + header + raf + file);
-    }
-    
-    
+
     private void parseDATA(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        BNKDATA data = new BNKDATA(header);
-        raf.seek(header.getDataStart());
-        int pos = (int) raf.pos();
-        
-        for (BNKDIDXEntry entry : file.getDataIndex().getEntries())
+        List<BNKDATAWEMFile> wemFiles = new ArrayList<>();
+        long                 start    = header.getDataStart();
+        long                 length   = Integer.toUnsignedLong(header.getLength());
+
+        // without an index there is no way to know where the files are
+        if (file.getDataIndex() != null)
         {
-            raf.seek(pos + entry.getFileOffset());
-            byte[] content = raf.readBytes(entry.getFileSize());
-            
-            BNKDATAWEMFile wem = new BNKDATAWEMFile();
-            wem.setFileId(entry.getFileId());
-            wem.setData(content);
-            
-            data.getWemFiles().add(wem);
+            for (BNKDIDXEntry entry : file.getDataIndex().getEntries())
+            {
+                long offset = Integer.toUnsignedLong(entry.getFileOffset());
+                long size   = Integer.toUnsignedLong(entry.getFileSize());
+                if (offset + size > length)
+                {
+                    throw new ParseException("DIDX entry " + Integer.toUnsignedString(entry.getFileId()) + " is outside the DATA section", start + offset);
+                }
+
+                raf.seek(start + offset);
+
+                wemFiles.add(new BNKDATAWEMFile(entry.getFileId(), raf.readBytes(size)));
+            }
         }
-        
-        file.setData(data);
-        raf.seek(pos + data.getLength());
+
+        file.setData(new BNKDATA(header, wemFiles));
     }
-    
+
     private void parseDIDX(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        BNKDIDX didx = new BNKDIDX(header);
         raf.seek(header.getDataStart());
-        int didxCount = didx.getLength() / 12;
-        
-        for (int i = 0; i < didxCount; i++)
+        long didxCount = Integer.toUnsignedLong(header.getLength()) / 12;
+
+        List<BNKDIDXEntry> entries = new ArrayList<>();
+        for (long i = 0; i < didxCount; i++)
         {
-            BNKDIDXEntry entry = new BNKDIDXEntry();
-            
-            entry.setFileId(raf.readInt());
-            entry.setFileOffset(raf.readInt());
-            entry.setFileSize(raf.readInt());
-            
-            didx.getEntries().add(entry);
+            int fileId     = raf.readInt();
+            int fileOffset = raf.readInt();
+            int fileSize   = raf.readInt();
+
+            entries.add(new BNKDIDXEntry(fileId, fileOffset, fileSize));
         }
-        
-        file.setDataIndex(didx);
+
+        file.setDataIndex(new BNKDIDX(header, entries));
     }
-    
+
     private void parseBKDH(BNKHeader header, RandomAccessReader raf, BNKFile file)
     {
-        BNKBKHD bankHeader = new BNKBKHD(header);
         raf.seek(header.getDataStart());
-        bankHeader.setBankVersion(raf.readInt());
-        bankHeader.setBankId(raf.readInt());
-        bankHeader.setLanguageId(raf.readInt());
-        bankHeader.setFeedback(raf.readInt());
-        // padding?
-        raf.seek((raf.pos() + (bankHeader.getLength() + 8)) - 24);
-        file.setBankHeader(bankHeader);
+        long length = Integer.toUnsignedLong(header.getLength());
+
+        if (length < 8)
+        {
+            throw new ParseException("BKHD too small", header.getDataStart());
+        }
+
+        int bankVersion = raf.readInt();
+        int bankId      = raf.readInt();
+        int languageId  = 0;
+        int feedback    = 0;
+        if (length >= 12)
+        {
+            languageId = raf.readInt();
+        }
+        if (length >= 16)
+        {
+            feedback = raf.readInt();
+        }
+
+        file.setBankHeader(new BNKBKHD(header, bankVersion, bankId, languageId, feedback));
     }
-    
+
     private BNKHeader parseHeader(RandomAccessReader raf)
     {
-        BNKHeader header = new BNKHeader();
-        header.setSection(raf.readString(4));
-        header.setLength(raf.readInt());
-        header.setDataStart((int) raf.pos());
-        return header;
+        String section = new String(raf.readBytes(4), StandardCharsets.ISO_8859_1);
+        int    length  = raf.readInt();
+        return new BNKHeader(section, length, (int) raf.pos());
+
     }
 }

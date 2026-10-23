@@ -3,21 +3,24 @@ package no.stelar7.cdragon.types.releasemanifest.data;
 
 import java.util.List;
 
-public class ReleasemanifestDataFile
+public final class ReleasemanifestDataFile
 {
-    private ReleasemanifestHeader                header;
-    private List<ReleasemanifestDataDirectory>   directories;
-    private List<ReleasemanifestDataContentFile> files;
-    private List<String>                         strings;
+    private final ReleasemanifestHeader                header;
+    private final List<ReleasemanifestDataDirectory>   directories;
+    private final List<ReleasemanifestDataContentFile> files;
+    private final List<String>                         strings;
+    
+    public ReleasemanifestDataFile(ReleasemanifestHeader header, List<ReleasemanifestDataDirectory> directories, List<ReleasemanifestDataContentFile> files, List<String> strings)
+    {
+        this.header = header;
+        this.directories = directories;
+        this.files = files;
+        this.strings = strings;
+    }
     
     public ReleasemanifestHeader getHeader()
     {
         return header;
-    }
-    
-    public void setHeader(ReleasemanifestHeader header)
-    {
-        this.header = header;
     }
     
     public List<ReleasemanifestDataDirectory> getDirectories()
@@ -25,28 +28,13 @@ public class ReleasemanifestDataFile
         return directories;
     }
     
-    public void setDirectories(List<ReleasemanifestDataDirectory> directories)
-    {
-        this.directories = directories;
-    }
-    
     public List<ReleasemanifestDataContentFile> getFiles()
     {
         return files;
     }
     
-    public void setFiles(List<ReleasemanifestDataContentFile> files)
-    {
-        this.files = files;
-    }
-    
     public List<String> getStrings()
     {
         return strings;
-    }
-    
-    public void setStrings(List<String> strings)
-    {
-        this.strings = strings;
     }
 }

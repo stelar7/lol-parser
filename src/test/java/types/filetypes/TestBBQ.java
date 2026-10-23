@@ -41,9 +41,9 @@ public class TestBBQ
                         System.out.println("Missing reference to asset: " + path);
                     }
                     
-                    // TODO
+                    // buf positions are relative to the start of the resource file
                     BBQAsset source = first.get();
-                    source.buf.seek(13527188 + offset);
+                    source.buf.seek(offset);
                     byte[] dataBytes = source.buf.readBytes(size);
                     
                     System.out.println();

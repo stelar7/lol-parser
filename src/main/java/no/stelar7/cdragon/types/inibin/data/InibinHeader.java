@@ -1,19 +1,21 @@
 package no.stelar7.cdragon.types.inibin.data;
 
-public class InibinHeader
+public final class InibinHeader
 {
-    private int version;
-    private int tableLength;
-    private int bitmask;
+    private final int version;
+    private final int tableLength;
+    private final int bitmask;
+    
+    public InibinHeader(int version, int tableLength, int bitmask)
+    {
+        this.version = version;
+        this.tableLength = tableLength;
+        this.bitmask = bitmask;
+    }
     
     public int getVersion()
     {
         return version;
-    }
-    
-    public void setVersion(int version)
-    {
-        this.version = version;
     }
     
     public int getTableLength()
@@ -21,18 +23,8 @@ public class InibinHeader
         return tableLength;
     }
     
-    public void setTableLength(int tableLength)
-    {
-        this.tableLength = tableLength;
-    }
-    
     public int getBitmask()
     {
         return bitmask;
-    }
-    
-    public void setBitmask(int bitmask)
-    {
-        this.bitmask = bitmask;
     }
 }

@@ -1,41 +1,35 @@
 package no.stelar7.cdragon.types.rman.data;
 
+import no.stelar7.cdragon.util.handlers.HashHandler;
+
 import java.util.Objects;
 
-public class RMANFileBodyBundleChunk
+public final class RMANFileBodyBundleChunk
 {
-    private int    compressedSize;
-    private int    uncompressedSize;
-    private String chunkId;
+    private final long compressedSize;
+    private final long uncompressedSize;
+    private final long chunkId;
     
-    public int getCompressedSize()
+    public RMANFileBodyBundleChunk(long compressedSize, long uncompressedSize, long chunkId)
+    {
+        this.compressedSize = compressedSize;
+        this.uncompressedSize = uncompressedSize;
+        this.chunkId = chunkId;
+    }
+    
+    public long getCompressedSize()
     {
         return compressedSize;
     }
     
-    public void setCompressedSize(int compressedSize)
-    {
-        this.compressedSize = compressedSize;
-    }
-    
-    public int getUncompressedSize()
+    public long getUncompressedSize()
     {
         return uncompressedSize;
     }
     
-    public void setUncompressedSize(int uncompressedSize)
-    {
-        this.uncompressedSize = uncompressedSize;
-    }
-    
-    public String getChunkId()
+    public long getChunkId()
     {
         return chunkId;
-    }
-    
-    public void setChunkId(String chunkId)
-    {
-        this.chunkId = chunkId;
     }
     
     @Override
@@ -52,13 +46,19 @@ public class RMANFileBodyBundleChunk
         RMANFileBodyBundleChunk that = (RMANFileBodyBundleChunk) o;
         return compressedSize == that.compressedSize &&
                uncompressedSize == that.uncompressedSize &&
-               Objects.equals(chunkId, that.chunkId);
+               chunkId == that.chunkId;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash(compressedSize, uncompressedSize, chunkId);
     }
     
     @Override
     public String toString()
     {
-        return chunkId;
+        return HashHandler.toHex(chunkId, 16);
     }
     
     /*

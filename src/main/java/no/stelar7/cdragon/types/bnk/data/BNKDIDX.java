@@ -3,24 +3,18 @@ package no.stelar7.cdragon.types.bnk.data;
 
 import java.util.*;
 
-public class BNKDIDX extends BNKHeader
+public final class BNKDIDX extends BNKHeader
 {
-    public BNKDIDX(BNKHeader header)
+    public BNKDIDX(BNKHeader header, List<BNKDIDXEntry> entries)
     {
-        setDataStart(header.getDataStart());
-        setSection(header.getSection());
-        setLength(header.getLength());
+        super(header);
+        this.entries = entries;
     }
     
-    private List<BNKDIDXEntry> entries = new ArrayList<>();
+    private final List<BNKDIDXEntry> entries;
     
     public List<BNKDIDXEntry> getEntries()
     {
         return entries;
-    }
-    
-    public void setEntries(List<BNKDIDXEntry> entries)
-    {
-        this.entries = entries;
     }
 }

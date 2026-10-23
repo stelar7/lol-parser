@@ -1,228 +1,330 @@
 package no.stelar7.cdragon.types.bnk;
 
 import no.stelar7.cdragon.types.bnk.data.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 
 import java.nio.ByteOrder;
 import java.util.*;
 
 public class BNKHIRCObject
 {
-    private BNKHIRCType type;
+    private BNKHIRCType type = BNKHIRCType.UNKNOWN;
+    private int         rawType;
+    private int         bankVersion = Integer.MAX_VALUE;
     private int         length;
     private int         id;
     private byte[]      data;
-    
+    private String      parseError;
+
+    private Map<BNKHIRCSettingType, Float> settings;
+    private BNKHIRCSound                   sound;
+
     public BNKHIRCType getType()
     {
         return type;
     }
-    
-    public void setType(byte val)
+
+    /**
+     * Sets the type, as it is stored in a bank of the given version (the ids of the later types depend on the version)
+     */
+    public void setType(int val, int bankVersion)
     {
-        this.type = BNKHIRCType.fromByte(val);
+        this.rawType = val;
+        this.bankVersion = bankVersion;
+        this.type = BNKHIRCType.fromValue(val, bankVersion);
     }
-    
+
+    /**
+     * The type as stored in the file, also for UNKNOWN types
+     */
+    public int getRawType()
+    {
+        return rawType;
+    }
+
+    public int getBankVersion()
+    {
+        return bankVersion;
+    }
+
+    /**
+     * The values of a SETTING object, null for other types
+     */
+    public Map<BNKHIRCSettingType, Float> getSettings()
+    {
+        return settings;
+    }
+
+    /**
+     * The media source and parent ids of a SFX_VOICE object, null for other types or if it couldn't be parsed
+     */
+    public BNKHIRCSound getSound()
+    {
+        return sound;
+    }
+
+    /**
+     * Why the object internals couldn't be parsed, or null. The raw data is kept either way.
+     */
+    public String getParseError()
+    {
+        return parseError;
+    }
+
     public int getLength()
     {
         return length;
     }
-    
+
     public void setLength(int length)
     {
         this.length = length;
     }
-    
+
     public int getId()
     {
         return id;
     }
-    
+
     public void setId(int id)
     {
         this.id = id;
     }
-    
+
+    /**
+     * The object data after the id
+     */
     public byte[] getData()
     {
         return data;
     }
-    
+
     public void setData(byte[] data)
     {
         this.data = data;
     }
-    
+
+    /**
+     * Parses the internals of known object types from the data, using the bank version given with the type.
+     * Never reads outside the data; on failure getParseError() is set.
+     */
     public void parse()
     {
         RandomAccessReader raf = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
-        switch (type)
+        try
         {
-            case SETTING:
+            switch (type)
             {
-                Map<BNKHIRCSettingType, Float> settingsMap = new HashMap<>();
-                List<Byte>                     settings    = new ArrayList<>();
-                
-                byte settingCount = raf.readByte();
-                for (int i = 0; i < settingCount; i++)
+                case SETTING -> parseSetting(raf);
+                case SFX_VOICE -> sound = parseSound(raf, bankVersion);
+                default ->
                 {
-                    settings.add(raf.readByte());
+                    // kept as raw data
                 }
-                for (int i = 0; i < settingCount; i++)
-                {
-                    settingsMap.put(BNKHIRCSettingType.fromByte(settings.get(i)), raf.readFloat());
-                }
-                break;
             }
-            case SFX_VOICE:
+        } catch (ParseException | IndexOutOfBoundsException e)
+        {
+            parseError = e.getMessage();
+        }
+    }
+
+    private void parseSetting(RandomAccessReader raf)
+    {
+        Map<BNKHIRCSettingType, Float> settingsMap = new LinkedHashMap<>();
+
+        int   settingCount = raf.readU8();
+        int[] types        = new int[settingCount];
+        need(raf, settingCount * 5L);
+        for (int i = 0; i < settingCount; i++)
+        {
+            types[i] = raf.readU8();
+        }
+        for (int i = 0; i < settingCount; i++)
+        {
+            settingsMap.put(BNKHIRCSettingType.fromValue(types[i]), raf.readFloat());
+        }
+
+        this.settings = settingsMap;
+    }
+
+    private static void need(RandomAccessReader raf, long bytes)
+    {
+        if (bytes < 0 || bytes > raf.remaining())
+        {
+            throw new ParseException("Object truncated, need " + bytes + " bytes, " + raf.remaining() + " left", raf);
+        }
+    }
+
+    private static int u8(RandomAccessReader raf)
+    {
+        need(raf, 1);
+        return raf.readU8();
+    }
+
+    private static int u32(RandomAccessReader raf)
+    {
+        need(raf, 4);
+        return raf.readInt();
+    }
+
+    private static byte[] bytes(RandomAccessReader raf, long count)
+    {
+        need(raf, count);
+        return raf.readBytes(count);
+    }
+
+    /**
+     * CAkSound::SetInitialValues -> CAkBankMgr::LoadSource + the start of CAkParameterNodeBase::SetNodeBaseParams (wwiser)
+     */
+    static BNKHIRCSound parseSound(RandomAccessReader raf, int version)
+    {
+        if (version <= 26)
+        {
+            throw new ParseException("Sound objects of bank version " + version + " are not supported", raf);
+        }
+
+        BNKHIRCSound sound = new BNKHIRCSound();
+        sound.setBankVersion(version);
+
+        // AkBankSourceData
+        int pluginId = u32(raf);
+        sound.setPluginId(pluginId);
+
+        int streamType = version <= 89 ? u32(raf) : u8(raf);
+        sound.setStreamType(streamType);
+
+        if (version <= 46)
+        {
+            // AkAudioFormat: sample rate, format bits
+            bytes(raf, 8);
+        }
+
+        // AkMediaInformation
+        int sourceId = u32(raf);
+        sound.setSourceId(sourceId);
+
+        if (version <= 88)
+        {
+            sound.setFileId(u32(raf));
+            if (streamType != 1)
             {
-                int dataSize = 17;
-                
-                byte[] unknown   = raf.readBytes(4);
-                int    soundType = raf.readInt(); // embedd, stream or prefetch
-                int    audioId   = raf.readInt();
-                int    sourceId  = raf.readInt();
-                
-                if (soundType == 0)
-                {
-                    int offset = raf.readInt();
-                    int length = raf.readInt();
-                    
-                    dataSize += 8;
-                }
-                
-                byte   type      = raf.readByte();
-                byte[] soundData = raf.readBytes(getLength() - dataSize - 4);
-                parseSoundStruct(soundData);
-                break;
+                sound.setFileOffset(Integer.toUnsignedLong(u32(raf)));
+                sound.setInMemoryMediaSize(Integer.toUnsignedLong(u32(raf)));
             }
-            default:
+        } else if (version <= 89)
+        {
+            sound.setFileId(u32(raf));
+            if (streamType != 1)
             {
-                //System.out.println("unhandled event: " + type);
+                sound.setFileOffset(Integer.toUnsignedLong(u32(raf)));
+            }
+            sound.setInMemoryMediaSize(Integer.toUnsignedLong(u32(raf)));
+        } else if (version <= 112)
+        {
+            sound.setFileId(u32(raf));
+            if (streamType != 2)
+            {
+                sound.setFileOffset(Integer.toUnsignedLong(u32(raf)));
+            }
+            sound.setInMemoryMediaSize(Integer.toUnsignedLong(u32(raf)));
+        } else if (version <= 150)
+        {
+            // the file id is the source id
+            sound.setFileId(sourceId);
+            sound.setInMemoryMediaSize(Integer.toUnsignedLong(u32(raf)));
+        } else
+        {
+            sound.setFileId(sourceId);
+            sound.setCacheId(u32(raf));
+            sound.setInMemoryMediaSize(Integer.toUnsignedLong(u32(raf)));
+        }
+
+        sound.setSourceBits(u8(raf));
+
+        // plugin params (wwiser parse_plugin_params): only for source plugins (and, before v127, type 5)
+        int     pluginType = pluginId & 0x0F;
+        boolean hasParam   = pluginType == 2 || (version <= 126 && pluginType == 5);
+        if (hasParam && pluginId != 0)
+        {
+            long size = Integer.toUnsignedLong(u32(raf));
+            if (size > 0)
+            {
+                sound.setPluginParams(bytes(raf, size));
+            }
+        }
+
+        // NodeBaseParams, up to the bus and parent ids
+        readInitialFxParams(raf, version);
+
+        if (version > 136)
+        {
+            readInitialMetadataParams(raf);
+        }
+
+        if (version > 89 && version <= 145)
+        {
+            // bOverrideAttachmentParams
+            u8(raf);
+        }
+
+        int overrideBusId  = u32(raf);
+        int directParentId = u32(raf);
+        sound.setParentInfo(overrideBusId, directParentId);
+
+        return sound;
+    }
+
+    // CAkParameterNode::SetInitialFxParams
+    private static void readInitialFxParams(RandomAccessReader raf, int version)
+    {
+        // bIsOverrideParentFX
+        u8(raf);
+        int count = u8(raf);
+        if (count == 0)
+        {
+            return;
+        }
+
+        // bitsFXBypass / bBypassAll
+        u8(raf);
+        for (int i = 0; i < count; i++)
+        {
+            // uFXIndex, fxID
+            u8(raf);
+            u32(raf);
+
+            if (version <= 48)
+            {
+                // bIsRendered, then the plugin preset
+                u8(raf);
+                long presetSize = Integer.toUnsignedLong(u32(raf));
+                bytes(raf, presetSize);
+
+                if (version > 46)
+                {
+                    long bankDataCount = Integer.toUnsignedLong(u32(raf));
+                    bytes(raf, bankDataCount * 8);
+                }
+            } else if (version <= 145)
+            {
+                // bIsShareSet, bIsRendered
+                u8(raf);
+                u8(raf);
+            } else
+            {
+                // bitVector: bypass, shareset, rendered
+                u8(raf);
             }
         }
     }
-    
-    private void parseSoundStruct(byte[] soundData)
+
+    // CAkParameterNode::SetInitialMetadataParams
+    private static void readInitialMetadataParams(RandomAccessReader raf)
     {
-        /* todo
-        RandomAccessReader raf = new RandomAccessReader(soundData, ByteOrder.LITTLE_ENDIAN);
-        
-        boolean overrideParent = raf.readBoolean();
-        
-        byte effects = raf.readByte();
-        if (effects > 0)
-        {
-            byte mask = raf.readByte();
-            for (int i = 0; i < effects; i++)
-            {
-                // do i need to do some fancy stuff here?
-                byte   index = raf.readByte();
-                int    id    = raf.readInt();
-                byte[] zero  = raf.readBytes(2);
-            }
-        }
-        
-        int     outputId         = raf.readInt();
-        int     parent           = raf.readInt();
-        boolean overridePlayback = raf.readBoolean();
-        boolean offsetByDistance = raf.readBoolean();
-        
-        byte params = raf.readByte();
-        for (int i = 0; i < params; i++)
-        {
-            byte type = raf.readByte();
-        }
-        
-        for (int i = 0; i < params; i++)
-        {
-            // int or float depending on parameter type (only int if loop, so we can assume float)
-            float value = raf.readFloat();
-        }
-        
-        byte    zero        = raf.readByte();
-        boolean positioning = raf.readBoolean();
-        if (positioning)
-        {
-            byte type = raf.readByte();
-            if (type == 0)
-            {
-                boolean panner = raf.readBoolean();
-            } else
-            {
-                int     sourcePos   = raf.readInt();
-                int     attenuation = raf.readInt();
-                boolean spatial     = raf.readBoolean();
-                
-                if (sourcePos == 2)
-                {
-                    int     playType          = raf.readInt();
-                    boolean loop              = raf.readBoolean();
-                    int     transitionTime    = raf.readInt();
-                    boolean followOrientation = raf.readBoolean();
-                } else if (sourcePos == 3)
-                {
-                    boolean updatePerFrame = raf.readBoolean();
-                }
-            }
-        }
-        
-        boolean overrideAux       = raf.readBoolean();
-        boolean gameAux           = raf.readBoolean();
-        boolean parentOverrideAux = raf.readBoolean();
-        boolean userAuxExists     = raf.readBoolean();
-        
-        if (userAuxExists)
-        {
-            int id0 = raf.readInt();
-            int id1 = raf.readInt();
-            int id2 = raf.readInt();
-            int id3 = raf.readInt();
-        }
-        
-        boolean playbackLimit = raf.readBoolean();
-        if (playbackLimit)
-        {
-            byte prio  = raf.readByte();
-            byte limit = raf.readByte();
-        }
-        
-        byte    limitPerInstance      = raf.readByte();
-        byte    virtualBehavior       = raf.readByte();
-        boolean overridePlaybackLimit = raf.readBoolean();
-        boolean overrideVirtualVoice  = raf.readBoolean();
-        
-        int stateGroupCount = raf.readInt();
-        for (int i = 0; i < stateGroupCount; i++)
-        {
-            int   id         = raf.readInt();
-            byte  changeLoc  = raf.readByte();
-            short stateDiffs = raf.readShort();
-            for (int j = 0; j < stateDiffs; j++)
-            {
-                int stateId   = raf.readInt();
-                int settingId = raf.readInt();
-            }
-        }
-        
-        short rtpc = raf.readShort();
-        for (int i = 0; i < rtpc; i++)
-        {
-            int  id        = raf.readInt();
-            int  yaxis     = raf.readInt();
-            int  unk       = raf.readInt();
-            byte unk2      = raf.readByte();
-            byte unkPoints = raf.readByte();
-            byte unk4      = raf.readByte();
-            for (int j = 0; j < unkPoints; j++)
-            {
-                float xCord = raf.readFloat();
-                float yCord = raf.readFloat();
-                int   shape = raf.readInt();
-            }
-        }
-        
-        System.out.println();
-        */
+        // bIsOverrideParentMetadata
+        u8(raf);
+        int count = u8(raf);
+        // uFXIndex, fxID, bIsShareSet
+        bytes(raf, count * 6L);
     }
 }

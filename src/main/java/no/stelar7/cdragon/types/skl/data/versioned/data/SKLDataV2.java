@@ -1,30 +1,29 @@
 package no.stelar7.cdragon.types.skl.data.versioned.data;
 
 
+import no.stelar7.cdragon.types.skl.data.versioned.bone.SKLBoneV1;
+
 import java.util.*;
 
-public class SKLDataV2 extends SKLDataV1
+public final class SKLDataV2 extends SKLDataV1
 {
-    private int boneIndexCounter;
-    private List<Integer> boneIndecies = new ArrayList<>();
+    private final int           boneIndexCounter;
+    private final List<Integer> boneIndecies;
+    
+    public SKLDataV2(int designerId, int boneCount, List<SKLBoneV1> bones, int boneIndexCounter, List<Integer> boneIndecies)
+    {
+        super(designerId, boneCount, bones);
+        this.boneIndexCounter = boneIndexCounter;
+        this.boneIndecies = boneIndecies;
+    }
     
     public int getBoneIndexCounter()
     {
         return boneIndexCounter;
     }
     
-    public void setBoneIndexCounter(int boneIndexCounter)
-    {
-        this.boneIndexCounter = boneIndexCounter;
-    }
-    
     public List<Integer> getBoneIndecies()
     {
         return boneIndecies;
-    }
-    
-    public void setBoneIndecies(List<Integer> boneIndecies)
-    {
-        this.boneIndecies = boneIndecies;
     }
 }

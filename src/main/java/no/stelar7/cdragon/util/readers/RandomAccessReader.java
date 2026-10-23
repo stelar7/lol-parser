@@ -1,7 +1,6 @@
 package no.stelar7.cdragon.util.readers;
 
 
-import com.google.common.collect.EvictingQueue;
 import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.*;
 import org.joml.Quaternionf;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -24,11 +22,19 @@ import java.util.List;
 public class RandomAccessReader implements BinaryReader
 {
     private final MemorySegment segment;
-    private long pos = 0;
+    private       long          pos = 0;
 
-    private byte[] rawBytes;
+    private byte[]    rawBytes;
     private ByteOrder byteOrder;
-    private Path path;
+    private Path      path;
+
+    // file data is not guaranteed to be aligned, so every multi-byte read uses an unaligned layout in the current byte order
+    private ValueLayout.OfShort  shortLayout;
+    private ValueLayout.OfChar   charLayout;
+    private ValueLayout.OfInt    intLayout;
+    private ValueLayout.OfLong   longLayout;
+    private ValueLayout.OfFloat  floatLayout;
+    private ValueLayout.OfDouble doubleLayout;
 
     public static RandomAccessReader create(RandomAccessReader raf)
     {
@@ -48,18 +54,20 @@ public class RandomAccessReader implements BinaryReader
 
     public RandomAccessReader(Path path, ByteOrder order)
     {
-        try (Arena arena = Arena.ofShared())
+        // copy the file into GC-managed memory and unmap it right away,
+        // so the file is not left locked (on Windows) while the reader is alive
+        try (Arena mapArena = Arena.ofConfined(); FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
         {
-            try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
-            {
-                this.segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), arena);
-                this.byteOrder = order;
-                this.path = path;
-            }
+            MemorySegment mapped = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), mapArena);
+            this.segment = Arena.ofAuto().allocate(mapped.byteSize());
+            this.segment.copyFrom(mapped);
         } catch (IOException e)
         {
             throw new RuntimeException(e);
         }
+
+        this.path = path;
+        setEndian(order);
     }
 
     public RandomAccessReader(Path path)
@@ -76,20 +84,31 @@ public class RandomAccessReader implements BinaryReader
     {
         this.rawBytes = dataBytes;
         this.segment = MemorySegment.ofArray(dataBytes);
-        this.byteOrder = order;
+        setEndian(order);
     }
 
 
     public void setEndian(ByteOrder order)
     {
         this.byteOrder = order;
+        this.shortLayout = ValueLayout.JAVA_SHORT_UNALIGNED.withOrder(order);
+        this.charLayout = ValueLayout.JAVA_CHAR_UNALIGNED.withOrder(order);
+        this.intLayout = ValueLayout.JAVA_INT_UNALIGNED.withOrder(order);
+        this.longLayout = ValueLayout.JAVA_LONG_UNALIGNED.withOrder(order);
+        this.floatLayout = ValueLayout.JAVA_FLOAT_UNALIGNED.withOrder(order);
+        this.doubleLayout = ValueLayout.JAVA_DOUBLE_UNALIGNED.withOrder(order);
+    }
+
+    public ByteOrder getEndian()
+    {
+        return byteOrder;
     }
 
     @Override
     public void align()
     {
         long current = pos();
-        long newPos = (current + 3) & -4;
+        long newPos  = (current + 3) & -4;
 
         if (newPos > current)
         {
@@ -100,6 +119,11 @@ public class RandomAccessReader implements BinaryReader
     public long pos()
     {
         return this.pos;
+    }
+
+    public long size()
+    {
+        return this.segment.byteSize();
     }
 
     public long remaining()
@@ -114,6 +138,8 @@ public class RandomAccessReader implements BinaryReader
     public void seek(long pos)
     {
         this.pos = pos;
+        // any buffered bits belong to the old position
+        this.bitsLeft = 0;
     }
 
     /**
@@ -121,7 +147,6 @@ public class RandomAccessReader implements BinaryReader
      */
     public void seekFromEnd(long pos)
     {
-
         seek(this.segment.byteSize() + pos);
     }
 
@@ -130,9 +155,12 @@ public class RandomAccessReader implements BinaryReader
         seek(this.pos() + pos);
     }
 
+    /**
+     * Reads a string prefixed by its length as an unsigned short
+     */
     public String readShortString()
     {
-        return readString(readShort());
+        return readString(readU16());
     }
 
     public String readIntString()
@@ -150,9 +178,23 @@ public class RandomAccessReader implements BinaryReader
         return new String(readBytes(length), charset).trim();
     }
 
+    /**
+     * Reads a fixed size field, and returns the text up to the first 0x00 in it
+     */
+    public String readFixedString(long length)
+    {
+        byte[] data = readBytes(length);
+        int    end  = 0;
+        while (end < data.length && data[end] != 0)
+        {
+            end++;
+        }
+        return new String(data, 0, end, StandardCharsets.UTF_8);
+    }
 
-    private int bitsLeft;
-    private int totalBitsRead;
+
+    private int  bitsLeft;
+    private int  totalBitsRead;
     private byte bits;
 
     /**
@@ -161,6 +203,14 @@ public class RandomAccessReader implements BinaryReader
     public int getTotalBitsRead()
     {
         return totalBitsRead;
+    }
+
+    /**
+     * Discards any bits left over from the last byte read by readBits, so the next readBits starts on a byte boundary
+     */
+    public void alignBits()
+    {
+        this.bitsLeft = 0;
     }
 
     private byte readBit()
@@ -195,15 +245,34 @@ public class RandomAccessReader implements BinaryReader
      */
     public String readString()
     {
-        byte[] temp = new byte[65536];
-        byte b;
-        int index = 0;
-        while ((b = readByte()) != 0)
-        {
-            temp[index++] = b;
-        }
+        long start = pos();
+        long end   = indexOfZero(start);
+        String value = new String(slice(start, end - start), StandardCharsets.UTF_8);
+        seek(Math.min(end + 1, size()));
+        return value;
+    }
 
-        return new String(temp, 0, index, StandardCharsets.UTF_8);
+    /**
+     * Finds the next 0x00 at or after offset, or the end of the data if there is none
+     */
+    private long indexOfZero(long offset)
+    {
+        long size = size();
+        long i    = offset;
+        while (i < size && this.segment.get(ValueLayout.JAVA_BYTE, i) != 0)
+        {
+            i++;
+        }
+        return i;
+    }
+
+    private byte[] slice(long offset, long length)
+    {
+        if (length > Integer.MAX_VALUE)
+        {
+            throw new IllegalStateException("Cannot read more than Integer.MAX_VALUE bytes");
+        }
+        return this.segment.asSlice(offset, length).toArray(ValueLayout.JAVA_BYTE);
     }
 
     /**
@@ -217,25 +286,21 @@ public class RandomAccessReader implements BinaryReader
 
     public byte[] readRemaining()
     {
-        long remainingSize = remaining();
-        if (remainingSize > Integer.MAX_VALUE)
-        {
-            throw new IllegalStateException("Cannot read more than Integer.MAX_VALUE bytes");
-        }
-
-        return this.segment.asSlice(pos(), remainingSize).toArray(ValueLayout.JAVA_BYTE);
+        byte[] data = slice(pos(), remaining());
+        seek(size());
+        return data;
     }
 
     public long readLong()
     {
-        long value = this.segment.get(ValueLayout.JAVA_LONG, pos());
+        long value = this.segment.get(longLayout, pos());
         pos += Long.BYTES;
         return value;
     }
 
     public List<Long> readLongs(int count)
     {
-        List<Long> values = new ArrayList<>();
+        List<Long> values = new ArrayList<>(count);
         for (int j = 0; j < count; j++)
         {
             values.add(readLong());
@@ -243,16 +308,26 @@ public class RandomAccessReader implements BinaryReader
         return values;
     }
 
+    public long[] readLongArray(int count)
+    {
+        long[] values = new long[count];
+        for (int j = 0; j < count; j++)
+        {
+            values[j] = readLong();
+        }
+        return values;
+    }
+
     public int readInt()
     {
-        int value = this.segment.get(ValueLayout.JAVA_INT, pos());
+        int value = this.segment.get(intLayout, pos());
         pos += Integer.BYTES;
         return value;
     }
 
     public List<Integer> readInts(int count)
     {
-        List<Integer> values = new ArrayList<>();
+        List<Integer> values = new ArrayList<>(count);
         for (int j = 0; j < count; j++)
         {
             values.add(readInt());
@@ -260,19 +335,52 @@ public class RandomAccessReader implements BinaryReader
         return values;
     }
 
+    public int[] readIntArray(int count)
+    {
+        int[] values = new int[count];
+        for (int j = 0; j < count; j++)
+        {
+            values[j] = readInt();
+        }
+        return values;
+    }
+
     public short readShort()
     {
-        short value = this.segment.get(ValueLayout.JAVA_SHORT, pos());
+        short value = this.segment.get(shortLayout, pos());
         pos += Short.BYTES;
         return value;
     }
 
     public List<Short> readShorts(int count)
     {
-        List<Short> values = new ArrayList<>();
+        List<Short> values = new ArrayList<>(count);
         for (int j = 0; j < count; j++)
         {
             values.add(readShort());
+        }
+        return values;
+    }
+
+    public short[] readShortArray(int count)
+    {
+        short[] values = new short[count];
+        for (int j = 0; j < count; j++)
+        {
+            values[j] = readShort();
+        }
+        return values;
+    }
+
+    /**
+     * Reads unsigned shorts, widened to int
+     */
+    public int[] readU16Array(int count)
+    {
+        int[] values = new int[count];
+        for (int j = 0; j < count; j++)
+        {
+            values[j] = readU16();
         }
         return values;
     }
@@ -284,14 +392,43 @@ public class RandomAccessReader implements BinaryReader
         return value;
     }
 
+    public int readU8()
+    {
+        return Byte.toUnsignedInt(readByte());
+    }
+
+    public int readU16()
+    {
+        return Short.toUnsignedInt(readShort());
+    }
+
+    public long readU32()
+    {
+        return Integer.toUnsignedLong(readInt());
+    }
+
+    /**
+     * Reads a single byte as a char
+     */
     @Override
     public char readChar()
     {
-        char value = this.segment.get(ValueLayout.JAVA_CHAR, pos());
+        return (char) (readByte() & 0xFF);
+    }
+
+    /**
+     * Reads a two byte (UTF-16) char
+     */
+    public char readWideChar()
+    {
+        char value = this.segment.get(charLayout, pos());
         pos += Character.BYTES;
         return value;
     }
 
+    /**
+     * Reads up to length bytes, fewer if the end of the data is reached first
+     */
     public byte[] readBytes(long length)
     {
         if (length > remaining())
@@ -299,7 +436,23 @@ public class RandomAccessReader implements BinaryReader
             length = remaining();
         }
 
-        return this.segment.asSlice(pos(), length).toArray(ValueLayout.JAVA_BYTE);
+        byte[] data = slice(pos(), Math.max(length, 0));
+        pos += data.length;
+        return data;
+    }
+
+    /**
+     * Reads the length bytes before the current position, and moves the position back to the start of them
+     */
+    public byte[] readBytesReverse(long length)
+    {
+        if (pos() < length)
+        {
+            length = pos();
+        }
+
+        seek(pos() - length);
+        return slice(pos(), length);
     }
 
     public Path getPath()
@@ -307,16 +460,21 @@ public class RandomAccessReader implements BinaryReader
         return path;
     }
 
+    public byte[] getRawBytes()
+    {
+        return rawBytes;
+    }
+
     public double readDouble()
     {
-        double value = this.segment.get(ValueLayout.JAVA_DOUBLE, pos());
+        double value = this.segment.get(doubleLayout, pos());
         pos += Double.BYTES;
         return value;
     }
 
     public List<Double> readDoubles(int count)
     {
-        List<Double> values = new ArrayList<>();
+        List<Double> values = new ArrayList<>(count);
         for (int j = 0; j < count; j++)
         {
             values.add(readDouble());
@@ -326,17 +484,27 @@ public class RandomAccessReader implements BinaryReader
 
     public float readFloat()
     {
-        float value = this.segment.get(ValueLayout.JAVA_FLOAT, pos());
+        float value = this.segment.get(floatLayout, pos());
         pos += Float.BYTES;
         return value;
     }
 
     public List<Float> readFloats(int count)
     {
-        List<Float> values = new ArrayList<>();
+        List<Float> values = new ArrayList<>(count);
         for (int j = 0; j < count; j++)
         {
             values.add(readFloat());
+        }
+        return values;
+    }
+
+    public float[] readFloatArray(int count)
+    {
+        float[] values = new float[count];
+        for (int j = 0; j < count; j++)
+        {
+            values[j] = readFloat();
         }
         return values;
     }
@@ -345,13 +513,13 @@ public class RandomAccessReader implements BinaryReader
     public boolean readBoolean()
     {
         byte value = readByte();
-        return value > 0;
+        return value != 0;
     }
 
 
     public List<Boolean> readBooleans(int count)
     {
-        List<Boolean> values = new ArrayList<>();
+        List<Boolean> values = new ArrayList<>(count);
         for (int j = 0; j < count; j++)
         {
             values.add(readBoolean());
@@ -360,23 +528,12 @@ public class RandomAccessReader implements BinaryReader
     }
 
     /**
-     * Reads untill 0x00 is read.
+     * Reads the 0x00 terminated string at an absolute offset, without moving the current position
      */
     public String readFromOffset(int offset)
     {
-        long currentPos = pos();
-        byte[] tempData = readRemaining();
-        seek(currentPos);
-
-        byte[] temp = new byte[65536];
-        byte b;
-        int index = offset;
-        while ((b = tempData[index++]) != 0)
-        {
-            temp[index - offset] = b;
-        }
-
-        return new String(temp, StandardCharsets.UTF_8).trim();
+        long end = indexOfZero(offset);
+        return new String(slice(offset, end - offset), StandardCharsets.UTF_8).trim();
     }
 
     public Vector3f readVec3F()
@@ -513,58 +670,40 @@ public class RandomAccessReader implements BinaryReader
 
     public boolean hasMoreBytes()
     {
-        return pos() < remaining();
+        return remaining() > 0;
     }
 
+    /**
+     * Moves to the start of the next occurrence of data (at or after the current position).
+     * Returns false, and leaves the position unchanged, if there is none.
+     */
     public boolean readUntillString(String data)
     {
-        long pos = pos();
-        String content = new String(readRemaining(), StandardCharsets.UTF_8);
+        byte[] needle = data.getBytes(StandardCharsets.UTF_8);
+        long   last   = size() - needle.length;
 
-        int index = content.indexOf(data);
-        if (index != -1)
+        outer:
+        for (long i = pos(); i <= last; i++)
         {
-            seek(index);
-            // indexOf doesnt count the null bytes in the string, so the posision can be way earlier than what it really is..
-            readUntillStringAccurate(data);
+            for (int j = 0; j < needle.length; j++)
+            {
+                if (this.segment.get(ValueLayout.JAVA_BYTE, i + j) != needle[j])
+                {
+                    continue outer;
+                }
+            }
+
+            seek(i);
             return true;
         }
 
         return false;
     }
 
-    private void readUntillStringAccurate(String data)
-    {
-        // Is there a better way to do this?
-        // String.join() is really slow, so we want to avoid calling it...
-        EvictingQueue<String> queue = EvictingQueue.create(data.length());
-        String dataString = "";
-        do
-        {
-            dataString = new String(readBytes(data.length() - 1), StandardCharsets.UTF_8);
-        } while (!dataString.contains(data.substring(0, 3)));
-
-        for (char c : dataString.toCharArray())
-        {
-            queue.add("" + c);
-        }
-
-        while (hasMoreBytes())
-        {
-            queue.add(new String(readBytes(1), StandardCharsets.UTF_8));
-            String internal = String.join("", queue);
-            if (internal.equalsIgnoreCase(data))
-            {
-                seek(pos() - data.length());
-                return;
-            }
-        }
-    }
-
     public List<?> readPattern(String pattern)
     {
-        char[] chars = pattern.toCharArray();
-        List<Object> data = new ArrayList<>();
+        char[]       chars = pattern.toCharArray();
+        List<Object> data  = new ArrayList<>();
 
         int count = 0;
         for (char aChar : chars)
@@ -647,23 +786,25 @@ public class RandomAccessReader implements BinaryReader
         return new ByteArray(readRemaining());
     }
 
+    /**
+     * Reads the 4 bytes before the current position as a little endian int, and moves back past them
+     */
     public int readIntReverse()
     {
-        ByteBuffer wrapped = ByteBuffer.wrap(readBytes(4));
-        wrapped.order(ByteOrder.LITTLE_ENDIAN);
-        return wrapped.getInt();
+        return MemorySegment.ofArray(readBytesReverse(4)).get(ValueLayout.JAVA_INT_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN), 0);
     }
 
+    /**
+     * Reads the 8 bytes before the current position as a little endian long, and moves back past them
+     */
     public long readLongReverse()
     {
-        ByteBuffer wrapped = ByteBuffer.wrap(readBytes(8));
-        wrapped.order(ByteOrder.LITTLE_ENDIAN);
-        return wrapped.getLong();
+        return MemorySegment.ofArray(readBytesReverse(8)).get(ValueLayout.JAVA_LONG_UNALIGNED.withOrder(ByteOrder.LITTLE_ENDIAN), 0);
     }
 
     public String readStringReverse(int length)
     {
-        return new String(readBytes(length), StandardCharsets.UTF_8);
+        return new String(readBytesReverse(length), StandardCharsets.UTF_8);
     }
 
     public BoundingBox readBoundingBox()

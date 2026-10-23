@@ -2,21 +2,26 @@ package no.stelar7.cdragon.types.rman.data;
 
 import java.util.*;
 
-public class RMANFileBodyBundle
+public final class RMANFileBodyBundle
 {
-    private int                           headerSize;
-    private String                        bundleId;
-    private byte[]                        skipped;
-    private List<RMANFileBodyBundleChunk> chunks;
+    private final int                           headerSize;
+    private final String                        bundleId;
+    private final byte[]                        skipped;
+    private final List<RMANFileBodyBundleChunk> chunks;
+    
+    public RMANFileBodyBundle(String bundleId, List<RMANFileBodyBundleChunk> chunks)
+    {
+        // never read from the file
+        this.headerSize = 0;
+        this.bundleId = bundleId;
+        // never read from the file
+        this.skipped = null;
+        this.chunks = chunks;
+    }
     
     public int getHeaderSize()
     {
         return headerSize;
-    }
-    
-    public void setHeaderSize(int headerSize)
-    {
-        this.headerSize = headerSize;
     }
     
     public String getBundleId()
@@ -24,29 +29,14 @@ public class RMANFileBodyBundle
         return bundleId;
     }
     
-    public void setBundleId(String bundleId)
-    {
-        this.bundleId = bundleId;
-    }
-    
     public byte[] getSkipped()
     {
         return skipped;
     }
     
-    public void setSkipped(byte[] skipped)
-    {
-        this.skipped = skipped;
-    }
-    
     public List<RMANFileBodyBundleChunk> getChunks()
     {
         return chunks;
-    }
-    
-    public void setChunks(List<RMANFileBodyBundleChunk> chunks)
-    {
-        this.chunks = chunks;
     }
     
     @Override

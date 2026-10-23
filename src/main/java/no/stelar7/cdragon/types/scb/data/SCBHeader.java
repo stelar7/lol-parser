@@ -1,20 +1,23 @@
 package no.stelar7.cdragon.types.scb.data;
 
-public class SCBHeader
+public final class SCBHeader
 {
-    private String magic;
-    private short  major;
-    private short  minor;
-    private String filename;
+    private final String magic;
+    private final short  major;
+    private final short  minor;
+    private final String filename;
+    
+    public SCBHeader(String magic, short major, short minor, String filename)
+    {
+        this.magic = magic;
+        this.major = major;
+        this.minor = minor;
+        this.filename = filename;
+    }
     
     public String getMagic()
     {
         return magic;
-    }
-    
-    public void setMagic(String magic)
-    {
-        this.magic = magic;
     }
     
     public short getMajor()
@@ -22,28 +25,13 @@ public class SCBHeader
         return major;
     }
     
-    public void setMajor(short major)
-    {
-        this.major = major;
-    }
-    
     public short getMinor()
     {
         return minor;
     }
     
-    public void setMinor(short minor)
-    {
-        this.minor = minor;
-    }
-    
     public String getFilename()
     {
         return filename;
-    }
-    
-    public void setFilename(String filename)
-    {
-        this.filename = filename;
     }
 }

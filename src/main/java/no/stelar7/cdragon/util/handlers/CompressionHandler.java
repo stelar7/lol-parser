@@ -24,20 +24,49 @@ public final class CompressionHandler
         return decompressor.decompress(input, outputSize);
     }
     
+    /**
+     * Decompresses a classic .lzma stream (13 byte header: 5 bytes of properties + 8 byte uncompressed size)
+     */
     public static byte[] uncompressLZMA(byte[] input)
     {
-        try (LZMACompressorInputStream lzma = new LZMACompressorInputStream(new ByteArrayInputStream(input));
-             ByteArrayOutputStream bos = new ByteArrayOutputStream())
+        try (LZMACompressorInputStream lzma = new LZMACompressorInputStream(new ByteArrayInputStream(input)))
         {
-            lzma.transferTo(bos);
-            return bos.toByteArray();
+            return lzma.readAllBytes();
         } catch (IOException e)
         {
-            e.printStackTrace();
-            return null;
+            throw new UncheckedIOException("Failed to decompress LZMA data", e);
         }
     }
-    
+
+    /**
+     * Decompresses LZMA data that starts with the 5 property bytes (lc/lp/pb byte + little-endian dictionary size)
+     * but has no size field, like the data in Unity asset bundles.
+     * The uncompressed size has to be known up front.
+     */
+    public static byte[] uncompressLZMA(byte[] input, int uncompressedSize)
+    {
+        if (input.length < 5)
+        {
+            throw new IllegalArgumentException("LZMA data is too short to contain the properties header");
+        }
+
+        byte propsByte = input[0];
+        int  dictSize  = (input[1] & 0xFF) | ((input[2] & 0xFF) << 8) | ((input[3] & 0xFF) << 16) | ((input[4] & 0xFF) << 24);
+
+        try (org.tukaani.xz.LZMAInputStream lzma = new org.tukaani.xz.LZMAInputStream(new ByteArrayInputStream(input, 5, input.length - 5), uncompressedSize, propsByte, dictSize))
+        {
+            byte[] output = lzma.readNBytes(uncompressedSize);
+            if (output.length != uncompressedSize)
+            {
+                throw new IOException("LZMA data ended after " + output.length + " of " + uncompressedSize + " bytes");
+            }
+            return output;
+        } catch (IOException e)
+        {
+            throw new UncheckedIOException("Failed to decompress LZMA data", e);
+        }
+    }
+
     public static void uncompressDEFLATE(Path inputPath, Path uncompressPath)
     {
         try (ByteArrayInputStream bis = new ByteArrayInputStream(Files.readAllBytes(inputPath));

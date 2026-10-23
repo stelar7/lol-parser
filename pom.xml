@@ -11,7 +11,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.test.skip>true</maven.test.skip>
+        <!-- compile the tests, but don't run them as part of the build (they download and extract game data) -->
+        <skipTests>true</skipTests>
+        <lwjgl.version>3.4.3</lwjgl.version>
     </properties>
 
     <dependencies>
@@ -19,13 +21,13 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.4.2</version>
+            <version>6.1.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.4.2</version>
+            <version>6.1.3</version>
             <scope>test</scope>
         </dependency>
 
@@ -33,28 +35,35 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.8.9</version>
+            <version>2.14.0</version>
         </dependency>
 
-        <!-- used for hashing. ie. XXHash64 -->
+        <!-- used for hashing. ie. XXHash64 (at.yawk.lz4 is the maintained continuation of org.lz4, same packages) -->
         <dependency>
-            <groupId>org.lz4</groupId>
+            <groupId>at.yawk.lz4</groupId>
             <artifactId>lz4-java</artifactId>
-            <version>1.4</version>
+            <version>1.12.1</version>
+        </dependency>
+
+        <!-- used for XXH3 hashing (RST string keys) -->
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>zero-allocation-hashing</artifactId>
+            <version>2026.0</version>
         </dependency>
 
         <!-- used for unpacking LZMA streams -->
         <dependency>
             <groupId>org.tukaani</groupId>
             <artifactId>xz</artifactId>
-            <version>1.8</version>
+            <version>1.12</version>
         </dependency>
 
         <!-- used for zstd uncompression -->
         <dependency>
             <groupId>com.github.luben</groupId>
             <artifactId>zstd-jni</artifactId>
-            <version>1.3.8-1</version>
+            <version>1.5.7-24</version>
             <classifier>win_amd64</classifier>
         </dependency>
 
@@ -62,10 +71,10 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.1-jre</version>
+            <version>33.7.2-jre</version>
         </dependency>
 
-        <!-- used to parse DDS image files -->
+        <!-- used to parse DDS image files (an ImageIO plugin, DDSParser falls back to it for formats it does not decode itself) -->
         <dependency>
             <groupId>net.nikr</groupId>
             <artifactId>dds</artifactId>
@@ -76,88 +85,72 @@
         <dependency>
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
-            <version>1.9.9</version>
+            <version>1.10.9</version>
         </dependency>
 
         <!-- used for connecting to the lcu via websocket -->
         <dependency>
             <groupId>com.neovisionaries</groupId>
             <artifactId>nv-websocket-client</artifactId>
-            <version>2.3</version>
+            <version>2.14</version>
         </dependency>
 
         <!-- used for creating .tar.gz files -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.21</version>
+            <version>1.28.0</version>
         </dependency>
 
         <!-- used for decryption of the ROFL entries -->
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.69</version>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.86</version>
         </dependency>
 
         <!-- used for the 3d model viewing -->
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
-            <version>3.1.5</version>
+            <version>${lwjgl.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-glfw</artifactId>
-            <version>3.1.5</version>
+            <version>${lwjgl.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-opengl</artifactId>
-            <version>3.1.5</version>
+            <version>${lwjgl.version}</version>
         </dependency>
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
-            <version>3.1.5</version>
+            <version>${lwjgl.version}</version>
             <classifier>${lwjgl.natives}</classifier>
         </dependency>
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-glfw</artifactId>
-            <version>3.1.5</version>
+            <version>${lwjgl.version}</version>
             <classifier>${lwjgl.natives}</classifier>
         </dependency>
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-opengl</artifactId>
-            <version>3.1.5</version>
+            <version>${lwjgl.version}</version>
             <classifier>${lwjgl.natives}</classifier>
         </dependency>
         <!-- end lwjgl -->
 
-        <!-- used for comparing object graphs -->
+        <!-- used for comparing object graphs (TestBIN) -->
         <dependency>
             <groupId>org.javers</groupId>
             <artifactId>javers-core</artifactId>
-            <version>3.9.0</version>
-        </dependency>
-
-        <!-- used for js prettying -->
-        <dependency>
-            <groupId>org.graalvm.sdk</groupId>
-            <artifactId>graal-sdk</artifactId>
-            <version>20.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
-            <version>20.2.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js-scriptengine</artifactId>
-            <version>20.2.0</version>
+            <version>7.11.9</version>
+            <scope>test</scope>
         </dependency>
 
 
@@ -165,26 +158,14 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-nop</artifactId>
-            <version>1.7.25</version>
+            <version>2.0.20</version>
         </dependency>
         -->
 
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna-platform</artifactId>
-            <version>5.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>net.byteseek</groupId>
-            <artifactId>byteseek</artifactId>
-            <version>2.0.3</version>
-        </dependency>
-
-        <!-- used for >2GB mmap -->
-        <dependency>
-            <groupId>org.xerial.larray</groupId>
-            <artifactId>larray_2.12</artifactId>
-            <version>0.4.1</version>
+            <version>5.19.1</version>
         </dependency>
 
     </dependencies>
@@ -245,7 +226,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.16.0</version>
                 <configuration>
                     <source>22</source>
                     <target>22</target>
@@ -266,6 +247,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.8.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -289,11 +271,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.6.0</version>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.6.0</version>
             </plugin>
         </plugins>
     </build>

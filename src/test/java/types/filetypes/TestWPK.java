@@ -33,6 +33,11 @@ public class TestWPK
         {
             System.out.println(wemFile.getFilename() + (wemFile.getData() == null ? " - HAS JUNK CHUNK!" : ""));
             
+            if (wemFile.getData() == null)
+            {
+                continue;
+            }
+            
             OGGStream odata        = ogg.parse(wemFile.getData());
             Path      outputFolder = file.resolveSibling(filename.substring(0, filename.indexOf('.')));
             Files.createDirectories(outputFolder);

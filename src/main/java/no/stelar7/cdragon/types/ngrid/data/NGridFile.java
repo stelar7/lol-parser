@@ -28,7 +28,12 @@ public class NGridFile
     private float heightSampleOffsetX;
     private float heightSampleOffsetZ;
     
-    private List<Float> heightSamples = new ArrayList<>();
+    private float[] heightSamples = new float[0];
+    
+    // hint grid: hintNodeCount nodes, each with hintNodeCount distances (row major) and a cell coordinate pair
+    private int     hintNodeCount;
+    private float[] hintNodeDistances = new float[0];
+    private short[] hintNodeCoordinates = new short[0];
     
     private float minHeightSample;
     private float maxHeightSample;
@@ -153,14 +158,47 @@ public class NGridFile
         this.heightSampleOffsetZ = heightSampleOffsetZ;
     }
     
-    public List<Float> getHeightSamples()
+    public float[] getHeightSamples()
     {
         return heightSamples;
     }
     
-    public void setHeightSamples(List<Float> heightSamples)
+    public void setHeightSamples(float[] heightSamples)
     {
         this.heightSamples = heightSamples;
+    }
+    
+    public int getHintNodeCount()
+    {
+        return hintNodeCount;
+    }
+    
+    public void setHintNodeCount(int hintNodeCount)
+    {
+        this.hintNodeCount = hintNodeCount;
+    }
+    
+    public float[] getHintNodeDistances()
+    {
+        return hintNodeDistances;
+    }
+    
+    public void setHintNodeDistances(float[] hintNodeDistances)
+    {
+        this.hintNodeDistances = hintNodeDistances;
+    }
+    
+    /**
+     * x, z pairs, one per hint node
+     */
+    public short[] getHintNodeCoordinates()
+    {
+        return hintNodeCoordinates;
+    }
+    
+    public void setHintNodeCoordinates(short[] hintNodeCoordinates)
+    {
+        this.hintNodeCoordinates = hintNodeCoordinates;
     }
     
     public float getMinHeightSample()
@@ -209,13 +247,13 @@ public class NGridFile
                Objects.equals(min, nGridFile.min) &&
                Objects.equals(max, nGridFile.max) &&
                Objects.equals(cells, nGridFile.cells) &&
-               Objects.equals(heightSamples, nGridFile.heightSamples);
+               Arrays.equals(heightSamples, nGridFile.heightSamples);
     }
     
     @Override
     public int hashCode()
     {
-        return Objects.hash(major, minor, min, max, size, countX, countZ, cells, heightSamplesX, heightSamplesZ, heightSampleOffsetX, heightSampleOffsetZ, heightSamples, minHeightSample, maxHeightSample);
+        return Objects.hash(major, minor, min, max, size, countX, countZ, cells, heightSamplesX, heightSamplesZ, heightSampleOffsetX, heightSampleOffsetZ, Arrays.hashCode(heightSamples), minHeightSample, maxHeightSample);
     }
     
     @Override
@@ -234,7 +272,7 @@ public class NGridFile
                ", heightSamplesZ=" + heightSamplesZ +
                ", heightSampleOffsetX=" + heightSampleOffsetX +
                ", heightSampleOffsetZ=" + heightSampleOffsetZ +
-               ", heightSamples=" + heightSamples.size() +
+               ", heightSamples=" + heightSamples.length +
                ", minHeightSample=" + minHeightSample +
                ", maxHeightSample=" + maxHeightSample +
                '}';
@@ -327,9 +365,9 @@ public class NGridFile
         
         float heightDiff    = this.maxHeightSample - this.minHeightSample;
         int   heightPadding = getBMPPadding(this.heightSamplesX);
-        for (int i = 0; i < this.heightSamples.size(); i++)
+        for (int i = 0; i < this.heightSamples.length; i++)
         {
-            float sample      = this.heightSamples.get(i);
+            float sample      = this.heightSamples[i];
             float lerp        = (sample - this.minHeightSample) / heightDiff;
             Color sampleColor = heightSampleBaseColor.multiply(lerp);
             height.writeColor(sampleColor);

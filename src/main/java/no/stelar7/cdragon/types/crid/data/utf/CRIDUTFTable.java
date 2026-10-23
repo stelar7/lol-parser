@@ -6,6 +6,7 @@ public class CRIDUTFTable
 {
     int                      tableOffset;
     int                      tableSize;
+    int                      version;
     int                      schemaOffset;
     int                      rowOffset;
     int                      stringTableOffset;
@@ -47,6 +48,19 @@ public class CRIDUTFTable
         this.schemaOffset = schemaOffset;
     }
     
+    /**
+     * 0 or 1 (1 means the strings are UTF-8)
+     */
+    public int getVersion()
+    {
+        return version;
+    }
+
+    public void setVersion(int version)
+    {
+        this.version = version;
+    }
+
     public int getRowOffset()
     {
         return rowOffset;
@@ -143,6 +157,7 @@ public class CRIDUTFTable
         return "CRIDUTFTable{" +
                "tableOffset=" + tableOffset +
                ", tableSize=" + tableSize +
+               ", version=" + version +
                ", schemaOffset=" + schemaOffset +
                ", rowOffset=" + rowOffset +
                ", stringTableOffset=" + stringTableOffset +

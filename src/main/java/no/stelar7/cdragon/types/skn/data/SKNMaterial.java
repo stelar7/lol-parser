@@ -4,25 +4,31 @@ import no.stelar7.cdragon.util.types.math.Vector3f;
 
 import java.util.*;
 
-public class SKNMaterial
+public final class SKNMaterial
 {
-    private String name;
-    private int    startVertex;
-    private int    numVertex;
-    private int    startIndex;
-    private int    numIndex;
+    private final String name;
+    private final int    startVertex;
+    private final int    numVertex;
+    private final int    startIndex;
+    private final int    numIndex;
     
-    private List<Integer>   indecies;
-    private List<SKNData> vertices;
+    private final List<Integer> indecies;
+    private final List<SKNData> vertices;
+    
+    public SKNMaterial(String name, int startVertex, int numVertex, int startIndex, int numIndex, List<Integer> indecies, List<SKNData> vertices)
+    {
+        this.name = name;
+        this.startVertex = startVertex;
+        this.numVertex = numVertex;
+        this.startIndex = startIndex;
+        this.numIndex = numIndex;
+        this.indecies = indecies;
+        this.vertices = vertices;
+    }
     
     public List<Integer> getIndecies()
     {
         return indecies;
-    }
-    
-    public void setIndecies(List<Integer> indecies)
-    {
-        this.indecies = indecies;
     }
     
     public List<SKNData> getVertices()
@@ -40,19 +46,9 @@ public class SKNMaterial
         return pos;
     }
     
-    public void setVertices(List<SKNData> vertices)
-    {
-        this.vertices = vertices;
-    }
-    
     public String getName()
     {
         return name;
-    }
-    
-    public void setName(String name)
-    {
-        this.name = name;
     }
     
     public int getStartVertex()
@@ -60,19 +56,9 @@ public class SKNMaterial
         return startVertex;
     }
     
-    public void setStartVertex(int startVertex)
-    {
-        this.startVertex = startVertex;
-    }
-    
     public int getNumVertex()
     {
         return numVertex;
-    }
-    
-    public void setNumVertex(int numVertex)
-    {
-        this.numVertex = numVertex;
     }
     
     public int getStartIndex()
@@ -80,18 +66,8 @@ public class SKNMaterial
         return startIndex;
     }
     
-    public void setStartIndex(int startIndex)
-    {
-        this.startIndex = startIndex;
-    }
-    
     public int getNumIndex()
     {
         return numIndex;
-    }
-    
-    public void setNumIndex(int numIndex)
-    {
-        this.numIndex = numIndex;
     }
 }

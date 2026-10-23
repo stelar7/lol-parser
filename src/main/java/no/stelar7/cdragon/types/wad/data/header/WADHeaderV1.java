@@ -1,35 +1,27 @@
 package no.stelar7.cdragon.types.wad.data.header;
 
-public class WADHeaderV1 extends WADHeaderBase
+/**
+ * WAD 1.x header
+ */
+public final class WADHeaderV1 extends WADHeaderBase
 {
-    private int entryHeaderOffset;
-    private int entryHeaderCellSize;
-    
-    public WADHeaderV1(WADHeaderBase base)
+    private final int entryHeaderOffset;
+    private final int entryHeaderCellSize;
+
+    public WADHeaderV1(String magic, int major, int minor, int entryHeaderOffset, int entryHeaderCellSize, long fileCount)
     {
-        this.magic = base.magic;
-        this.major = base.major;
-        this.minor = base.minor;
-        this.fileCount = base.fileCount;
+        super(magic, major, minor, fileCount);
+        this.entryHeaderOffset = entryHeaderOffset;
+        this.entryHeaderCellSize = entryHeaderCellSize;
     }
-    
+
     public int getEntryHeaderOffset()
     {
         return entryHeaderOffset;
     }
-    
-    public void setEntryHeaderOffset(int entryHeaderOffset)
-    {
-        this.entryHeaderOffset = entryHeaderOffset;
-    }
-    
+
     public int getEntryHeaderCellSize()
     {
         return entryHeaderCellSize;
-    }
-    
-    public void setEntryHeaderCellSize(int entryHeaderCellSize)
-    {
-        this.entryHeaderCellSize = entryHeaderCellSize;
     }
 }

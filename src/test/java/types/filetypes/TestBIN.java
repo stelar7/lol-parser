@@ -469,12 +469,12 @@ public class TestBIN
     @Test
     public void generateUnknownBinhashList() throws IOException
     {
-        final BINParser bp = new BINParser();
+        final BINParser bp = new BINParser(true);
         Files.walk(UtilHandler.CDRAGON_FOLDER.resolve("pbe"))
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(bp::parse);
         
-        BINParser.hashes.forEach((key, value) -> {
+        bp.getCollectedHashes().forEach((key, value) -> {
             try
             {
                 List<String> sortedHashes = new ArrayList<>(value);

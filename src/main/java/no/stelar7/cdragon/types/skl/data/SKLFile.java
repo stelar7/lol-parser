@@ -1,19 +1,28 @@
 package no.stelar7.cdragon.types.skl.data;
 
-import no.stelar7.cdragon.types.skl.data.versioned.bone.SKLBoneV0;
+import no.stelar7.cdragon.types.skl.data.versioned.bone.*;
 import no.stelar7.cdragon.types.skl.data.versioned.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
 import no.stelar7.cdragon.util.types.Pair;
+import no.stelar7.cdragon.util.types.math.*;
+import org.joml.Quaternionf;
 
 import java.util.*;
-import java.util.Map.Entry;
 
-public class SKLFile
+public final class SKLFile
 {
-    private SKLHeader header;
-    private SKLDataV0 dataV0;
-    private SKLDataV1 dataV1;
-    private SKLDataV2 dataV2;
+    private final SKLHeader header;
+    private final SKLDataV0 dataV0;
+    private final SKLDataV1 dataV1;
+    private final SKLDataV2 dataV2;
+    
+    public SKLFile(SKLHeader header, SKLDataV0 dataV0, SKLDataV1 dataV1, SKLDataV2 dataV2)
+    {
+        this.header = header;
+        this.dataV0 = dataV0;
+        this.dataV1 = dataV1;
+        this.dataV2 = dataV2;
+    }
     
     public List<ReadableBone> toReadableBones()
     {
@@ -21,71 +30,75 @@ public class SKLFile
         
         if (dataV0 != null)
         {
-            Map<Short, Pair<SKLBoneV0, ReadableBone>> tempret = new HashMap<>();
+            Map<Short, Pair<SKLBoneV0, ReadableBone>> tempret = new LinkedHashMap<>();
             List<SKLBoneV0>                           bones   = dataV0.getBones();
             
-            for (int i = 0; i < bones.size(); i++)
+            for (SKLBoneV0 bone : bones)
             {
-                SKLBoneV0 bone = bones.get(i);
-                
-                ReadableBone newb     = new ReadableBone();
-                String       boneName = dataV0.getBoneNames().get(i);
-                boneName = boneName.substring(0, boneName.indexOf("\u0000"));
-                newb.setName(boneName);
-                newb.setHash(bone.getHash() != 0 ? bone.getHash() : HashHandler.computeELFHash(newb.getName()));
+                ReadableBone newb = new ReadableBone();
+                newb.setName(bone.getName());
+                newb.setHash(bone.getHash() != 0 ? Integer.toUnsignedLong(bone.getHash()) : HashHandler.computeELFHash(newb.getName()));
                 newb.setScale(bone.getScale());
                 newb.setPosition(bone.getPosition());
                 newb.setRotation(bone.getRotation());
                 tempret.put(bone.getId(), new Pair<>(bone, newb));
             }
             
-            for (Entry<Short, Pair<SKLBoneV0, ReadableBone>> entry : tempret.entrySet())
+            for (Pair<SKLBoneV0, ReadableBone> entry : tempret.values())
             {
-                ReadableBone rself = entry.getValue().getB();
-                SKLBoneV0    bself = entry.getValue().getA();
-                
-                Optional<Entry<Short, Pair<SKLBoneV0, ReadableBone>>> dat = tempret.entrySet().stream().filter(t -> t.getKey() == bself.getParent()).findFirst();
-                if (dat.isPresent())
+                Pair<SKLBoneV0, ReadableBone> parent = tempret.get(entry.getA().getParent());
+                if (parent != null)
                 {
-                    ReadableBone rother = dat.get().getValue().getB();
-                    rself.setParent(rother);
+                    entry.getB().setParent(parent.getB());
                 }
-                
-                ret.add(rself);
+                ret.add(entry.getB());
             }
             return ret;
         }
         
-        throw new RuntimeException("Only able to transform v0 bones atm..");
-        
-        /*
-        
-        if (dataV1 != null)
+        SKLDataV1 legacy = dataV2 != null ? dataV2 : dataV1;
+        if (legacy != null)
         {
-            List<SKLBoneV1> bones = dataV1.getBones();
+            // legacy bones store global transforms, ReadableBone wants them relative to the parent
+            List<SKLBoneV1> bones = legacy.getBones();
+            for (SKLBoneV1 bone : bones)
+            {
+                Matrix4x3f local = new Matrix4x3f();
+                local.set(bone.getMatrix());
+                
+                int parentId = bone.getParent();
+                if (parentId >= 0 && parentId < bones.size())
+                {
+                    Matrix4x3f parentInverse = new Matrix4x3f();
+                    bones.get(parentId).getMatrix().invert(parentInverse);
+                    parentInverse.mul(bone.getMatrix(), local);
+                }
+                
+                Quaternionf rotation = local.getNormalizedRotation(new Quaternionf());
+                Vector4f    rot      = new Vector4f();
+                rot.set(rotation.x, rotation.y, rotation.z, rotation.w);
+                
+                ReadableBone newb = new ReadableBone();
+                newb.setName(bone.getName());
+                newb.setHash(HashHandler.computeELFHash(bone.getName()));
+                newb.setPosition(local.decomposePosition());
+                newb.setScale(local.decomposeScale());
+                newb.setRotation(rot);
+                ret.add(newb);
+            }
             
             for (int i = 0; i < bones.size(); i++)
             {
-                SKLBoneV1 bone = bones.get(i);
-                
-                ReadableBone newb     = new ReadableBone();
-                String       boneName = dataV0.getBoneNames().get(i);
-                boneName = boneName.substring(0, boneName.indexOf("\u0000"));
-                newb.setName(boneName);
-                newb.setHash(HashHandler.computeELFHash(newb.getName()));
-                
-                // TODO what?
-                newb.setScale(new Vector3f(bone.getScale()));
-                newb.setScale(bone.getMatrix().decomposeScale());
-                
-                newb.setPosition(bone.getMatrix().decomposePosition());
-                newb.setRotation(bone.getMatrix().decomposeRotation());
+                int parentId = bones.get(i).getParent();
+                if (parentId >= 0 && parentId < bones.size())
+                {
+                    ret.get(i).setParent(ret.get(parentId));
+                }
             }
-            
             return ret;
         }
-        */
         
+        throw new IllegalStateException("Skeleton contains no bone data");
     }
     
     public SKLDataV0 getDataV0()
@@ -93,19 +106,9 @@ public class SKLFile
         return dataV0;
     }
     
-    public void setDataV0(SKLDataV0 dataV0)
-    {
-        this.dataV0 = dataV0;
-    }
-    
     public SKLDataV1 getDataV1()
     {
         return dataV1;
-    }
-    
-    public void setDataV1(SKLDataV1 dataV1)
-    {
-        this.dataV1 = dataV1;
     }
     
     public SKLDataV2 getDataV2()
@@ -113,18 +116,8 @@ public class SKLFile
         return dataV2;
     }
     
-    public void setDataV2(SKLDataV2 dataV2)
-    {
-        this.dataV2 = dataV2;
-    }
-    
     public SKLHeader getHeader()
     {
         return header;
-    }
-    
-    public void setHeader(SKLHeader header)
-    {
-        this.header = header;
     }
 }

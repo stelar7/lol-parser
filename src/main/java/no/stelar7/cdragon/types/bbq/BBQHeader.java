@@ -140,6 +140,26 @@ public class BBQHeader
         this.headerSize = headerSize;
     }
     
+    private transient BBQUnityCN unityCN;
+
+    /**
+     * The UnityCN decryptor if the bundle is encrypted, else null
+     */
+    public BBQUnityCN getUnityCN()
+    {
+        return unityCN;
+    }
+
+    public void setUnityCN(BBQUnityCN unityCN)
+    {
+        this.unityCN = unityCN;
+    }
+
+    public boolean isEncrypted()
+    {
+        return unityCN != null;
+    }
+
     public boolean isUnityFS()
     {
         return this.signature.equals("UnityFS");

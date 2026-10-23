@@ -3,21 +3,27 @@ package no.stelar7.cdragon.types.bin.data;
 
 import java.util.*;
 
-public class BINContainer
+public final class BINContainer
 {
-    private BINValueType type;
-    private int          size;
-    private int          count;
-    private List<Object> data = new ArrayList<>();
+    private final BINValueType type;
+    private final int          size;
+    private final int          count;
+    private final List<Object> data;
+    
+    /**
+     * @param data the items, kept as given (not copied)
+     */
+    public BINContainer(BINValueType type, int size, int count, List<Object> data)
+    {
+        this.type = type;
+        this.size = size;
+        this.count = count;
+        this.data = data;
+    }
     
     public BINValueType getType()
     {
         return type;
-    }
-    
-    public void setType(BINValueType type)
-    {
-        this.type = type;
     }
     
     public int getSize()
@@ -25,31 +31,15 @@ public class BINContainer
         return size;
     }
     
-    public void setSize(int size)
-    {
-        this.size = size;
-    }
-    
     public int getCount()
     {
         return count;
-    }
-    
-    public void setCount(int count)
-    {
-        this.count = count;
     }
     
     public List<Object> getData()
     {
         return data;
     }
-    
-    public void setData(List<Object> data)
-    {
-        this.data = data;
-    }
-    
     
     @Override
     public boolean equals(Object o)

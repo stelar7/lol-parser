@@ -2,18 +2,28 @@ package no.stelar7.cdragon.types.bnk.data;
 
 public class BNKHeader
 {
-    private String section;
-    private int    length;
-    private int    dataStart;
+    private final String section;
+    private final int    length;
+    private final int    dataStart;
+    
+    public BNKHeader(String section, int length, int dataStart)
+    {
+        this.section = section;
+        this.length = length;
+        this.dataStart = dataStart;
+    }
+    
+    /**
+     * Copies the section header, used by the parsed sections
+     */
+    protected BNKHeader(BNKHeader header)
+    {
+        this(header.getSection(), header.getLength(), header.getDataStart());
+    }
     
     public String getSection()
     {
         return section;
-    }
-    
-    public void setSection(String section)
-    {
-        this.section = section;
     }
     
     public int getLength()
@@ -21,18 +31,8 @@ public class BNKHeader
         return length;
     }
     
-    public void setLength(int length)
-    {
-        this.length = length;
-    }
-    
     public int getDataStart()
     {
         return dataStart;
-    }
-    
-    public void setDataStart(int dataStart)
-    {
-        this.dataStart = dataStart;
     }
 }

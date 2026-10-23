@@ -3,12 +3,23 @@ package no.stelar7.cdragon.types.bin.data;
 
 import java.util.*;
 
-public class BINStruct
+public final class BINStruct
 {
-    private String         hash;
-    private int            size;
-    private short          count;
-    private List<BINValue> data = new ArrayList<>();
+    private final String         hash;
+    private final int            size;
+    private final short          count;
+    private final List<BINValue> data;
+    
+    /**
+     * @param data the fields, kept as given (not copied)
+     */
+    public BINStruct(String hash, int size, short count, List<BINValue> data)
+    {
+        this.hash = hash;
+        this.size = size;
+        this.count = count;
+        this.data = data;
+    }
     
     public BINValue getIfPresent(String hash)
     {
@@ -28,12 +39,12 @@ public class BINStruct
     public <T> T getOrDefault(String hash, T other)
     {
         Optional<BINValue> maybe = get(hash);
-        
+    
         if (maybe.isEmpty())
         {
             return other;
         }
-        
+    
         return (T) maybe.get().getValue();
     }
     
@@ -42,19 +53,9 @@ public class BINStruct
         return hash;
     }
     
-    public void setHash(String hash)
-    {
-        this.hash = hash;
-    }
-    
     public int getSize()
     {
         return size;
-    }
-    
-    public void setSize(int size)
-    {
-        this.size = size;
     }
     
     public short getCount()
@@ -62,19 +63,9 @@ public class BINStruct
         return count;
     }
     
-    public void setCount(short count)
-    {
-        this.count = count;
-    }
-    
     public List<BINValue> getData()
     {
         return data;
-    }
-    
-    public void setData(List<BINValue> data)
-    {
-        this.data = data;
     }
     
     @Override

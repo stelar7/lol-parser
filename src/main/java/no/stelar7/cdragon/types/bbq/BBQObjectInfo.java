@@ -9,118 +9,155 @@ import java.util.function.BiFunction;
 
 public class BBQObjectInfo
 {
-    BBQAsset asset;
-    long     pathId;
-    int      dataOffset;
-    int      size;
-    int      typeId;
-    int      classId;
-    boolean  isDestroyed;
-    short    unknown0;
-    short    unknown1;
-    
+    private static volatile Map<String, String> classNames;
+
+    BBQAsset    asset;
+    long        pathId;
+    long        dataOffset;
+    int         size;
+    /**
+     * The class id (for MonoBehaviours with a script: -2 - script index)
+     */
+    int         typeId;
+    int         classId;
+    /**
+     * Index into the type list of the file (format 16+), -1 for older files
+     */
+    int         typeIndex = -1;
+    boolean     isDestroyed;
+    short       unknown0;
+    short       unknown1;
+    BBQTypeTree typeTree;
+
     public BBQObjectInfo(BBQAsset asset, BinaryReader buf)
     {
         this.asset = asset;
         load(buf);
     }
-    
+
     public void load(BinaryReader buf)
     {
         this.pathId = this.readId(buf);
-        this.dataOffset = buf.readInt() + this.asset.dataOffset;
+
+        long start = (this.asset.format >= 22) ? buf.readLong() : Integer.toUnsignedLong(buf.readInt());
+        this.dataOffset = start + this.asset.dataOffset;
         this.size = buf.readInt();
-        if (this.asset.format < 17)
+
+        BBQAssetTypeMetadata types = this.asset.tree;
+        if (this.asset.format < 16)
         {
             this.typeId = buf.readInt();
-            this.classId = buf.readShort();
+            this.classId = Short.toUnsignedInt(buf.readShort());
+            this.typeTree = types.typeTrees.get(this.typeId);
         } else
         {
-            int type  = buf.readInt();
-            int clazz = this.asset.tree.classIds.get(type);
+            this.typeIndex = buf.readInt();
+            if (this.typeIndex < 0 || this.typeIndex >= types.classIds.size())
+            {
+                throw new ParseException("Object " + this.pathId + " has an invalid type index " + this.typeIndex, buf.pos() - 4);
+            }
+
+            int clazz = types.classIds.get(this.typeIndex);
             this.typeId = clazz;
-            this.classId = clazz;
+            this.classId = clazz < 0 ? 114 : clazz;
+            this.typeTree = types.typeList.get(this.typeIndex);
         }
-        
-        if (this.asset.format <= 10)
+
+        if (this.asset.format < 11)
         {
-            this.isDestroyed = buf.readShort() > 0;
+            this.isDestroyed = buf.readShort() != 0;
         }
-        
-        if (this.asset.format >= 11 && this.asset.format <= 16)
+
+        if (this.asset.format >= 11 && this.asset.format < 17)
         {
             this.unknown0 = buf.readShort();
         }
-        
-        if (this.asset.format >= 15 && this.asset.format <= 16)
+
+        if (this.asset.format == 15 || this.asset.format == 16)
         {
             this.unknown1 = buf.readByte();
         }
+
+        if (this.typeTree == null && !types.hasTypeTree)
+        {
+            // stripped file, try the type trees bundled with the library
+            this.typeTree = BBQAssetTypeMetadata.getDefault().typeTrees.get(this.classId);
+        }
     }
-    
+
     long readId(BinaryReader buf)
     {
         if (this.asset.longObjectIds)
         {
             return buf.readLong();
         }
+
+        if (this.asset.format >= 14)
+        {
+            buf.align();
+        }
+
         return this.asset.readId(buf);
     }
-    
-    private BBQTypeTree getTypeTree()
+
+    /**
+     * The type tree used to read this object, or null if neither the file nor the bundled defaults have one
+     */
+    public BBQTypeTree getTypeTree()
     {
-        if (this.typeId < 0)
-        {
-            Map<Integer, BBQTypeTree> tree = this.asset.tree.typeTrees;
-            if (tree.containsKey(this.typeId))
-            {
-                return tree.get(this.typeId);
-            } else if (tree.containsKey(this.classId))
-            {
-                return tree.get(this.classId);
-            }
-            
-            return BBQAssetTypeMetadata.fromFile("bbq/structs.dat").typeTrees.get(this.classId);
-        }
-        
-        return this.asset.types.get(this.typeId);
+        return this.typeTree;
     }
-    
+
+    private static Map<String, String> getClassNames()
+    {
+        if (classNames == null)
+        {
+            classNames = UtilHandler.getBBQClassData();
+        }
+        return classNames;
+    }
+
     public Object getType()
     {
-        if (this.typeId > 0)
+        if (this.classId > 0)
         {
-            return UtilHandler.getBBQClassData().get(String.valueOf(this.typeId));
-        } else if (!this.asset.types.containsKey(this.typeId))
-        {
-            String        typename = "(null)";
-            BBQObjectInfo script   = ((Map<String, BBQObjectInfo>) this.read()).get("m_Script");
-            if (script != null)
+            String name = getClassNames().get(String.valueOf(this.classId));
+            if (name != null)
             {
-                BBQObjectInfo type = ((Map<String, BBQObjectInfo>) script.read()).get("m_ClassName");
-            } else if (this.asset.tree.typeTrees.containsKey(this.typeId))
-            {
-                typename = this.asset.tree.typeTrees.get(this.typeId).type;
-            } else
-            {
-                typename = String.valueOf(this.typeId);
+                return name;
             }
-            this.asset.typeNames.put(this.typeId, typename);
         }
-        
-        return this.asset.types.get(this.typeId).type;
+
+        if (this.typeTree != null)
+        {
+            return this.typeTree.type;
+        }
+
+        return String.valueOf(this.typeId);
     }
-    
-    public Object read()
+
+    /**
+     * Returns the raw bytes of this object
+     */
+    public byte[] readBytes()
     {
         this.asset.buf.seek(this.asset.bufferOffset + this.dataOffset);
-        byte[] data = this.asset.buf.readBytes(this.size);
-        return readValue(getTypeTree(), new RandomAccessReader(data));
+        return this.asset.buf.readBytes(this.size);
+    }
+
+    public Object read()
+    {
+        BBQTypeTree tree = getTypeTree();
+        if (tree == null)
+        {
+            throw new ParseException("No type tree for class " + this.classId + " (bundle has no type tree, and the class is not in the bundled defaults); use readBytes() instead", -1);
+        }
+
+        return readValue(tree, new RandomAccessReader(readBytes(), this.asset.endian));
     }
     
     protected Object readValue(BBQTypeTree type, BinaryReader buf)
     {
-        // TODO: this is reading wrong somewhere
         boolean     shouldAlign  = false;
         int         expectedSize = type.size;
         int         pos          = (int) buf.pos();
@@ -164,12 +201,11 @@ public class BBQObjectInfo
             case "int":
                 result = buf.readInt();
                 break;
+            // values are only aligned after a node that has the align flag (0x4000) set, never before
             case "float":
-                buf.align();
                 result = buf.readFloat();
                 break;
             case "double":
-                buf.align();
                 result = buf.readDouble();
                 break;
             case "string":
@@ -210,7 +246,7 @@ public class BBQObjectInfo
                 {
                     if (type.children.size() != 2)
                     {
-                        throw new UnsupportedOperationException("Pair type has too many children!");
+                        throw new ParseException("Pair type " + type.name + " has " + type.children.size() + " children, expected 2", pos);
                     }
                     
                     Object first  = readValue(type.children.get(0), buf);
@@ -260,7 +296,7 @@ public class BBQObjectInfo
         int size  = after - pos;
         if (expectedSize > 0 && size < expectedSize)
         {
-            throw new RuntimeException("Expected to read " + expectedSize + " but only read " + size + " for type " + type.name);
+            throw new ParseException("Expected to read " + expectedSize + " bytes but only read " + size + " for " + type.type + " " + type.name, pos);
         }
         
         if (shouldAlign || type.shouldAlign())

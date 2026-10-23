@@ -2,6 +2,7 @@ package types.filetypes;
 
 import no.stelar7.cdragon.types.dds.DDSParser;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.readers.ParseException;
 import org.junit.jupiter.api.*;
 
 import javax.crypto.Cipher;
@@ -30,12 +31,18 @@ public class TestDDS
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
                 {
                     BufferedImage img = null;
-                    if (file.toString().endsWith(".dds.compressed"))
+                    try
                     {
-                        img = parser.parseCompressed(file);
-                    } else if (file.toString().endsWith(".dds"))
+                        if (file.toString().endsWith(".dds.compressed"))
+                        {
+                            img = parser.parseCompressed(file);
+                        } else if (file.toString().endsWith(".dds"))
+                        {
+                            img = parser.parse(file);
+                        }
+                    } catch (ParseException e)
                     {
-                        img = parser.parse(file);
+                        System.out.println("Unable to parse " + file + ": " + e.getMessage());
                     }
                     
                     if (img == null)

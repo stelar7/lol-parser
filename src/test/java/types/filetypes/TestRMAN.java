@@ -59,7 +59,7 @@ public class TestRMAN
             // use one thread per core, and leave one free for the OS
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             
-            Set<Pair<Integer, Function<Void, Void>>> extracts = new HashSet<>();
+            Set<Pair<Long, Function<Void, Void>>> extracts = new HashSet<>();
             files.forEach(manifest -> manifest.getBody()
                                               .getFiles()
                                               .forEach(f -> {
@@ -167,7 +167,7 @@ public class TestRMAN
     
     private void downloadFileBundles(RMANFile manifest, RMANFileBodyFile file, Path bundleFolder)
     {
-        Map<String, RMANFileBodyBundleChunkInfo> chunksById = manifest.getChunkMap();
+        Map<Long, RMANFileBodyBundleChunkInfo> chunksById = manifest.getChunkMap();
         Set<RMANFileBodyBundle> bundles = file.getChunkIds()
                                               .stream()
                                               .map(c -> manifest.getBundleMap().get(chunksById.get(c).getBundleId()))

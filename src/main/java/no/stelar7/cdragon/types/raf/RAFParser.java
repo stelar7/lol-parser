@@ -1,41 +1,84 @@
 package no.stelar7.cdragon.types.raf;
 
 import no.stelar7.cdragon.types.raf.data.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 
 import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * Parser for the .raf index of RAF archives (version 1).
+ * The file list and path list are read from the offsets in the header, path strings from the offsets in the path list.
+ */
 public class RAFParser
 {
+    public static final int MAGIC = 0x18BE0EF0;
     
     public RAFFile parse(Path path)
     {
-        RandomAccessReader raf     = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        RAFFile            rafFile = new RAFFile(path);
+        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
         
-        rafFile.setHeader(parseHeader(raf));
+        try
+        {
+            RAFHeader header = parseHeader(raf);
         
-        rafFile.setFileCount(raf.readInt());
-        rafFile.setFiles(parseFiles(raf, rafFile.getFileCount()));
+            raf.seek(checkOffset(raf, header.getFilesOffset()));
+            int                  fileCount = readCount(raf, 4 * Integer.BYTES);
+            List<RAFContentFile> files     = parseFiles(raf, fileCount);
         
-        rafFile.setPathsSize(raf.readInt());
-        rafFile.setPathsCount(raf.readInt());
-        rafFile.setPaths(parsePaths(raf, rafFile.getPathsCount()));
+            long pathsOffset = checkOffset(raf, header.getPathsOffset());
+            raf.seek(pathsOffset);
+            int                  pathsSize  = raf.readInt();
+            int                  pathsCount = readCount(raf, 2 * Integer.BYTES);
+            List<RAFContentPath> paths      = parsePaths(raf, pathsCount);
         
-        rafFile.setStrings(parseStrings(raf, rafFile.getPathsCount()));
-        
-        return rafFile;
+            List<String> strings = parseStrings(raf, pathsOffset, paths);
+            return new RAFFile(path, header, files, paths, strings, pathsSize, pathsCount, fileCount);
+        } catch (IndexOutOfBoundsException e)
+        {
+            throw new ParseException("Unexpected end of RAF data", raf.pos(), e);
+        }
     }
     
-    private List<String> parseStrings(RandomAccessReader raf, int count)
+    private static long checkOffset(RandomAccessReader raf, int offset)
     {
-        List<String> strings = new ArrayList<>();
-        
-        for (int i = 0; i < count; i++)
+        long value = Integer.toUnsignedLong(offset);
+        if (value >= raf.size())
         {
-            strings.add(raf.readString().trim());
+            throw new ParseException("RAF offset " + value + " is outside the file", raf.pos());
+        }
+        return value;
+    }
+    
+    private static int readCount(RandomAccessReader raf, int itemSize)
+    {
+        long count = raf.readU32();
+        if (count * itemSize > raf.remaining())
+        {
+            throw new ParseException("Invalid RAF count " + count, raf.pos() - 4);
+        }
+        return (int) count;
+    }
+    
+    /**
+     * Path strings are stored at an offset relative to the start of the path list, with a length that includes the 0x00
+     */
+    private List<String> parseStrings(RandomAccessReader raf, long pathsOffset, List<RAFContentPath> paths)
+    {
+        List<String> strings = new ArrayList<>(paths.size());
+        
+        for (RAFContentPath path : paths)
+        {
+            long offset = pathsOffset + Integer.toUnsignedLong(path.getOffset());
+            long length = Integer.toUnsignedLong(path.getLength());
+            if (offset + length > raf.size())
+            {
+                throw new ParseException("RAF path string is outside the file", offset);
+            }
+            
+            raf.seek(offset);
+            strings.add(raf.readFixedString(length).trim());
         }
         
         return strings;
@@ -43,7 +86,7 @@ public class RAFParser
     
     private List<RAFContentPath> parsePaths(RandomAccessReader raf, int count)
     {
-        List<RAFContentPath> paths = new ArrayList<>();
+        List<RAFContentPath> paths = new ArrayList<>(count);
         
         for (int i = 0; i < count; i++)
         {
@@ -55,7 +98,7 @@ public class RAFParser
     
     private List<RAFContentFile> parseFiles(RandomAccessReader raf, int count)
     {
-        List<RAFContentFile> files = new ArrayList<>();
+        List<RAFContentFile> files = new ArrayList<>(count);
         
         for (int i = 0; i < count; i++)
         {
@@ -67,14 +110,23 @@ public class RAFParser
     
     private RAFHeader parseHeader(RandomAccessReader raf)
     {
-        RAFHeader header = new RAFHeader();
+        int magic = raf.readInt();
+        if (magic != MAGIC)
+        {
+            throw new ParseException(String.format("Invalid RAF magic %08X", magic), 0);
+        }
         
-        header.setMagic(raf.readInt());
-        header.setVersion(raf.readInt());
-        header.setManagerIndex(raf.readInt());
-        header.setFilesOffset(raf.readInt());
-        header.setPathsOffset(raf.readInt());
+        int version = raf.readInt();
+        if (version != 1)
+        {
+            throw new ParseException("Unsupported RAF version " + version, 4);
+        }
         
-        return header;
+        int managerIndex = raf.readInt();
+        int filesOffset  = raf.readInt();
+        int pathsOffset  = raf.readInt();
+        
+        return new RAFHeader(magic, version, managerIndex, filesOffset, pathsOffset);
+        
     }
 }

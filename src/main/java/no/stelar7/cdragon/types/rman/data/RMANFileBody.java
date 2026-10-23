@@ -2,42 +2,22 @@ package no.stelar7.cdragon.types.rman.data;
 
 import java.util.*;
 
-public class RMANFileBody
+public final class RMANFileBody
 {
-    private int                         headerOffset;
-    private RMANFileBodyHeader          header;
-    private List<RMANFileBodyBundle>    bundles;
-    private List<RMANFileBodyLanguage>  languages;
-    private List<RMANFileBodyFile>      files;
-    private List<RMANFileBodyDirectory> directories;
+    private final int                         headerOffset;
+    private final RMANFileBodyHeader          header;
+    private final List<RMANFileBodyBundle>    bundles;
+    private final List<RMANFileBodyLanguage>  languages;
+    private final List<RMANFileBodyFile>      files;
+    private final List<RMANFileBodyDirectory> directories;
     
-    public void setHeaderOffset(int headerOffset)
+    public RMANFileBody(int headerOffset, RMANFileBodyHeader header, List<RMANFileBodyBundle> bundles, List<RMANFileBodyLanguage> languages, List<RMANFileBodyFile> files, List<RMANFileBodyDirectory> directories)
     {
         this.headerOffset = headerOffset;
-    }
-    
-    public void setHeader(RMANFileBodyHeader header)
-    {
         this.header = header;
-    }
-    
-    public void setBundles(List<RMANFileBodyBundle> bundles)
-    {
         this.bundles = bundles;
-    }
-    
-    public void setLanguages(List<RMANFileBodyLanguage> languages)
-    {
         this.languages = languages;
-    }
-    
-    public void setFiles(List<RMANFileBodyFile> files)
-    {
         this.files = files;
-    }
-    
-    public void setDirectories(List<RMANFileBodyDirectory> directories)
-    {
         this.directories = directories;
     }
     

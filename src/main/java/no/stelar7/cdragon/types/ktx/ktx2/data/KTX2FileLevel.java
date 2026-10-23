@@ -8,6 +8,21 @@ public class KTX2FileLevel
     private long byteLength;
     private long uncompressedByteLength;
     
+    /**
+     * The level data as stored in the file (still supercompressed if the file uses supercompression)
+     */
+    private byte[] data;
+    
+    public byte[] getData()
+    {
+        return data;
+    }
+    
+    public void setData(byte[] data)
+    {
+        this.data = data;
+    }
+    
     
     public long getByteOffset()
     {

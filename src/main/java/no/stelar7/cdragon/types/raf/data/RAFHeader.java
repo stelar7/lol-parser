@@ -1,21 +1,25 @@
 package no.stelar7.cdragon.types.raf.data;
 
-public class RAFHeader
+public final class RAFHeader
 {
-    private int magic;
-    private int version;
-    private int managerIndex;
-    private int filesOffset;
-    private int pathsOffset;
+    private final int magic;
+    private final int version;
+    private final int managerIndex;
+    private final int filesOffset;
+    private final int pathsOffset;
+    
+    public RAFHeader(int magic, int version, int managerIndex, int filesOffset, int pathsOffset)
+    {
+        this.magic = magic;
+        this.version = version;
+        this.managerIndex = managerIndex;
+        this.filesOffset = filesOffset;
+        this.pathsOffset = pathsOffset;
+    }
     
     public int getMagic()
     {
         return magic;
-    }
-    
-    public void setMagic(int magic)
-    {
-        this.magic = magic;
     }
     
     public int getVersion()
@@ -23,19 +27,9 @@ public class RAFHeader
         return version;
     }
     
-    public void setVersion(int version)
-    {
-        this.version = version;
-    }
-    
     public int getManagerIndex()
     {
         return managerIndex;
-    }
-    
-    public void setManagerIndex(int managerIndex)
-    {
-        this.managerIndex = managerIndex;
     }
     
     public int getFilesOffset()
@@ -43,18 +37,8 @@ public class RAFHeader
         return filesOffset;
     }
     
-    public void setFilesOffset(int filesOffset)
-    {
-        this.filesOffset = filesOffset;
-    }
-    
     public int getPathsOffset()
     {
         return pathsOffset;
-    }
-    
-    public void setPathsOffset(int pathsOffset)
-    {
-        this.pathsOffset = pathsOffset;
     }
 }

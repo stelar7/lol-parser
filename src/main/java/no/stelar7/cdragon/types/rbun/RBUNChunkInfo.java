@@ -4,26 +4,26 @@ import java.util.Objects;
 
 public class RBUNChunkInfo
 {
-    private int    compressedSize;
-    private int    uncompressedSize;
+    private long   compressedSize;
+    private long   uncompressedSize;
     private String chunkId;
     
-    public int getCompressedSize()
+    public long getCompressedSize()
     {
         return compressedSize;
     }
     
-    public void setCompressedSize(int compressedSize)
+    public void setCompressedSize(long compressedSize)
     {
         this.compressedSize = compressedSize;
     }
     
-    public int getUncompressedSize()
+    public long getUncompressedSize()
     {
         return uncompressedSize;
     }
     
-    public void setUncompressedSize(int uncompressedSize)
+    public void setUncompressedSize(long uncompressedSize)
     {
         this.uncompressedSize = uncompressedSize;
     }

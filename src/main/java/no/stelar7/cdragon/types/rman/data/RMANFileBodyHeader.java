@@ -2,24 +2,30 @@ package no.stelar7.cdragon.types.rman.data;
 
 import java.util.Objects;
 
-public class RMANFileBodyHeader
+public final class RMANFileBodyHeader
 {
-    private int offsetTableOffset;
-    private int bundleListOffset;
-    private int languageListOffset;
-    private int fileListOffset;
-    private int folderListOffset;
-    private int keyHeaderOffset;
-    private int unknownOffset;
+    private final int offsetTableOffset;
+    private final int bundleListOffset;
+    private final int languageListOffset;
+    private final int fileListOffset;
+    private final int folderListOffset;
+    private final int keyHeaderOffset;
+    private final int unknownOffset;
+    
+    public RMANFileBodyHeader(int offsetTableOffset, int bundleListOffset, int languageListOffset, int fileListOffset, int folderListOffset, int keyHeaderOffset, int unknownOffset)
+    {
+        this.offsetTableOffset = offsetTableOffset;
+        this.bundleListOffset = bundleListOffset;
+        this.languageListOffset = languageListOffset;
+        this.fileListOffset = fileListOffset;
+        this.folderListOffset = folderListOffset;
+        this.keyHeaderOffset = keyHeaderOffset;
+        this.unknownOffset = unknownOffset;
+    }
     
     public int getOffsetTableOffset()
     {
         return offsetTableOffset;
-    }
-    
-    public void setOffsetTableOffset(int offsetTableOffset)
-    {
-        this.offsetTableOffset = offsetTableOffset;
     }
     
     public int getBundleListOffset()
@@ -27,19 +33,9 @@ public class RMANFileBodyHeader
         return bundleListOffset;
     }
     
-    public void setBundleListOffset(int bundleListOffset)
-    {
-        this.bundleListOffset = bundleListOffset;
-    }
-    
     public int getLanguageListOffset()
     {
         return languageListOffset;
-    }
-    
-    public void setLanguageListOffset(int languageListOffset)
-    {
-        this.languageListOffset = languageListOffset;
     }
     
     public int getFileListOffset()
@@ -47,19 +43,9 @@ public class RMANFileBodyHeader
         return fileListOffset;
     }
     
-    public void setFileListOffset(int fileListOffset)
-    {
-        this.fileListOffset = fileListOffset;
-    }
-    
     public int getFolderListOffset()
     {
         return folderListOffset;
-    }
-    
-    public void setFolderListOffset(int folderListOffset)
-    {
-        this.folderListOffset = folderListOffset;
     }
     
     public int getKeyHeaderOffset()
@@ -67,19 +53,9 @@ public class RMANFileBodyHeader
         return keyHeaderOffset;
     }
     
-    public void setKeyHeaderOffset(int keyHeaderOffset)
-    {
-        this.keyHeaderOffset = keyHeaderOffset;
-    }
-    
     public int getUnknownOffset()
     {
         return unknownOffset;
-    }
-    
-    public void setUnknownOffset(int unknownOffset)
-    {
-        this.unknownOffset = unknownOffset;
     }
     
     @Override

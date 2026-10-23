@@ -6,176 +6,313 @@ import java.util.*;
 
 public class MGEOFileMesh
 {
+    // only stored in the file for versions 11 and below
     private String                    name;
-    private MGEOFileMeshType          type;
-    private List<MGEOFileMeshVertex>  vertices;
-    private List<Short>               indices;
-    private List<MGeoFileMeshSubMesh> subMeshes;
-    private BoundingBox               boundingBox;
-    private Matrix4f                  transformationMatrix;
-    private Vector3f                  unknown;
-    private Matrix4f[]                unknown2;
-    private String                    lightMap;
-    private Vector4f                  unknown3;
-    
-    public List<MGEOFileMeshVertex> getVertices()
-    {
-        return vertices;
-    }
-    
-    public void setVertices(List<MGEOFileMeshVertex> vertices)
-    {
-        this.vertices = vertices;
-    }
-    
-    public List<Short> getIndices()
-    {
-        return indices;
-    }
-    
-    public void setIndices(List<Short> indices)
-    {
-        this.indices = indices;
-    }
-    
+    // index of the first vertex declaration used by this mesh; buffer i uses declaration (id + i)
+    private int                       baseVertexDeclarationId;
+    private int[]                     vertexBufferIds;
+    private int                       indexBufferId;
+    private List<MGEOFileMeshVertex>  vertices  = new ArrayList<>();
+    // unsigned 16 bit indices
+    private int[]                     indices   = new int[0];
+    private List<MGeoFileMeshSubMesh> subMeshes = new ArrayList<>();
+
+    // version 13+ (before that: 7-12, stored after the quality filter)
+    private int     visibilityFlags = 0xFF;
+    // version 18+
+    private int     regionHash;
+    // version 15+
+    private int     visibilityControllerPathHash;
+    private boolean disableBackfaceCulling;
+
+    private BoundingBox boundingBox;
+    private Matrix4f    transformationMatrix;
+    private int         qualityFilter;
+    // version 14+
+    private int         layerTransitionBehavior;
+    // version 11+
+    private int         renderFlags;
+
+    // versions below 7, if the file uses separate point lights
+    private Vector3f   pointLight;
+    // versions below 9
+    private Vector3f[] sphericalHarmonics;
+
+    private MGEOChannel bakedLight;
+    // version 9+
+    private MGEOChannel stationaryLight;
+    // version 12+ (baked paint for 12-16, index 0)
+    private List<MGEOTextureOverride> textureOverrides = new ArrayList<>();
+    // version 17+
+    private Vector2f bakedPaintScale;
+    private Vector2f bakedPaintBias;
+    // version 19+
+    private int      version19Byte = -1;
+    // version 20+
+    private byte[]   extensionData;
+
     public String getName()
     {
         return name;
     }
-    
+
     public void setName(String name)
     {
         this.name = name;
     }
-    
-    public MGEOFileMeshType getType()
+
+    public int getBaseVertexDeclarationId()
     {
-        return type;
+        return baseVertexDeclarationId;
     }
-    
-    public void setType(MGEOFileMeshType type)
+
+    public void setBaseVertexDeclarationId(int baseVertexDeclarationId)
     {
-        this.type = type;
+        this.baseVertexDeclarationId = baseVertexDeclarationId;
     }
-    
+
+    public int[] getVertexBufferIds()
+    {
+        return vertexBufferIds;
+    }
+
+    public void setVertexBufferIds(int[] vertexBufferIds)
+    {
+        this.vertexBufferIds = vertexBufferIds;
+    }
+
+    public int getIndexBufferId()
+    {
+        return indexBufferId;
+    }
+
+    public void setIndexBufferId(int indexBufferId)
+    {
+        this.indexBufferId = indexBufferId;
+    }
+
+    public List<MGEOFileMeshVertex> getVertices()
+    {
+        return vertices;
+    }
+
+    public void setVertices(List<MGEOFileMeshVertex> vertices)
+    {
+        this.vertices = vertices;
+    }
+
+    public int[] getIndices()
+    {
+        return indices;
+    }
+
+    public void setIndices(int[] indices)
+    {
+        this.indices = indices;
+    }
+
     public List<MGeoFileMeshSubMesh> getSubMeshes()
     {
         return subMeshes;
     }
-    
+
     public void setSubMeshes(List<MGeoFileMeshSubMesh> subMeshes)
     {
         this.subMeshes = subMeshes;
     }
-    
+
+    public int getVisibilityFlags()
+    {
+        return visibilityFlags;
+    }
+
+    public void setVisibilityFlags(int visibilityFlags)
+    {
+        this.visibilityFlags = visibilityFlags;
+    }
+
+    public int getRegionHash()
+    {
+        return regionHash;
+    }
+
+    public void setRegionHash(int regionHash)
+    {
+        this.regionHash = regionHash;
+    }
+
+    public int getVisibilityControllerPathHash()
+    {
+        return visibilityControllerPathHash;
+    }
+
+    public void setVisibilityControllerPathHash(int visibilityControllerPathHash)
+    {
+        this.visibilityControllerPathHash = visibilityControllerPathHash;
+    }
+
+    public boolean isDisableBackfaceCulling()
+    {
+        return disableBackfaceCulling;
+    }
+
+    public void setDisableBackfaceCulling(boolean disableBackfaceCulling)
+    {
+        this.disableBackfaceCulling = disableBackfaceCulling;
+    }
+
     public BoundingBox getBoundingBox()
     {
         return boundingBox;
     }
-    
+
     public void setBoundingBox(BoundingBox boundingBox)
     {
         this.boundingBox = boundingBox;
     }
-    
+
     public Matrix4f getTransformationMatrix()
     {
         return transformationMatrix;
     }
-    
+
     public void setTransformationMatrix(Matrix4f transformationMatrix)
     {
         this.transformationMatrix = transformationMatrix;
     }
-    
-    public Vector3f getUnknown()
+
+    public int getQualityFilter()
     {
-        return unknown;
+        return qualityFilter;
     }
-    
-    public void setUnknown(Vector3f unknown)
+
+    public void setQualityFilter(int qualityFilter)
     {
-        this.unknown = unknown;
+        this.qualityFilter = qualityFilter;
     }
-    
-    public Matrix4f[] getUnknown2()
+
+    public int getLayerTransitionBehavior()
     {
-        return unknown2;
+        return layerTransitionBehavior;
     }
-    
-    public void setUnknown2(Matrix4f[] unknown2)
+
+    public void setLayerTransitionBehavior(int layerTransitionBehavior)
     {
-        this.unknown2 = unknown2;
+        this.layerTransitionBehavior = layerTransitionBehavior;
     }
-    
+
+    public int getRenderFlags()
+    {
+        return renderFlags;
+    }
+
+    public void setRenderFlags(int renderFlags)
+    {
+        this.renderFlags = renderFlags;
+    }
+
+    public Vector3f getPointLight()
+    {
+        return pointLight;
+    }
+
+    public void setPointLight(Vector3f pointLight)
+    {
+        this.pointLight = pointLight;
+    }
+
+    public Vector3f[] getSphericalHarmonics()
+    {
+        return sphericalHarmonics;
+    }
+
+    public void setSphericalHarmonics(Vector3f[] sphericalHarmonics)
+    {
+        this.sphericalHarmonics = sphericalHarmonics;
+    }
+
+    public MGEOChannel getBakedLight()
+    {
+        return bakedLight;
+    }
+
+    public void setBakedLight(MGEOChannel bakedLight)
+    {
+        this.bakedLight = bakedLight;
+    }
+
+    /**
+     * The baked light texture
+     */
     public String getLightMap()
     {
-        return lightMap;
+        return bakedLight == null ? null : bakedLight.getTexture();
     }
-    
-    public void setLightMap(String lightMap)
+
+    public MGEOChannel getStationaryLight()
     {
-        this.lightMap = lightMap;
+        return stationaryLight;
     }
-    
-    public Vector4f getUnknown3()
+
+    public void setStationaryLight(MGEOChannel stationaryLight)
     {
-        return unknown3;
+        this.stationaryLight = stationaryLight;
     }
-    
-    public void setUnknown3(Vector4f unknown3)
+
+    public List<MGEOTextureOverride> getTextureOverrides()
     {
-        this.unknown3 = unknown3;
+        return textureOverrides;
     }
-    
-    @Override
-    public boolean equals(Object o)
+
+    public void setTextureOverrides(List<MGEOTextureOverride> textureOverrides)
     {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        MGEOFileMesh that = (MGEOFileMesh) o;
-        return Objects.equals(name, that.name) &&
-               type == that.type &&
-               Objects.equals(vertices, that.vertices) &&
-               Objects.equals(indices, that.indices) &&
-               Objects.equals(subMeshes, that.subMeshes) &&
-               Objects.equals(boundingBox, that.boundingBox) &&
-               Objects.equals(transformationMatrix, that.transformationMatrix) &&
-               Objects.equals(unknown, that.unknown) &&
-               Arrays.equals(unknown2, that.unknown2) &&
-               Objects.equals(lightMap, that.lightMap) &&
-               Objects.equals(unknown3, that.unknown3);
+        this.textureOverrides = textureOverrides;
     }
-    
-    @Override
-    public int hashCode()
+
+    public Vector2f getBakedPaintScale()
     {
-        int result = Objects.hash(name, type, vertices, indices, subMeshes, boundingBox, transformationMatrix, unknown, lightMap, unknown3);
-        result = 31 * result + Arrays.hashCode(unknown2);
-        return result;
+        return bakedPaintScale;
     }
-    
-    @Override
-    public String toString()
+
+    public void setBakedPaintScale(Vector2f bakedPaintScale)
     {
-        return "MGEOFileMesh{" +
-               "name='" + name + '\'' +
-               ", type=" + type +
-               ", vertices=" + vertices +
-               ", indices=" + indices +
-               ", subMeshes=" + subMeshes +
-               ", boundingBox=" + boundingBox +
-               ", transformationMatrix=" + transformationMatrix +
-               ", unknown=" + unknown +
-               ", unknown2=" + Arrays.toString(unknown2) +
-               ", lightMap='" + lightMap + '\'' +
-               ", unknown3=" + unknown3 +
-               '}';
+        this.bakedPaintScale = bakedPaintScale;
+    }
+
+    public Vector2f getBakedPaintBias()
+    {
+        return bakedPaintBias;
+    }
+
+    public void setBakedPaintBias(Vector2f bakedPaintBias)
+    {
+        this.bakedPaintBias = bakedPaintBias;
+    }
+
+    /**
+     * Version 19+: the byte after the baked paint scale/bias (default 1; the client stores it but never uses it), -1 for older versions
+     */
+    public int getVersion19Byte()
+    {
+        return version19Byte;
+    }
+
+    public void setVersion19Byte(int version19Byte)
+    {
+        this.version19Byte = version19Byte;
+    }
+
+    /**
+     * Version 20+: the raw reflection-serialized MapGeoExtension object (class hash 0xD3F07247) that follows the mesh record, null for older versions.
+     * The client parses and discards it, so it is kept unparsed.
+     */
+    public byte[] getExtensionData()
+    {
+        return extensionData;
+    }
+
+    public void setExtensionData(byte[] extensionData)
+    {
+        this.extensionData = extensionData;
     }
 }

@@ -20,6 +20,19 @@ public class KTX2FileHeader
         this.magic = magic;
     }
     
+    public byte[] getMagic()
+    {
+        return magic;
+    }
+    
+    /**
+     * The VkFormat of the texture data, 0 (VK_FORMAT_UNDEFINED) for BasisLZ/UASTC and other formats only described by the DFD
+     */
+    public int getFormat()
+    {
+        return format;
+    }
+    
     public void setFormat(int format)
     {
         this.format = format;

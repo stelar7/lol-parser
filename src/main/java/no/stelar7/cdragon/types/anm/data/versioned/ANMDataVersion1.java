@@ -5,46 +5,69 @@ import no.stelar7.cdragon.util.types.math.Vector3f;
 
 import java.util.*;
 
-public class ANMDataVersion1
+public final class ANMDataVersion1
 {
-    private int    dataSize;
-    private String subMagic;
-    private int    subVersion;
-    private int    boneCount;
-    private int    entryCount;
-    private int    unknown1;
+    private final int    dataSize;
+    private final String subMagic;
+    private final int    subVersion;
+    private final int    boneCount;
+    private final int    entryCount;
+    private final int    unknown1;
     
-    private float animationLength;
-    private float FPS;
+    private final float animationLength;
+    private final float FPS;
     
-    private int unknown2;
-    private int unknown3;
-    private int unknown4;
-    private int unknown5;
-    private int unknown6;
-    private int unknown7;
+    private final int unknown2;
+    private final int unknown3;
+    private final int unknown4;
+    private final int unknown5;
+    private final int unknown6;
+    private final int unknown7;
     
-    private Vector3f minTranslation;
-    private Vector3f maxTranslation;
-    private Vector3f minScale;
-    private Vector3f maxScale;
+    private final Vector3f minTranslation;
+    private final Vector3f maxTranslation;
+    private final Vector3f minScale;
+    private final Vector3f maxScale;
     
-    private int entryOffset;
-    private int indexOffset;
-    private int hashOffset;
+    private final int entryOffset;
+    private final int indexOffset;
+    private final int hashOffset;
     
-    private List<ANMEntry> entries    = new ArrayList<>();
-    private List<Short>    indecies   = new ArrayList<>();
-    private List<Integer>  boneHashes = new ArrayList<>();
+    private final List<ANMEntry> entries;
+    private final List<Short>    indecies;
+    private final List<Integer>  boneHashes;
+    
+    public ANMDataVersion1(int dataSize, String subMagic, int subVersion, int boneCount, int entryCount, int unknown1, float animationLength, float FPS, int unknown2, int unknown3, int unknown4, int unknown5, int unknown6, int unknown7, Vector3f minTranslation, Vector3f maxTranslation, Vector3f minScale, Vector3f maxScale, int entryOffset, int indexOffset, int hashOffset, List<ANMEntry> entries, List<Short> indecies, List<Integer> boneHashes)
+    {
+        this.dataSize = dataSize;
+        this.subMagic = subMagic;
+        this.subVersion = subVersion;
+        this.boneCount = boneCount;
+        this.entryCount = entryCount;
+        this.unknown1 = unknown1;
+        this.animationLength = animationLength;
+        this.FPS = FPS;
+        this.unknown2 = unknown2;
+        this.unknown3 = unknown3;
+        this.unknown4 = unknown4;
+        this.unknown5 = unknown5;
+        this.unknown6 = unknown6;
+        this.unknown7 = unknown7;
+        this.minTranslation = minTranslation;
+        this.maxTranslation = maxTranslation;
+        this.minScale = minScale;
+        this.maxScale = maxScale;
+        this.entryOffset = entryOffset;
+        this.indexOffset = indexOffset;
+        this.hashOffset = hashOffset;
+        this.entries = entries;
+        this.indecies = indecies;
+        this.boneHashes = boneHashes;
+    }
     
     public int getDataSize()
     {
         return dataSize;
-    }
-    
-    public void setDataSize(int dataSize)
-    {
-        this.dataSize = dataSize;
     }
     
     public String getSubMagic()
@@ -52,19 +75,9 @@ public class ANMDataVersion1
         return subMagic;
     }
     
-    public void setSubMagic(String subMagic)
-    {
-        this.subMagic = subMagic;
-    }
-    
     public int getSubVersion()
     {
         return subVersion;
-    }
-    
-    public void setSubVersion(int subVersion)
-    {
-        this.subVersion = subVersion;
     }
     
     public int getBoneCount()
@@ -72,19 +85,9 @@ public class ANMDataVersion1
         return boneCount;
     }
     
-    public void setBoneCount(int boneCount)
-    {
-        this.boneCount = boneCount;
-    }
-    
     public int getEntryCount()
     {
         return entryCount;
-    }
-    
-    public void setEntryCount(int entryCount)
-    {
-        this.entryCount = entryCount;
     }
     
     public int getUnknown1()
@@ -92,19 +95,9 @@ public class ANMDataVersion1
         return unknown1;
     }
     
-    public void setUnknown1(int unknown1)
-    {
-        this.unknown1 = unknown1;
-    }
-    
     public float getAnimationLength()
     {
         return animationLength;
-    }
-    
-    public void setAnimationLength(float animationLength)
-    {
-        this.animationLength = animationLength;
     }
     
     public float getFPS()
@@ -112,19 +105,9 @@ public class ANMDataVersion1
         return FPS;
     }
     
-    public void setFPS(float FPS)
-    {
-        this.FPS = FPS;
-    }
-    
     public int getUnknown2()
     {
         return unknown2;
-    }
-    
-    public void setUnknown2(int unknown2)
-    {
-        this.unknown2 = unknown2;
     }
     
     public int getUnknown3()
@@ -132,19 +115,9 @@ public class ANMDataVersion1
         return unknown3;
     }
     
-    public void setUnknown3(int unknown3)
-    {
-        this.unknown3 = unknown3;
-    }
-    
     public int getUnknown4()
     {
         return unknown4;
-    }
-    
-    public void setUnknown4(int unknown4)
-    {
-        this.unknown4 = unknown4;
     }
     
     public int getUnknown5()
@@ -152,19 +125,9 @@ public class ANMDataVersion1
         return unknown5;
     }
     
-    public void setUnknown5(int unknown5)
-    {
-        this.unknown5 = unknown5;
-    }
-    
     public int getUnknown6()
     {
         return unknown6;
-    }
-    
-    public void setUnknown6(int unknown6)
-    {
-        this.unknown6 = unknown6;
     }
     
     public int getUnknown7()
@@ -172,19 +135,9 @@ public class ANMDataVersion1
         return unknown7;
     }
     
-    public void setUnknown7(int unknown7)
-    {
-        this.unknown7 = unknown7;
-    }
-    
     public Vector3f getMinTranslation()
     {
         return minTranslation;
-    }
-    
-    public void setMinTranslation(Vector3f minTranslation)
-    {
-        this.minTranslation = minTranslation;
     }
     
     public Vector3f getMaxTranslation()
@@ -192,19 +145,9 @@ public class ANMDataVersion1
         return maxTranslation;
     }
     
-    public void setMaxTranslation(Vector3f maxTranslation)
-    {
-        this.maxTranslation = maxTranslation;
-    }
-    
     public Vector3f getMinScale()
     {
         return minScale;
-    }
-    
-    public void setMinScale(Vector3f minScale)
-    {
-        this.minScale = minScale;
     }
     
     public Vector3f getMaxScale()
@@ -212,19 +155,9 @@ public class ANMDataVersion1
         return maxScale;
     }
     
-    public void setMaxScale(Vector3f maxScale)
-    {
-        this.maxScale = maxScale;
-    }
-    
     public int getEntryOffset()
     {
         return entryOffset;
-    }
-    
-    public void setEntryOffset(int entryOffset)
-    {
-        this.entryOffset = entryOffset;
     }
     
     public int getIndexOffset()
@@ -232,19 +165,9 @@ public class ANMDataVersion1
         return indexOffset;
     }
     
-    public void setIndexOffset(int indexOffset)
-    {
-        this.indexOffset = indexOffset;
-    }
-    
     public int getHashOffset()
     {
         return hashOffset;
-    }
-    
-    public void setHashOffset(int hashOffset)
-    {
-        this.hashOffset = hashOffset;
     }
     
     public List<ANMEntry> getEntries()
@@ -252,28 +175,13 @@ public class ANMDataVersion1
         return entries;
     }
     
-    public void setEntries(List<ANMEntry> entries)
-    {
-        this.entries = entries;
-    }
-    
     public List<Short> getIndecies()
     {
         return indecies;
     }
     
-    public void setIndecies(List<Short> indecies)
-    {
-        this.indecies = indecies;
-    }
-    
     public List<Integer> getBoneHashes()
     {
         return boneHashes;
-    }
-    
-    public void setBoneHashes(List<Integer> boneHashes)
-    {
-        this.boneHashes = boneHashes;
     }
 }

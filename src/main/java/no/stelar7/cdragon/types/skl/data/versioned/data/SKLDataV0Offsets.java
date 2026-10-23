@@ -1,23 +1,29 @@
 package no.stelar7.cdragon.types.skl.data.versioned.data;
 
-public class SKLDataV0Offsets
+public final class SKLDataV0Offsets
 {
-    private int    boneStart;
-    private int    animationStart;
-    private int    boneIndexStart;
-    private int    boneIndexEnd;
-    private int    halfwayBoneString;
-    private int    boneNameStart;
-    private String padding;
+    private final int   boneStart;
+    private final int   animationStart;
+    private final int   boneIndexStart;
+    private final int   boneIndexEnd;
+    private final int   halfwayBoneString;
+    private final int   boneNameStart;
+    private final int[] reservedOffsets;
+    
+    public SKLDataV0Offsets(int boneStart, int animationStart, int boneIndexStart, int boneIndexEnd, int halfwayBoneString, int boneNameStart, int[] reservedOffsets)
+    {
+        this.boneStart = boneStart;
+        this.animationStart = animationStart;
+        this.boneIndexStart = boneIndexStart;
+        this.boneIndexEnd = boneIndexEnd;
+        this.halfwayBoneString = halfwayBoneString;
+        this.boneNameStart = boneNameStart;
+        this.reservedOffsets = reservedOffsets;
+    }
     
     public int getBoneStart()
     {
         return boneStart;
-    }
-    
-    public void setBoneStart(int boneStart)
-    {
-        this.boneStart = boneStart;
     }
     
     public int getAnimationStart()
@@ -25,19 +31,9 @@ public class SKLDataV0Offsets
         return animationStart;
     }
     
-    public void setAnimationStart(int animationStart)
-    {
-        this.animationStart = animationStart;
-    }
-    
     public int getBoneIndexStart()
     {
         return boneIndexStart;
-    }
-    
-    public void setBoneIndexStart(int boneIndexStart)
-    {
-        this.boneIndexStart = boneIndexStart;
     }
     
     public int getBoneIndexEnd()
@@ -45,19 +41,9 @@ public class SKLDataV0Offsets
         return boneIndexEnd;
     }
     
-    public void setBoneIndexEnd(int boneIndexEnd)
-    {
-        this.boneIndexEnd = boneIndexEnd;
-    }
-    
     public int getHalfwayBoneString()
     {
         return halfwayBoneString;
-    }
-    
-    public void setHalfwayBoneString(int halfwayBoneString)
-    {
-        this.halfwayBoneString = halfwayBoneString;
     }
     
     public int getBoneNameStart()
@@ -65,18 +51,8 @@ public class SKLDataV0Offsets
         return boneNameStart;
     }
     
-    public void setBoneNameStart(int boneNameStart)
+    public int[] getReservedOffsets()
     {
-        this.boneNameStart = boneNameStart;
-    }
-    
-    public String getPadding()
-    {
-        return padding;
-    }
-    
-    public void setPadding(String padding)
-    {
-        this.padding = padding;
+        return reservedOffsets;
     }
 }

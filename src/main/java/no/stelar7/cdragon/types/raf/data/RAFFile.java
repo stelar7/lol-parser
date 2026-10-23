@@ -2,33 +2,48 @@ package no.stelar7.cdragon.types.raf.data;
 
 import no.stelar7.cdragon.interfaces.Extractable;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.List;
 
-public class RAFFile implements Extractable
+public final class RAFFile implements Extractable
 {
-    private final RandomAccessReader datReader;
+    // the .dat file is only opened when content is read
+    private final transient Path               datPath;
+    private transient       RandomAccessReader datReader;
     
-    private RAFHeader            header;
-    private List<RAFContentFile> files;
-    private List<RAFContentPath> paths;
-    private List<String>         strings;
-    private int                  pathsSize;
-    private int                  pathsCount;
-    private int                  fileCount;
+    private final RAFHeader            header;
+    private final List<RAFContentFile> files;
+    private final List<RAFContentPath> paths;
+    private final List<String>         strings;
+    private final int                  pathsSize;
+    private final int                  pathsCount;
+    private final int                  fileCount;
     
-    
-    public RAFFile(Path pathToRaf)
+    /**
+     * @param pathToRaf the .raf file, the content is read from the .dat file next to it
+     */
+    public RAFFile(Path pathToRaf, RAFHeader header, List<RAFContentFile> files, List<RAFContentPath> paths, List<String> strings, int pathsSize, int pathsCount, int fileCount)
     {
-        this.datReader = new RandomAccessReader(pathToRaf.resolveSibling(pathToRaf.getFileName() + ".dat"), ByteOrder.BIG_ENDIAN);
+        this.datPath = pathToRaf.resolveSibling(pathToRaf.getFileName() + ".dat");
+        this.header = header;
+        this.files = files;
+        this.paths = paths;
+        this.strings = strings;
+        this.pathsSize = pathsSize;
+        this.pathsCount = pathsCount;
+        this.fileCount = fileCount;
     }
     
-    public RandomAccessReader getDatReader()
+    public synchronized RandomAccessReader getDatReader()
     {
+        if (datReader == null)
+        {
+            datReader = new RandomAccessReader(datPath, ByteOrder.BIG_ENDIAN);
+        }
         return datReader;
     }
     
@@ -37,19 +52,9 @@ public class RAFFile implements Extractable
         return header;
     }
     
-    public void setHeader(RAFHeader header)
-    {
-        this.header = header;
-    }
-    
     public List<RAFContentFile> getFiles()
     {
         return files;
-    }
-    
-    public void setFiles(List<RAFContentFile> files)
-    {
-        this.files = files;
     }
     
     public List<RAFContentPath> getPaths()
@@ -57,19 +62,9 @@ public class RAFFile implements Extractable
         return paths;
     }
     
-    public void setPaths(List<RAFContentPath> paths)
-    {
-        this.paths = paths;
-    }
-    
     public List<String> getStrings()
     {
         return strings;
-    }
-    
-    public void setStrings(List<String> strings)
-    {
-        this.strings = strings;
     }
     
     public int getPathsSize()
@@ -77,29 +72,14 @@ public class RAFFile implements Extractable
         return pathsSize;
     }
     
-    public void setPathsSize(int pathsSize)
-    {
-        this.pathsSize = pathsSize;
-    }
-    
     public int getPathsCount()
     {
         return pathsCount;
     }
     
-    public void setPathsCount(int pathsCount)
-    {
-        this.pathsCount = pathsCount;
-    }
-    
     public int getFileCount()
     {
         return fileCount;
-    }
-    
-    public void setFileCount(int fileCount)
-    {
-        this.fileCount = fileCount;
     }
     
     public void extract(Path path)
@@ -123,11 +103,18 @@ public class RAFFile implements Extractable
         }
     }
     
-    public byte[] readContentFromData(RAFContentFile file)
+    public synchronized byte[] readContentFromData(RAFContentFile file)
     {
-        boolean deflated = false;
+        boolean            deflated  = false;
+        RandomAccessReader datReader = getDatReader();
+        long               offset    = Integer.toUnsignedLong(file.getOffset());
+        long               size      = Integer.toUnsignedLong(file.getSize());
+        if (offset + size > datReader.size())
+        {
+            throw new ParseException("RAF content is outside the .dat file", offset);
+        }
         
-        datReader.seek(file.getOffset());
+        datReader.seek(offset);
         byte[] fileHeader = datReader.readBytes(2);
         
         if (FileTypeHandler.isProbableDEFLATE(fileHeader))
@@ -135,8 +122,8 @@ public class RAFFile implements Extractable
             deflated = true;
         }
         
-        datReader.seek(file.getOffset());
-        byte[] data = datReader.readBytes(file.getSize());
+        datReader.seek(offset);
+        byte[] data = datReader.readBytes(size);
         
         if (deflated)
         {

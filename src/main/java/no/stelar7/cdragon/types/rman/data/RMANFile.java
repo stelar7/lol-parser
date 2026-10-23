@@ -1,12 +1,12 @@
 package no.stelar7.cdragon.types.rman.data;
 
-import com.github.luben.zstd.ZstdInputStream;
+import com.github.luben.zstd.Zstd;
 import com.google.gson.*;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
 
 import java.io.*;
-import java.nio.ByteOrder;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
@@ -14,30 +14,62 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class RMANFile
+public final class RMANFile
 {
-    private RMANFileHeader header;
-    private RMANFileBody   body;
-    private byte[]         compressedBody;
-    private byte[]         signature;
+    private final RMANFileHeader header;
+    private final RMANFileBody   body;
+    private final byte[]         compressedBody;
+    private final byte[]         signature;
     
-    private Map<String, RMANFileBodyBundleChunkInfo> chunksById  = null;
-    private Map<String, RMANFileBodyBundle>          bundlesById = null;
+    // lookup maps, built by buildChunkMap and buildBundleMap
+    private Map<Long, RMANFileBodyBundleChunkInfo> chunksById  = null;
+    private Map<String, RMANFileBodyBundle>        bundlesById = null;
+    
+    // lazily built by getDirectory
+    private transient Map<Long, RMANFileBodyDirectory> directoriesById = null;
+    
+    /**
+     * @param signature the signature after the body, or null if the file is not signed
+     */
+    public RMANFile(RMANFileHeader header, RMANFileBody body, byte[] compressedBody, byte[] signature)
+    {
+        this.header = header;
+        this.body = body;
+        this.compressedBody = compressedBody;
+        this.signature = signature;
+    }
     
     public void buildChunkMap()
     {
-        chunksById = new HashMap<>();
+        int chunkCount = getBody().getBundles().stream().mapToInt(b -> b.getChunks().size()).sum();
+        chunksById = new HashMap<>((int) (chunkCount / 0.75f) + 1);
         for (RMANFileBodyBundle bundle : getBody().getBundles())
         {
-            int currentIndex = 0;
+            long currentIndex = 0;
             for (RMANFileBodyBundleChunk chunk : bundle.getChunks())
             {
-                RMANFileBodyBundleChunkInfo chunkInfo = new RMANFileBodyBundleChunkInfo(bundle.getBundleId(), chunk.getChunkId(), currentIndex, chunk.getCompressedSize());
+                RMANFileBodyBundleChunkInfo chunkInfo = new RMANFileBodyBundleChunkInfo(bundle.getBundleId(), chunk.getChunkId(), currentIndex, chunk.getCompressedSize(), chunk.getUncompressedSize());
                 chunksById.put(chunk.getChunkId(), chunkInfo);
                 
                 currentIndex += chunk.getCompressedSize();
             }
         }
+    }
+    
+    /**
+     * Returns the directory with this id, or null if there is none
+     */
+    public synchronized RMANFileBodyDirectory getDirectory(long directoryId)
+    {
+        if (directoriesById == null)
+        {
+            directoriesById = new HashMap<>();
+            for (RMANFileBodyDirectory directory : getBody().getDirectories())
+            {
+                directoriesById.putIfAbsent(directory.getDirectoryId(), directory);
+            }
+        }
+        return directoriesById.get(directoryId);
     }
     
     public void buildBundleMap()
@@ -78,19 +110,9 @@ public class RMANFile
         return header;
     }
     
-    public void setHeader(RMANFileHeader header)
-    {
-        this.header = header;
-    }
-    
     public byte[] getCompressedBody()
     {
         return compressedBody;
-    }
-    
-    public void setCompressedBody(byte[] compressedBody)
-    {
-        this.compressedBody = compressedBody;
     }
     
     public byte[] getSignature()
@@ -98,22 +120,12 @@ public class RMANFile
         return signature;
     }
     
-    public void setSignature(byte[] signature)
-    {
-        this.signature = signature;
-    }
-    
     public RMANFileBody getBody()
     {
         return body;
     }
     
-    public void setBody(RMANFileBody body)
-    {
-        this.body = body;
-    }
-    
-    public Map<String, RMANFileBodyBundleChunkInfo> getChunkMap()
+    public Map<Long, RMANFileBodyBundleChunkInfo> getChunkMap()
     {
         return chunksById;
     }
@@ -125,43 +137,65 @@ public class RMANFile
     
     public void extractFile(RMANFileBodyFile file, Path bundleFolder, Path outputFolder)
     {
+        System.out.println("Loading bundles needed for " + file.getName());
+        Path outputName = outputFolder.resolve(file.getFullFilepath(this));
+
+        // bundles are opened once each, and only the needed chunks are read from them
+        Map<String, FileChannel> bundles = new HashMap<>();
         try
         {
-            System.out.println("Loading bundles needed for " + file.getName());
-            Path outputName = outputFolder.resolve(file.getFullFilepath(this));
             Files.createDirectories(outputName.getParent());
-            
-            
-            List<String>                chunkIds = file.getChunkIds();
-            RMANFileBodyBundleChunkInfo current  = getChunkMap().get(chunkIds.get(0));
-            
-            FileOutputStream   fos = new FileOutputStream(outputName.toFile(), false);
-            RandomAccessReader raf = new RandomAccessReader(bundleFolder.resolve(current.getBundleId() + ".bundle"), ByteOrder.LITTLE_ENDIAN);
-            for (int i = 0, chunkIdsSize = chunkIds.size(); i < chunkIdsSize; i++)
+        } catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+
+        try (OutputStream fos = new BufferedOutputStream(Files.newOutputStream(outputName)))
+        {
+            for (Long chunkId : file.getChunkIds())
             {
-                raf.seek(current.getOffsetToChunk());
-                byte[]          compressedChunkData = raf.readBytes(current.getCompressedSize());
-                ZstdInputStream is                  = new ZstdInputStream(new ByteArrayInputStream(compressedChunkData));
-                is.transferTo(fos);
-                
-                if (i + 1 >= chunkIdsSize)
+                RMANFileBodyBundleChunkInfo chunk = getChunkMap().get(chunkId);
+                if (chunk == null)
                 {
-                    break;
+                    throw new IllegalStateException("Chunk " + HashHandler.toHex(chunkId, 16) + " of " + file.getName() + " is not in any bundle");
                 }
-                
-                RMANFileBodyBundleChunkInfo next = getChunkMap().get(chunkIds.get(i + 1));
-                if (!current.getBundleId().equals(next.getBundleId()))
+
+                FileChannel channel = bundles.get(chunk.getBundleId());
+                if (channel == null)
                 {
-                    Path nextBundle = bundleFolder.resolve(next.getBundleId() + ".bundle");
-                    raf = new RandomAccessReader(nextBundle, ByteOrder.LITTLE_ENDIAN);
+                    channel = FileChannel.open(bundleFolder.resolve(chunk.getBundleId() + ".bundle"), StandardOpenOption.READ);
+                    bundles.put(chunk.getBundleId(), channel);
                 }
-                
-                current = next;
+
+                ByteBuffer compressed = ByteBuffer.allocate(Math.toIntExact(chunk.getCompressedSize()));
+                long       position   = chunk.getOffsetToChunk();
+                while (compressed.hasRemaining())
+                {
+                    int read = channel.read(compressed, position + compressed.position());
+                    if (read < 0)
+                    {
+                        throw new EOFException("Bundle " + chunk.getBundleId() + " ended before chunk " + HashHandler.toHex(chunkId, 16));
+                    }
+                }
+
+                fos.write(Zstd.decompress(compressed.array(), Math.toIntExact(chunk.getUncompressedSize())));
             }
         } catch (IOException e1)
         {
             e1.printStackTrace();
-            throw new RuntimeException(e1);
+            throw new UncheckedIOException(e1);
+        } finally
+        {
+            for (FileChannel channel : bundles.values())
+            {
+                try
+                {
+                    channel.close();
+                } catch (IOException e)
+                {
+                    e.printStackTrace();
+                }
+            }
         }
     }
     
@@ -230,38 +264,49 @@ public class RMANFile
         return files.stream().collect(Collectors.groupingBy(f -> fixName.apply(f.getName()), Collectors.mapping(f -> f, Collectors.toList())));
     }
     
+    /**
+     * Files of this manifest by lowercase name (the first one, if several share a name)
+     */
+    private Map<String, RMANFileBodyFile> getFilesByLowercaseName()
+    {
+        Map<String, RMANFileBodyFile> byName = new HashMap<>();
+        for (RMANFileBodyFile file : getBody().getFiles())
+        {
+            byName.putIfAbsent(file.getName().toLowerCase(Locale.ROOT), file);
+        }
+        return byName;
+    }
+
     public List<RMANFileBodyFile> getUnchangedFiles(RMANFile oldM)
     {
-        List<RMANFileBodyFile> ignored = new ArrayList<>();
-        oldM.getBody().getFiles().forEach(oldFile -> {
-            
-            Optional<RMANFileBodyFile> optf = getBody().getFiles().stream().filter(n -> n.getName().equalsIgnoreCase(oldFile.getName())).findAny();
-            optf.ifPresent(newFile -> {
-                if (oldFile.getChunkIds().equals(newFile.getChunkIds()))
-                {
-                    ignored.add(oldFile);
-                }
-            });
-        });
-        
+        Map<String, RMANFileBodyFile> newFiles = getFilesByLowercaseName();
+        List<RMANFileBodyFile>        ignored  = new ArrayList<>();
+        for (RMANFileBodyFile oldFile : oldM.getBody().getFiles())
+        {
+            RMANFileBodyFile newFile = newFiles.get(oldFile.getName().toLowerCase(Locale.ROOT));
+            if (newFile != null && oldFile.getChunkIds().equals(newFile.getChunkIds()))
+            {
+                ignored.add(oldFile);
+            }
+        }
+
         return ignored;
     }
-    
-    
+
+
     public List<RMANFileBodyFile> getChangedFiles(RMANFile oldM)
     {
-        List<RMANFileBodyFile> ignored = new ArrayList<>();
-        oldM.getBody().getFiles().forEach(oldFile -> {
-            
-            Optional<RMANFileBodyFile> optf = getBody().getFiles().stream().filter(n -> n.getName().equalsIgnoreCase(oldFile.getName())).findAny();
-            optf.ifPresentOrElse(newFile -> {
-                if (!oldFile.getChunkIds().equals(newFile.getChunkIds()))
-                {
-                    ignored.add(oldFile);
-                }
-            }, () -> ignored.add(oldFile));
-        });
-        
+        Map<String, RMANFileBodyFile> newFiles = getFilesByLowercaseName();
+        List<RMANFileBodyFile>        ignored  = new ArrayList<>();
+        for (RMANFileBodyFile oldFile : oldM.getBody().getFiles())
+        {
+            RMANFileBodyFile newFile = newFiles.get(oldFile.getName().toLowerCase(Locale.ROOT));
+            if (newFile == null || !oldFile.getChunkIds().equals(newFile.getChunkIds()))
+            {
+                ignored.add(oldFile);
+            }
+        }
+
         return ignored;
     }
     

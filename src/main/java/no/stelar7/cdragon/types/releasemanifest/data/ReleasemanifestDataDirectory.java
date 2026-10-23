@@ -1,21 +1,25 @@
 package no.stelar7.cdragon.types.releasemanifest.data;
 
-public class ReleasemanifestDataDirectory
+public final class ReleasemanifestDataDirectory
 {
-    private int nameIndex;
-    private int subdirectoryStartIndex;
-    private int subdirectoryCount;
-    private int fileStartIndex;
-    private int fileCount;
+    private final int nameIndex;
+    private final int subdirectoryStartIndex;
+    private final int subdirectoryCount;
+    private final int fileStartIndex;
+    private final int fileCount;
+    
+    public ReleasemanifestDataDirectory(int nameIndex, int subdirectoryStartIndex, int subdirectoryCount, int fileStartIndex, int fileCount)
+    {
+        this.nameIndex = nameIndex;
+        this.subdirectoryStartIndex = subdirectoryStartIndex;
+        this.subdirectoryCount = subdirectoryCount;
+        this.fileStartIndex = fileStartIndex;
+        this.fileCount = fileCount;
+    }
     
     public int getNameIndex()
     {
         return nameIndex;
-    }
-    
-    public void setNameIndex(int nameIndex)
-    {
-        this.nameIndex = nameIndex;
     }
     
     public int getSubdirectoryStartIndex()
@@ -23,19 +27,9 @@ public class ReleasemanifestDataDirectory
         return subdirectoryStartIndex;
     }
     
-    public void setSubdirectoryStartIndex(int subdirectoryStartIndex)
-    {
-        this.subdirectoryStartIndex = subdirectoryStartIndex;
-    }
-    
     public int getSubdirectoryCount()
     {
         return subdirectoryCount;
-    }
-    
-    public void setSubdirectoryCount(int subdirectoryCount)
-    {
-        this.subdirectoryCount = subdirectoryCount;
     }
     
     public int getFileStartIndex()
@@ -43,18 +37,8 @@ public class ReleasemanifestDataDirectory
         return fileStartIndex;
     }
     
-    public void setFileStartIndex(int fileStartIndex)
-    {
-        this.fileStartIndex = fileStartIndex;
-    }
-    
     public int getFileCount()
     {
         return fileCount;
-    }
-    
-    public void setFileCount(int fileCount)
-    {
-        this.fileCount = fileCount;
     }
 }

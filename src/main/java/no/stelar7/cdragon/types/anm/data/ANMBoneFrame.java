@@ -2,28 +2,24 @@ package no.stelar7.cdragon.types.anm.data;
 
 import org.joml.*;
 
-public class ANMBoneFrame
+public final class ANMBoneFrame
 {
-    private Quaternionf rotation;
-    private Vector3f    translation;
+    private final Quaternionf rotation;
+    private final Vector3f    translation;
+    
+    public ANMBoneFrame(Quaternionf rotation, Vector3f translation)
+    {
+        this.rotation = rotation;
+        this.translation = translation;
+    }
     
     public Quaternionf getRotation()
     {
         return rotation;
     }
     
-    public void setRotation(Quaternionf rotation)
-    {
-        this.rotation = rotation;
-    }
-    
     public Vector3f getTranslation()
     {
         return translation;
-    }
-    
-    public void setTranslation(Vector3f translation)
-    {
-        this.translation = translation;
     }
 }

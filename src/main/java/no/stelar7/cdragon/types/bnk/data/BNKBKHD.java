@@ -1,27 +1,28 @@
 package no.stelar7.cdragon.types.bnk.data;
 
-public class BNKBKHD extends BNKHeader
+public final class BNKBKHD extends BNKHeader
 {
-    public BNKBKHD(BNKHeader header)
+    /**
+     * @param languageId 0 if the section is too small to have it
+     * @param feedback   0 if the section is too small to have it
+     */
+    public BNKBKHD(BNKHeader header, int bankVersion, int bankId, int languageId, int feedback)
     {
-        setDataStart(header.getDataStart());
-        setSection(header.getSection());
-        setLength(header.getLength());
+        super(header);
+        this.bankVersion = bankVersion;
+        this.bankId = bankId;
+        this.languageId = languageId;
+        this.feedback = feedback;
     }
     
-    private int bankVersion;
-    private int bankId;
-    private int languageId;
-    private int feedback;
+    private final int bankVersion;
+    private final int bankId;
+    private final int languageId;
+    private final int feedback;
     
     public int getBankVersion()
     {
         return bankVersion;
-    }
-    
-    public void setBankVersion(int bankVersion)
-    {
-        this.bankVersion = bankVersion;
     }
     
     public int getBankId()
@@ -29,28 +30,13 @@ public class BNKBKHD extends BNKHeader
         return bankId;
     }
     
-    public void setBankId(int bankId)
-    {
-        this.bankId = bankId;
-    }
-    
     public int getLanguageId()
     {
         return languageId;
     }
     
-    public void setLanguageId(int languageId)
-    {
-        this.languageId = languageId;
-    }
-    
     public int getFeedback()
     {
         return feedback;
-    }
-    
-    public void setFeedback(int feedback)
-    {
-        this.feedback = feedback;
     }
 }

@@ -1,16 +1,29 @@
 package no.stelar7.cdragon.types.releasemanifest.data;
 
-public class ReleasemanifestDataContentFile
+public final class ReleasemanifestDataContentFile
 {
-    private int    nameIndex;
-    private int    version;
-    private String hash;
-    private int    flags;
-    private int    size;
-    private int    compressedSize;
-    private int    unknown;
-    private short  type;
-    private short  padding;
+    private final int    nameIndex;
+    private final int    version;
+    private final String hash;
+    private final int    flags;
+    private final int    size;
+    private final int    compressedSize;
+    private final int    unknown;
+    private final short  type;
+    private final short  padding;
+    
+    public ReleasemanifestDataContentFile(int nameIndex, int version, String hash, int flags, int size, int compressedSize, int unknown, short type, short padding)
+    {
+        this.nameIndex = nameIndex;
+        this.version = version;
+        this.hash = hash;
+        this.flags = flags;
+        this.size = size;
+        this.compressedSize = compressedSize;
+        this.unknown = unknown;
+        this.type = type;
+        this.padding = padding;
+    }
     
     // Flags:
     // 0x01 :  Managedfiles dir (?)
@@ -22,15 +35,9 @@ public class ReleasemanifestDataContentFile
     // lol_launcher: all & 4
     // lol_game_client: all & 4
     
-    
     public int getNameIndex()
     {
         return nameIndex;
-    }
-    
-    public void setNameIndex(int nameIndex)
-    {
-        this.nameIndex = nameIndex;
     }
     
     public int getVersion()
@@ -38,19 +45,9 @@ public class ReleasemanifestDataContentFile
         return version;
     }
     
-    public void setVersion(int version)
-    {
-        this.version = version;
-    }
-    
     public String getHash()
     {
         return hash;
-    }
-    
-    public void setHash(String hash)
-    {
-        this.hash = hash;
     }
     
     public int getFlags()
@@ -58,19 +55,9 @@ public class ReleasemanifestDataContentFile
         return flags;
     }
     
-    public void setFlags(int flags)
-    {
-        this.flags = flags;
-    }
-    
     public int getSize()
     {
         return size;
-    }
-    
-    public void setSize(int size)
-    {
-        this.size = size;
     }
     
     public int getCompressedSize()
@@ -78,19 +65,9 @@ public class ReleasemanifestDataContentFile
         return compressedSize;
     }
     
-    public void setCompressedSize(int compressedSize)
-    {
-        this.compressedSize = compressedSize;
-    }
-    
     public int getUnknown()
     {
         return unknown;
-    }
-    
-    public void setUnknown(int unknown)
-    {
-        this.unknown = unknown;
     }
     
     public short getType()
@@ -98,18 +75,8 @@ public class ReleasemanifestDataContentFile
         return type;
     }
     
-    public void setType(short type)
-    {
-        this.type = type;
-    }
-    
     public short getPadding()
     {
         return padding;
-    }
-    
-    public void setPadding(short padding)
-    {
-        this.padding = padding;
     }
 }

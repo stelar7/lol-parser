@@ -1,19 +1,21 @@
 package no.stelar7.cdragon.types.releasemanifest.data;
 
-public class ReleasemanifestContentFile
+public final class ReleasemanifestContentFile
 {
-    private String name;
-    private int    size;
-    private String hash;
+    private final String name;
+    private final int    size;
+    private final String hash;
+    
+    public ReleasemanifestContentFile(String name, int size, String hash)
+    {
+        this.name = name;
+        this.size = size;
+        this.hash = hash;
+    }
     
     public String getName()
     {
         return name;
-    }
-    
-    public void setName(String name)
-    {
-        this.name = name;
     }
     
     public int getSize()
@@ -21,18 +23,8 @@ public class ReleasemanifestContentFile
         return size;
     }
     
-    public void setSize(int size)
-    {
-        this.size = size;
-    }
-    
     public String getHash()
     {
         return hash;
-    }
-    
-    public void setHash(String hash)
-    {
-        this.hash = hash;
     }
 }

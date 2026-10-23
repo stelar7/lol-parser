@@ -20,6 +20,99 @@ public class GameHashGuesser extends HashGuesser
     {
         super(HashGuesser.hashFileGAME, hashes);
     }
+
+    /**
+     * Uses another hash file for the known hashes, eg. a small one for testing
+     */
+    public GameHashGuesser(HashFile hashFile, Set<String> hashes)
+    {
+        super(hashFile, hashes);
+    }
+
+    // a locale as a whole path segment / dot or underscore separated word: data/menu/en_us/, .en_us.wad, bootstrap_en_us.stringtable
+    // zero-width so overlapping candidates are all found ("xx_en_us" finds both "xx_en" and "en_us")
+    private static final Pattern LOCALE_PATTERN = Pattern.compile("(?<=[/._])(?=([a-z]{2}_[a-z]{2})(?:[/._]|$))");
+
+    /**
+     * For known paths containing a locale (vo/en_us/..., *.en_us.wad.client, ...), tries every other locale
+     */
+    public void substituteLanguages()
+    {
+        List<String> paths = new ArrayList<>(this.known.values());
+        substituteTemplates("Substitute languages", paths, LOCALE_PATTERN, LANGUAGES::contains, LANGUAGES);
+    }
+
+    // skin0, skins/skin12/, skin12.bin, ahri_skin12_q.tex; not "reskin1" or "skin_1"
+    private static final Pattern SKIN_PATTERN = Pattern.compile("(?<![a-z])skin(\\d+)(?!\\d)");
+
+    /**
+     * Replaces skin numbers in known paths with 0..max
+     */
+    public void substituteSkinNumbers(int max)
+    {
+        List<String> paths   = new ArrayList<>(this.known.values());
+        List<String> numbers = IntStream.rangeClosed(0, max).mapToObj(String::valueOf).toList();
+
+        // "skin" is kept in the template, only the number is replaced
+        substituteTemplates("Substitute skin numbers", paths, SKIN_PATTERN, s -> true, numbers);
+    }
+
+    private static final Map<String, List<String>> SIBLING_ENDINGS = Map.of(
+            ".dds", List.of(".tex"),
+            ".tex", List.of(".dds"),
+            ".skn", List.of(".skl"),
+            ".skl", List.of(".skn"),
+            ".scb", List.of(".sco"),
+            ".sco", List.of(".scb"),
+            "_audio.bnk", List.of("_events.bnk", "_audio.wpk"),
+            "_events.bnk", List.of("_audio.bnk", "_audio.wpk"),
+            "_audio.wpk", List.of("_audio.bnk", "_events.bnk")
+                                                                           );
+
+    /**
+     * Tries the files that usually exist next to a known file: .dds/.tex, .skn/.skl, .scb/.sco, _audio.bnk/_events.bnk/_audio.wpk
+     */
+    public void substituteSiblingExtensions()
+    {
+        List<String> paths = new ArrayList<>(this.known.values());
+        System.out.format("Substitute sibling extensions: %s paths%n", paths.size());
+
+        paths.parallelStream().forEach(raw -> {
+            String path = raw.toLowerCase(Locale.ENGLISH);
+            for (Map.Entry<String, List<String>> e : SIBLING_ENDINGS.entrySet())
+            {
+                if (path.endsWith(e.getKey()))
+                {
+                    String base = path.substring(0, path.length() - e.getKey().length());
+                    for (String ending : e.getValue())
+                    {
+                        check(base + ending);
+                    }
+                }
+            }
+        });
+    }
+
+    // content hashed names, shaders (guessShaderFiles covers them) and skin paths (substituteSkinNumbers covers them)
+    private static final Pattern NUMBER_FILTER = Pattern.compile("/[0-9a-f]{8,}\\.[^/]+$|^data/shaders/|^assets/shaders/|/skin\\d+[^/]*$");
+
+    /**
+     * Replaces the numbers in the file name of known game paths with 0..max
+     */
+    public void substituteNumbers(int max, Optional<Integer> numbers)
+    {
+        Set<String> paths = new HashSet<>();
+        for (String value : new ArrayList<>(this.known.values()))
+        {
+            String lower = value.toLowerCase(Locale.ENGLISH);
+            if (!NUMBER_FILTER.matcher(lower).find())
+            {
+                paths.add(lower);
+            }
+        }
+
+        super.substituteNumbers(paths, max, numbers);
+    }
     
     public void guessBinByLinkedFiles(Path pbe)
     {
@@ -28,7 +121,7 @@ public class GameHashGuesser extends HashGuesser
         {
             System.out.println("Parsing bin files...");
             BINParser parser = new BINParser();
-            Files.walk(pbe).parallel().filter(UtilHandler.IS_BIN_PREDICATE).map(parser::parse).filter(Objects::nonNull).flatMap(b -> b.getLinkedFiles().stream()).forEach(this::check);
+            Files.walk(pbe).parallel().filter(UtilHandler.IS_BIN_PREDICATE).map(p -> BINHashGuesser.parseOrSkip(parser, p)).filter(Objects::nonNull).flatMap(b -> b.getLinkedFiles().stream()).forEach(this::check);
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -46,9 +139,9 @@ public class GameHashGuesser extends HashGuesser
         List<Path> files = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
         Pattern    p     = Pattern.compile("(/.*?/).*?\\..*\"");
         
-        files.stream()
-             .map(UtilHandler::readAsString)
-             .forEach(e -> service.submit(() -> {
+        // read inside the task so file contents are not all held in memory while queued
+        files.forEach(file -> service.execute(() -> {
+                 String  e = UtilHandler.readAsString(file);
                  Matcher m = p.matcher(e);
                  while (m.find())
                  {
@@ -64,12 +157,12 @@ public class GameHashGuesser extends HashGuesser
                          }
                          
                          lastStart = start;
-                         while (e.charAt(start - 1) != '"')
+                         while (start > 0 && e.charAt(start - 1) != '"')
                          {
                              start--;
                          }
-                         
-                         while (e.charAt(end) != '"')
+
+                         while (end < e.length() && e.charAt(end) != '"')
                          {
                              end++;
                          }
@@ -88,18 +181,26 @@ public class GameHashGuesser extends HashGuesser
     
     public void pullCDTB()
     {
-        System.out.println("Feching hashlists from CDTB");
-        String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.game.txt";
-        String hashB = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.game.txt";
-        
-        Stream.of(WebHandler.readWeb(hashA).stream(), WebHandler.readWeb(hashB).stream()).flatMap(a -> a).map(line -> line.substring(line.indexOf(' ') + 1)).filter(isGameHash).forEach(this::check);
+        System.out.println("Feching hashlists from CommunityDragon");
+        // streamed, the file is >200MB
+        readCDragonHashList("hashes.game.txt", line -> {
+            if (isGameHash.test(line.substring(line.indexOf(' ') + 1)))
+            {
+                checkPrehashed(line);
+            }
+        });
     }
-    
+
     @Override
-    public String generateHash(String val)
+    public long hashOf(String lowerCased)
     {
-        Long hashNum = HashHandler.computeXXHash64AsLong(val);
-        return HashHandler.toHex(hashNum, 16);
+        return HashHandler.computeXXHash64AsLong(lowerCased);
+    }
+
+    @Override
+    protected int hexLength()
+    {
+        return 16;
     }
     
     public void guessShaderFiles(Path dataPath)
@@ -109,7 +210,8 @@ public class GameHashGuesser extends HashGuesser
         final List<String> prefixes = new ArrayList<>(Arrays.asList("data/shaders/hlsl/", "assets/shaders/generated/shaders/"));
         final List<String> suffixes = new ArrayList<>(Arrays.asList("", ".dx9", ".dx11", ".glsl", ".metal"));
         
-        Stream.of(".dx9_", ".dx11_", ".glsl_", ".metal_").parallel().forEach(s -> IntStream.rangeClosed(0, 100_000).parallel().filter(i -> i % 100 == 0).forEach(i -> suffixes.add(s + i)));
+        // not parallel, suffixes is a plain ArrayList
+        Stream.of(".dx9_", ".dx11_", ".glsl_", ".metal_").forEach(s -> IntStream.rangeClosed(0, 100_000).filter(i -> i % 100 == 0).forEach(i -> suffixes.add(s + i)));
         
         try
         {
@@ -213,10 +315,10 @@ public class GameHashGuesser extends HashGuesser
         this.known.values().forEach(v -> {
             if (v.indexOf('/', 10) > -1)
             {
-                prefixes.add(v.substring(0, v.indexOf('/', 10)));
+                prefixes.add(v.substring(0, v.indexOf('/', 10) + 1));
             }
         });
         
-        super.guessByExistingWords(Set.of(""));
+        super.guessByExistingWords(prefixes);
     }
 }

@@ -1,7 +1,12 @@
 package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.*;
+import no.stelar7.cdragon.types.atlas.AtlasParser;
+import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
+import no.stelar7.cdragon.types.rst.RSTParser;
+import no.stelar7.cdragon.types.scb.SCBParser;
+import no.stelar7.cdragon.types.sco.SCOParser;
 import no.stelar7.cdragon.util.types.ByteArray;
 
 import java.nio.*;
@@ -10,6 +15,12 @@ import java.util.*;
 
 public final class FileTypeHandler
 {
+    // only used for their (stateless) canParse checks
+    private static final AtlasParser ATLAS = new AtlasParser();
+    private static final RSTParser   RST   = new RSTParser();
+    private static final SCBParser   SCB   = new SCBParser();
+    private static final SCOParser   SCO   = new SCOParser();
+    private static final ManifestContentParser MANIFEST = new ManifestContentParser();
     
     private FileTypeHandler()
     {
@@ -185,6 +196,20 @@ public final class FileTypeHandler
             return "hls";
         }
         
+        // formats without a magic number. These are checked before the manifests, as the manifest checks accept almost anything
+        // that starts with a small count (eg. every atlas is also a valid "manifestv1")
+        if (ATLAS.canParse(magic.getDataRaw()))
+        {
+            return "atlas";
+        }
+        
+        // (BINParser is only created here, as loading it preloads the bin hashes)
+        if (new BINParser().canParse(magic.getDataRaw()))
+        {
+            // a headerless bin (a single container or structure), PROP/PTCH files are found by magic above
+            return "bin";
+        }
+        
         if (FileTypeHandler.isProbableManifestV2(magic))
         {
             return "manifestv2";
@@ -221,53 +246,17 @@ public final class FileTypeHandler
     
     private static boolean isProbableManifestV0(ByteArray magic)
     {
-        if (magic.size() > 4)
-        {
-            try
-            {
-                new ManifestContentParser().parseV0(magic);
-                return true;
-            } catch (Exception e)
-            {
-                return false;
-            }
-        }
-        
-        return false;
+        return magic.size() > 4 && MANIFEST.canParseV0(magic.getDataRaw());
     }
     
     private static boolean isProbableManifestV1(ByteArray magic)
     {
-        if (magic.size() > 4)
-        {
-            try
-            {
-                new ManifestContentParser().parseV1(magic);
-                return true;
-            } catch (Exception e)
-            {
-                return false;
-            }
-        }
-        
-        return false;
+        return magic.size() > 4 && MANIFEST.canParseV1(magic.getDataRaw());
     }
     
     private static boolean isProbableManifestV2(ByteArray magic)
     {
-        if (magic.size() > 4)
-        {
-            try
-            {
-                new ManifestContentParser().parseV2(magic);
-                return true;
-            } catch (Exception e)
-            {
-                return false;
-            }
-        }
-        
-        return false;
+        return magic.size() > 4 && MANIFEST.canParseV2(magic.getDataRaw());
     }
     
     private static boolean isProbableHLS(ByteArray magic)
@@ -668,7 +657,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableSCB(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("r3d2Mesh".getBytes(StandardCharsets.UTF_8)));
+        return SCB.canParse(wrapper.getDataRaw());
     }
     
     public static boolean isProbableSKL(ByteArray wrapper)
@@ -697,7 +686,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableRST(ByteArray wrapper)
     {
-        return wrapper.startsWith(new ByteArray("RST".getBytes(StandardCharsets.UTF_8)));
+        return RST.canParse(wrapper.getDataRaw());
     }
     
     public static boolean isProbableBNK(ByteArray wrapper)
@@ -707,7 +696,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableSCO(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("[Obj".getBytes(StandardCharsets.UTF_8)));
+        return SCO.canParse(wrapper.getDataRaw());
     }
     
     public static boolean isProbablePRELOAD(ByteArray wrapper)

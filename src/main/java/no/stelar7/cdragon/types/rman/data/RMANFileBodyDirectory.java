@@ -2,13 +2,43 @@ package no.stelar7.cdragon.types.rman.data;
 
 import java.util.*;
 
-public class RMANFileBodyDirectory
+public final class RMANFileBodyDirectory
 {
-    private String name;
-    private long   directoryId;
-    private long   parentId;
+    private final String name;
+    private final long   directoryId;
+    private final long   parentId;
     
     private String fullPath;
+    
+    public RMANFileBodyDirectory(String name, long directoryId, long parentId)
+    {
+        this.name = name;
+        this.directoryId = directoryId;
+        this.parentId = parentId;
+    }
+    
+    /**
+     * Resolves the full path using the directory lookup map of the manifest
+     */
+    public String getFullPath(RMANFile manifest)
+    {
+        if (fullPath != null)
+        {
+            return fullPath;
+        }
+        
+        StringBuilder         output  = new StringBuilder(getName());
+        Set<Long>             visited = new HashSet<>();
+        RMANFileBodyDirectory parent  = manifest.getDirectory(getParentId());
+        while (parent != null && parent.directoryId != 0 && visited.add(parent.directoryId))
+        {
+            output.insert(0, parent.getName() + "/");
+            parent = manifest.getDirectory(parent.getParentId());
+        }
+        
+        fullPath = output.toString();
+        return fullPath;
+    }
     
     public String getFullPath(List<RMANFileBodyDirectory> folders)
     {
@@ -41,29 +71,14 @@ public class RMANFileBodyDirectory
         return name;
     }
     
-    public void setName(String name)
-    {
-        this.name = name;
-    }
-    
     public long getDirectoryId()
     {
         return directoryId;
     }
     
-    public void setDirectoryId(long directoryId)
-    {
-        this.directoryId = directoryId;
-    }
-    
     public long getParentId()
     {
         return parentId;
-    }
-    
-    public void setParentId(long parentId)
-    {
-        this.parentId = parentId;
     }
     
     @Override

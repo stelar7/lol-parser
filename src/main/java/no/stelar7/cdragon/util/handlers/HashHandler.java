@@ -2,6 +2,7 @@ package no.stelar7.cdragon.util.handlers;
 
 import com.google.gson.reflect.TypeToken;
 import net.jpountz.xxhash.*;
+import net.openhft.hashing.LongHashFunction;
 
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
@@ -97,9 +98,10 @@ public class HashHandler
         return pre.toString();
     }
     
-    private static final StreamingXXHash64 hash64 = xxHashFactory.newStreamingHash64(0);
-    private static final StreamingXXHash32 hash32 = xxHashFactory.newStreamingHash32(0);
-    
+    // stateless and thread-safe, so no locking is needed
+    private static final XXHash64 hash64 = xxHashFactory.hash64();
+    private static final XXHash32 hash32 = xxHashFactory.hash32();
+
     public static long computeXXHash64AsLong(String text)
     {
         byte[] data = text.getBytes(StandardCharsets.UTF_8);
@@ -112,18 +114,14 @@ public class HashHandler
         return computeXXHash32AsLong(data);
     }
     
-    public static synchronized long computeXXHash64AsLong(byte[] data)
+    public static long computeXXHash64AsLong(byte[] data)
     {
-        hash64.reset();
-        hash64.update(data, 0, data.length);
-        return hash64.getValue();
+        return hash64.hash(data, 0, data.length, 0);
     }
-    
-    public static synchronized long computeXXHash32AsLong(byte[] data)
+
+    public static long computeXXHash32AsLong(byte[] data)
     {
-        hash32.reset();
-        hash32.update(data, 0, data.length);
-        return hash32.getValue();
+        return hash32.hash(data, 0, data.length, 0);
     }
     
     public static String computeXXHash64(String text)
@@ -134,6 +132,17 @@ public class HashHandler
     public static String computeXXHash32(String text)
     {
         return toHex(computeXXHash32AsLong(text), 8);
+    }
+
+    private static final LongHashFunction xxh3 = LongHashFunction.xx3();
+
+    /**
+     * XXH3 64 bit hash with seed 0, of the UTF-8 bytes of text
+     */
+    public static long computeXXH3AsLong(String text)
+    {
+        byte[] data = text.getBytes(StandardCharsets.UTF_8);
+        return xxh3.hashBytes(data);
     }
     
     public static long computeFNV(String input)
@@ -152,12 +161,22 @@ public class HashHandler
     }
     
     // bin files
+    private static final int FNV_OFFSET = 0x811C9DC5;
+    private static final int FNV_PRIME  = 0x01000193;
+
     public static long computeFNV1A(String input)
     {
-        String toHash = input.toLowerCase(Locale.ENGLISH);
-        int    hash   = Integer.parseUnsignedInt("2166136261");
-        int    mask   = Integer.parseUnsignedInt("16777619");
-        
+        return computeFNV1ALowercase(input.toLowerCase(Locale.ENGLISH));
+    }
+
+    /**
+     * Same as computeFNV1A, but skips lowercasing for input that is already lowercase
+     */
+    public static long computeFNV1ALowercase(String toHash)
+    {
+        int hash = FNV_OFFSET;
+        int mask = FNV_PRIME;
+
         for (int i = 0; i < toHash.length(); i++)
         {
             hash = hash ^ toHash.charAt(i);

@@ -3,142 +3,340 @@ package no.stelar7.cdragon.types.bin;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.util.handlers.HashHandler;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
+import java.io.*;
 import java.nio.ByteOrder;
-import java.nio.file.Path;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-@SuppressWarnings("ALL")
+/**
+ * Parser for PROP (version 1-3) and PTCH bin files.
+ * <p>
+ * Instances are stateless (apart from the optional, thread-safe, hash collection), so one parser can be shared between threads.
+ * <p>
+ * {@link #parse} throws {@link ParseException} if the data is not a bin file, or is a corrupt or unsupported bin file.
+ * Use {@link #canParse(byte[])} to check the type first, or {@link #tryParse(Path)} to get null for non-bin data.
+ */
 public class BINParser implements Parseable<BINFile>
 {
-    public static final Map<String, Set<String>> hashes = new HashMap<>();
-    
+    /**
+     * Since patch 16.21, HASH fields directly in objects of this class are 64-bit (see CDTB binfile.py)
+     */
+    public static final int WIDE_HASH_CLASS = 0xFF9D3409;
+
+    private static final String NULL_HASH = "00000000";
+
+    private final boolean                  collectHashes;
+    private final boolean                  wideHashFields;
+    private final Map<String, Set<String>> hashes = new ConcurrentHashMap<>();
+
     static
     {
         // Preload bin hashes
         HashHandler.getBinHashes();
     }
-    
-    public BINFile parse(RandomAccessReader raf)
+
+    public BINParser()
     {
-        BINFile file = new BINFile();
-        file.setHeader(parseHeader(file, raf, false));
-        
-        // some binfiles are just a container, so lets try to parse it...
-        if (file.getHeader() == null)
+        this(false);
+    }
+
+    /**
+     * @param collectHashes if true, every hash seen while parsing is collected, see {@link #getCollectedHashes()}
+     */
+    public BINParser(boolean collectHashes)
+    {
+        this(collectHashes, true);
+    }
+
+    /**
+     * @param collectHashes  if true, every hash seen while parsing is collected, see {@link #getCollectedHashes()}
+     * @param wideHashFields if true, HASH fields in {@link #WIDE_HASH_CLASS} objects are read as 64-bit (patch 16.21+). Set to false for older files.
+     */
+    public BINParser(boolean collectHashes, boolean wideHashFields)
+    {
+        this.collectHashes = collectHashes;
+        this.wideHashFields = wideHashFields;
+    }
+
+    /**
+     * The hashes seen by this parser, by category (type, entry, value, string, wad, struct, offset).
+     * Only filled if the parser was created with collectHashes = true.
+     */
+    public Map<String, Set<String>> getCollectedHashes()
+    {
+        return hashes;
+    }
+
+    private void collect(String category, String hash)
+    {
+        if (collectHashes)
         {
-            BINEntry entry = new BINEntry();
-            entry.setType("headerless container");
-            entry.setHash("00000000");
-            
-            BINValue value;
-            value = parseToValue(raf, BINValueType.CONTAINER);
-            if (value == null)
-            {
-                value = parseToValue(raf, BINValueType.STRUCTURE);
-                if (value == null)
-                {
-                    return null;
-                }
-            }
-            
-            entry.getValues().add(value);
-            file.getEntries().add(entry);
-            
-            return file;
+            hashes.computeIfAbsent(category, k -> ConcurrentHashMap.newKeySet()).add(hash);
         }
-        
-        parseEntries(file, raf);
-        
-        if (file.getHeader().isPatch() && file.getHeader().getVersion() >= 3)
+    }
+
+    /**
+     * True for PROP/PTCH files, and for headerless files that are a single container/structure covering the whole data.
+     * For headerless data, the container/structure is read to check it, so this is only cheap for files with a header.
+     */
+    @Override
+    public boolean canParse(byte[] data)
+    {
+        if (data == null || data.length < 4)
         {
-            parsePatches(file, raf);
+            return false;
         }
-        return file;
+
+        if (hasMagic(data))
+        {
+            return true;
+        }
+
+        return parseHeaderless(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN), 0) != null;
     }
-    
-    
-    @Override
-    public BINFile parse(ByteArray data)
+
+    private static boolean hasMagic(byte[] data)
     {
-        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
+        String magic = new String(data, 0, 4, StandardCharsets.ISO_8859_1);
+        return "PROP".equals(magic) || "PTCH".equals(magic);
     }
-    
-    @Override
-    public BINFile parse(Path path)
+
+    /**
+     * Parses the file, or returns null if it is not a bin file (eg. a .bin file in another format).
+     * Use this when walking a folder of .bin files; corrupt or unsupported bin files still throw {@link ParseException}.
+     */
+    public BINFile tryParse(Path path)
     {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    private BINValue parseToValue(RandomAccessReader raf, BINValueType type)
-    {
-        Object temp;
-        raf.seek(0);
+        byte[] data;
         try
         {
-            temp = readByType(type, raf);
-        } catch (Exception e)
+            data = Files.readAllBytes(path);
+        } catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+
+        if (!canParse(data))
         {
             return null;
         }
-        
-        BINValue value = new BINValue();
-        value.setType(type);
-        value.setHash("00000000");
-        value.setValue(temp);
-        
-        return value;
+        return parse(new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN));
     }
-    
+
+    /**
+     * @throws ParseException if the data is not a bin file (see {@link #canParse(byte[])}), or is corrupt or unsupported
+     */
+    @Override
+    public BINFile parse(RandomAccessReader raf)
+    {
+        long start = raf.pos();
+        if (raf.remaining() < 4)
+        {
+            throw new ParseException("Not a BIN file (too small)", start);
+        }
+
+        String magic = raf.readString(4);
+        if (!"PROP".equals(magic) && !"PTCH".equals(magic))
+        {
+            BINFile headerless = parseHeaderless(raf, start);
+            if (headerless == null)
+            {
+                throw new ParseException("Not a BIN file (no PROP/PTCH magic, and not a headerless container/structure)", start);
+            }
+            return headerless;
+        }
+
+        try
+        {
+            BINFile file = new BINFile();
+            file.setWideHashFields(wideHashFields);
+            file.setHeader(parseHeader(file, raf, magic));
+            parseEntries(file, raf);
+
+            if (file.getHeader().isPatch() && file.getHeader().getVersion() >= 3)
+            {
+                parsePatches(file, raf);
+            }
+            return file;
+        } catch (IndexOutOfBoundsException e)
+        {
+            throw new ParseException("Unexpected end of BIN data", raf.pos(), e);
+        } catch (IllegalArgumentException e)
+        {
+            throw new ParseException("Invalid BIN data: " + e.getMessage(), raf.pos(), e);
+        }
+    }
+
+    /**
+     * Some bin files are just a single container or structure, without a header.
+     * Only data where the size field of the container/structure exactly covers the rest of the data is considered.
+     */
+    private BINFile parseHeaderless(RandomAccessReader raf, long start)
+    {
+        long         size = raf.size() - start;
+        BINValueType type = null;
+
+        if (size >= 9)
+        {
+            raf.seek(start);
+            BINValueType elementType = BINValueType.fromRaw(raf.readByte());
+            long         declared    = raf.readU32();
+            if (elementType != null && declared == size - 5)
+            {
+                type = BINValueType.CONTAINER;
+            }
+        }
+
+        if (type == null && size >= 10)
+        {
+            raf.seek(start);
+            int  hash     = raf.readInt();
+            long declared = raf.readU32();
+            if (hash != 0 && declared == size - 8)
+            {
+                type = BINValueType.STRUCTURE;
+            }
+        }
+
+        if (type == null)
+        {
+            return null;
+        }
+
+        Object data;
+        try
+        {
+            raf.seek(start);
+            data = readByType(type, raf);
+        } catch (ParseException | IndexOutOfBoundsException | IllegalArgumentException e)
+        {
+            return null;
+        }
+
+        if (raf.hasMoreBytes())
+        {
+            return null;
+        }
+
+        BINValue value = new BINValue(NULL_HASH, type, data);
+
+        List<BINValue> values = new ArrayList<>();
+        values.add(value);
+        BINEntry entry = new BINEntry(0, "headerless container", NULL_HASH, (short) 1, values);
+
+        BINFile file = new BINFile();
+        file.getEntries().add(entry);
+        return file;
+    }
+
+    private BINHeader parseHeader(BINFile file, RandomAccessReader raf, String magic)
+    {
+        boolean isPatch      = false;
+        int     patchVersion = 0;
+        int     patchUnknown = 0;
+
+        if ("PTCH".equals(magic))
+        {
+            isPatch = true;
+            patchVersion = raf.readInt();
+            patchUnknown = raf.readInt();
+
+            magic = raf.readString(4);
+            if (!"PROP".equals(magic))
+            {
+                throw new ParseException("Expected PROP after PTCH header, got " + magic, raf.pos() - 4);
+            }
+        }
+
+        int version = raf.readInt();
+        if (version < 1 || version > 3)
+        {
+            throw new ParseException("Unsupported BIN version " + version, raf.pos() - 4);
+        }
+
+        if (version >= 2)
+        {
+            long fileCount = raf.readU32();
+            checkCount(raf, fileCount, Short.BYTES);
+            for (int i = 0; i < fileCount; i++)
+            {
+                file.getLinkedFiles().add(raf.readShortString());
+            }
+        }
+
+        long entryCount = raf.readU32();
+        checkCount(raf, entryCount, Integer.BYTES);
+        List<Integer> entryTypes = new ArrayList<>();
+        for (int i = 0; i < entryCount; i++)
+        {
+            entryTypes.add(raf.readInt());
+        }
+
+        return new BINHeader(magic, version, (int) entryCount, isPatch, entryTypes, patchVersion, patchUnknown);
+    }
+
     private void parseEntries(BINFile file, RandomAccessReader raf)
     {
         for (int i = 0; i < file.getHeader().getEntryCount(); i++)
         {
-            BINEntry entry = new BINEntry();
-            
-            int    lengthCheck = (int) raf.pos() + Integer.BYTES;
-            String typeHash    = HashHandler.getBINHash(file.getHeader().getEntryTypes().get(i));
-            entry.setType(typeHash);
-            entry.setLength(raf.readInt());
-            String entryHash = HashHandler.getBINHash(raf.readInt());
-            entry.setHash(entryHash);
-            entry.setValueCount(raf.readShort());
-            
-            hashes.computeIfAbsent("type", (key) -> new HashSet<>()).add(typeHash);
-            hashes.computeIfAbsent("entry", (key) -> new HashSet<>()).add(entryHash);
-            
-            for (int j = 0; j < entry.getValueCount(); j++)
+            int entryType = file.getHeader().getEntryTypes().get(i);
+
+            String typeHash = HashHandler.getBINHash(entryType);
+            int    length   = raf.readInt();
+            long   start    = raf.pos();
+
+            String entryHash  = HashHandler.getBINHash(raf.readInt());
+            short  valueCount = raf.readShort();
+
+            collect("type", typeHash);
+            collect("entry", entryHash);
+
+            int            count  = Short.toUnsignedInt(valueCount);
+            List<BINValue> values = new ArrayList<>(count);
+            for (int j = 0; j < count; j++)
             {
-                BINValue value = readValue(raf);
-                entry.getValues().add(value);
+                values.add(readValue(raf, entryType));
             }
-            
-            file.getEntries().add(entry);
-            
-            if (lengthCheck + entry.getLength() != raf.pos())
-            {
-                System.out.format("Wrong detail size from %s to %s, value %s, expected %s%n", lengthCheck, raf.pos(), raf.pos() - lengthCheck, entry.getLength());
-                break;
-            }
+
+            checkSize(raf, "entry " + entryHash, start, Integer.toUnsignedLong(length));
+            file.getEntries().add(new BINEntry(length, typeHash, entryHash, valueCount, values));
         }
     }
-    
-    private BINValue readValue(RandomAccessReader raf)
+
+    private BINValue readValue(RandomAccessReader raf, int parentClass)
     {
-        BINValue value = new BINValue();
-        
         String valueHash = HashHandler.getBINHash(raf.readInt());
-        value.setHash(valueHash);
-        hashes.computeIfAbsent("value", (key) -> new HashSet<>()).add(valueHash);
-        value.setType(BINValueType.valueOf(raf.readByte()));
-        value.setValue(readByType(value.getType(), raf));
-        
-        return value;
+        collect("value", valueHash);
+        BINValueType type = readType(raf);
+
+        Object value;
+        if (wideHashFields && parentClass == WIDE_HASH_CLASS && type == BINValueType.STRING_HASH)
+        {
+            value = HashHandler.toHex(raf.readLong(), 16);
+        } else
+        {
+            value = readByType(type, raf);
+        }
+
+        return new BINValue(valueHash, type, value);
     }
-    
+
+    private BINValueType readType(RandomAccessReader raf)
+    {
+        byte         raw  = raf.readByte();
+        BINValueType type = BINValueType.fromRaw(raw);
+        if (type == null)
+        {
+            throw new ParseException("Unknown BIN value type " + Byte.toUnsignedInt(raw), raf.pos() - 1);
+        }
+        return type;
+    }
+
     private Object readByType(BINValueType type, RandomAccessReader raf)
     {
         switch (type)
@@ -146,21 +344,18 @@ public class BINParser implements Parseable<BINFile>
             case V3_SHORT:
                 return raf.readVec3S();
             case BOOLEAN:
+            case BOOLEAN_FLAGS:
                 return raf.readBoolean();
             case SIGNED_BYTE:
-                return raf.readByte();
             case BYTE:
                 return raf.readByte();
             case SIGNED_SHORT:
-                return raf.readShort();
             case SHORT:
                 return raf.readShort();
             case SIGNED_INT:
-                return raf.readInt();
             case INT:
                 return raf.readInt();
             case SIGNED_LONG:
-                return raf.readLong();
             case LONG:
                 return raf.readLong();
             case FLOAT:
@@ -176,169 +371,148 @@ public class BINParser implements Parseable<BINFile>
             case RGBA_BYTE:
                 return raf.readVec4B();
             case STRING:
-                return raf.readString(raf.readShort());
+            {
+                int length = raf.readU16();
+                checkCount(raf, length, 1);
+                return raf.readString(length);
+            }
             case STRING_HASH:
             {
                 String hash = HashHandler.getBINHash(raf.readInt());
-                hashes.computeIfAbsent("string", (key) -> new HashSet<>()).add(hash);
+                collect("string", hash);
                 return hash;
             }
             case WAD_LINK:
             {
-                Long   value = raf.readLong();
-                String hexed = HashHandler.toHex(value, 16);
-                hashes.computeIfAbsent("wad", (key) -> new HashSet<>()).add(hexed);
+                String hexed = HashHandler.toHex(raf.readLong(), 16);
+                collect("wad", hexed);
                 return hexed;
             }
             case CONTAINER:
             case CONTAINER2:
             {
-                BINContainer bc = new BINContainer();
-                
-                bc.setType(BINValueType.valueOf(raf.readByte()));
-                bc.setSize(raf.readInt());
-                bc.setCount(raf.readInt());
-                
-                for (int i = 0; i < bc.getCount(); i++)
+                BINValueType itemType = readType(raf);
+                int          size     = raf.readInt();
+                long         start    = raf.pos();
+                int          count    = raf.readInt();
+                checkCount(raf, Integer.toUnsignedLong(count), 1);
+
+                List<Object> data = new ArrayList<>();
+                for (int i = 0; i < count; i++)
                 {
-                    bc.getData().add(readByType(bc.getType(), raf));
+                    data.add(readByType(itemType, raf));
                 }
-                
-                return bc;
+
+                checkSize(raf, "container", start, Integer.toUnsignedLong(size));
+                return new BINContainer(itemType, size, count, data);
             }
             case STRUCTURE:
             case EMBEDDED:
             {
-                BINStruct bs = new BINStruct();
-                
-                String structHash = HashHandler.getBINHash(raf.readInt());
-                bs.setHash(structHash);
-                if (bs.getHash().equalsIgnoreCase("00000000"))
+                int    classHash = raf.readInt();
+                String hash      = HashHandler.getBINHash(classHash);
+
+                // a null pointer has no size or fields, embedded values are always present
+                if (classHash == 0 && type == BINValueType.STRUCTURE)
                 {
-                    return bs;
+                    return new BINStruct(hash, 0, (short) 0, new ArrayList<>());
                 }
-                
-                hashes.computeIfAbsent("struct", (key) -> new HashSet<>()).add(structHash);
-                bs.setSize(raf.readInt());
-                bs.setCount(raf.readShort());
-                for (int i = 0; i < bs.getCount(); i++)
+
+                collect("struct", hash);
+                int   size       = raf.readInt();
+                long  start      = raf.pos();
+                short fieldCount = raf.readShort();
+
+                int            count = Short.toUnsignedInt(fieldCount);
+                List<BINValue> data  = new ArrayList<>(count);
+                for (int i = 0; i < count; i++)
                 {
-                    bs.getData().add(readValue(raf));
+                    data.add(readValue(raf, classHash));
                 }
-                
-                return bs;
+
+                checkSize(raf, "structure " + hash, start, Integer.toUnsignedLong(size));
+                return new BINStruct(hash, size, fieldCount, data);
             }
             case LINK_OFFSET:
             {
                 String hash = HashHandler.getBINHash(raf.readInt());
-                hashes.computeIfAbsent("offset", (key) -> new HashSet<>()).add(hash);
+                collect("offset", hash);
                 return hash;
             }
             case OPTIONAL_DATA:
             {
-                BINData bd = new BINData();
-                
-                bd.setType(BINValueType.valueOf(raf.readByte()));
-                bd.setCount(raf.readByte());
-                for (int i = 0; i < bd.getCount(); i++)
+                BINValueType itemType = readType(raf);
+                byte         count    = raf.readByte();
+                List<Object> data     = new ArrayList<>();
+                if (count != 0)
                 {
-                    bd.getData().add(readByType(bd.getType(), raf));
+                    data.add(readByType(itemType, raf));
                 }
-                
-                return bd;
+
+                return new BINData(itemType, count, data);
             }
             case PAIR:
             {
-                BINMap bm = new BINMap();
-                
-                bm.setType1(BINValueType.valueOf(raf.readByte()));
-                bm.setType2(BINValueType.valueOf(raf.readByte()));
-                bm.setSize(raf.readInt());
-                bm.setCount(raf.readInt());
-                
-                for (int i = 0; i < bm.getCount(); i++)
+                BINValueType keyType   = readType(raf);
+                BINValueType valueType = readType(raf);
+                int          size      = raf.readInt();
+                long         start     = raf.pos();
+                int          count     = raf.readInt();
+                checkCount(raf, Integer.toUnsignedLong(count), 2);
+
+                List<Vector2<Object, Object>> data = new ArrayList<>();
+                for (int i = 0; i < count; i++)
                 {
-                    bm.getData().add(new Vector2<>(readByType(bm.getType1(), raf), readByType(bm.getType2(), raf)));
+                    Object key   = readByType(keyType, raf);
+                    Object value = readByType(valueType, raf);
+                    data.add(new Vector2<>(key, value));
                 }
-                
-                return bm;
+
+                checkSize(raf, "map", start, Integer.toUnsignedLong(size));
+                return new BINMap(keyType, valueType, size, count, data);
+
             }
-            case BOOLEAN_FLAGS:
-                return raf.readBoolean();
             default:
-                int pos = (int) raf.pos() - 1;
-                throw new RuntimeException("Unknown type: " + type + " at location: " + pos + " in file: " + raf.getPath());
+                throw new ParseException("Unknown BIN value type " + type, raf.pos());
         }
     }
-    
-    private BINHeader parseHeader(BINFile file, RandomAccessReader raf, boolean isPatch)
-    {
-        BINHeader header = new BINHeader();
-        header.setMagic(raf.readString(4));
-        
-        if (!"PROP".equalsIgnoreCase(header.getMagic()))
-        {
-            if ("PTCH".equalsIgnoreCase(header.getMagic()))
-            {
-                long patchVersion = raf.readLong();
-                return parseHeader(file, raf, true);
-            }
-            
-            return null;
-        }
-        
-        header.setVersion(raf.readInt());
-        header.setPatch(isPatch);
-        
-        if (header.getVersion() >= 2)
-        {
-            int fileCount = raf.readInt();
-            for (int i = 0; i < fileCount; i++)
-            {
-                short  length = raf.readShort();
-                String link   = raf.readString(length);
-                file.getLinkedFiles().add(link);
-            }
-        }
-        
-        header.setEntryCount(raf.readInt());
-        for (int i = 0; i < header.getEntryCount(); i++)
-        {
-            header.getEntryTypes().add(raf.readInt());
-        }
-        
-        return header;
-    }
-    
+
     private void parsePatches(BINFile file, RandomAccessReader raf)
     {
-        int patchCount = raf.readInt();
+        long patchCount = raf.readU32();
+        checkCount(raf, patchCount, 11);
         for (int i = 0; i < patchCount; i++)
         {
-            int hash        = raf.readInt();
-            int patchLength = raf.readInt();
-            
-            int pos = (int) raf.pos();
-            
-            BINValueType type       = BINValueType.valueOf(raf.readByte());
-            int          nameLength = raf.readShort();
-            String       name       = raf.readString(nameLength);
-            
-            Object value = readByType(type, raf);
-            
-            if (type == BINValueType.LINK_OFFSET)
-            {
-                value = "LINK_OFFSET: " + value.toString();
-            }
-            
-            if (type == BINValueType.STRING_HASH)
-            {
-                String testHash = HashHandler.getBinHashes().getOrDefault(value.toString(), value.toString());
-                String output   = (value.toString().equalsIgnoreCase(testHash)) ? "STRING_HASH: " : "";
-                value = output + value.toString();
-            }
-            
-            file.getPatches().add(new BINPatchEntry(hash, name, value));
+            int  hash        = raf.readInt();
+            long patchLength = raf.readU32();
+            long start       = raf.pos();
+
+            BINValueType type  = readType(raf);
+            String       name  = raf.readShortString();
+            Object       value = readByType(type, raf);
+
+            checkSize(raf, "patch " + name, start, patchLength);
+            file.getPatches().add(new BINPatchEntry(hash, name, type, value));
+        }
+    }
+
+    /**
+     * Makes sure count items of at least minItemSize bytes can fit in the remaining data
+     */
+    private static void checkCount(RandomAccessReader raf, long count, int minItemSize)
+    {
+        if (count < 0 || count * minItemSize > raf.remaining())
+        {
+            throw new ParseException("Invalid BIN count " + count + ", only " + raf.remaining() + " bytes left", raf.pos());
+        }
+    }
+
+    private static void checkSize(RandomAccessReader raf, String what, long start, long expected)
+    {
+        long actual = raf.pos() - start;
+        if (actual != expected)
+        {
+            throw new ParseException("Wrong size for " + what + ": read " + actual + " bytes, expected " + expected, raf.pos());
         }
     }
 }

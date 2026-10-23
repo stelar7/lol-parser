@@ -2,28 +2,46 @@ package no.stelar7.cdragon.types.skl.data.versioned.bone;
 
 import no.stelar7.cdragon.util.types.math.*;
 
-public class SKLBoneV0
+public final class SKLBoneV0
 {
-    private short    unknown1;
-    private short    id;
-    private short    parent;
-    private short    unknown2;
-    private int      hash;
-    private float    TPO;
-    private Vector3f position;
-    private Vector3f scale;
-    private Vector4f rotation;
-    private Vector3f ct;
-    private String   padding;
+    private final short    unknown1;
+    private final short    id;
+    private final short    parent;
+    private final short    unknown2;
+    private final int      hash;
+    private final float    TPO;
+    private final Vector3f position;
+    private final Vector3f scale;
+    private final Vector4f rotation;
+    // inverse bind translation
+    private final Vector3f ct;
+    private final Vector3f inverseBindScale;
+    private final Vector4f inverseBindRotation;
+    // relative to the position of the name offset field
+    private final int    nameOffset;
+    private final String name;
+    
+    public SKLBoneV0(short unknown1, short id, short parent, short unknown2, int hash, float TPO, Vector3f position, Vector3f scale, Vector4f rotation, Vector3f ct, Vector3f inverseBindScale, Vector4f inverseBindRotation, int nameOffset, String name)
+    {
+        this.unknown1 = unknown1;
+        this.id = id;
+        this.parent = parent;
+        this.unknown2 = unknown2;
+        this.hash = hash;
+        this.TPO = TPO;
+        this.position = position;
+        this.scale = scale;
+        this.rotation = rotation;
+        this.ct = ct;
+        this.inverseBindScale = inverseBindScale;
+        this.inverseBindRotation = inverseBindRotation;
+        this.nameOffset = nameOffset;
+        this.name = name;
+    }
     
     public short getUnknown1()
     {
         return unknown1;
-    }
-    
-    public void setUnknown1(short unknown1)
-    {
-        this.unknown1 = unknown1;
     }
     
     public short getId()
@@ -31,19 +49,9 @@ public class SKLBoneV0
         return id;
     }
     
-    public void setId(short id)
-    {
-        this.id = id;
-    }
-    
     public short getParent()
     {
         return parent;
-    }
-    
-    public void setParent(short parent)
-    {
-        this.parent = parent;
     }
     
     public short getUnknown2()
@@ -51,19 +59,9 @@ public class SKLBoneV0
         return unknown2;
     }
     
-    public void setUnknown2(short unknown2)
-    {
-        this.unknown2 = unknown2;
-    }
-    
     public int getHash()
     {
         return hash;
-    }
-    
-    public void setHash(int hash)
-    {
-        this.hash = hash;
     }
     
     public float getTPO()
@@ -71,19 +69,9 @@ public class SKLBoneV0
         return TPO;
     }
     
-    public void setTPO(float TPO)
-    {
-        this.TPO = TPO;
-    }
-    
     public Vector3f getPosition()
     {
         return position;
-    }
-    
-    public void setPosition(Vector3f position)
-    {
-        this.position = position;
     }
     
     public Vector3f getScale()
@@ -91,19 +79,9 @@ public class SKLBoneV0
         return scale;
     }
     
-    public void setScale(Vector3f scale)
-    {
-        this.scale = scale;
-    }
-    
     public Vector4f getRotation()
     {
         return rotation;
-    }
-    
-    public void setRotation(Vector4f rotation)
-    {
-        this.rotation = rotation;
     }
     
     public Vector3f getCt()
@@ -111,18 +89,23 @@ public class SKLBoneV0
         return ct;
     }
     
-    public void setCt(Vector3f ct)
+    public Vector3f getInverseBindScale()
     {
-        this.ct = ct;
+        return inverseBindScale;
     }
     
-    public String getPadding()
+    public Vector4f getInverseBindRotation()
     {
-        return padding;
+        return inverseBindRotation;
     }
     
-    public void setPadding(String padding)
+    public int getNameOffset()
     {
-        this.padding = padding;
+        return nameOffset;
+    }
+    
+    public String getName()
+    {
+        return name;
     }
 }

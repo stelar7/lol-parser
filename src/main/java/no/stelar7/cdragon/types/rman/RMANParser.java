@@ -4,7 +4,7 @@ import com.google.gson.*;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.rman.data.*;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
@@ -281,8 +281,9 @@ public class RMANParser implements Parseable<RMANFile>
             if (oldFile != null)
             {
                 System.out.println("Found version " + (version - 1) + " in cache");
-                List<RMANFileBodyFile> oldFiles = newFile.getChangedFiles(oldFile);
-                newFile.getBody().getFiles().removeIf(nfif -> oldFiles.stream().map(RMANFileBodyFile::getFileId).noneMatch(i -> nfif.getFileId() == i));
+                Set<Long> changedIds = new HashSet<>();
+                newFile.getChangedFiles(oldFile).forEach(f -> changedIds.add(f.getFileId()));
+                newFile.getBody().getFiles().removeIf(nfif -> !changedIds.contains(nfif.getFileId()));
                 System.out.println();
             }
             
@@ -304,169 +305,166 @@ public class RMANParser implements Parseable<RMANFile>
     }
     
     @Override
-    public RMANFile parse(Path path)
-    {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    @Override
-    public RMANFile parse(ByteArray data)
-    {
-        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    @Override
     public RMANFile parse(RandomAccessReader raf)
     {
-        RMANFile file = new RMANFile();
-        file.setHeader(parseHeader(raf));
-        
-        raf.seek(file.getHeader().getOffset());
-        file.setCompressedBody(raf.readBytes(file.getHeader().getLength()));
-        
-        if (file.getHeader().getSignatureType() != 0)
+        raf.setEndian(ByteOrder.LITTLE_ENDIAN);
+
+        RMANFileHeader header = parseHeader(raf);
+
+        long bodyOffset = Integer.toUnsignedLong(header.getOffset());
+        long bodyLength = Integer.toUnsignedLong(header.getLength());
+        if (bodyOffset + bodyLength > raf.size())
         {
-            file.setSignature(raf.readBytes(256));
+            throw new ParseException("RMAN body (offset " + bodyOffset + ", length " + bodyLength + ") is outside the file", raf);
         }
-        
-        file.setBody(parseCompressedBody(file));
+
+        raf.seek(bodyOffset);
+        byte[] compressedBody = raf.readBytes(bodyLength);
+
+        // the signature follows the body
+        byte[] signature = null;
+        if (header.getSignatureType() != 0)
+        {
+            signature = raf.readBytes(256);
+        }
+
+        RMANFile file = new RMANFile(header, parseCompressedBody(header, compressedBody), compressedBody, signature);
         file.buildChunkMap();
         file.buildBundleMap();
-        
+
         return file;
     }
-    
-    private RMANFileBody parseCompressedBody(RMANFile file)
+
+    private RMANFileBody parseCompressedBody(RMANFileHeader fileHeader, byte[] compressedBody)
     {
-        byte[]             uncompressed = CompressionHandler.uncompressZSTD(file.getCompressedBody(), file.getHeader().getDecompressedLength());
-        RandomAccessReader raf          = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
-        RMANFileBody       body         = new RMANFileBody();
-        body.setHeaderOffset(raf.readInt());
-        raf.seek(body.getHeaderOffset());
-        
-        RMANFileBodyHeader header = new RMANFileBodyHeader();
-        header.setOffsetTableOffset(raf.readInt());
-        
-        header.setBundleListOffset((int) raf.pos() + raf.readInt());
-        header.setLanguageListOffset((int) raf.pos() + raf.readInt());
-        header.setFileListOffset((int) raf.pos() + raf.readInt());
-        header.setFolderListOffset((int) raf.pos() + raf.readInt());
-        header.setKeyHeaderOffset((int) raf.pos() + raf.readInt());
-        header.setUnknownOffset((int) raf.pos() + raf.readInt());
-        
-        body.setHeader(header);
-        body.setBundles(parseBundles(raf, header));
-        body.setLanguages(parseLanguages(raf, header));
-        body.setFiles(parseFiles(raf, header));
-        body.setDirectories(parseDirectories(raf, header));
-        
-        return body;
-    }
-    
-    private List<RMANFileBodyDirectory> parseDirectories(RandomAccessReader raf, RMANFileBodyHeader header)
-    {
-        List<RMANFileBodyDirectory> data = new ArrayList<>();
-        raf.seek(header.getFolderListOffset());
-        
-        List<Map<String, Object>> unmappedDirectories = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getDirectoryFields(), RMANVTable::parseVTable);
-        for (Map<String, Object> entry : unmappedDirectories)
+        byte[] uncompressed = CompressionHandler.uncompressZSTD(compressedBody, fileHeader.getDecompressedLength());
+        if (uncompressed == null)
         {
-            RMANFileBodyDirectory dir = new RMANFileBodyDirectory();
-            
-            dir.setDirectoryId((Long) entry.get("directory_id"));
-            dir.setParentId((Long) entry.get("parent_id"));
-            dir.setName((String) entry.get("name"));
-            
-            data.add(dir);
+            throw new ParseException("Failed to decompress RMAN body", fileHeader.getOffset());
         }
-        
-        return data;
+
+        RandomAccessReader raf = new RandomAccessReader(uncompressed, ByteOrder.LITTLE_ENDIAN);
+
+        // FlatBuffers root: u32 offset to the root table
+        int headerOffset = raf.readInt();
+        raf.seek(Integer.toUnsignedLong(headerOffset));
+        RMANVTable.Table root = RMANVTable.Table.read(raf);
+
+        RMANFileBodyHeader header = new RMANFileBodyHeader(root.getVTableOffset(),
+                                                           (int) root.offset(RMANVTable.BODY_BUNDLES),
+                                                           (int) root.offset(RMANVTable.BODY_LANGUAGES),
+                                                           (int) root.offset(RMANVTable.BODY_FILES),
+                                                           (int) root.offset(RMANVTable.BODY_DIRECTORIES),
+                                                           (int) root.offset(RMANVTable.BODY_KEYS),
+                                                           (int) root.offset(RMANVTable.BODY_UNKNOWN));
+
+        List<RMANFileBodyBundle>    bundles     = parseList(raf, header.getBundleListOffset(), RMANParser::parseBundle);
+        List<RMANFileBodyLanguage>  languages   = parseList(raf, header.getLanguageListOffset(), RMANParser::parseLanguage);
+        List<RMANFileBodyFile>      files       = parseList(raf, header.getFileListOffset(), RMANParser::parseFile);
+        List<RMANFileBodyDirectory> directories = parseList(raf, header.getFolderListOffset(), RMANParser::parseDirectory);
+
+        return new RMANFileBody(headerOffset, header, bundles, languages, files, directories);
     }
-    
-    private List<RMANFileBodyFile> parseFiles(RandomAccessReader raf, RMANFileBodyHeader header)
+
+    /**
+     * Parses a vector of tables, an absent vector (offset -1) is an empty list
+     */
+    private static <T> List<T> parseList(RandomAccessReader raf, long offset, java.util.function.Function<RandomAccessReader, T> parser)
     {
-        List<RMANFileBodyFile> data = new ArrayList<>();
-        raf.seek(header.getFileListOffset());
-        
-        List<Map<String, Object>> unmappedDirectories = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getFileFields(), RMANVTable::parseVTable);
-        for (Map<String, Object> entry : unmappedDirectories)
+        if (offset < 0)
         {
-            RMANFileBodyFile file = new RMANFileBodyFile();
-            
-            file.setFileId((Long) entry.get("file_id"));
-            file.setDirectoryId((Long) entry.get("directory_id"));
-            file.setFileSize((Integer) entry.get("file_size"));
-            file.setName((String) entry.get("name"));
-            file.setSymlink((String) entry.get("symlink"));
-            file.setChunkIds((List<Long>) entry.get("chunks"));
-            
-            data.add(file);
+            return new ArrayList<>();
         }
-        
-        return data;
+
+        raf.seek(offset);
+        return RMANOffsetTable.parseOffsetTable(raf, parser);
     }
-    
-    private List<RMANFileBodyLanguage> parseLanguages(RandomAccessReader raf, RMANFileBodyHeader header)
+
+    private static RMANFileBodyDirectory parseDirectory(RandomAccessReader raf)
     {
-        List<RMANFileBodyLanguage> data = new ArrayList<>();
-        raf.seek(header.getLanguageListOffset());
-        
-        List<Map<String, Object>> unmappedLanguages = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getLanguageFields(), RMANVTable::parseVTable);
-        for (Map<String, Object> entry : unmappedLanguages)
-        {
-            RMANFileBodyLanguage dir = new RMANFileBodyLanguage();
-            
-            dir.setId((Integer) entry.get("language_id"));
-            dir.setName((String) entry.get("name"));
-            
-            data.add(dir);
-        }
-        
-        return data;
+        RMANVTable.Table table = RMANVTable.Table.read(raf);
+
+        long   directoryId = table.u64(RMANVTable.DIRECTORY_ID, 0);
+        long   parentId    = table.u64(RMANVTable.DIRECTORY_PARENT_ID, 0);
+        String name        = table.string(RMANVTable.DIRECTORY_NAME, "");
+
+        return new RMANFileBodyDirectory(name, directoryId, parentId);
     }
-    
-    private List<RMANFileBodyBundle> parseBundles(RandomAccessReader raf, RMANFileBodyHeader header)
+
+    private static RMANFileBodyFile parseFile(RandomAccessReader raf)
     {
-        List<RMANFileBodyBundle> data = new ArrayList<>();
-        raf.seek(header.getBundleListOffset());
-        
-        List<Map<String, Object>> unmappedBundles = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getBundleFields(), RMANVTable::parseVTable);
-        for (Map<String, Object> entry : unmappedBundles)
-        {
-            RMANFileBodyBundle bundle = new RMANFileBodyBundle();
-            bundle.setBundleId(HashHandler.toHex((Long) entry.get("bundle_id"), 16));
-            
-            List<RMANFileBodyBundleChunk> chunks = new ArrayList<>();
-            raf.seek((Integer) entry.get("chunks_offset"));
-            List<Map<String, Object>> unmappedChunks = RMANOffsetTable.parseOffsetTable(raf, RMANVTable.getChunkFields(), RMANVTable::parseVTable);
-            for (Map<String, Object> chunkInfo : unmappedChunks)
-            {
-                RMANFileBodyBundleChunk chunk = new RMANFileBodyBundleChunk();
-                chunk.setCompressedSize((Integer) chunkInfo.get("compressed_size"));
-                chunk.setUncompressedSize((Integer) chunkInfo.get("uncompressed_size"));
-                chunk.setChunkId(HashHandler.toHex((Long) chunkInfo.get("chunk_id"), 16));
-                chunks.add(chunk);
-            }
-            
-            bundle.setChunks(chunks);
-            data.add(bundle);
-        }
-        
-        return data;
+        RMANVTable.Table table = RMANVTable.Table.read(raf);
+
+        long       fileId        = table.u64(RMANVTable.FILE_ID, 0);
+        long       directoryId   = table.u64(RMANVTable.FILE_DIRECTORY_ID, 0);
+        long       fileSize      = table.u64(RMANVTable.FILE_SIZE, 0);
+        String     name          = table.string(RMANVTable.FILE_NAME, "");
+        long       languageFlags = table.u64(RMANVTable.FILE_LANGUAGES, 0);
+        List<Long> chunkIds      = table.u64Vector(RMANVTable.FILE_CHUNKS);
+        String     symlink       = table.string(RMANVTable.FILE_SYMLINK, "");
+        int        permissions   = table.u8(RMANVTable.FILE_PERMISSIONS, 0);
+
+        return new RMANFileBodyFile(name, symlink, fileId, directoryId, fileSize, permissions, languageFlags, chunkIds);
     }
-    
+
+    private static RMANFileBodyLanguage parseLanguage(RandomAccessReader raf)
+    {
+        RMANVTable.Table table = RMANVTable.Table.read(raf);
+
+        int    id   = table.u8(RMANVTable.LANGUAGE_ID, 0);
+        String name = table.string(RMANVTable.LANGUAGE_NAME, "");
+
+        return new RMANFileBodyLanguage(id, name);
+    }
+
+    private static RMANFileBodyBundle parseBundle(RandomAccessReader raf)
+    {
+        RMANVTable.Table table    = RMANVTable.Table.read(raf);
+        String           bundleId = HashHandler.toHex(table.u64(RMANVTable.BUNDLE_ID, 0), 16);
+        return new RMANFileBodyBundle(bundleId, parseList(raf, table.offset(RMANVTable.BUNDLE_CHUNKS), RMANParser::parseChunk));
+    }
+
+    private static RMANFileBodyBundleChunk parseChunk(RandomAccessReader raf)
+    {
+        RMANVTable.Table table            = RMANVTable.Table.read(raf);
+        long             chunkId          = table.u64(RMANVTable.CHUNK_ID, 0);
+        long             compressedSize   = table.u32(RMANVTable.CHUNK_COMPRESSED_SIZE, 0);
+        long             uncompressedSize = table.u32(RMANVTable.CHUNK_UNCOMPRESSED_SIZE, 0);
+        return new RMANFileBodyBundleChunk(compressedSize, uncompressedSize, chunkId);
+    }
+
+    /**
+     * u32 magic "RMAN", u8 major, u8 minor, u16 flags (we split it into unknown + signatureType), u32 body offset, u32 body length, u64 manifest id, u32 uncompressed body length
+     */
     private RMANFileHeader parseHeader(RandomAccessReader raf)
     {
-        RMANFileHeader header = new RMANFileHeader();
-        header.setMagic(raf.readString(4));
-        header.setMajor(raf.readByte());
-        header.setMinor(raf.readByte());
-        header.setUnknown(raf.readByte());
-        header.setSignatureType(raf.readByte());
-        header.setOffset(raf.readInt());
-        header.setLength(raf.readInt());
-        header.setManifestId(raf.readLong());
-        header.setDecompressedLength(raf.readInt());
-        return header;
+        if (raf.remaining() < 28)
+        {
+            throw new ParseException("File is too small to be a RMAN", raf);
+        }
+
+        String magic = raf.readString(4);
+        byte   major = raf.readByte();
+        byte   minor = raf.readByte();
+
+        if (!"RMAN".equals(magic))
+        {
+            throw new ParseException("Invalid RMAN magic: " + magic, 0);
+        }
+
+        // only the major version changes the layout; CDTB accepts 2.0 and 2.1, moonshadow565/rman accepts any 2.x
+        if (major != 2)
+        {
+            throw new ParseException("Unsupported RMAN version " + major + "." + minor, 4);
+        }
+
+        byte unknown            = raf.readByte();
+        byte signatureType      = raf.readByte();
+        int  offset             = raf.readInt();
+        int  length             = raf.readInt();
+        long manifestId         = raf.readLong();
+        int  decompressedLength = raf.readInt();
+        return new RMANFileHeader(magic, major, minor, unknown, signatureType, offset, length, manifestId, decompressedLength);
+
     }
 }

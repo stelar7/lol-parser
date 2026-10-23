@@ -2,112 +2,144 @@ package no.stelar7.cdragon.types.scb;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.scb.data.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.readers.*;
+import no.stelar7.cdragon.util.types.math.*;
 
-import java.nio.*;
-import java.nio.file.Path;
+import java.util.*;
 
+/**
+ * Binary static
+ mesh (.scb) reader.
+ * <p>
+ * Layout reference: LeagueToolkit Core/Mesh/StaticMesh.cs (ReadBinary) and StaticMeshFace.cs
+ */
 public class SCBParser implements Parseable<SCBFile>
 {
+    public static final String MAGIC = "r3d2Mesh";
+
+    public static final int FLAG_HAS_VCP                     = 1;
+    public static final int FLAG_HAS_LOCAL_ORIGIN_AND_PIVOT = 2;
+
+    // indices(12) + material(64) + uvs(24)
+    private static final int FACE_SIZE = 100;
+
+    /**
+     * True if the data starts with "r3d2Mesh"
+     */
     @Override
-    public SCBFile parse(Path path)
+    public boolean canParse(byte[] data)
     {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
+        if (data == null || data.length < MAGIC.length())
+        {
+            return false;
+        }
+        for (int i = 0; i < MAGIC.length(); i++)
+        {
+            if (data[i] != MAGIC.charAt(i))
+            {
+                return false;
+            }
+        }
+        return true;
     }
-    
-    @Override
-    public SCBFile parse(ByteArray data)
-    {
-        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
-    }
-    
+
     @Override
     public SCBFile parse(RandomAccessReader raf)
     {
-        SCBFile data = new SCBFile();
-        
-        readHeader(data, raf);
-        readContent(data, raf);
-        
-        return data;
+        SCBHeader header = readHeader(raf);
+        return new SCBFile(header, readContent(header, raf));
     }
-    
-    private void readContent(SCBFile data, RandomAccessReader raf)
+
+    private SCBContent readContent(SCBHeader header, RandomAccessReader raf)
     {
-        SCBContent content = new SCBContent();
-        
-        content.setVertexCount(raf.readInt());
-        content.setFaceCount(raf.readInt());
-        content.setColored(raf.readInt());
-        
-        if (data.getHeader().getMinor() >= 2)
+        int vertexCount = raf.readInt();
+        int faceCount   = raf.readInt();
+        int colored     = raf.readInt();
+
+        Vector3f boundingBoxMin = raf.readVec3F();
+        Vector3f boundingBoxMax = raf.readVec3F();
+
+        boolean hasVertexColors = false;
+        int     major           = header.getMajor();
+        int     minor           = header.getMinor();
+        if (major >= 3 && minor >= 2)
         {
-            content.setCenter(raf.readVec3F());
-            content.setPivot(raf.readVec3F());
+            hasVertexColors = raf.readInt() == 1;
         }
-        
-        for (int i = 0; i < content.getVertexCount(); i++)
+
+        if (vertexCount < 0 || faceCount < 0 || (long) vertexCount * 12 + (long) faceCount * FACE_SIZE > raf.remaining())
         {
-            content.getVertices().add(raf.readVec3F());
+            throw new ParseException("Invalid scb vertex/face count", raf);
         }
-        
-        // skip once
-        raf.readVec3F();
-        
-        for (int i = 0; i < content.getFaceCount(); i++)
+
+        float[]        vertexData = raf.readFloatArray(vertexCount * 3);
+        List<Vector3f> vertices   = new ArrayList<>(vertexCount);
+        for (int i = 0; i < vertexCount; i++)
         {
-            content.getFaces().add(readFace(raf));
+            vertices.add(new Vector3f(vertexData[i * 3], vertexData[i * 3 + 1], vertexData[i * 3 + 2]));
         }
-        
-        if (data.getHeader().getMinor() >= 2)
+
+        List<Vector4b> vertexColors = new ArrayList<>();
+        if (hasVertexColors)
         {
-            if (content.getColored() > 0)
+            // BGRA
+            for (int i = 0; i < vertexCount; i++)
             {
-                int idxCount = content.getFaceCount() * 3;
-                for (int i = 0; i < idxCount; i++)
-                {
-                    content.getColors().add(raf.readVec3B());
-                }
+                vertexColors.add(raf.readVec4B());
             }
         }
-        
-        data.setContent(content);
+
+        Vector3f center = raf.readVec3F();
+
+        List<SCBFace> faces = new ArrayList<>(faceCount);
+        for (int i = 0; i < faceCount; i++)
+        {
+            faces.add(readFace(raf));
+        }
+
+        List<Vector3b> colors = new ArrayList<>();
+        if ((colored & FLAG_HAS_VCP) != 0)
+        {
+            // RGB per face corner
+            int idxCount = faceCount * 3;
+            for (int i = 0; i < idxCount; i++)
+            {
+                colors.add(raf.readVec3B());
+            }
+        }
+
+        return new SCBContent(vertexCount, faceCount, colored, boundingBoxMin, boundingBoxMax, center, null, hasVertexColors, vertexColors, vertices, faces, colors);
     }
-    
+
     private SCBFace readFace(RandomAccessReader raf)
     {
-        SCBFace face = new SCBFace();
-        
-        face.setIndecies(raf.readVec3I());
-        face.setMaterial(raf.readString(64).trim());
-        
-        face.setU(raf.readVec3F());
-        face.setV(raf.readVec3F());
-        
-        return face;
+        Vector3i indecies = raf.readVec3I();
+        String   material = raf.readFixedString(64);
+
+        // u0 u1 u2, v0 v1 v2
+        Vector3f u = raf.readVec3F();
+        Vector3f v = raf.readVec3F();
+
+        return new SCBFace(indecies, material, u, v);
     }
-    
-    private void readHeader(SCBFile data, RandomAccessReader raf)
+
+    private SCBHeader readHeader(RandomAccessReader raf)
     {
-        SCBHeader header = new SCBHeader();
-        header.setMagic(raf.readString(8));
-        
-        header.setMajor(raf.readShort());
-        header.setMinor(raf.readShort());
-        header.setFilename(raf.readString(128));
-        
-        
-        ByteBuffer buff = ByteBuffer.allocate(4);
-        buff.putShort(header.getMajor());
-        buff.putShort(header.getMinor());
-        buff.flip();
-        int bver = buff.getInt();
-        if (bver != 0x20002 && bver != 0x20001)
+        String magic = raf.readString(8);
+        if (!MAGIC.equals(magic))
         {
-            throw new RuntimeException("Unknown version: " + header.getMajor() + "." + header.getMinor());
+            throw new ParseException("Invalid scb magic", 0);
         }
-        
-        data.setHeader(header);
+
+        short major = raf.readShort();
+        short minor = raf.readShort();
+
+        // known versions: 1.1, 2.1, 2.2, 3.1, 3.2
+        if (major < 1 || major > 3)
+        {
+            throw new ParseException("Unsupported scb version: " + major + "." + minor, raf);
+        }
+
+        return new SCBHeader(magic, major, minor, raf.readFixedString(128));
     }
 }

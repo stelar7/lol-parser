@@ -1,130 +1,224 @@
 package no.stelar7.cdragon.types.bbq;
 
-import no.stelar7.cdragon.util.readers.BinaryReader;
+import no.stelar7.cdragon.util.readers.*;
 
-import java.nio.*;
+import java.io.ByteArrayOutputStream;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Reads a window (one file in the bundle) of a BBQBlockStore.
+ * Positions are relative to the start of the window, so alignment works like it does in the file itself.
+ */
 public class BBQBlockStoreReader implements BinaryReader
 {
-    BBQBlockStore storage;
-    ByteOrder     endian;
-    
+    private final BBQBlockStore storage;
+    private final long          base;
+    private final long          length;
+    private final byte[]        scratch = new byte[8];
+    private       long          pos     = 0;
+    private       ByteOrder     endian  = ByteOrder.BIG_ENDIAN;
+
     public BBQBlockStoreReader(BBQBlockStore storage)
     {
-        this.storage = storage;
+        this(storage, 0, storage.getMaxPos());
     }
-    
+
+    public BBQBlockStoreReader(BBQBlockStore storage, long base, long length)
+    {
+        if (base < 0 || length < 0 || base + length > storage.getMaxPos())
+        {
+            throw new ParseException("Bundle entry (offset " + base + ", size " + length + ") is outside the bundle data (size " + storage.getMaxPos() + ")", -1);
+        }
+
+        this.storage = storage;
+        this.base = base;
+        this.length = length;
+    }
+
+    public long size()
+    {
+        return length;
+    }
+
+    public long remaining()
+    {
+        return length - pos;
+    }
+
+    public ByteOrder getEndian()
+    {
+        return endian;
+    }
+
+    private void fill(int count)
+    {
+        if (count > remaining())
+        {
+            throw new ParseException("Unexpected end of data", pos);
+        }
+
+        storage.read(base + pos, scratch, 0, count);
+        pos += count;
+    }
+
+    private long assemble(int count)
+    {
+        fill(count);
+        long value = 0;
+        if (endian == ByteOrder.BIG_ENDIAN)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                value = (value << 8) | (scratch[i] & 0xFF);
+            }
+        } else
+        {
+            for (int i = count - 1; i >= 0; i--)
+            {
+                value = (value << 8) | (scratch[i] & 0xFF);
+            }
+        }
+        return value;
+    }
+
     @Override
     public String readString(long length)
     {
-        return StandardCharsets.UTF_8.decode(ByteBuffer.wrap(storage.read((int) length)).order(endian)).toString();
+        return new String(readBytes(length), StandardCharsets.UTF_8);
     }
-    
+
+    /**
+     * Reads a 0x00 terminated UTF-8 string
+     */
     @Override
     public String readString()
     {
-        StringBuilder sb   = new StringBuilder();
-        char          data = 0;
-        while ((data = readChar()) != 0)
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        while (pos < length)
         {
-            sb.append(data);
+            byte value = storage.get(base + pos++);
+            if (value == 0)
+            {
+                break;
+            }
+            bytes.write(value);
         }
-        return sb.toString();
+        return bytes.toString(StandardCharsets.UTF_8);
     }
-    
+
     @Override
     public long readLong()
     {
-        return ByteBuffer.wrap(storage.read(8)).order(endian).getLong();
+        return assemble(8);
     }
-    
+
     @Override
     public int readInt()
     {
-        return ByteBuffer.wrap(storage.read(4)).order(endian).getInt();
+        return (int) assemble(4);
     }
-    
+
     @Override
     public short readShort()
     {
-        return ByteBuffer.wrap(storage.read(2)).order(endian).getShort();
+        return (short) assemble(2);
     }
-    
+
     @Override
     public double readDouble()
     {
-        return ByteBuffer.wrap(storage.read(8)).order(endian).getDouble();
+        return Double.longBitsToDouble(readLong());
     }
-    
+
     @Override
     public float readFloat()
     {
-        return ByteBuffer.wrap(storage.read(4)).order(endian).getFloat();
+        return Float.intBitsToFloat(readInt());
     }
-    
+
+    /**
+     * Reads up to i bytes, fewer if the end of the window is reached
+     */
     @Override
     public byte[] readBytes(long i)
     {
-        return storage.read((int) i);
+        int    count = (int) Math.max(0, Math.min(i, remaining()));
+        byte[] data  = new byte[count];
+        storage.read(base + pos, data, 0, count);
+        pos += count;
+        return data;
     }
-    
+
     @Override
     public byte readByte()
     {
-        return ByteBuffer.wrap(storage.read(1)).order(endian).get();
+        if (pos >= length)
+        {
+            throw new ParseException("Unexpected end of data", pos);
+        }
+        return storage.get(base + pos++);
     }
-    
+
     @Override
     public char readChar()
     {
-        return (char) readByte();
+        return (char) (readByte() & 0xFF);
     }
-    
+
     @Override
     public boolean readBoolean()
     {
-        return readByte() > 0;
+        return readByte() != 0;
     }
-    
+
     @Override
     public byte[] readRemaining()
     {
-        return storage.read(storage.getMaxPos() - storage.pos());
+        return readBytes(remaining());
     }
-    
+
     @Override
     public long pos()
     {
-        return storage.pos();
+        return pos;
     }
-    
+
     @Override
     public void seek(long pos)
     {
-        storage.seek((int) pos, 0);
+        this.pos = pos;
     }
-    
+
     public void seek(long pos, int direction)
     {
-        storage.seek((int) pos, direction);
+        switch (direction)
+        {
+            case 0 -> this.pos = pos;
+            case 1 -> this.pos += pos;
+            case 2 -> this.pos = length + pos;
+            default -> throw new IllegalArgumentException("Unknown seek direction " + direction);
+        }
     }
-    
+
     @Override
     public void setEndian(ByteOrder order)
     {
         this.endian = order;
     }
-    
+
     @Override
     public void align()
     {
-        int current = (int) pos();
-        int newPos  = (current + 3) & -4;
-        
-        if (newPos > current)
+        align(4);
+    }
+
+    public void align(int alignment)
+    {
+        long rest = pos % alignment;
+        if (rest != 0)
         {
-            this.seek(newPos - current, 1);
+            pos += alignment - rest;
         }
     }
 }

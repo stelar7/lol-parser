@@ -10,6 +10,84 @@ public class KTX11FileMipMapTexture
     private int           height;
     private int           widthInBlocks;
     private int           heightInBlocks;
+    private int           depth          = 1;
+    private int           faces          = 1;
+    private int           arrayElements  = 1;
+    private int           rowPitch;
+    private int           imageByteSize;
+    
+    /**
+     * The z slice count of this level (1 for 2D textures)
+     */
+    public int getDepth()
+    {
+        return depth;
+    }
+    
+    public void setDepth(int depth)
+    {
+        this.depth = depth;
+    }
+    
+    public int getFaces()
+    {
+        return faces;
+    }
+    
+    public void setFaces(int faces)
+    {
+        this.faces = faces;
+    }
+    
+    public int getArrayElements()
+    {
+        return arrayElements;
+    }
+    
+    public void setArrayElements(int arrayElements)
+    {
+        this.arrayElements = arrayElements;
+    }
+    
+    /**
+     * Bytes per row (including KTX's 4 byte row alignment) for uncompressed formats, 0 for block compressed formats
+     */
+    public int getRowPitch()
+    {
+        return rowPitch;
+    }
+    
+    public void setRowPitch(int rowPitch)
+    {
+        this.rowPitch = rowPitch;
+    }
+    
+    /**
+     * The size of one 2D image (one z slice of one face of one array element) in {@link #getData()}
+     */
+    public int getImageByteSize()
+    {
+        return imageByteSize;
+    }
+    
+    public void setImageByteSize(int imageByteSize)
+    {
+        this.imageByteSize = imageByteSize;
+    }
+    
+    /**
+     * Returns one 2D image of this level. {@link #getData()} holds all images ordered by array element, then face, then z slice.
+     */
+    public byte[] getImage(int arrayElement, int face, int slice)
+    {
+        if (arrayElement < 0 || arrayElement >= arrayElements || face < 0 || face >= faces || slice < 0 || slice >= depth)
+        {
+            throw new IndexOutOfBoundsException("Image " + arrayElement + "/" + face + "/" + slice + " does not exist");
+        }
+        
+        int index = (arrayElement * faces + face) * depth + slice;
+        return Arrays.copyOfRange(data, index * imageByteSize, (index + 1) * imageByteSize);
+    }
     
     public TextureFormat getFormat()
     {

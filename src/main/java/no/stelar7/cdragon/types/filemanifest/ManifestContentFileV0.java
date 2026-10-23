@@ -2,13 +2,13 @@ package no.stelar7.cdragon.types.filemanifest;
 
 import java.util.*;
 
-public class ManifestContentFileV0
+public final class ManifestContentFileV0
 {
-    private final List<Integer> content = new ArrayList<>();
+    private final List<Integer> content;
     
-    public void addItem(Integer item)
+    public ManifestContentFileV0(List<Integer> content)
     {
-        content.add(item);
+        this.content = List.copyOf(content);
     }
     
     public int size()

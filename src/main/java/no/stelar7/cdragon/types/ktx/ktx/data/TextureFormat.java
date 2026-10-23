@@ -1,5 +1,7 @@
 package no.stelar7.cdragon.types.ktx.ktx.data;
 
+import no.stelar7.cdragon.types.dds.TextureDecoder;
+
 public enum TextureFormat
 {
     // Uncompressed formats (texture format = pixel format).
@@ -39,7 +41,7 @@ public enum TextureFormat
     TEXTURE_FORMAT_BPTC(true, true, "BPTC", "BC7", 4, 4, 0x8E8C, 0, 0, "DX10", 98),
     TEXTURE_FORMAT_ETC1(201327392L, true, false, "ETC1", "", 4, 4, 0x8D64, 0, 0, "", 0),
     TEXTURE_FORMAT_ETC2(true, false, "ETC2", "ETC2_RGB8", 4, 4, 0x9274, 0, 0, "", 0),
-    TEXTURE_FORMAT_ETC2_PUNCHTHROUGH(true, false, "ETC2_PUNCHTHROUGH", "", 4, 4, 0x9275, 0, 0, "", 0),
+    TEXTURE_FORMAT_ETC2_PUNCHTHROUGH(true, false, "ETC2_PUNCHTHROUGH", "", 4, 4, 0x9276, 0, 0, "", 0),
     TEXTURE_FORMAT_ETC2_EAC(true, false, "ETC2_EAC", "EAC", 4, 4, 0x9278, 0, 0, "", 0),
     TEXTURE_FORMAT_EAC_R11(true, false, "EAC_R11", "", 4, 4, 0x9270, 0, 0, "", 0),
     TEXTURE_FORMAT_EAC_SIGNED_R11(true, false, "EAC_SIGNED_R11", "", 4, 4, 0x9271, 0, 0, "", 0),
@@ -51,7 +53,7 @@ public enum TextureFormat
     TEXTURE_FORMAT_ASTC_4X4(true, false, "ASTC_4x4", "", 4, 4, 0x93B0, 0, 0, "DX10", 134),
     TEXTURE_FORMAT_RGBA_ASTC_5X4(true, false, "astc_5x4", "", 5, 4, 0x93B1, 0, 0, "", 0),
     TEXTURE_FORMAT_RGBA_ASTC_5X5(true, false, "astc_5x5", "", 5, 5, 0x93B2, 0, 0, "", 0),
-    TEXTURE_FORMAT_RGBA_ASTC_6X5(true, false, "astc_6x4", "", 6, 5, 0x93B3, 0, 0, "", 0),
+    TEXTURE_FORMAT_RGBA_ASTC_6X5(true, false, "astc_6x5", "", 6, 5, 0x93B3, 0, 0, "", 0),
     TEXTURE_FORMAT_RGBA_ASTC_6X6(true, false, "astc_6x6", "", 6, 6, 0x93B4, 0, 0, "", 0),
     TEXTURE_FORMAT_RGBA_ASTC_8X5(true, false, "astc_8x5", "", 8, 5, 0x93B5, 0, 0, "", 0),
     TEXTURE_FORMAT_RGBA_ASTC_8X6(true, false, "astc_8x6", "", 8, 6, 0x93B6, 0, 0, "", 0),
@@ -62,7 +64,22 @@ public enum TextureFormat
     TEXTURE_FORMAT_RGBA_ASTC_10X10(true, false, "astc_10x10", "", 10, 10, 0x93BB, 0, 0, "", 0),
     TEXTURE_FORMAT_RGBA_ASTC_12X10(true, false, "astc_12x10", "", 12, 10, 0x93BC, 0, 0, "", 0),
     TEXTURE_FORMAT_RGBA_ASTC_12X12(true, false, "astc_12x12", "", 12, 12, 0x93BD, 0, 0, "", 0),
-    
+    TEXTURE_FORMAT_SRGB_BPTC(true, true, "SRGB_BPTC", "BC7_SRGB", 4, 4, 0x8E8D, 0, 0, "DX10", 99),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_4X4(true, false, "srgb_astc_4x4", "", 4, 4, 0x93D0, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_5X4(true, false, "srgb_astc_5x4", "", 5, 4, 0x93D1, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_5X5(true, false, "srgb_astc_5x5", "", 5, 5, 0x93D2, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_6X5(true, false, "srgb_astc_6x5", "", 6, 5, 0x93D3, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_6X6(true, false, "srgb_astc_6x6", "", 6, 6, 0x93D4, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_8X5(true, false, "srgb_astc_8x5", "", 8, 5, 0x93D5, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_8X6(true, false, "srgb_astc_8x6", "", 8, 6, 0x93D6, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_8X8(true, false, "srgb_astc_8x8", "", 8, 8, 0x93D7, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_10X5(true, false, "srgb_astc_10x5", "", 10, 5, 0x93D8, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_10X6(true, false, "srgb_astc_10x6", "", 10, 6, 0x93D9, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_10X8(true, false, "srgb_astc_10x8", "", 10, 8, 0x93DA, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_10X10(true, false, "srgb_astc_10x10", "", 10, 10, 0x93DB, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_12X10(true, false, "srgb_astc_12x10", "", 12, 10, 0x93DC, 0, 0, "", 0),
+    TEXTURE_FORMAT_SRGB8_ALPHA8_ASTC_12X12(true, false, "srgb_astc_12x12", "", 12, 12, 0x93DD, 0, 0, "", 0),
+
     // Pseudo-formats (not present in files, but used for name look-up).
     PIXEL_FORMAT_RGBX8(false, false, "RGBX8", "", 1, 1, 0, 0, 0, "", 0),
     PIXEL_FORMAT_BGRX8(false, false, "BGRX8", "", 1, 1, 0, 0, 0, "", 0),
@@ -180,6 +197,76 @@ public enum TextureFormat
         this.glType = glType;
         this.dxFourCC = dxFourCC;
         this.dx10Format = dx10Format;
+    }
+    
+    /**
+     * The number of bytes in one compressed block, or 0 for uncompressed formats
+     */
+    public int getBlockBytes()
+    {
+        return switch (this)
+        {
+            case TEXTURE_FORMAT_BC1, TEXTURE_FORMAT_BC1A, TEXTURE_FORMAT_RGTC1, TEXTURE_FORMAT_SIGNED_RGTC1,
+                 TEXTURE_FORMAT_ETC1, TEXTURE_FORMAT_ETC2, TEXTURE_FORMAT_ETC2_PUNCHTHROUGH, TEXTURE_FORMAT_ETC2_SRGB8, TEXTURE_FORMAT_ETC2_SRGB_PUNCHTHROUGH,
+                 TEXTURE_FORMAT_EAC_R11, TEXTURE_FORMAT_EAC_SIGNED_R11 -> 8;
+            default -> this.name().startsWith("TEXTURE_FORMAT_") ? 16 : 0;
+        };
+    }
+    
+    /**
+     * The decoder format for block compressed formats that can be decoded, or null
+     */
+    public TextureDecoder.Format getDecoderFormat()
+    {
+        return switch (this)
+        {
+            case TEXTURE_FORMAT_BC1 -> TextureDecoder.Format.BC1;
+            case TEXTURE_FORMAT_BC1A -> TextureDecoder.Format.BC1A;
+            case TEXTURE_FORMAT_BC2 -> TextureDecoder.Format.BC2;
+            case TEXTURE_FORMAT_BC3 -> TextureDecoder.Format.BC3;
+            case TEXTURE_FORMAT_RGTC1 -> TextureDecoder.Format.BC4;
+            case TEXTURE_FORMAT_RGTC2 -> TextureDecoder.Format.BC5;
+            case TEXTURE_FORMAT_ETC1 -> TextureDecoder.Format.ETC1;
+            case TEXTURE_FORMAT_BPTC, TEXTURE_FORMAT_SRGB_BPTC -> TextureDecoder.Format.BC7;
+            case TEXTURE_FORMAT_BPTC_FLOAT -> TextureDecoder.Format.BC6H_UF16;
+            case TEXTURE_FORMAT_BPTC_SIGNED_FLOAT -> TextureDecoder.Format.BC6H_SF16;
+            case TEXTURE_FORMAT_ETC2, TEXTURE_FORMAT_ETC2_SRGB8 -> TextureDecoder.Format.ETC2_RGB;
+            case TEXTURE_FORMAT_ETC2_PUNCHTHROUGH, TEXTURE_FORMAT_ETC2_SRGB_PUNCHTHROUGH -> TextureDecoder.Format.ETC2_RGB_A1;
+            case TEXTURE_FORMAT_ETC2_EAC, TEXTURE_FORMAT_ETC2_SRGB_EAC -> TextureDecoder.Format.ETC2_RGBA;
+            case TEXTURE_FORMAT_EAC_R11 -> TextureDecoder.Format.EAC_R11;
+            case TEXTURE_FORMAT_EAC_RG11 -> TextureDecoder.Format.EAC_RG11;
+            default -> this.name().contains("ASTC") ? TextureDecoder.Format.astc(blockWidth, blockHeight) : null;
+        };
+    }
+    
+    /**
+     * Finds the format of a compressed (glFormat == 0) KTX texture by its glInternalFormat, or null if it is unknown
+     */
+    public static TextureFormat fromCompressedGlInternalFormat(int glInternalFormat)
+    {
+        for (TextureFormat format : values())
+        {
+            if (format.getBlockBytes() > 0 && format.glInternalFormat == glInternalFormat)
+            {
+                return format;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Finds an uncompressed format by its GL triple, or null if it is not in this table
+     */
+    public static TextureFormat fromUncompressedGl(int glInternalFormat, int glFormat, int glType)
+    {
+        for (TextureFormat format : values())
+        {
+            if (format.getBlockBytes() == 0 && format.glInternalFormat != 0 && format.glInternalFormat == glInternalFormat && format.glFormat == glFormat && format.glType == glType)
+            {
+                return format;
+            }
+        }
+        return null;
     }
     
     public int getPixelSize()

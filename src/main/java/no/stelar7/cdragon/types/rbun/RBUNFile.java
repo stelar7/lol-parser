@@ -11,9 +11,17 @@ public class RBUNFile
     private List<RBUNChunkInfo> chunks;
     
     
+    /**
+     * Size of the chunk table and footer at the end of the bundle
+     */
     public int getMetadataSize()
     {
-        return 4 + 4 + 4 + 8 + (chunkCount * (8 + 4 + 4));
+        return Math.toIntExact(getMetadataSizeLong());
+    }
+    
+    public long getMetadataSizeLong()
+    {
+        return RBUNParser.FOOTER_SIZE + ((long) chunkCount * RBUNParser.ENTRY_SIZE);
     }
     
     public String getMagic()

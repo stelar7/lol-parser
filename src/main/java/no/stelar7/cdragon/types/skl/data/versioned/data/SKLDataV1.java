@@ -6,19 +6,20 @@ import java.util.*;
 
 public class SKLDataV1
 {
-    private int designerId;
-    private int boneCount;
-    private List<SKLBoneV1> bones = new ArrayList<>();
+    private final int             designerId;
+    private final int             boneCount;
+    private final List<SKLBoneV1> bones;
     
+    public SKLDataV1(int designerId, int boneCount, List<SKLBoneV1> bones)
+    {
+        this.designerId = designerId;
+        this.boneCount = boneCount;
+        this.bones = bones;
+    }
     
     public int getDesignerId()
     {
         return designerId;
-    }
-    
-    public void setDesignerId(int designerId)
-    {
-        this.designerId = designerId;
     }
     
     public int getBoneCount()
@@ -26,18 +27,8 @@ public class SKLDataV1
         return boneCount;
     }
     
-    public void setBoneCount(int boneCount)
-    {
-        this.boneCount = boneCount;
-    }
-    
     public List<SKLBoneV1> getBones()
     {
         return bones;
-    }
-    
-    public void setBones(List<SKLBoneV1> bones)
-    {
-        this.bones = bones;
     }
 }

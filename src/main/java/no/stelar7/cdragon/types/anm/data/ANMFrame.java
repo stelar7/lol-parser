@@ -1,60 +1,45 @@
 package no.stelar7.cdragon.types.anm.data;
 
-public class ANMFrame
+public final class ANMFrame
 {
-    private int   boneHash;
-    private short positionId;
-    private short scaleId;
-    private short rotationId;
-    private short unknown;
+    private final int boneHash;
+    // unsigned 16 bit palette indices
+    private final int positionId;
+    private final int scaleId;
+    private final int rotationId;
+    private final int unknown;
     
+    public ANMFrame(int boneHash, int positionId, int scaleId, int rotationId, int unknown)
+    {
+        this.boneHash = boneHash;
+        this.positionId = positionId;
+        this.scaleId = scaleId;
+        this.rotationId = rotationId;
+        this.unknown = unknown;
+    }
+
     public int getBoneHash()
     {
         return boneHash;
     }
-    
-    public void setBoneHash(int boneHash)
-    {
-        this.boneHash = boneHash;
-    }
-    
-    public short getPositionId()
+
+    public int getPositionId()
     {
         return positionId;
     }
-    
-    public void setPositionId(short positionId)
-    {
-        this.positionId = positionId;
-    }
-    
-    public short getScaleId()
+
+    public int getScaleId()
     {
         return scaleId;
     }
-    
-    public void setScaleId(short scaleId)
-    {
-        this.scaleId = scaleId;
-    }
-    
-    public short getRotationId()
+
+    public int getRotationId()
     {
         return rotationId;
     }
-    
-    public void setRotationId(short rotationId)
-    {
-        this.rotationId = rotationId;
-    }
-    
-    public short getUnknown()
+
+    public int getUnknown()
     {
         return unknown;
-    }
-    
-    public void setUnknown(short unknown)
-    {
-        this.unknown = unknown;
     }
 }

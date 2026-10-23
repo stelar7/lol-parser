@@ -9,29 +9,25 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 
-public class InibinFile implements Extractable
+public final class InibinFile implements Extractable
 {
-    private InibinHeader        header;
-    private Map<String, Object> keys;
+    private final InibinHeader        header;
+    private final Map<String, Object> keys;
+    
+    public InibinFile(InibinHeader header, Map<String, Object> keys)
+    {
+        this.header = header;
+        this.keys = keys;
+    }
     
     public InibinHeader getHeader()
     {
         return header;
     }
     
-    public void setHeader(InibinHeader header)
-    {
-        this.header = header;
-    }
-    
     public Map<String, Object> getKeys()
     {
         return keys;
-    }
-    
-    public void setKeys(Map<String, Object> keys)
-    {
-        this.keys = keys;
     }
     
     public void extract(Path path)

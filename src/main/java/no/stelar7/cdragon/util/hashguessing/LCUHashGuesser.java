@@ -1,11 +1,13 @@
 package no.stelar7.cdragon.util.hashguessing;
 
 import com.google.gson.JsonElement;
+import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Triplet;
 
-import java.nio.file.Path;
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.*;
@@ -18,12 +20,25 @@ public class LCUHashGuesser extends HashGuesser
     {
         super(HashGuesser.hashFileLCU, hashes);
     }
+
+    /**
+     * Uses another hash file for the known hashes, eg. a small one for testing
+     */
+    public LCUHashGuesser(HashFile hashFile, Set<String> hashes)
+    {
+        super(hashFile, hashes);
+    }
     
     @Override
-    public String generateHash(String val)
+    public long hashOf(String lowerCased)
     {
-        Long hashNum = HashHandler.computeXXHash64AsLong(val);
-        return HashHandler.toHex(hashNum, 16);
+        return HashHandler.computeXXHash64AsLong(lowerCased);
+    }
+
+    @Override
+    protected int hexLength()
+    {
+        return 16;
     }
     
     public Set<String> buildWordlist()
@@ -53,32 +68,49 @@ public class LCUHashGuesser extends HashGuesser
     
     public void substituteRegionLang()
     {
-        Set<String> regionLang = UtilHandler.product("/", this.REGIONS, this.LANGUAGES);
-        
-        System.out.format("Substitute region, and language: %s region/languages, %s hashes%n", regionLang.size(), this.known.size());
-        
-        new ArrayList<>(this.known.values()).parallelStream().forEach(value -> {
-            regionLang.parallelStream().forEach(rl -> {
-                String prefix  = value.substring(0, ordinalIndexOf(value, "/", 2) + 1);
-                String suffix  = value.substring(ordinalIndexOf(value, "/", 4) + 1);
-                String toCheck = prefix + rl + "/" + suffix;
-                check(toCheck);
-            });
+        Set<String> languages = new HashSet<>(this.LANGUAGES);
+        languages.add("default");
+        Set<String> regionLang = UtilHandler.product("/", this.REGIONS, languages);
+
+        // paths are plugins/<plugin>/<region>/<lang>/<rest>, most of them only differ by region/lang,
+        // so collapse them to unique (prefix, rest) pairs before substituting
+        Set<List<String>> templates = new HashSet<>();
+        for (String value : this.known.values())
+        {
+            int second = ordinalIndexOf(value, "/", 2);
+            int fourth = ordinalIndexOf(value, "/", 4);
+            if (value.startsWith("plugins/") && fourth > 0)
+            {
+                templates.add(List.of(value.substring(0, second + 1), value.substring(fourth + 1)));
+            }
+        }
+
+        System.out.format("Substitute region, and language: %s region/languages, %s templates (from %s hashes)%n", regionLang.size(), templates.size(), this.known.size());
+
+        templates.parallelStream().forEach(t -> {
+            for (String rl : regionLang)
+            {
+                check(t.get(0) + rl + "/" + t.get(1));
+            }
         });
     }
-    
+
     public void substitutePlugins()
     {
-        Set<String> plugins = this.known.values().stream()
-                                        .map(a -> a.substring("plugins/".length(), a.substring("plugins/".length()).indexOf('/') + "plugins/".length()))
-                                        .collect(Collectors.toSet());
-        
-        
-        System.out.format("Substitute plugins: %s plugins, %s hashes%n", plugins.size(), this.known.size());
-        
+        List<String> pluginPaths = this.known.values().stream()
+                                             .filter(a -> a.startsWith("plugins/") && a.indexOf('/', "plugins/".length()) > 0)
+                                             .toList();
+
+        Set<String> plugins = pluginPaths.stream()
+                                         .map(a -> a.substring("plugins/".length(), a.indexOf('/', "plugins/".length())))
+                                         .collect(Collectors.toSet());
+
+
+        System.out.format("Substitute plugins: %s plugins, %s hashes%n", plugins.size(), pluginPaths.size());
+
         for (String p : plugins)
         {
-            for (String value : new ArrayList<>(this.known.values()))
+            for (String value : pluginPaths)
             {
                 String prefix  = value.substring(0, ordinalIndexOf(value, "/", 1) + 1);
                 String suffix  = value.substring(ordinalIndexOf(value, "/", 2) + 1);
@@ -133,14 +165,12 @@ public class LCUHashGuesser extends HashGuesser
     
     public void substituteNumbers(int max, Optional<Integer> numbers)
     {
-        Pattern filter = Pattern.compile("\n^(?" +
-                                         ":plugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champion-\n| p" +
-                                         "lugins/rcp-be-lol-game-data/global/default/(?:data|assets)/characters/\n| p" +
-                                         "lugins/rcp-be-lol-game-data/global/default/data/items/icons2d/\\d+_\n| p" +
-                                         "lugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champions/-1.json\n)\n" +
-                                         "| /" +
-                                         "[0-9a-f]{32}\\.\n" +
-                                         "");
+        // paths that are already fully covered elsewhere, or that only differ by a content hash
+        Pattern filter = Pattern.compile("^(?:plugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champion-" +
+                                         "|plugins/rcp-be-lol-game-data/global/default/(?:data|assets)/characters/" +
+                                         "|plugins/rcp-be-lol-game-data/global/default/data/items/icons2d/\\d+_" +
+                                         "|plugins/rcp-be-lol-game-data/[^/]+/[^/]+/v1/champions/-1\\.json" +
+                                         ")|/[0-9a-f]{32}\\.");
         
         Set<String> paths = new HashSet<>();
         for (String value : new ArrayList<>(this.known.values()))
@@ -301,17 +331,17 @@ public class LCUHashGuesser extends HashGuesser
     
     public void guessFromGameHashes()
     {
+        // game textures are served by the client with the same path, converted to png/jpg
         String base = "plugins/rcp-be-lol-game-data/global/default";
         for (String path : HashGuesser.hashFileGAME.load(true).values())
         {
-            String prefix = UtilHandler.getFilename(path);
-            prefix = prefix.substring(0, prefix.lastIndexOf("."));
             String ext = UtilHandler.getEnding(path);
-            
-            if (ext.equals("dds"))
+
+            if (ext.equals("dds") || ext.equals("tex"))
             {
-                check(base + "/" + prefix + ".jpg");
-                check(base + "/" + prefix + ".png");
+                String withoutExt = path.substring(0, path.lastIndexOf('.'));
+                check(base + "/" + withoutExt + ".jpg");
+                check(base + "/" + withoutExt + ".png");
             } else if (ext.equals("json"))
             {
                 check(base + "/" + path);
@@ -464,15 +494,53 @@ public class LCUHashGuesser extends HashGuesser
     
     public void pullCDTB()
     {
-        System.out.println("Feching hashlists from CDTB");
-        String hashA = "https://github.com/CommunityDragon/CDTB/raw/master/cdragontoolbox/hashes.lcu.txt";
-        String hashB = "https://github.com/Morilli/CDTB/raw/new-hashes/cdragontoolbox/hashes.lcu.txt";
-        
-        Stream.of(WebHandler.readWeb(hashA).stream(), WebHandler.readWeb(hashB).stream())
-              .flatMap(a -> a)
-              .map(line -> line.substring(line.indexOf(' ') + 1))
-              .filter(isLCUHash)
-              .forEach(this::check);
+        System.out.println("Feching hashlists from CommunityDragon");
+        readCDragonHashList("hashes.lcu.txt", line -> {
+            if (isLCUHash.test(line.substring(line.indexOf(' ') + 1)))
+            {
+                checkPrehashed(line);
+            }
+        });
+    }
+
+    /**
+     * Runs {@link #grepWad} on every LCU wad (*.wad, not the game *.wad.client) in the folder.
+     * Does nothing if the folder does not exist.
+     */
+    public void grepWads(Path folder)
+    {
+        if (folder == null || !Files.isDirectory(folder))
+        {
+            System.out.println("No wad folder at " + folder + ", skipping grepWads");
+            return;
+        }
+
+        List<Path> wadFiles;
+        try (Stream<Path> files = Files.find(folder, 50, (p, attr) -> attr.isRegularFile() && p.getFileName().toString().toLowerCase(Locale.ENGLISH).endsWith(".wad")))
+        {
+            wadFiles = files.toList();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return;
+        }
+
+        System.out.format("Grepping %s LCU wads%n", wadFiles.size());
+        WADParser parser = new WADParser();
+        for (Path wadFile : wadFiles)
+        {
+            try
+            {
+                WADFile wad = parser.parse(wadFile);
+                if (wad != null)
+                {
+                    grepWad(wad);
+                }
+            } catch (Exception e)
+            {
+                System.err.println("Unable to grep " + wadFile + ": " + e.getMessage());
+            }
+        }
     }
     
     public void guessSanitizerHashes()

@@ -1,24 +1,44 @@
 package no.stelar7.cdragon.types.rman.data;
 
-import no.stelar7.cdragon.util.handlers.HashHandler;
-
 import java.util.*;
 
-public class RMANFileBodyFile
+public final class RMANFileBodyFile
 {
-    private int          filetypeFlag;
-    private String       name;
-    private int          structSize;
-    private String       symlink;
-    private long         fileId;
-    private long         directoryId;
-    private int          fileSize;
-    private int          permissions;
-    private int          languageId;
-    private int          unknown2;
-    private int          unknown3;
-    private List<String> chunkIds;
+    private final int        filetypeFlag;
+    private final String     name;
+    private final int        structSize;
+    private final String     symlink;
+    private final long       fileId;
+    private final long       directoryId;
+    private final long       fileSize;
+    private final int        permissions;
+    private final int        languageId;
+    private final int        unknown2;
+    private final int        unknown3;
+    private final long       languageFlags;
+    private final List<Long> chunkIds;
     
+    public RMANFileBodyFile(String name, String symlink, long fileId, long directoryId, long fileSize, int permissions, long languageFlags, List<Long> chunkIds)
+    {
+        // never read from the file
+        this.filetypeFlag = 0;
+        this.name = name;
+        // never read from the file
+        this.structSize = 0;
+        this.symlink = symlink;
+        this.fileId = fileId;
+        this.directoryId = directoryId;
+        this.fileSize = fileSize;
+        this.permissions = permissions;
+        // never read from the file
+        this.languageId = 0;
+        // never read from the file
+        this.unknown2 = 0;
+        // never read from the file
+        this.unknown3 = 0;
+        this.languageFlags = languageFlags;
+        this.chunkIds = chunkIds;
+    }
     
     public String getFullFilepath(RMANFile manifest)
     {
@@ -29,10 +49,10 @@ public class RMANFileBodyFile
             return output.toString();
         }
         
-        Optional<RMANFileBodyDirectory> maybeParent = manifest.getBody().getDirectories().stream().filter(d -> d.getDirectoryId() == getDirectoryId()).findAny();
-        if (maybeParent.isPresent())
+        RMANFileBodyDirectory parentDir = manifest.getDirectory(getDirectoryId());
+        if (parentDir != null)
         {
-            String parent = maybeParent.get().getFullPath(manifest.getBody().getDirectories());
+            String parent = parentDir.getFullPath(manifest);
             output.insert(0, parent + "/");
             
             return output.toString();
@@ -47,19 +67,9 @@ public class RMANFileBodyFile
         return filetypeFlag;
     }
     
-    public void setFiletypeFlag(int filetypeFlag)
-    {
-        this.filetypeFlag = filetypeFlag;
-    }
-    
     public String getName()
     {
         return name;
-    }
-    
-    public void setName(String name)
-    {
-        this.name = name;
     }
     
     public int getStructSize()
@@ -67,19 +77,9 @@ public class RMANFileBodyFile
         return structSize;
     }
     
-    public void setStructSize(int structSize)
-    {
-        this.structSize = structSize;
-    }
-    
     public String getSymlink()
     {
         return symlink;
-    }
-    
-    public void setSymlink(String symlink)
-    {
-        this.symlink = symlink;
     }
     
     public long getFileId()
@@ -87,29 +87,14 @@ public class RMANFileBodyFile
         return fileId;
     }
     
-    public void setFileId(long fileId)
-    {
-        this.fileId = fileId;
-    }
-    
     public long getDirectoryId()
     {
         return directoryId;
     }
     
-    public void setDirectoryId(long directoryId)
-    {
-        this.directoryId = directoryId;
-    }
-    
-    public int getFileSize()
+    public long getFileSize()
     {
         return fileSize;
-    }
-    
-    public void setFileSize(int fileSize)
-    {
-        this.fileSize = fileSize;
     }
     
     public int getPermissions()
@@ -117,19 +102,9 @@ public class RMANFileBodyFile
         return permissions;
     }
     
-    public void setPermissions(int permissions)
-    {
-        this.permissions = permissions;
-    }
-    
     public int getLanguageId()
     {
         return languageId;
-    }
-    
-    public void setLanguageId(int languageId)
-    {
-        this.languageId = languageId;
     }
     
     public int getUnknown2()
@@ -137,34 +112,22 @@ public class RMANFileBodyFile
         return unknown2;
     }
     
-    public void setUnknown2(int unknown2)
-    {
-        this.unknown2 = unknown2;
-    }
-    
     public int getUnknown3()
     {
         return unknown3;
     }
     
-    public void setUnknown3(int unknown3)
+    /**
+     * Bitmask of the languages this file belongs to; bit i set means language id i + 1
+     */
+    public long getLanguageFlags()
     {
-        this.unknown3 = unknown3;
+        return languageFlags;
     }
     
-    public List<String> getChunkIds()
+    public List<Long> getChunkIds()
     {
         return chunkIds;
-    }
-    
-    public void setChunkIds(List<Long> chunkIds)
-    {
-        List<String> stringChunkIds = new ArrayList<>();
-        for (Long chunkId : chunkIds)
-        {
-            stringChunkIds.add(HashHandler.toHex(chunkId, 16));
-        }
-        this.chunkIds = stringChunkIds;
     }
     
     @Override
@@ -186,6 +149,7 @@ public class RMANFileBodyFile
                fileSize == that.fileSize &&
                permissions == that.permissions &&
                languageId == that.languageId &&
+               languageFlags == that.languageFlags &&
                unknown2 == that.unknown2 &&
                unknown3 == that.unknown3 &&
                Objects.equals(name, that.name) &&

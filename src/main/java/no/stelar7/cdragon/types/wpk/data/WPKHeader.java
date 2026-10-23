@@ -1,19 +1,21 @@
 package no.stelar7.cdragon.types.wpk.data;
 
-public class WPKHeader
+public final class WPKHeader
 {
-    private String magic;
-    private int    version;
-    private int    fileCount;
+    private final String magic;
+    private final int    version;
+    private final int    fileCount;
+    
+    public WPKHeader(String magic, int version, int fileCount)
+    {
+        this.magic = magic;
+        this.version = version;
+        this.fileCount = fileCount;
+    }
     
     public String getMagic()
     {
         return magic;
-    }
-    
-    public void setMagic(String magic)
-    {
-        this.magic = magic;
     }
     
     public int getVersion()
@@ -21,18 +23,8 @@ public class WPKHeader
         return version;
     }
     
-    public void setVersion(int version)
-    {
-        this.version = version;
-    }
-    
     public int getFileCount()
     {
         return fileCount;
-    }
-    
-    public void setFileCount(int fileCount)
-    {
-        this.fileCount = fileCount;
     }
 }

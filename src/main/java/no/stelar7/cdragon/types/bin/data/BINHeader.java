@@ -3,22 +3,30 @@ package no.stelar7.cdragon.types.bin.data;
 
 import java.util.*;
 
-public class BINHeader
+public final class BINHeader
 {
-    private String        magic;
-    private int           version;
-    private int           entryCount;
-    private boolean       isPatch;
-    private List<Integer> entryTypes = new ArrayList<>();
+    private final String        magic;
+    private final int           version;
+    private final int           entryCount;
+    private final boolean       isPatch;
+    private final List<Integer> entryTypes;
+    private final int           patchVersion;
+    private final int           patchUnknown;
+    
+    public BINHeader(String magic, int version, int entryCount, boolean isPatch, List<Integer> entryTypes, int patchVersion, int patchUnknown)
+    {
+        this.magic = magic;
+        this.version = version;
+        this.entryCount = entryCount;
+        this.isPatch = isPatch;
+        this.entryTypes = entryTypes;
+        this.patchVersion = patchVersion;
+        this.patchUnknown = patchUnknown;
+    }
     
     public String getMagic()
     {
         return magic;
-    }
-    
-    public void setMagic(String magic)
-    {
-        this.magic = magic;
     }
     
     public int getVersion()
@@ -26,19 +34,9 @@ public class BINHeader
         return version;
     }
     
-    public void setVersion(int version)
-    {
-        this.version = version;
-    }
-    
     public boolean isPatch()
     {
         return isPatch;
-    }
-    
-    public void setPatch(boolean patch)
-    {
-        isPatch = patch;
     }
     
     public int getEntryCount()
@@ -46,19 +44,24 @@ public class BINHeader
         return entryCount;
     }
     
-    public void setEntryCount(int entryCount)
-    {
-        this.entryCount = entryCount;
-    }
-    
     public List<Integer> getEntryTypes()
     {
         return entryTypes;
     }
     
-    public void setEntryTypes(List<Integer> entryTypes)
+    /**
+     * The version from the PTCH header (only set for patch files)
+     */
+    public int getPatchVersion()
     {
-        this.entryTypes = entryTypes;
+        return patchVersion;
     }
     
+    /**
+     * The unknown u32 after the PTCH version (only set for patch files)
+     */
+    public int getPatchUnknown()
+    {
+        return patchUnknown;
+    }
 }

@@ -5,11 +5,10 @@ import no.stelar7.cdragon.types.wad.data.*;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.*;
 import no.stelar7.cdragon.util.handlers.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
+import java.io.*;
 import java.nio.ByteOrder;
 import java.nio.file.*;
 import java.util.*;
@@ -143,21 +142,8 @@ public class WADParser implements Parseable<WADFile>
     
     
     /**
-     * Parses the specified WAD file
-     *
-     * @param path path to the file
-     * @return WADFile
-     */
-    @Override
-    public WADFile parse(Path path)
-    {
-        RandomAccessReader raf = new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN);
-        return parse(raf);
-    }
-    
-    /**
-     * Parses the specified WAD, locking it for writing.
-     * This is much faster than the other options, but blocks the file from being written to, deleted, and moved.
+     * Parses the specified WAD.
+     * Kept for compatibility; this is the same as {@link #parse(Path)}, the file is not kept locked.
      *
      * @param path path to the file
      * @return WADFile
@@ -168,29 +154,50 @@ public class WADParser implements Parseable<WADFile>
         return parse(raf);
     }
     
+    /**
+     * Parses a compressed (eg. .wad.compressed) WAD
+     *
+     * @throws ParseException       if the file can not be decompressed, or is not a valid WAD
+     * @throws UncheckedIOException if the file can not be read
+     */
     public WADFile parseCompressed(Path path)
     {
+        byte[] compressed;
         try
         {
-            byte[] dataBytes = CompressionHandler.uncompress(Files.readAllBytes(path));
-            return parse(new ByteArray(dataBytes));
+            compressed = Files.readAllBytes(path);
         } catch (IOException e)
         {
-            e.printStackTrace();
-            return null;
+            throw new UncheckedIOException(e);
         }
+
+        byte[] dataBytes = compressed.length < 4 ? null : CompressionHandler.uncompress(compressed);
+        if (dataBytes == null)
+        {
+            throw new ParseException("Unable to decompress " + path, 0);
+        }
+        return parse(new ByteArray(dataBytes));
     }
-    
+
+    /**
+     * True if the data starts with "RW" and a supported version (1.x, 2.x, 3.0-3.4)
+     */
     @Override
-    public WADFile parse(ByteArray data)
+    public boolean canParse(byte[] data)
     {
-        RandomAccessReader raf = new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN);
-        return parse(raf);
+        if (data == null || data.length < 4 || data[0] != 'R' || data[1] != 'W')
+        {
+            return false;
+        }
+        int major = data[2] & 0xFF;
+        int minor = data[3] & 0xFF;
+        return major == 1 || major == 2 || (major == 3 && minor <= 4);
     }
-    
+
     @Override
     public WADFile parse(RandomAccessReader raf)
     {
+        raf.setEndian(ByteOrder.LITTLE_ENDIAN);
         WADFile wadFile = new WADFile(raf);
         
         wadFile.setHeader(parseHeader(raf));
@@ -202,132 +209,130 @@ public class WADParser implements Parseable<WADFile>
     /**
      * Read the content headers, and put them in a list
      *
+     * Entry layouts (all little endian), matching CDTB's wad.py:
+     * <pre>
+     * 1.x      : u64 pathHash, u32 offset, u32 compressedSize, u32 size, u32 type
+     * 2.x-3.3  : u64 pathHash, u32 offset, u32 compressedSize, u32 size, u8 type|subChunkCount<<4, u8 duplicate, u16 firstSubChunk, u64 checksum
+     * 3.4      : u64 pathHash, u32 offset, u32 compressedSize, u32 size, u8 type|subChunkCount<<4, u8 firstSubChunkHigh, u16 firstSubChunkLow, u64 checksum
+     * </pre>
+     *
      * @param raf  the filereader
      * @param base header containing the major version, and filecount
      * @return {@code List<WADContentHeaderV1>}
      */
     private List<WADContentHeaderV1> parseContent(RandomAccessReader raf, WADHeaderBase base)
     {
-        List<WADContentHeaderV1> content = new ArrayList<>();
-        
-        try
-        {
-            Field field = WADHeaderBase.class.getDeclaredField("fileCount");
-            field.setAccessible(true);
-            long fileCount = (long) field.get(base);
-            
-            for (int i = 0; i < fileCount; i++)
-            {
-                WADContentHeaderV1 header = new WADContentHeaderV1();
-                header.setPathHash(HashHandler.toHex(raf.readLong(), 16));
-                header.setOffset(raf.readInt());
-                header.setCompressedFileSize(raf.readInt());
-                header.setFileSize(raf.readInt());
-                
-                if (base.getMajor() > 1)
-                {
-                    if (base.getMajor() >= 3 && base.getMinor() >= 3)
-                    {
-                        byte dataAndChunkCount = raf.readByte();
-                        int  type              = dataAndChunkCount & 0xF;
-                        int  count             = dataAndChunkCount >> 4;
-                        header.setCompressionType(WADCompressionType.valueOf(type));
-                        header.setSubChunkCount(count);
-                    } else
-                    {
-                        header.setCompressionType(WADCompressionType.valueOf(raf.readByte()));
-                    }
-                } else
-                {
-                    header.setCompressionType(WADCompressionType.valueOf((byte) raf.readInt()));
-                }
-                
-                if (base.getMajor() == 2 || base.getMajor() == 3)
-                {
-                    WADContentHeaderV2 headerv2 = new WADContentHeaderV2(header);
-                    headerv2.setDuplicate(raf.readByte() > 0);
-                    headerv2.setSubChunkOffset(raf.readShort());
-                    headerv2.setSha256(raf.readLong());
-                    
-                    content.add(headerv2);
-                    continue;
-                }
+        long fileCount = base.getFileCount();
+        int  major     = base.getMajor();
+        int  minor     = base.getMinor();
 
-                if (base.getMajor() == 3 && base.getMinor() > 3)
-                {
-                    WADContentHeaderV2 headerv3 = new WADContentHeaderV2(header);
-                    headerv3.setDuplicate(false);
-                    byte chunkOffsetHigh = raf.readByte();
-                    short chunkOffsetLow = raf.readShort();
-                    int chunkOffset = chunkOffsetLow + (chunkOffsetHigh << 16);
-                    headerv3.setSubChunkOffset(chunkOffset);
-                    headerv3.setSha256(raf.readLong());
-
-                    content.add(headerv3);
-                    continue;
-                }
-                
-                if (header.getCompressionType() == WADCompressionType.REFERENCE)
-                {
-                    System.out.println("Found file reference in " + raf.getPath());
-                }
-                
-                content.add(header);
-            }
-        } catch (NoSuchFieldException | IllegalAccessException e)
+        int  entrySize = major == 1 ? 24 : 32;
+        if (fileCount * entrySize > raf.remaining())
         {
-            e.printStackTrace();
+            throw new ParseException("WAD entry table (" + fileCount + " entries) is larger than the file", raf);
         }
-        
+
+        List<WADContentHeaderV1> content = new ArrayList<>((int) fileCount);
+        for (long i = 0; i < fileCount; i++)
+        {
+            String pathHash           = HashHandler.toHex(raf.readLong(), 16);
+            long   offset             = raf.readU32();
+            long   compressedFileSize = raf.readU32();
+            long   fileSize           = raf.readU32();
+
+            if (major == 1)
+            {
+                content.add(new WADContentHeaderV1(pathHash, offset, compressedFileSize, fileSize, WADCompressionType.valueOf(raf.readInt()), 0));
+                continue;
+            }
+
+            int                typeAndChunkCount = raf.readU8();
+            WADCompressionType compressionType   = WADCompressionType.valueOf(typeAndChunkCount & 0xF);
+            int                subChunkCount     = typeAndChunkCount >>> 4;
+
+            boolean duplicate;
+            int     subChunkOffset;
+            if (major == 3 && minor == 4)
+            {
+                // 3.4 dropped the duplicate flag, and uses its byte to extend the subchunk index to 24 bits
+                int chunkIndexHigh = raf.readU8();
+                int chunkIndexLow  = raf.readU16();
+                duplicate = false;
+                subChunkOffset = chunkIndexLow | (chunkIndexHigh << 16);
+            } else
+            {
+                duplicate = raf.readByte() != 0;
+                subChunkOffset = raf.readU16();
+            }
+            long checksum = raf.readLong();
+
+            content.add(new WADContentHeaderV2(pathHash, offset, compressedFileSize, fileSize, compressionType, subChunkCount, duplicate, subChunkOffset, checksum));
+        }
+
         return content;
     }
-    
+
     /**
      * Parse the WAD header by version number
      *
      * @param raf wad file
      * @return WADHeaderBase
      */
-    
+
     private WADHeaderBase parseHeader(RandomAccessReader raf)
     {
-        WADHeaderBase base = new WADHeaderBase();
-        base.setMagic(raf.readString(2));
-        base.setMajor(raf.readByte());
-        base.setMinor(raf.readByte());
-        
-        switch (base.getMajor())
+        if (raf.remaining() < 4)
+        {
+            throw new ParseException("File is too small to be a WAD", raf);
+        }
+
+        String magic = raf.readString(2);
+        int    major = raf.readU8();
+        int    minor = raf.readU8();
+
+        if (!"RW".equals(magic))
+        {
+            throw new ParseException("Invalid WAD magic: " + magic, 0);
+        }
+
+        switch (major)
         {
             case 1:
             {
-                WADHeaderV1 head = new WADHeaderV1(base);
-                head.setEntryHeaderOffset(raf.readShort());
-                head.setEntryHeaderCellSize(raf.readShort());
-                head.setFileCount(raf.readInt());
-                return head;
+                int  entryHeaderOffset   = raf.readU16();
+                int  entryHeaderCellSize = raf.readU16();
+                long fileCount           = raf.readU32();
+                return new WADHeaderV1(magic, major, minor, entryHeaderOffset, entryHeaderCellSize, fileCount);
             }
             case 2:
             {
-                WADHeaderV2 head = new WADHeaderV2(base);
-                head.setECDSALength(raf.readByte());
-                head.setECDSA(raf.readBytes(head.getECDSALength()));
-                head.setECDSAPadding(raf.readBytes(83 - head.getECDSALength()));
-                head.setFileChecksum(raf.readLong());
-                head.setEntryHeaderOffset(raf.readShort());
-                head.setEntryHeaderCellSize(raf.readShort());
-                head.setFileCount(raf.readInt());
-                return head;
+                int ecdsaLength = raf.readU8();
+                if (ecdsaLength > 83)
+                {
+                    throw new ParseException("Invalid WAD signature length: " + ecdsaLength, raf);
+                }
+                byte[] ecdsa               = raf.readBytes(ecdsaLength);
+                byte[] ecdsaPadding        = raf.readBytes(83 - ecdsaLength);
+                long   fileChecksum        = raf.readLong();
+                int    entryHeaderOffset   = raf.readU16();
+                int    entryHeaderCellSize = raf.readU16();
+                long   fileCount           = raf.readU32();
+                return new WADHeaderV2(magic, major, minor, ecdsaLength, ecdsa, ecdsaPadding, fileChecksum, entryHeaderOffset, entryHeaderCellSize, fileCount);
             }
             case 3:
             {
-                WADHeaderV3 head = new WADHeaderV3(base);
-                head.setECDSA(raf.readBytes(256));
-                head.setChecksum(raf.readLong());
-                head.setFileCount(raf.readInt());
-                return head;
+                if (minor > 4)
+                {
+                    throw new ParseException("Unsupported WAD version " + major + "." + minor, 2);
+                }
+
+                byte[] ecdsa     = raf.readBytes(256);
+                long   checksum  = raf.readLong();
+                long   fileCount = raf.readU32();
+                return new WADHeaderV3(magic, major, minor, ecdsa, checksum, fileCount);
             }
             default:
-                throw new RuntimeException("Invalid major version! " + base.getMajor());
+                throw new ParseException("Unsupported WAD version " + major + "." + minor, 2);
         }
     }
 }

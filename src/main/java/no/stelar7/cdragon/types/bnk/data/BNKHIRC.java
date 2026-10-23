@@ -4,24 +4,18 @@ import no.stelar7.cdragon.types.bnk.BNKHIRCObject;
 
 import java.util.*;
 
-public class BNKHIRC extends BNKHeader
+public final class BNKHIRC extends BNKHeader
 {
-    public BNKHIRC(BNKHeader header)
+    public BNKHIRC(BNKHeader header, List<BNKHIRCObject> hircData)
     {
-        setDataStart(header.getDataStart());
-        setSection(header.getSection());
-        setLength(header.getLength());
+        super(header);
+        this.hircData = hircData;
     }
     
-    List<BNKHIRCObject> hircData = new ArrayList<>();
+    private final List<BNKHIRCObject> hircData;
     
     public List<BNKHIRCObject> getHircData()
     {
         return hircData;
-    }
-    
-    public void setHircData(List<BNKHIRCObject> hircData)
-    {
-        this.hircData = hircData;
     }
 }

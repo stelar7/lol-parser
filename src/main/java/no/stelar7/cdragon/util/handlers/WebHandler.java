@@ -9,7 +9,6 @@ import java.net.*;
 import java.net.http.*;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.BufferUnderflowException;
 import java.nio.channels.*;
 import java.nio.file.*;
 import java.security.*;
@@ -89,8 +88,9 @@ public class WebHandler
                     //System.out.println("Bundle " + bundleId + " already exists");
                     return false;
                 }
-            } catch (BufferUnderflowException | IOException b)
+            } catch (IOException | RuntimeException b)
             {
+                // missing, truncated or corrupt bundle; download it again
                 return true;
             }
         }

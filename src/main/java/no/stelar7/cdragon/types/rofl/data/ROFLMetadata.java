@@ -10,6 +10,20 @@ public class ROFLMetadata
     private int                     lastGameChunkId;
     private int                     lastKeyframeId;
     private List<ROFLMetadataStats> statsJson;
+    private String                  rawStatsJson;
+    
+    /**
+     * The statsJson string as stored in the replay
+     */
+    public String getRawStatsJson()
+    {
+        return rawStatsJson;
+    }
+    
+    public void setRawStatsJson(String rawStatsJson)
+    {
+        this.rawStatsJson = rawStatsJson;
+    }
     
     public long getGameLength()
     {

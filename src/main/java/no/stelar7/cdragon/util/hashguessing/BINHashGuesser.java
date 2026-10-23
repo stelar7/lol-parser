@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.util.hashguessing;
 
-import com.google.common.collect.Sets;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.types.rst.*;
@@ -36,17 +35,33 @@ public class BINHashGuesser extends HashGuesser
                 files = Files.walk(dataPath)
                              .parallel()
                              .filter(UtilHandler.IS_BIN_PREDICATE)
-                             .map(parser::parse)
+                             .map(p -> parseOrSkip(parser, p))
                              .filter(Objects::nonNull)
                              .collect(Collectors.toList());
-                
+
             } catch (Exception e)
             {
                 e.printStackTrace();
             }
         }
-        
+
         return files;
+    }
+
+    /**
+     * Parses a .bin file, returns null for files that are not bins, and skips (with a message) corrupt ones,
+     * so one bad file does not stop a whole guessing run
+     */
+    static BINFile parseOrSkip(BINParser parser, Path path)
+    {
+        try
+        {
+            return parser.tryParse(path);
+        } catch (RuntimeException e)
+        {
+            System.out.println("Skipping " + path + ": " + e.getMessage());
+            return null;
+        }
     }
     
     public void guessTFTItems()
@@ -118,33 +133,32 @@ public class BINHashGuesser extends HashGuesser
                       for (Vector2<Object, Object> pairs : clipData.getData())
                       {
                           BINStruct clipContent = (BINStruct) pairs.getSecond();
-                
+
                           Optional<BINValue> animationResourcePath = clipContent.get("mAnimationResourceData");
                           if (animationResourcePath.isEmpty())
                           {
-                              return;
+                              continue;
                           }
-                
+
                           BINStruct          animationResourceData = (BINStruct) animationResourcePath.get().getValue();
                           Optional<BINValue> animationFilePath     = animationResourceData.get("mAnimationFilePath");
                           if (animationFilePath.isEmpty())
                           {
-                              return;
+                              continue;
                           }
-                
-                          String           path      = (String) animationFilePath.get().getValue();
-                          String           filename  = UtilHandler.removeEnding(UtilHandler.getFilename(path));
-                          Set<String>      parts     = new HashSet<>(Arrays.asList(filename.split("_")));
-                          Set<Set<String>> powerSets = Sets.powerSet(parts);
-                          for (Set<String> product : powerSets)
+
+                          // clip names are runs of the filename parts in order, e.g. ahri_idle1_base -> idle1, idle1_base, idle1base, ...
+                          String   path     = (String) animationFilePath.get().getValue();
+                          String   filename = UtilHandler.removeEnding(UtilHandler.getFilename(path));
+                          String[] parts    = filename.split("_");
+                          for (int start = 0; start < parts.length; start++)
                           {
-                              String toHash = String.join("", product);
-                              if (toHash.isBlank())
+                              for (int end = start + 1; end <= parts.length; end++)
                               {
-                                  continue;
-                        
+                                  String[] run = Arrays.copyOfRange(parts, start, end);
+                                  this.check(String.join("_", run));
+                                  this.check(String.join("", run));
                               }
-                              this.check(toHash);
                           }
                       }
                   });
@@ -252,38 +266,33 @@ public class BINHashGuesser extends HashGuesser
     
     public void pullCDTB()
     {
-        System.out.println("Feching hashlists from CDTB");
-        
-        List<String> bases = Arrays.asList("https://raw.githubusercontent.com/CommunityDragon/CDTB/master/",
-                                           "https://raw.githubusercontent.com/moonshadow565/CDTB/master/",
-                                           "https://raw.githubusercontent.com/moonshadow565/CDTB/binhashes/");
-        
-        List<String> files = Arrays.asList("cdragontoolbox/hashes.binentries.txt",
-                                           "cdragontoolbox/hashes.binfields.txt",
-                                           "cdragontoolbox/hashes.binhashes.txt",
-                                           "cdragontoolbox/hashes.bintypes.txt");
-        
-        List<String> data = new ArrayList<>();
-        for (String base : bases)
+        System.out.println("Feching hashlists from CommunityDragon");
+
+        // the CDTB repo no longer has these, and the moonshadow565 fork stopped updating in 2022
+        List<String> files = Arrays.asList("hashes.binentries.txt",
+                                           "hashes.binfields.txt",
+                                           "hashes.binhashes.txt",
+                                           "hashes.bintypes.txt");
+
+        for (String file : files)
         {
-            for (String file : files)
-            {
-                String url = base + file;
-                data.addAll(WebHandler.readWeb(url));
-            }
+            readCDragonHashList(file, this::checkPrehashed);
         }
-        
-        data.stream().map(line -> line.substring(line.indexOf(' ') + 1)).forEach(this::check);
     }
-    
+
     @Override
-    public String generateHash(String val)
+    public long hashOf(String lowerCased)
     {
-        long hashNum = HashHandler.computeFNV1A(val);
-        return HashHandler.toHex(hashNum, 8);
+        return HashHandler.computeFNV1ALowercase(lowerCased);
     }
-    
-    
+
+    @Override
+    protected int hexLength()
+    {
+        return 8;
+    }
+
+
     /**
      * returns false if there are no more hashes
      */
@@ -295,23 +304,30 @@ public class BINHashGuesser extends HashGuesser
         {
             return true;
         }
-        
-        String hash = generateHash(lowerCased);
+
+        return checkHash(hashOf(lowerCased), path, lowerCased);
+    }
+
+    /**
+     * returns false if there are no more hashes
+     */
+    @Override
+    protected boolean checkHash(long hash, String printPath, String savePath)
+    {
         if (this.unknown.contains(hash))
         {
-            this.addKnown(hash, path, lowerCased);
+            this.addKnown(hash, printPath, savePath);
             return true;
         }
-        
-        if (!this.known.containsKey(hash))
+
+        if (!this.knownHashes.contains(hash))
         {
-            this.addKnown(hash, path, lowerCased);
+            this.addKnown(hash, printPath, savePath);
         }
-        
+
         if (this.unknown.isEmpty())
         {
-            System.out.println("No more unknown hashes!");
-            return false;
+            return noMoreHashes();
         }
         return true;
     }

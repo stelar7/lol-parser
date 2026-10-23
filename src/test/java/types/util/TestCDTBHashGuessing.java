@@ -14,7 +14,7 @@ public class TestCDTBHashGuessing
 {
     private final Path dataPath = UtilHandler.CDRAGON_FOLDER.resolve("pbe");
     
-    @Test
+    // not a @Test, the ordered tests below already run everything
     public void doTests() throws Exception
     {
         doSubchunkTocTest();
@@ -32,13 +32,37 @@ public class TestCDTBHashGuessing
         
         GameHashGuesser game = new GameHashGuesser(HashGuesser.unknownFromExportWAD(UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt")));
         
-        Files.find(UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles"), 50, (path, attr) -> path.toString().contains("wad"))
-             .map(Path::toString)
-             .map(p -> p.replace("C:\\cdragon\\extractedFiles\\", ""))
-             .map(p -> p.replace("\\", "/"))
+        Path extracted = UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles");
+        if (!Files.isDirectory(extracted))
+        {
+            System.out.println("No extracted files at " + extracted + ", skipping subchunk guessing");
+            return;
+        }
+
+        Set<String> languages = game.getLanguages();
+        Files.find(extracted, 50, (path, attr) -> {
+                 String name = path.getFileName().toString().toLowerCase();
+                 return attr.isRegularFile() && (name.endsWith(".wad") || name.endsWith(".wad.client"));
+             })
+             .map(p -> extracted.relativize(p).toString())
+             .map(p -> p.replace("\\", "/").toLowerCase(Locale.ENGLISH))
              .forEach(p -> {
                  game.check(p + ".subchunktoc");
                  game.check(p.replace(".client", "") + ".subchunktoc");
+
+                 // {name}.wad.client -> {name}.{locale}.wad.subchunktoc, also when the wad itself is already localized
+                 String name = p.substring(0, p.indexOf(".wad"));
+                 int    dot  = name.lastIndexOf('.');
+                 if (dot > name.lastIndexOf('/') && languages.contains(name.substring(dot + 1)))
+                 {
+                     name = name.substring(0, dot);
+                 }
+
+                 for (String locale : languages)
+                 {
+                     game.check(name + "." + locale + ".wad.subchunktoc");
+                     game.check(name + "." + locale + ".wad.client.subchunktoc");
+                 }
              });
         
         game.saveToBackup();
@@ -93,7 +117,17 @@ public class TestCDTBHashGuessing
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessBinByLinkedFiles(dataPath);
         guesser.saveToBackup();
-        
+
+        // cheap and exact, run these first so the substitutions below can build on what they find
+        guesser.substituteSiblingExtensions();
+        guesser.substituteLanguages();
+        guesser.saveToBackup();
+        guesser.substituteSkinNumbers(99);
+        guesser.substituteSiblingExtensions();
+        guesser.saveToBackup();
+        guesser.substituteNumbers(99, Optional.empty());
+        guesser.saveToBackup();
+
         //guesser.guessByExistingWords();
         //guesser.saveToBackup();
     }
@@ -109,11 +143,18 @@ public class TestCDTBHashGuessing
         guesser.guessManifestFiles();
         guesser.guessAssetsBySearch(dataPath);
         guesser.guessSanitizerHashes();
+        guesser.guessPatterns();
         guesser.saveToBackup();
-        
+
+        // needs the game hashes, so doGameTest runs first
+        guesser.guessFromGameHashes();
+        guesser.grepWads(UtilHandler.CDRAGON_FOLDER.resolve("extractedFiles"));
+        guesser.saveToBackup();
+
         guesser.substituteRegionLang();
         guesser.substituteBasenames();
         guesser.substitutePlugins();
+        guesser.substituteExtensions();
         guesser.saveToBackup();
         
         guesser.substituteBasenameWords(null, null, null, 1);

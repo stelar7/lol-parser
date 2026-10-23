@@ -4,13 +4,25 @@ import no.stelar7.cdragon.util.types.math.Vector2;
 
 import java.util.*;
 
-public class BINMap
+public final class BINMap
 {
-    private BINValueType                  type1;
-    private BINValueType                  type2;
-    private int                           size;
-    private int                           count;
-    private List<Vector2<Object, Object>> data = new ArrayList<>();
+    private final BINValueType                  type1;
+    private final BINValueType                  type2;
+    private final int                           size;
+    private final int                           count;
+    private final List<Vector2<Object, Object>> data;
+    
+    /**
+     * @param data the key/value pairs, kept as given (not copied)
+     */
+    public BINMap(BINValueType type1, BINValueType type2, int size, int count, List<Vector2<Object, Object>> data)
+    {
+        this.type1 = type1;
+        this.type2 = type2;
+        this.size = size;
+        this.count = count;
+        this.data = data;
+    }
     
     public Optional<Object> get(Object key)
     {
@@ -27,19 +39,9 @@ public class BINMap
         return type1;
     }
     
-    public void setType1(BINValueType type1)
-    {
-        this.type1 = type1;
-    }
-    
     public BINValueType getType2()
     {
         return type2;
-    }
-    
-    public void setType2(BINValueType type2)
-    {
-        this.type2 = type2;
     }
     
     public int getSize()
@@ -47,29 +49,14 @@ public class BINMap
         return size;
     }
     
-    public void setSize(int size)
-    {
-        this.size = size;
-    }
-    
     public int getCount()
     {
         return count;
     }
     
-    public void setCount(int count)
-    {
-        this.count = count;
-    }
-    
     public List<Vector2<Object, Object>> getData()
     {
         return data;
-    }
-    
-    public void setData(List<Vector2<Object, Object>> data)
-    {
-        this.data = data;
     }
     
     @Override

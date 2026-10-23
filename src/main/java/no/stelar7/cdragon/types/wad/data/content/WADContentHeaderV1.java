@@ -2,81 +2,66 @@ package no.stelar7.cdragon.types.wad.data.content;
 
 import no.stelar7.cdragon.types.wad.data.WADCompressionType;
 
-public class WADContentHeaderV1
+/**
+ * An entry of the WAD table of contents. Immutable.
+ * <p>
+ * WAD 1.x entries are this class, 2.x and 3.x entries are {@link WADContentHeaderV2}, which adds the subchunk and checksum fields.
+ * (The base type is used for every entry, so code that only needs the common fields works for every version.)
+ */
+public sealed class WADContentHeaderV1 permits WADContentHeaderV2
 {
-    protected String             pathHash;
-    protected int                offset;
-    protected int                compressedFileSize;
-    protected int                fileSize;
-    protected WADCompressionType compressionType;
-    protected int                subChunkCount;
-    
-    
+    protected final String             pathHash;
+    protected final long               offset;
+    protected final long               compressedFileSize;
+    protected final long               fileSize;
+    protected final WADCompressionType compressionType;
+    protected final int                subChunkCount;
+
+    public WADContentHeaderV1(String pathHash, long offset, long compressedFileSize, long fileSize, WADCompressionType compressionType, int subChunkCount)
+    {
+        this.pathHash = pathHash;
+        this.offset = offset;
+        this.compressedFileSize = compressedFileSize;
+        this.fileSize = fileSize;
+        this.compressionType = compressionType;
+        this.subChunkCount = subChunkCount;
+    }
+
     public boolean isCompressed()
     {
         return compressionType != WADCompressionType.NONE;
     }
-    
+
     public String getPathHash()
     {
         return pathHash;
     }
-    
-    public void setPathHash(String pathHash)
-    {
-        this.pathHash = pathHash;
-    }
-    
-    public int getOffset()
+
+    public long getOffset()
     {
         return offset;
     }
-    
-    public void setOffset(int offset)
-    {
-        this.offset = offset;
-    }
-    
-    public int getCompressedFileSize()
+
+    public long getCompressedFileSize()
     {
         return compressedFileSize;
     }
-    
-    public void setCompressedFileSize(int compressedFileSize)
-    {
-        this.compressedFileSize = compressedFileSize;
-    }
-    
-    public int getFileSize()
+
+    public long getFileSize()
     {
         return fileSize;
     }
-    
-    public void setFileSize(int fileSize)
-    {
-        this.fileSize = fileSize;
-    }
-    
+
     public WADCompressionType getCompressionType()
     {
         return compressionType;
     }
-    
-    public void setCompressionType(WADCompressionType compressionType)
-    {
-        this.compressionType = compressionType;
-    }
-    
+
     public int getSubChunkCount()
     {
         return subChunkCount;
     }
-    
-    public void setSubChunkCount(int subChunkCount)
-    {
-        this.subChunkCount = subChunkCount;
-    }
-    
+
     @Override
     public String toString()
     {

@@ -33,7 +33,7 @@ public enum RiverRegionFlag
     
     public static List<RiverRegionFlag> valueOf(int flag)
     {
-        return Arrays.stream(RiverRegionFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
+        return Arrays.stream(RiverRegionFlag.values()).filter(f -> flag == 0 ? f.flag == 0 : (f.flag & flag) != 0).collect(Collectors.toList());
     }
     
     public static int valueFrom(List<RiverRegionFlag> flags)

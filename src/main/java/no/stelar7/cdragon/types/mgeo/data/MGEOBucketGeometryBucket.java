@@ -1,15 +1,17 @@
 package no.stelar7.cdragon.types.mgeo.data;
 
-import java.util.Objects;
-
 public class MGEOBucketGeometryBucket
 {
     private float maxStickOutX;
+    // Z
     private float maxStickOutY;
     private int   startIndex;
+    // base vertex
     private int   vertex;
-    private short insideFaceCount;
-    private short stickingOutFaceCount;
+    // u16
+    private int   insideFaceCount;
+    // u16
+    private int   stickingOutFaceCount;
     
     public float getMaxStickOutX()
     {
@@ -51,62 +53,23 @@ public class MGEOBucketGeometryBucket
         this.vertex = vertex;
     }
     
-    public short getInsideFaceCount()
+    public int getInsideFaceCount()
     {
         return insideFaceCount;
     }
     
-    public void setInsideFaceCount(short insideFaceCount)
+    public void setInsideFaceCount(int insideFaceCount)
     {
         this.insideFaceCount = insideFaceCount;
     }
     
-    public short getStickingOutFaceCount()
+    public int getStickingOutFaceCount()
     {
         return stickingOutFaceCount;
     }
     
-    public void setStickingOutFaceCount(short stickingOutFaceCount)
+    public void setStickingOutFaceCount(int stickingOutFaceCount)
     {
         this.stickingOutFaceCount = stickingOutFaceCount;
-    }
-    
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        MGEOBucketGeometryBucket that = (MGEOBucketGeometryBucket) o;
-        return Float.compare(that.maxStickOutX, maxStickOutX) == 0 &&
-               Float.compare(that.maxStickOutY, maxStickOutY) == 0 &&
-               startIndex == that.startIndex &&
-               vertex == that.vertex &&
-               insideFaceCount == that.insideFaceCount &&
-               stickingOutFaceCount == that.stickingOutFaceCount;
-    }
-    
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(maxStickOutX, maxStickOutY, startIndex, vertex, insideFaceCount, stickingOutFaceCount);
-    }
-    
-    @Override
-    public String toString()
-    {
-        return "MGEOBucketGeometryBucket{" +
-               "maxStickOutX=" + maxStickOutX +
-               ", maxStickOutY=" + maxStickOutY +
-               ", startIndex=" + startIndex +
-               ", vertex=" + vertex +
-               ", insideFaceCount=" + insideFaceCount +
-               ", stickingOutFaceCount=" + stickingOutFaceCount +
-               '}';
     }
 }

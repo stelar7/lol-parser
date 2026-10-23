@@ -2,149 +2,201 @@ package no.stelar7.cdragon.types.skn;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.skn.data.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.readers.*;
+import no.stelar7.cdragon.util.types.math.*;
 
-import java.nio.ByteOrder;
-import java.nio.file.Path;
+
 import java.util.*;
 
+/**
+ * Simple skin (.skn) reader.
+ * <p>
+ * Layout reference: LeagueToolkit Core/Mesh/SkinnedMesh.cs (ReadFromSimpleSkin)
+ */
 public class SKNParser implements Parseable<SKNFile>
 {
-    @Override
-    public SKNFile parse(Path path)
-    {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    @Override
-    public SKNFile parse(ByteArray data)
-    {
-        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
-    }
-    
+    public static final int MAGIC = 0x00112233;
+
+    // position(12) + blend indices(4) + blend weights(16) + normal(12) + uv(8)
+    private static final int BASIC_VERTEX_SIZE   = 52;
+    // + BGRA color (4)
+    private static final int COLOR_VERTEX_SIZE   = 56;
+    // + tangent (16)
+    private static final int TANGENT_VERTEX_SIZE = 72;
+
     @Override
     public SKNFile parse(RandomAccessReader raf)
     {
-        SKNFile file = new SKNFile();
-        file.setMagic(raf.readInt());
-        file.setMajor(raf.readShort());
-        file.setMinor(raf.readShort());
-        
-        if (file.getMajor() == 0)
+        int magic = raf.readInt();
+        if (magic != MAGIC)
         {
-            file.setIndexCount(raf.readInt());
-            file.setVertexCount(raf.readInt());
-            file.setIndecies(raf.readShorts(file.getIndexCount()));
-            file.setVertices(parseVertices(raf, file));
-            
-            SKNMaterial material = new SKNMaterial();
-            material.setName("Unknown");
-            material.setStartVertex(0);
-            material.setNumVertex(file.getVertexCount());
-            material.setStartIndex(0);
-            material.setNumIndex(file.getIndexCount());
-            material.setVertices(file.getVertices());
-            List<Integer> inds    = new ArrayList<>();
-            List<Short>   sublist = file.getIndecies();
-            for (Short sh : sublist)
+            throw new ParseException("Invalid skn magic: " + Integer.toHexString(magic), 0);
+        }
+
+        short majorRaw = raf.readShort();
+        short minorRaw = raf.readShort();
+
+        int major = majorRaw & 0xFFFF;
+        if (major != 0 && major != 1 && major != 2 && major != 4)
+        {
+            throw new ParseException("Unsupported skn version " + major + "." + (minorRaw & 0xFFFF), raf);
+        }
+
+        int             objectCount            = 0;
+        int             flags                  = 0;
+        int             indexCount;
+        int             vertexCount;
+        int             vertexSize             = 0;
+        int             vertexType             = 0;
+        Vector3f        boundingBoxMin         = null;
+        Vector3f        boundingBoxMax         = null;
+        Vector3f        boundingSphereLocation = null;
+        float           boundingSphereRadius   = 0;
+        List<RangeInfo> ranges;
+
+        if (major == 0)
+        {
+            indexCount = raf.readInt();
+            vertexCount = raf.readInt();
+            ranges = new ArrayList<>(List.of(new RangeInfo("Base", 0, vertexCount, 0, indexCount)));
+        } else
+        {
+            objectCount = raf.readInt();
+            ranges = parseRanges(raf, objectCount);
+
+            if (major == 4)
             {
-                inds.add(Integer.valueOf(sh));
+                flags = raf.readInt();
             }
-            material.setIndecies(inds);
-            
-            file.getMaterials().add(material);
-            
-            
-            return file;
-        }
-        
-        
-        file.setObjectCount(raf.readInt());
-        file.setMaterials(parseMaterials(raf, file.getObjectCount()));
-        
-        
-        if (file.getMajor() == 4)
-        {
-            file.setUnknown(raf.readInt());
-        }
-        
-        file.setIndexCount(raf.readInt());
-        file.setVertexCount(raf.readInt());
-        
-        if (file.getMajor() == 4)
-        {
-            file.setVertexSize(raf.readInt());
-            file.setVertexType(raf.readInt());
-            file.setBoundingBoxMin(raf.readVec3F());
-            file.setBoundingBoxMax(raf.readVec3F());
-            file.setBoundingSphereLocation(raf.readVec3F());
-            file.setBoundingSphereRadius(raf.readFloat());
-        }
-        
-        file.setIndecies(raf.readShorts(file.getIndexCount()));
-        file.setVertices(parseVertices(raf, file));
-        
-        for (int i = 0; i < file.getObjectCount(); i++)
-        {
-            SKNMaterial mat = file.getMaterials().get(i);
-            mat.setVertices(file.getVertices().subList(mat.getStartVertex(), mat.getStartVertex() + mat.getNumVertex()));
-            
-            List<Integer> inds           = new ArrayList<>();
-            List<Short>   sublist        = file.getIndecies().subList(mat.getStartIndex(), mat.getStartIndex() + mat.getNumIndex());
-            boolean       shouldSubtract = sublist.stream().noneMatch(in -> in > mat.getStartVertex());
-            for (Short sh : sublist)
+
+            indexCount = raf.readInt();
+            vertexCount = raf.readInt();
+
+            if (major == 4)
             {
-                inds.add(sh - (shouldSubtract ? 0 : mat.getStartVertex()));
+                vertexSize = raf.readInt();
+                vertexType = raf.readInt();
+                boundingBoxMin = raf.readVec3F();
+                boundingBoxMax = raf.readVec3F();
+                boundingSphereLocation = raf.readVec3F();
+                boundingSphereRadius = raf.readFloat();
             }
-            mat.setIndecies(inds);
         }
-        
-        
-        return file;
+
+        if (vertexSize == 0)
+        {
+            vertexSize = BASIC_VERTEX_SIZE;
+        }
+
+        if (indexCount < 0 || vertexCount < 0 || (long) indexCount * 2 > raf.remaining())
+        {
+            throw new ParseException("Invalid skn index/vertex count", raf);
+        }
+
+        int[]         indices  = raf.readU16Array(indexCount);
+        List<SKNData> vertices = parseVertices(raf, vertexSize, vertexType, vertexCount);
+
+        List<SKNMaterial> materials = new ArrayList<>(ranges.size());
+        for (RangeInfo range : ranges)
+        {
+            int startVertex = range.startVertex();
+            int numVertex   = range.numVertex();
+            int startIndex  = range.startIndex();
+            int numIndex    = range.numIndex();
+
+            if (startVertex < 0 || numVertex < 0 || (long) startVertex + numVertex > vertices.size() ||
+                startIndex < 0 || numIndex < 0 || (long) startIndex + numIndex > indices.length)
+            {
+                throw new ParseException("skn range \"" + range.name() + "\" is out of bounds", raf);
+            }
+
+            // indices are global into the shared vertex buffer, make them local to the range
+            List<Integer> inds = new ArrayList<>(numIndex);
+            for (int i = startIndex; i < startIndex + numIndex; i++)
+            {
+                int local = indices[i] - startVertex;
+                if (local < 0 || local >= numVertex)
+                {
+                    throw new ParseException("skn index " + indices[i] + " is outside of range \"" + range.name() + "\"", raf);
+                }
+                inds.add(local);
+            }
+
+            materials.add(new SKNMaterial(range.name(), startVertex, numVertex, startIndex, numIndex, inds, vertices.subList(startVertex, startVertex + numVertex)));
+        }
+
+        return new SKNFile(magic, majorRaw, minorRaw, objectCount, indexCount, vertexCount, vertexSize, flags, vertexType,
+                           boundingBoxMin, boundingBoxMax, boundingSphereLocation, boundingSphereRadius, indices, vertices, materials);
     }
-    
-    private List<SKNMaterial> parseMaterials(RandomAccessReader raf, int count)
+
+    /**
+     * A submesh range as stored in the file, before its vertices and indices are known
+     */
+    private record RangeInfo(String name, int startVertex, int numVertex, int startIndex, int numIndex)
     {
-        List<SKNMaterial> materials = new ArrayList<>();
-        
+    }
+
+    private List<RangeInfo> parseRanges(RandomAccessReader raf, int count)
+    {
+        if (count < 0 || (long) count * 80 > raf.remaining())
+        {
+            throw new ParseException("Invalid skn range count " + count, raf);
+        }
+
+        List<RangeInfo> ranges = new ArrayList<>(count);
         for (int i = 0; i < count; i++)
         {
-            SKNMaterial material = new SKNMaterial();
-            material.setName(raf.readString(64).trim());
-            material.setStartVertex(raf.readInt());
-            material.setNumVertex(raf.readInt());
-            material.setStartIndex(raf.readInt());
-            material.setNumIndex(raf.readInt());
-            materials.add(material);
+            String name        = raf.readFixedString(64);
+            int    startVertex = raf.readInt();
+            int    numVertex   = raf.readInt();
+            int    startIndex  = raf.readInt();
+            int    numIndex    = raf.readInt();
+            ranges.add(new RangeInfo(name, startVertex, numVertex, startIndex, numIndex));
         }
-        return materials;
+        return ranges;
     }
-    
-    private List<SKNData> parseVertices(RandomAccessReader raf, SKNFile file)
+
+    private List<SKNData> parseVertices(RandomAccessReader raf, int stride, int type, int vertexCount)
     {
-        List<SKNData> datas = new ArrayList<>();
-        
-        for (int i = 0; i < file.getVertexCount(); i++)
+
+        int required = type == 2 ? TANGENT_VERTEX_SIZE : (type == 1 ? COLOR_VERTEX_SIZE : BASIC_VERTEX_SIZE);
+        if (stride < required)
         {
-            SKNData data = new SKNData();
-            
-            data.setPosition(raf.readVec3F());
-            data.setBoneIndecies(raf.readVec4B());
-            data.setWeight(raf.readVec4F());
-            data.setNormals(raf.readVec3F());
-            data.setUv(raf.readVec2F());
-            if (file.getVertexType() >= 1)
-            {
-                data.setColor(raf.readVec4B());
-            }
-            if (file.getVertexType() == 2)
-            {
-                data.setTangent(raf.readVec4F());
-            }
-            
-            datas.add(data);
+            throw new ParseException("skn vertex size " + stride + " is too small for vertex type " + type, raf);
         }
+        if ((long) stride * vertexCount > raf.remaining())
+        {
+            throw new ParseException("skn vertex buffer is truncated", raf);
+        }
+
+        List<SKNData> datas = new ArrayList<>(vertexCount);
+        long          start = raf.pos();
+        for (int i = 0; i < vertexCount; i++)
+        {
+            raf.seek(start + (long) i * stride);
+
+            Vector3f position     = raf.readVec3F();
+            Vector4b boneIndecies = raf.readVec4B();
+            Vector4f weight       = raf.readVec4F();
+            Vector3f normals      = raf.readVec3F();
+            Vector2f uv           = raf.readVec2F();
+
+            // unknown (newer) vertex types are read as far as the known elements go, the rest of the stride is skipped
+            Vector4b color   = null;
+            Vector4f tangent = null;
+            if (type == 1 || type == 2)
+            {
+                // BGRA
+                color = raf.readVec4B();
+            }
+            if (type == 2)
+            {
+                tangent = raf.readVec4F();
+            }
+
+            datas.add(new SKNData(position, boneIndecies, weight, normals, uv, tangent, color));
+        }
+        raf.seek(start + (long) stride * vertexCount);
         return datas;
     }
 }

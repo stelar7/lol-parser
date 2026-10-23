@@ -8,8 +8,8 @@ public class KTX2FileIndecies
     private int dfdByteLength;
     private int kvdByteOffset;
     private int kvdByteLength;
-    private int sgdByteOffset;
-    private int sgdByteLength;
+    private long sgdByteOffset;
+    private long sgdByteLength;
     
     public int getDfdByteOffset()
     {
@@ -51,22 +51,22 @@ public class KTX2FileIndecies
         this.kvdByteLength = kvdByteLength;
     }
     
-    public int getSgdByteOffset()
+    public long getSgdByteOffset()
     {
         return sgdByteOffset;
     }
     
-    public void setSgdByteOffset(int sgdByteOffset)
+    public void setSgdByteOffset(long sgdByteOffset)
     {
         this.sgdByteOffset = sgdByteOffset;
     }
     
-    public int getSgdByteLength()
+    public long getSgdByteLength()
     {
         return sgdByteLength;
     }
     
-    public void setSgdByteLength(int sgdByteLength)
+    public void setSgdByteLength(long sgdByteLength)
     {
         this.sgdByteLength = sgdByteLength;
     }

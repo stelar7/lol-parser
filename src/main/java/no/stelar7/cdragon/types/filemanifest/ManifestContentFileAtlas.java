@@ -2,19 +2,23 @@ package no.stelar7.cdragon.types.filemanifest;
 
 import java.util.*;
 
-public class ManifestContentFileAtlas
+public final class ManifestContentFileAtlas
 {
-    private       String                    atlasFile;
-    private final List<Map<String, Object>> items = new ArrayList<>();
+    private final String                    atlasFile;
+    private final List<Map<String, Object>> items;
     
-    public void setAtlasFile(String name)
+    public ManifestContentFileAtlas(String atlasFile, List<Map<String, Object>> items)
     {
-        this.atlasFile = name;
+        this.atlasFile = atlasFile;
+        this.items = List.copyOf(items);
     }
     
-    public void addItem(String itemName, int x, int y, int z, int w, int h)
+    /**
+     * Creates the item map used by {@link #getItems()}
+     */
+    public static Map<String, Object> item(String itemName, int x, int y, int z, int w, int h)
     {
-        items.add(Map.of("name", itemName, "x", x, "y", y, "z", z, "w", w, "h", h));
+        return Map.of("name", itemName, "x", x, "y", y, "z", z, "w", w, "h", h);
     }
     
     public String getAtlasFile()

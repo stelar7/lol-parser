@@ -1,15 +1,26 @@
 package no.stelar7.cdragon.types.mgeo.data;
 
 import no.stelar7.cdragon.util.types.math.*;
+import java.util.*;
 
-import java.util.Objects;
-
+/**
+ * A single vertex, combined from every vertex buffer the mesh uses.
+ * Elements without a dedicated field are stored in "extra", keyed by their element name.
+ */
 public class MGEOFileMeshVertex
 {
-    private Vector3f position;
-    private Vector3f normal;
-    private Vector2f uv1;
-    private Vector2f uv2;
+    private Vector3f            position;
+    private Vector3f            normal;
+    // TEXCOORD0
+    private Vector2f            uv1;
+    // TEXCOORD1 (usually the lightmap uv)
+    private Vector2f            uv2;
+    // BGRA
+    private Vector4b            primaryColor;
+    // BGRA
+    private Vector4b            secondaryColor;
+    private Vector4f            tangent;
+    private Map<String,float[]> extra;
     
     public Vector3f getPosition()
     {
@@ -51,38 +62,43 @@ public class MGEOFileMeshVertex
         this.uv2 = uv2;
     }
     
-    @Override
-    public boolean equals(Object o)
+    public Vector4b getPrimaryColor()
     {
-        if (this == o)
-        {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass())
-        {
-            return false;
-        }
-        MGEOFileMeshVertex that = (MGEOFileMeshVertex) o;
-        return Objects.equals(position, that.position) &&
-               Objects.equals(normal, that.normal) &&
-               Objects.equals(uv1, that.uv1) &&
-               Objects.equals(uv2, that.uv2);
+        return primaryColor;
     }
     
-    @Override
-    public int hashCode()
+    public void setPrimaryColor(Vector4b primaryColor)
     {
-        return Objects.hash(position, normal, uv1, uv2);
+        this.primaryColor = primaryColor;
     }
     
-    @Override
-    public String toString()
+    public Vector4b getSecondaryColor()
     {
-        return "MGEOFileMeshVertex{" +
-               "position=" + position +
-               ", normal=" + normal +
-               ", uv1=" + uv1 +
-               ", uv2=" + uv2 +
-               '}';
+        return secondaryColor;
+    }
+    
+    public void setSecondaryColor(Vector4b secondaryColor)
+    {
+        this.secondaryColor = secondaryColor;
+    }
+    
+    public Vector4f getTangent()
+    {
+        return tangent;
+    }
+    
+    public void setTangent(Vector4f tangent)
+    {
+        this.tangent = tangent;
+    }
+    
+    public Map<String,float[]> getExtra()
+    {
+        return extra;
+    }
+    
+    public void setExtra(Map<String,float[]> extra)
+    {
+        this.extra = extra;
     }
 }

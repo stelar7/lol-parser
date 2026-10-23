@@ -7,20 +7,22 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
 
-public class WPKFile implements Extractable
+public final class WPKFile implements Extractable
 {
-    private WPKHeader header;
-    private List<Integer> offsets  = new ArrayList<>();
-    private List<WEMFile> WEMFiles = new ArrayList<>();
+    private final WPKHeader     header;
+    private final List<Integer> offsets;
+    private final List<WEMFile> WEMFiles;
+    
+    public WPKFile(WPKHeader header, List<Integer> offsets, List<WEMFile> WEMFiles)
+    {
+        this.header = header;
+        this.offsets = offsets;
+        this.WEMFiles = WEMFiles;
+    }
     
     public WPKHeader getHeader()
     {
         return header;
-    }
-    
-    public void setHeader(WPKHeader header)
-    {
-        this.header = header;
     }
     
     public List<Integer> getOffsets()
@@ -28,19 +30,9 @@ public class WPKFile implements Extractable
         return offsets;
     }
     
-    public void setOffsets(List<Integer> offsets)
-    {
-        this.offsets = offsets;
-    }
-    
     public List<WEMFile> getWEMFiles()
     {
         return WEMFiles;
-    }
-    
-    public void setWEMFiles(List<WEMFile> WEMFiles)
-    {
-        this.WEMFiles = WEMFiles;
     }
     
     public void extract(Path output)
@@ -49,12 +41,11 @@ public class WPKFile implements Extractable
         {
             try
             {
-                Files.write(output.resolve(file.getFilename()), file.getData().getDataBytes());
+                Files.write(output.resolve(file.getFilename()), file.getRawData());
             } catch (IOException e)
             {
                 e.printStackTrace();
             }
         }
     }
-    
 }

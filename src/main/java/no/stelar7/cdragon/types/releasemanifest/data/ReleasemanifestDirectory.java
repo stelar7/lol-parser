@@ -3,21 +3,23 @@ package no.stelar7.cdragon.types.releasemanifest.data;
 
 import java.util.*;
 
-public class ReleasemanifestDirectory
+public final class ReleasemanifestDirectory
 {
-    private       String                           name;
-    private       List<ReleasemanifestContentFile> files          = new ArrayList<>();
-    private       List<ReleasemanifestDirectory>   subDirectories = new ArrayList<>();
+    private final String                           name;
+    private final List<ReleasemanifestContentFile> files;
+    private final List<ReleasemanifestDirectory>   subDirectories;
     private final List<String>                     outputList     = new ArrayList<>();
+    
+    public ReleasemanifestDirectory(String name, List<ReleasemanifestContentFile> files, List<ReleasemanifestDirectory> subDirectories)
+    {
+        this.name = name;
+        this.files = files;
+        this.subDirectories = subDirectories;
+    }
     
     public String getName()
     {
         return name;
-    }
-    
-    public void setName(String name)
-    {
-        this.name = name;
     }
     
     public List<ReleasemanifestContentFile> getFiles()
@@ -25,19 +27,9 @@ public class ReleasemanifestDirectory
         return files;
     }
     
-    public void setFiles(List<ReleasemanifestContentFile> files)
-    {
-        this.files = files;
-    }
-    
     public List<ReleasemanifestDirectory> getSubDirectories()
     {
         return subDirectories;
-    }
-    
-    public void setSubDirectories(List<ReleasemanifestDirectory> subDirectories)
-    {
-        this.subDirectories = subDirectories;
     }
     
     public List<String> generateFilelist(String pre, String post)

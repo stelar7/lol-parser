@@ -1,12 +1,14 @@
 package no.stelar7.cdragon.types.wem.data;
 
 import no.stelar7.cdragon.util.readers.*;
-import no.stelar7.cdragon.util.types.ByteArray;
-import no.stelar7.cdragon.util.writers.ByteWriter;
 
 import java.nio.ByteOrder;
 import java.util.*;
 
+/**
+ * The header of a wem file, parsed by the constructor.
+ * The fields are filled in while walking the chunks (so they are not final), there are no setters.
+ */
 public class WEMData
 {
     private int fmtChunkOffset  = 0xFFFFFFFF;
@@ -56,19 +58,9 @@ public class WEMData
         return junkChunkOffset;
     }
     
-    public void setJunkChunkOffset(int junkChunkOffset)
-    {
-        this.junkChunkOffset = junkChunkOffset;
-    }
-    
     public int getAkdChunkOffset()
     {
         return akdChunkOffset;
-    }
-    
-    public void setAkdChunkOffset(int akdChunkOffset)
-    {
-        this.akdChunkOffset = akdChunkOffset;
     }
     
     public int getJunkChunkSize()
@@ -76,19 +68,9 @@ public class WEMData
         return junkChunkSize;
     }
     
-    public void setJunkChunkSize(int junkChunkSize)
-    {
-        this.junkChunkSize = junkChunkSize;
-    }
-    
     public int getAkdChunkSize()
     {
         return akdChunkSize;
-    }
-    
-    public void setAkdChunkSize(int akdChunkSize)
-    {
-        this.akdChunkSize = akdChunkSize;
     }
     
     public int getFmtChunkOffset()
@@ -96,19 +78,9 @@ public class WEMData
         return fmtChunkOffset;
     }
     
-    public void setFmtChunkOffset(int fmtChunkOffset)
-    {
-        this.fmtChunkOffset = fmtChunkOffset;
-    }
-    
     public int getCueChunkOffset()
     {
         return cueChunkOffset;
-    }
-    
-    public void setCueChunkOffset(int cueChunkOffset)
-    {
-        this.cueChunkOffset = cueChunkOffset;
     }
     
     public int getListChunkOffset()
@@ -116,19 +88,9 @@ public class WEMData
         return listChunkOffset;
     }
     
-    public void setListChunkOffset(int listChunkOffset)
-    {
-        this.listChunkOffset = listChunkOffset;
-    }
-    
     public int getSmplChunkOffset()
     {
         return smplChunkOffset;
-    }
-    
-    public void setSmplChunkOffset(int smplChunkOffset)
-    {
-        this.smplChunkOffset = smplChunkOffset;
     }
     
     public int getVorbChunkOffset()
@@ -136,19 +98,9 @@ public class WEMData
         return vorbChunkOffset;
     }
     
-    public void setVorbChunkOffset(int vorbChunkOffset)
-    {
-        this.vorbChunkOffset = vorbChunkOffset;
-    }
-    
     public int getDataChunkOffset()
     {
         return dataChunkOffset;
-    }
-    
-    public void setDataChunkOffset(int dataChunkOffset)
-    {
-        this.dataChunkOffset = dataChunkOffset;
     }
     
     public int getFmtChunkSize()
@@ -156,19 +108,9 @@ public class WEMData
         return fmtChunkSize;
     }
     
-    public void setFmtChunkSize(int fmtChunkSize)
-    {
-        this.fmtChunkSize = fmtChunkSize;
-    }
-    
     public int getCueChunkSize()
     {
         return cueChunkSize;
-    }
-    
-    public void setCueChunkSize(int cueChunkSize)
-    {
-        this.cueChunkSize = cueChunkSize;
     }
     
     public int getListChunkSize()
@@ -176,19 +118,9 @@ public class WEMData
         return listChunkSize;
     }
     
-    public void setListChunkSize(int listChunkSize)
-    {
-        this.listChunkSize = listChunkSize;
-    }
-    
     public int getSmplChunkSize()
     {
         return smplChunkSize;
-    }
-    
-    public void setSmplChunkSize(int smplChunkSize)
-    {
-        this.smplChunkSize = smplChunkSize;
     }
     
     public int getVorbChunkSize()
@@ -196,19 +128,9 @@ public class WEMData
         return vorbChunkSize;
     }
     
-    public void setVorbChunkSize(int vorbChunkSize)
-    {
-        this.vorbChunkSize = vorbChunkSize;
-    }
-    
     public int getDataChunkSize()
     {
         return dataChunkSize;
-    }
-    
-    public void setDataChunkSize(int dataChunkSize)
-    {
-        this.dataChunkSize = dataChunkSize;
     }
     
     public int getChannelCount()
@@ -216,19 +138,9 @@ public class WEMData
         return channelCount;
     }
     
-    public void setChannelCount(int channelCount)
-    {
-        this.channelCount = channelCount;
-    }
-    
     public int getSampleRate()
     {
         return sampleRate;
-    }
-    
-    public void setSampleRate(int sampleRate)
-    {
-        this.sampleRate = sampleRate;
     }
     
     public int getBytesPerSecond()
@@ -236,19 +148,9 @@ public class WEMData
         return bytesPerSecond;
     }
     
-    public void setBytesPerSecond(int bytesPerSecond)
-    {
-        this.bytesPerSecond = bytesPerSecond;
-    }
-    
     public int getCueCount()
     {
         return cueCount;
-    }
-    
-    public void setCueCount(int cueCount)
-    {
-        this.cueCount = cueCount;
     }
     
     public int getLoopCount()
@@ -256,19 +158,9 @@ public class WEMData
         return loopCount;
     }
     
-    public void setLoopCount(int loopCount)
-    {
-        this.loopCount = loopCount;
-    }
-    
     public int getLoopStart()
     {
         return loopStart;
-    }
-    
-    public void setLoopStart(int loopStart)
-    {
-        this.loopStart = loopStart;
     }
     
     public int getLoopEnd()
@@ -276,19 +168,9 @@ public class WEMData
         return loopEnd;
     }
     
-    public void setLoopEnd(int loopEnd)
-    {
-        this.loopEnd = loopEnd;
-    }
-    
     public int getSampleCount()
     {
         return sampleCount;
-    }
-    
-    public void setSampleCount(int sampleCount)
-    {
-        this.sampleCount = sampleCount;
     }
     
     public boolean isNoGranule()
@@ -296,19 +178,9 @@ public class WEMData
         return noGranule;
     }
     
-    public void setNoGranule(boolean noGranule)
-    {
-        this.noGranule = noGranule;
-    }
-    
     public boolean isModPackets()
     {
         return modPackets;
-    }
-    
-    public void setModPackets(boolean modPackets)
-    {
-        this.modPackets = modPackets;
     }
     
     public int getSetupPacketOffset()
@@ -316,19 +188,9 @@ public class WEMData
         return setupPacketOffset;
     }
     
-    public void setSetupPacketOffset(int setupPacketOffset)
-    {
-        this.setupPacketOffset = setupPacketOffset;
-    }
-    
     public int getFirstAudioPacketOffset()
     {
         return firstAudioPacketOffset;
-    }
-    
-    public void setFirstAudioPacketOffset(int firstAudioPacketOffset)
-    {
-        this.firstAudioPacketOffset = firstAudioPacketOffset;
     }
     
     public boolean isHeaderTriadPresent()
@@ -336,19 +198,9 @@ public class WEMData
         return headerTriadPresent;
     }
     
-    public void setHeaderTriadPresent(boolean headerTriadPresent)
-    {
-        this.headerTriadPresent = headerTriadPresent;
-    }
-    
     public boolean isOldPacketHeaders()
     {
         return oldPacketHeaders;
-    }
-    
-    public void setOldPacketHeaders(boolean oldPacketHeaders)
-    {
-        this.oldPacketHeaders = oldPacketHeaders;
     }
     
     public int getUid()
@@ -356,19 +208,9 @@ public class WEMData
         return uid;
     }
     
-    public void setUid(int uid)
-    {
-        this.uid = uid;
-    }
-    
     public int getBlockSize0Pow()
     {
         return blockSize0Pow;
-    }
-    
-    public void setBlockSize0Pow(int blockSize0Pow)
-    {
-        this.blockSize0Pow = blockSize0Pow;
     }
     
     public int getBlockSize1Pow()
@@ -376,19 +218,9 @@ public class WEMData
         return blockSize1Pow;
     }
     
-    public void setBlockSize1Pow(int blockSize1Pow)
-    {
-        this.blockSize1Pow = blockSize1Pow;
-    }
-    
     public boolean isLittleEndian()
     {
         return littleEndian;
-    }
-    
-    public void setLittleEndian(boolean littleEndian)
-    {
-        this.littleEndian = littleEndian;
     }
     
     public byte[] getDataBytes()
@@ -396,250 +228,274 @@ public class WEMData
         return dataBytes;
     }
     
-    public void setDataBytes(byte[] dataBytes)
-    {
-        this.dataBytes = dataBytes;
-    }
-    
+    /**
+     * Parses the RIFF/RIFX header of a Wwise vorbis wem.
+     * Port of the Wwise_RIFF_Vorbis constructor from ww2ogg (wwriff.cpp)
+     *
+     * @throws ParseException if the file is not a supported wem
+     */
     public WEMData(byte[] data)
     {
         this.dataBytes = data;
-        RandomAccessReader raf = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
-        
-        String magic = raf.readString(4);
-        if (!"RIFF".equals(magic))
+        try
         {
-            if (!"RIFX".equals(magic))
-            {
-                throw new IllegalArgumentException("This is not a valid WEM file, or its an unsupported type");
-            } else
-            {
-                throw new IllegalArgumentException("This file is in big endian, and that is not supported...");
-            }
+            parseHeader(data);
+        } catch (IndexOutOfBoundsException e)
+        {
+            throw new ParseException("WEM header truncated", -1, e);
         }
-        int riffSize = raf.readInt();
-        
+    }
+
+    private void parseHeader(byte[] data)
+    {
+        RandomAccessReader raf = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
+
+        if (data.length < 12)
+        {
+            throw new ParseException("File too small to be a WEM", 0);
+        }
+
+        String magic = raf.readString(4);
+        if ("RIFX".equals(magic))
+        {
+            littleEndian = false;
+            raf.setEndian(ByteOrder.BIG_ENDIAN);
+        } else if (!"RIFF".equals(magic))
+        {
+            throw new ParseException("Missing RIFF magic", 0);
+        }
+
+        long riffSize = raf.readU32() + 8;
+        if (riffSize > data.length)
+        {
+            throw new ParseException("RIFF truncated", 4);
+        }
+
         String waveMagic = raf.readString(4);
         if (!"WAVE".equals(waveMagic))
         {
-            throw new IllegalArgumentException("Missing WAVE magic");
+            throw new ParseException("Missing WAVE magic", 8);
         }
-        
-        int chunkOffset = 12;
-        int chunkEnd    = riffSize + 8;
-        while (chunkOffset < chunkEnd)
+
+        long chunkOffset = 12;
+        while (chunkOffset < riffSize)
         {
+            if (chunkOffset + 8 > riffSize)
+            {
+                throw new ParseException("Chunk header truncated", chunkOffset);
+            }
+
             raf.seek(chunkOffset);
             String chunkName = raf.readString(4);
-            int    chunkSize = raf.readInt();
-            
+            long   chunkSize = raf.readU32();
+            int    offset    = (int) (chunkOffset + 8);
+            int    size      = (int) Math.min(chunkSize, Integer.MAX_VALUE);
+
             switch (chunkName)
             {
-                case "fmt ":
+                case "fmt " ->
                 {
-                    fmtChunkOffset = chunkOffset + 8;
-                    fmtChunkSize = chunkSize;
-                    break;
+                    fmtChunkOffset = offset;
+                    fmtChunkSize = size;
                 }
-                case "cue ":
+                case "cue " ->
                 {
-                    cueChunkOffset = chunkOffset + 8;
-                    cueChunkSize = chunkSize;
-                    break;
+                    cueChunkOffset = offset;
+                    cueChunkSize = size;
                 }
-                case "LIST":
+                case "LIST" ->
                 {
-                    listChunkOffset = chunkOffset + 8;
-                    listChunkSize = chunkSize;
-                    break;
+                    listChunkOffset = offset;
+                    listChunkSize = size;
                 }
-                case "smpl":
+                case "smpl" ->
                 {
-                    smplChunkOffset = chunkOffset + 8;
-                    smplChunkSize = chunkSize;
-                    break;
+                    smplChunkOffset = offset;
+                    smplChunkSize = size;
                 }
-                case "vorb":
+                case "vorb" ->
                 {
-                    vorbChunkOffset = chunkOffset + 8;
-                    vorbChunkSize = chunkSize;
-                    break;
+                    vorbChunkOffset = offset;
+                    vorbChunkSize = size;
                 }
-                case "data":
+                case "data" ->
                 {
-                    dataChunkOffset = chunkOffset + 8;
-                    dataChunkSize = chunkSize;
-                    break;
+                    dataChunkOffset = offset;
+                    dataChunkSize = size;
                 }
-                case "JUNK":
+                case "JUNK" ->
                 {
-                    junkChunkOffset = chunkOffset + 8;
-                    junkChunkSize = chunkSize;
-                    break;
+                    junkChunkOffset = offset;
+                    junkChunkSize = size;
                 }
-                case "akd ":
+                case "akd " ->
                 {
-                    akdChunkOffset = chunkOffset + 8;
-                    akdChunkSize = chunkSize;
-                    break;
+                    akdChunkOffset = offset;
+                    akdChunkSize = size;
                 }
-                default:
-                    throw new RuntimeException("Invalid chunk name: " + chunkName);
+                default ->
+                {
+                    // unknown chunks (hash, meta, ...) are skipped, like ww2ogg does
+                }
             }
-            
-            chunkOffset += chunkSize + 8;
+
+            long next = chunkOffset + 8 + chunkSize;
+            // RIFF chunks are padded to an even size with a 0 byte (chunk ids never start with 0)
+            if ((chunkSize & 1) != 0 && next < riffSize && data[(int) next] == 0)
+            {
+                next++;
+            }
+            chunkOffset = next;
         }
-        
-        if (chunkOffset > chunkEnd)
+
+        if (chunkOffset > riffSize)
         {
-            throw new IllegalArgumentException("There was an error reading the file");
+            throw new ParseException("Chunk truncated", chunkOffset);
         }
-        
-        if (fmtChunkOffset == -1 && dataChunkOffset == -1)
+
+        // check that we have the chunks we're expecting
+        if (fmtChunkOffset == -1 || dataChunkOffset == -1)
         {
-            throw new IllegalArgumentException("Expected ftm, data chunks");
+            throw new ParseException("Expected fmt and data chunks", -1);
         }
-        
+
         if ((vorbChunkOffset == -1) && (fmtChunkSize != 0x42))
         {
-            throw new IllegalArgumentException("Expected 0x42 fmt if vorb is missing");
+            throw new ParseException("Expected 0x42 fmt if vorb is missing", fmtChunkOffset);
         }
         if ((vorbChunkOffset != -1) && (fmtChunkSize != 0x28) && (fmtChunkSize != 0x18) && (fmtChunkSize != 0x12))
         {
-            throw new IllegalArgumentException("bad fmt size");
+            throw new ParseException("Bad fmt size", fmtChunkOffset);
         }
         if ((vorbChunkOffset == -1) && (fmtChunkSize == 0x42))
         {
+            // fake it out
             vorbChunkOffset = fmtChunkOffset + 0x18;
         }
-        
+
         raf.seek(fmtChunkOffset);
-        
-        short codecId = raf.readShort();
-        if (codecId != (short) 0xFFFF)
+
+        int codecId = raf.readU16();
+        if (codecId != 0xFFFF)
         {
-            throw new IllegalArgumentException("bad codec id");
+            throw new ParseException("Bad codec id 0x" + Integer.toHexString(codecId) + ", only vorbis is supported", fmtChunkOffset);
         }
-        
-        channelCount = raf.readShort();
+
+        channelCount = raf.readU16();
         sampleRate = raf.readInt();
         bytesPerSecond = raf.readInt();
-        
-        if (raf.readShort() != 0)
+
+        if (raf.readU16() != 0)
         {
-            throw new IllegalArgumentException("bad block align");
+            throw new ParseException("Bad block align", raf);
         }
-        
-        if (raf.readShort() != 0)
+
+        if (raf.readU16() != 0)
         {
-            throw new IllegalArgumentException("expected 0 bps");
+            throw new ParseException("Expected 0 bps", raf);
         }
-        
-        int extra = raf.readShort();
+
+        int extra = raf.readU16();
         if (extra != (fmtChunkSize - 0x12))
         {
-            throw new IllegalArgumentException("Invalid extra size");
+            throw new ParseException("Bad extra fmt length", raf);
         }
-        
+
         if ((fmtChunkSize - 0x12) >= 2)
         {
             // ext_unk
-            raf.readShort();
+            raf.readU16();
             if ((fmtChunkSize - 0x12) >= 6)
             {
                 // subtype
                 raf.readInt();
             }
         }
-        
-        
+
         if (fmtChunkSize == 0x28)
         {
-            ByteArray signature = new ByteArray(new byte[]{1, 0, 0, 0, 0, 0, 0x10, 0, (byte) 0x80, 0, 0, (byte) 0xAA, 0, 0x38, (byte) 0x9B, 0x71});
-            ByteArray check     = new ByteArray(raf.readBytes(16));
-            
-            if (!signature.equals(check))
+            byte[] signature = new byte[]{1, 0, 0, 0, 0, 0, 0x10, 0, (byte) 0x80, 0, 0, (byte) 0xAA, 0, 0x38, (byte) 0x9B, 0x71};
+            if (!Arrays.equals(signature, raf.readBytes(16)))
             {
-                throw new IllegalArgumentException("Invalid buffer signature");
+                throw new ParseException("Expected signature in extra fmt", raf);
             }
         }
-        
+
         if (cueChunkOffset != -1)
         {
             raf.seek(cueChunkOffset);
             cueCount = raf.readInt();
         }
-        
+
         if (smplChunkOffset != -1)
         {
             raf.seek(smplChunkOffset + 0x1C);
-            
+
             loopCount = raf.readInt();
             if (loopCount != 1)
             {
-                throw new IllegalArgumentException("expected 1 loop");
+                throw new ParseException("Expected one loop", raf);
             }
-            
+
             raf.seek(smplChunkOffset + 0x2C);
-            
+
             loopStart = raf.readInt();
             loopEnd = raf.readInt();
         }
-        
-        List<Integer> validChunks = Arrays.asList(-1, 0x28, 0x2A, 0x2C, 0x32, 0x34);
-        if (!validChunks.contains(vorbChunkSize))
+
+        if (!List.of(-1, 0x28, 0x2A, 0x2C, 0x32, 0x34).contains(vorbChunkSize))
         {
-            throw new IllegalArgumentException("Invalid vorb chunk size");
+            throw new ParseException("Bad vorb size 0x" + Integer.toHexString(vorbChunkSize), vorbChunkOffset);
         }
-        
+
         raf.seek(vorbChunkOffset);
         sampleCount = raf.readInt();
-        
+
         if ((vorbChunkSize == -1) || (vorbChunkSize == 0x2A))
         {
             noGranule = true;
-            
+
             raf.seek(vorbChunkOffset + 0x4);
             int modSignal = raf.readInt();
-            
-            List<Integer> validSignals = Arrays.asList(0x4A, 0x4B, 0x69, 0x70);
-            if (!validSignals.contains(modSignal))
+
+            // seems to be 0xD9 when mod packets should be set, also seen 0xCB, 0xBC, 0xB2
+            if (modSignal != 0x4A && modSignal != 0x4B && modSignal != 0x69 && modSignal != 0x70)
             {
                 modPackets = true;
             }
-            
+
             raf.seek(vorbChunkOffset + 0x10);
         } else
         {
             raf.seek(vorbChunkOffset + 0x18);
         }
-        
+
         setupPacketOffset = raf.readInt();
         firstAudioPacketOffset = raf.readInt();
-        
+
         if ((vorbChunkSize == -1) || (vorbChunkSize == 0x2A))
         {
             raf.seek(vorbChunkOffset + 0x24);
         }
-        
+
         if ((vorbChunkSize == 0x32) || (vorbChunkSize == 0x34))
         {
             raf.seek(vorbChunkOffset + 0x2C);
         }
-        
+
         if ((vorbChunkSize == 0x28) || (vorbChunkSize == 0x2C))
         {
+            // ok to leave uid, blockSize0Pow and blockSize1Pow unset
             headerTriadPresent = true;
             oldPacketHeaders = true;
-        }
-        
-        if ((vorbChunkSize == -1) || (vorbChunkSize == 0x2A) || (vorbChunkSize == 0x32) || (vorbChunkSize == 0x34))
+        } else
         {
             uid = raf.readInt();
-            blockSize0Pow = raf.readByte();
-            blockSize1Pow = raf.readByte();
+            blockSize0Pow = raf.readU8();
+            blockSize1Pow = raf.readU8();
         }
-        
+
+        // check/set loops now that we know total sample count
         if (loopCount != 0)
         {
             if (loopEnd == 0)
@@ -649,151 +505,19 @@ public class WEMData
             {
                 loopEnd++;
             }
-            
-            if (loopStart >= sampleCount || loopEnd > sampleCount || loopStart > loopEnd)
+
+            if (Integer.compareUnsigned(loopStart, sampleCount) >= 0 || Integer.compareUnsigned(loopEnd, sampleCount) > 0 || Integer.compareUnsigned(loopStart, loopEnd) > 0)
             {
-                throw new IllegalArgumentException("Invalid loop range");
+                throw new ParseException("Loops out of range", smplChunkOffset);
             }
+        }
+
+        if (setupPacketOffset < 0 || firstAudioPacketOffset < 0 || (long) dataChunkOffset + dataChunkSize > data.length)
+        {
+            throw new ParseException("Data chunk out of range", dataChunkOffset);
         }
     }
-    
-    private byte[] fixWEM(byte[] data)
-    {
-        RandomAccessReader raf = new RandomAccessReader(data, ByteOrder.LITTLE_ENDIAN);
-        ByteWriter         bw  = new ByteWriter();
-        bw.writeRAF(raf);
-        byte[] ba = bw.toByteArray();
-        
-        String magic = raf.readString(4);
-        if (!"RIFF".equals(magic))
-        {
-            if (!"RIFX".equals(magic))
-            {
-                throw new IllegalArgumentException("This is not a valid WEM file, or its an unsupported type");
-            } else
-            {
-                throw new IllegalArgumentException("This file is in big endian, and that is not supported...");
-            }
-        }
-        
-        int riffSize = raf.readInt();
-        
-        String waveMagic = raf.readString(4);
-        if (!"WAVE".equals(waveMagic))
-        {
-            throw new IllegalArgumentException("Missing WAVE magic");
-        }
-        
-        int startChunk  = 12;
-        int endChunk    = riffSize + 8;
-        int chunkOffset = startChunk;
-        int channels    = -1;
-        int block_size  = -1;
-        
-        while (chunkOffset < endChunk)
-        {
-            raf.seek(chunkOffset);
-            String type = raf.readString(4);
-            int    size = raf.readInt();
-            
-            if ((chunkOffset + 8 + size) < chunkOffset + 8 ||
-                (chunkOffset + 8 + size) > endChunk)
-            {
-                System.out.println("chunk size out of range");
-            }
-            
-            
-            switch (type)
-            {
-                case "fmt ":
-                    if (0xE > size)
-                    {
-                        System.out.println("chunk too small");
-                    }
-                    
-                    raf.seek(chunkOffset + 8 + 0);
-                    int codec = raf.readShort();
-                    if (0x2 != codec)
-                    {
-                        System.out.println("invalid codec");
-                    }
-                    
-                    ba[chunkOffset + 8 + 0] = 0x11;
-                    
-                    raf.seek(chunkOffset + 8 + 2);
-                    channels = raf.readShort();
-                    
-                    raf.seek(chunkOffset + 8 + 0xC);
-                    block_size = raf.readShort();
-                    break;
-                case "data":
-                    if (channels == -1 || block_size == -1)
-                    {
-                        System.out.println("data before fmt");
-                    }
-                    reinterleave_ms_ima(raf, ba, chunkOffset + 8, size, channels, block_size);
-                    break;
-            }
-            
-            chunkOffset += 8 + size;
-        }
-        
-        return ba;
-    }
-    
-    private void reinterleave_ms_ima(RandomAccessReader raf, byte[] ba, int offset, int size, int channels, int block_size)
-    {
-        int bps = block_size / channels;
-        if (size % block_size != 0)
-        {
-            System.out.println("blocks doesnt fit in size");
-        }
-        
-        if (block_size % channels != 0)
-        {
-            System.out.println("blocks doesnt divide channels");
-        }
-        
-        if (bps % 4 != 0)
-        {
-            System.out.println("expected 4 bytes per channel");
-        }
-        
-        while (size > 0)
-        {
-            int writes = 0;
-            
-            raf.seek(offset);
-            byte[] data = raf.readBytes(block_size);
-            
-            for (int i = 0; i < channels; i++)
-            {
-                ByteArray baw = new ByteArray(data);
-                ba[offset + writes] = baw.copyOfRange(i * bps, 1).getDataRaw()[0];
-                ba[offset + writes + 1] = baw.copyOfRange(i * bps + 1, 1).getDataRaw()[0];
-                ba[offset + writes + 2] = baw.copyOfRange(i * bps + 2, 1).getDataRaw()[0];
-                ba[offset + writes + 3] = baw.copyOfRange(i * bps + 3, 1).getDataRaw()[0];
-                writes += 4;
-            }
-            
-            for (int j = 0; j < bps - 4; j += 4)
-            {
-                for (int i = 0; i < channels; i++)
-                {
-                    ByteArray baw = new ByteArray(data);
-                    ba[offset + writes] = baw.copyOfRange(i * bps + 4 + j + 0, 1).getDataRaw()[0];
-                    ba[offset + writes + 1] = baw.copyOfRange(i * bps + 4 + j + 1, 1).getDataRaw()[0];
-                    ba[offset + writes + 2] = baw.copyOfRange(i * bps + 4 + j + 2, 1).getDataRaw()[0];
-                    ba[offset + writes + 3] = baw.copyOfRange(i * bps + 4 + j + 3, 1).getDataRaw()[0];
-                    writes += 4;
-                }
-            }
-            
-            size -= block_size;
-            offset += block_size;
-        }
-    }
-    
+
     public void printInfo()
     {
         if (littleEndian)

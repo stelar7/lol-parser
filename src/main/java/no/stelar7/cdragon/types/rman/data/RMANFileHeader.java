@@ -2,26 +2,34 @@ package no.stelar7.cdragon.types.rman.data;
 
 import java.util.Objects;
 
-public class RMANFileHeader
+public final class RMANFileHeader
 {
-    private String magic;
-    private byte   major;
-    private byte   minor;
-    private byte   unknown;
-    private byte   signatureType;
-    private int    offset;
-    private int    length;
-    private long   manifestId;
-    private int    decompressedLength;
+    private final String magic;
+    private final byte   major;
+    private final byte   minor;
+    private final byte   unknown;
+    private final byte   signatureType;
+    private final int    offset;
+    private final int    length;
+    private final long   manifestId;
+    private final int    decompressedLength;
+    
+    public RMANFileHeader(String magic, byte major, byte minor, byte unknown, byte signatureType, int offset, int length, long manifestId, int decompressedLength)
+    {
+        this.magic = magic;
+        this.major = major;
+        this.minor = minor;
+        this.unknown = unknown;
+        this.signatureType = signatureType;
+        this.offset = offset;
+        this.length = length;
+        this.manifestId = manifestId;
+        this.decompressedLength = decompressedLength;
+    }
     
     public String getMagic()
     {
         return magic;
-    }
-    
-    public void setMagic(String magic)
-    {
-        this.magic = magic;
     }
     
     public byte getMajor()
@@ -29,19 +37,9 @@ public class RMANFileHeader
         return major;
     }
     
-    public void setMajor(byte major)
-    {
-        this.major = major;
-    }
-    
     public byte getMinor()
     {
         return minor;
-    }
-    
-    public void setMinor(byte minor)
-    {
-        this.minor = minor;
     }
     
     public byte getUnknown()
@@ -49,19 +47,9 @@ public class RMANFileHeader
         return unknown;
     }
     
-    public void setUnknown(byte unknown)
-    {
-        this.unknown = unknown;
-    }
-    
     public byte getSignatureType()
     {
         return signatureType;
-    }
-    
-    public void setSignatureType(byte signatureType)
-    {
-        this.signatureType = signatureType;
     }
     
     public long getManifestId()
@@ -69,19 +57,9 @@ public class RMANFileHeader
         return manifestId;
     }
     
-    public void setManifestId(long manifestId)
-    {
-        this.manifestId = manifestId;
-    }
-    
     public int getDecompressedLength()
     {
         return decompressedLength;
-    }
-    
-    public void setDecompressedLength(int decompressedLength)
-    {
-        this.decompressedLength = decompressedLength;
     }
     
     public int getOffset()
@@ -89,19 +67,9 @@ public class RMANFileHeader
         return offset;
     }
     
-    public void setOffset(int offset)
-    {
-        this.offset = offset;
-    }
-    
     public int getLength()
     {
         return length;
-    }
-    
-    public void setLength(int length)
-    {
-        this.length = length;
     }
     
     @Override

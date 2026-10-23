@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.types.ogg.data;
 
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
+import no.stelar7.cdragon.util.readers.*;
 
 public class OGGPacket
 {
@@ -15,8 +15,13 @@ public class OGGPacket
         absGranule = 0;
         noGranule = isNoGranule;
         
+        if (offset < 0 || offset + getHeaderSize() > stream.size())
+        {
+            throw new ParseException("Packet header out of range", offset);
+        }
+        
         stream.seek(offset);
-        size = stream.readShort();
+        size = stream.readU16();
         if (!noGranule)
         {
             absGranule = stream.readInt();

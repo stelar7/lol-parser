@@ -36,7 +36,7 @@ public enum RingFlag
     
     public static List<RingFlag> valueOf(int flag)
     {
-        return Arrays.stream(RingFlag.values()).filter(f -> UtilHandler.isBitflagSet(f.flag, flag)).collect(Collectors.toList());
+        return Arrays.stream(RingFlag.values()).filter(f -> f.flag == flag).collect(Collectors.toList());
     }
     
     public static int valueFrom(List<RingFlag> flags)

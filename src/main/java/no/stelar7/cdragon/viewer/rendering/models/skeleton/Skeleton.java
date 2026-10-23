@@ -7,10 +7,14 @@ import java.util.List;
 public class Skeleton
 {
     public List<ReadableBone> bones;
-    
+
     public Skeleton(SKLFile skl)
     {
-        bones = skl.toReadableBones();
+        this(skl.toReadableBones());
     }
-    
+
+    public Skeleton(List<ReadableBone> bones)
+    {
+        this.bones = bones;
+    }
 }

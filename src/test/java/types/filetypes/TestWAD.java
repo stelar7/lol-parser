@@ -29,6 +29,8 @@ import java.util.stream.Collectors;
 
 public class TestWAD
 {
+    // collects the bin hashes seen by transformBIN, for generateBinHashLists
+    private final BINParser binHashCollector = new BINParser(true);
     @Test
     public void testWeb()
     {
@@ -105,7 +107,11 @@ public class TestWAD
              .forEach(file -> {
                  try
                  {
-                     BINFile parsed = bp.parse(file);
+                     BINFile parsed = bp.tryParse(file);
+                     if (parsed == null)
+                     {
+                         return;
+                     }
                      Path    output = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Files.write(output, parsed.toJson().getBytes(StandardCharsets.UTF_8));
                      file.toFile().deleteOnExit();
@@ -267,7 +273,7 @@ public class TestWAD
     private void generateBinHashLists()
     {
         System.out.println("Generating list of unknown bin hashes");
-        BINParser.hashes.forEach((key, value) -> {
+        binHashCollector.getCollectedHashes().forEach((key, value) -> {
             try
             {
                 List<String> sortedUnknown = value.stream().filter(h -> {
@@ -405,13 +411,13 @@ public class TestWAD
     {
         System.out.println("Transforming bin files to json");
         
-        final BINParser bp = new BINParser();
+        final BINParser bp = binHashCollector;
         Files.walk(extractPath)
              .filter(a -> a.getFileName().toString().endsWith(".bin"))
              .forEach(file -> {
                  try
                  {
-                     BINFile parsed = bp.parse(file);
+                     BINFile parsed = bp.tryParse(file);
                      
                      if (parsed == null)
                      {

@@ -1,10 +1,7 @@
 package no.stelar7.cdragon.types.ogg.data;
 
 import com.google.common.io.*;
-import no.stelar7.cdragon.util.handlers.HashHandler;
-
-import java.nio.*;
-import java.util.Arrays;
+import no.stelar7.cdragon.util.readers.ParseException;
 
 public class OGGStream
 {
@@ -136,16 +133,15 @@ public class OGGStream
         
         if (payloadBytes != 0)
         {
+            // intentionally round up; a full page eschews the final 0 lacing value
             int segments = (payloadBytes + SEGMENT_SIZE) / SEGMENT_SIZE;
             if (segments == MAX_SEGMENTS + 1)
             {
                 segments = MAX_SEGMENTS;
             }
             
-            for (int i = 0; i < payloadBytes; i++)
-            {
-                pageBuffer[HEADER_BYTES + segments + i] = pageBuffer[HEADER_BYTES + MAX_SEGMENTS + i];
-            }
+            // move the payload back to sit right after the lacing values
+            System.arraycopy(pageBuffer, HEADER_BYTES + MAX_SEGMENTS, pageBuffer, HEADER_BYTES + segments, payloadBytes);
             
             pageBuffer[0] = 'O';
             pageBuffer[1] = 'g';
@@ -156,18 +152,18 @@ public class OGGStream
             pageBuffer[5] = (byte) ((continued ? 1 : 0) | (first ? 2 : 0) | (last ? 4 : 0));
             
             // granule low
-            System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(granule).array(), 0, pageBuffer, 6, 4);
+            writeIntLE(pageBuffer, 6, granule);
             // granule high
-            Arrays.fill(pageBuffer, 10, 14, (byte) ((granule == 0xFFFFFFFF) ? 0xFF : 0));
+            writeIntLE(pageBuffer, 10, (granule == 0xFFFFFFFF) ? 0xFFFFFFFF : 0);
             
             // stream serial
-            pageBuffer[14] = 1;
+            writeIntLE(pageBuffer, 14, 1);
             
             // page sequence
-            System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(sequenceNumber).array(), 0, pageBuffer, 18, 4);
+            writeIntLE(pageBuffer, 18, sequenceNumber);
             
             // clear checksum
-            Arrays.fill(pageBuffer, 22, 26, (byte) 0);
+            writeIntLE(pageBuffer, 22, 0);
             
             // segment count
             pageBuffer[26] = (byte) segments;
@@ -184,14 +180,12 @@ public class OGGStream
                 }
             }
             
-            // write checksum
-            int crc = (int) HashHandler.computeCCITT32(pageBuffer, HEADER_BYTES + segments + payloadBytes);
-            System.arraycopy(ByteBuffer.allocate(4).order(ByteOrder.LITTLE_ENDIAN).putInt(crc).array(), 0, pageBuffer, 22, 4);
+            int pageSize = HEADER_BYTES + segments + payloadBytes;
             
-            for (int i = 0; i < HEADER_BYTES + segments + payloadBytes; i++)
-            {
-                data.write(pageBuffer[i]);
-            }
+            // write checksum
+            writeIntLE(pageBuffer, 22, oggCRC(pageBuffer, pageSize));
+            
+            data.write(pageBuffer, 0, pageSize);
             
             sequenceNumber++;
             first = false;
@@ -200,14 +194,49 @@ public class OGGStream
         }
     }
     
-    // TODO: little endian????
+    private static void writeIntLE(byte[] buffer, int offset, int value)
+    {
+        buffer[offset] = (byte) value;
+        buffer[offset + 1] = (byte) (value >>> 8);
+        buffer[offset + 2] = (byte) (value >>> 16);
+        buffer[offset + 3] = (byte) (value >>> 24);
+    }
+    
+    private static final int[] CRC_TABLE = new int[256];
+    
+    static
+    {
+        for (int i = 0; i < 256; i++)
+        {
+            int r = i << 24;
+            for (int j = 0; j < 8; j++)
+            {
+                r = ((r & 0x80000000) != 0) ? ((r << 1) ^ 0x04C11DB7) : (r << 1);
+            }
+            CRC_TABLE[i] = r;
+        }
+    }
+    
+    /**
+     * The Ogg page checksum (CRC-32, polynomial 0x04C11DB7, initial value 0, no reflection, no final xor)
+     */
+    public static int oggCRC(byte[] buffer, int length)
+    {
+        int crc = 0;
+        for (int i = 0; i < length; i++)
+        {
+            crc = (crc << 8) ^ CRC_TABLE[((crc >>> 24) ^ buffer[i]) & 0xFF];
+        }
+        return crc;
+    }
+    
     private void flushBits()
     {
         if (bitsStored != 0)
         {
             if (payloadBytes == SEGMENT_SIZE * MAX_SEGMENTS)
             {
-                throw new IllegalArgumentException("OGGPacket out of space");
+                throw new ParseException("Ran out of space in an Ogg packet", -1);
             }
             
             int page = HEADER_BYTES + MAX_SEGMENTS + payloadBytes;
@@ -218,6 +247,29 @@ public class OGGStream
             bitBuffer = 0;
             bitsStored = 0;
         }
+    }
+    
+    /**
+     * Writes whole bytes; takes a fast path when the bit buffer is byte aligned
+     */
+    public void writeBytes(byte[] src, int offset, int length)
+    {
+        if (bitsStored != 0)
+        {
+            for (int i = 0; i < length; i++)
+            {
+                bitWrite(src[offset + i], Byte.SIZE);
+            }
+            return;
+        }
+        
+        if (payloadBytes + length > SEGMENT_SIZE * MAX_SEGMENTS)
+        {
+            throw new ParseException("Ran out of space in an Ogg packet", -1);
+        }
+        
+        System.arraycopy(src, offset, pageBuffer, HEADER_BYTES + MAX_SEGMENTS + payloadBytes, length);
+        payloadBytes += length;
     }
     
     public void writeVorbisHeader(int i)
@@ -247,16 +299,15 @@ public class OGGStream
     {
         for (int i = 0; i < size; i++)
         {
-            int val = (value & (1 << i)) != 0 ? (byte) 1 : (byte) 0;
-            writeBit(val);
+            writeBit((value >>> i) & 1);
         }
     }
     
     public void writeBit(int bit)
     {
-        if (bit == 1)
+        if (bit != 0)
         {
-            bitBuffer |= (byte) 1 << bitsStored;
+            bitBuffer |= (byte) (1 << bitsStored);
         }
         
         bitsStored++;

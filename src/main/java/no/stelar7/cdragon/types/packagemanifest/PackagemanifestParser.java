@@ -2,71 +2,66 @@ package no.stelar7.cdragon.types.packagemanifest;
 
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.packagemanifest.data.*;
-import no.stelar7.cdragon.util.readers.RandomAccessReader;
-import no.stelar7.cdragon.util.types.ByteArray;
+import no.stelar7.cdragon.util.readers.*;
 
-import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.*;
 
+/**
+ * Parser for packagemanifest files: a PKG1 header line, then one line per file:
+ * path,containing file,offset,size,unknown
+ */
 public class PackagemanifestParser implements Parseable<PackagemanifestFile>
 {
     @Override
-    public PackagemanifestFile parse(Path path)
-    {
-        return parse(new RandomAccessReader(path, ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    @Override
-    public PackagemanifestFile parse(ByteArray data)
-    {
-        return parse(new RandomAccessReader(data.getDataRaw(), ByteOrder.LITTLE_ENDIAN));
-    }
-    
-    @Override
     public PackagemanifestFile parse(RandomAccessReader raf)
     {
-        PackagemanifestFile file = new PackagemanifestFile();
-        
-        file.setHeader(parseHeader(raf));
-        file.setFiles(parseFiles(raf));
-        
-        return file;
+        String[] lines  = raf.readAsString().split("\\r?\\n");
+        String   header = parseHeader(lines[0]);
+        return new PackagemanifestFile(header, parseFiles(lines));
     }
     
-    private List<PackagemanifestLine> parseFiles(RandomAccessReader raf)
+    private List<PackagemanifestLine> parseFiles(String[] data)
     {
         List<PackagemanifestLine> lines = new ArrayList<>();
         
-        String data = raf.readAsString();
-        for (String line : data.split("\n"))
+        // the first line is the header
+        for (int i = 1; i < data.length; i++)
         {
-            if(line.trim().isEmpty()) {
+            String line = data[i].trim();
+            if (line.isEmpty())
+            {
                 continue;
             }
             
             String[] lineContent = line.split(",");
+            if (lineContent.length < 5)
+            {
+                throw new ParseException("Invalid packagemanifest line " + (i + 1) + ": " + line, -1);
+            }
             
-            PackagemanifestLine dataLine = new PackagemanifestLine();
-            dataLine.setFilePath(lineContent[0]);
-            dataLine.setContainedInFile(lineContent[1]);
-            dataLine.setContainedOffset(Integer.parseInt(lineContent[2]));
-            dataLine.setFileSize(Integer.parseInt(lineContent[2]));
-            dataLine.setUnknown(Integer.parseInt(lineContent[3]));
-            
-            lines.add(dataLine);
+            try
+            {
+                int containedOffset = Integer.parseUnsignedInt(lineContent[2].trim());
+                int fileSize        = Integer.parseUnsignedInt(lineContent[3].trim());
+                int unknown         = Integer.parseInt(lineContent[4].trim());
+                
+                lines.add(new PackagemanifestLine(lineContent[0], lineContent[1], containedOffset, fileSize, unknown));
+                
+            } catch (NumberFormatException e)
+            {
+                throw new ParseException("Invalid number in packagemanifest line " + (i + 1) + ": " + line, -1, e);
+            }
         }
         
         return lines;
     }
     
-    private String parseHeader(RandomAccessReader raf)
+    private String parseHeader(String line)
     {
-        String header = new String(raf.readBytes(4), StandardCharsets.UTF_8);
+        String header = line.trim();
         if (!header.startsWith("PKG"))
         {
-            throw new IllegalArgumentException("Invalid header");
+            throw new ParseException("Invalid packagemanifest header", 0);
         }
         return header;
     }

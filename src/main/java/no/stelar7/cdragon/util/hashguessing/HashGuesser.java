@@ -7,10 +7,13 @@ import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
-import java.text.DateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.*;
+import java.util.regex.*;
 import java.util.stream.*;
 
 public abstract class HashGuesser
@@ -24,30 +27,64 @@ public abstract class HashGuesser
                                                                 "lan", "las", "na", "oc", "oc1", "oce", "pbe", "ph", "ru", "sg", "tencent", "th", "tr", "tw",
                                                                 "vn"));
     
-    protected Set<String> LANGUAGES = new HashSet<>(Arrays.stream(DateFormat.getAvailableLocales())
-                                                          .map(l -> l.toString().toLowerCase(Locale.ENGLISH))
-                                                          .filter(s -> s.contains("_"))
-                                                          .collect(Collectors.toSet()));
+    // the locales the client actually ships, the JVM locale list is ~5x larger and full of variants like "ja_jp_jp_#u-ca-japanese"
+    protected Set<String> LANGUAGES = new HashSet<>(Arrays.asList("ar_ae", "cs_cz", "de_de", "el_gr", "en_au", "en_gb", "en_ph", "en_sg", "en_us",
+                                                                  "es_ar", "es_es", "es_mx", "fr_fr", "hu_hu", "id_id", "it_it", "ja_jp", "ko_kr",
+                                                                  "ms_my", "pl_pl", "pt_br", "ro_ro", "ru_ru", "th_th", "tr_tr", "vi_vn", "vn_vn",
+                                                                  "zh_cn", "zh_my", "zh_tw"));
     
     
     protected Set<String> hashes;
     protected HashFile    hashFile;
-    
-    private boolean foundNew = false;
-    
+
+    private volatile boolean foundNew = false;
+    // starts dirty so the first save syncs the backup with the loaded file
+    private volatile boolean dirty    = true;
+
+    // hashes are kept as longs so checking a guess never has to build a hex string;
+    // the collections are concurrent since check() is called from parallel streams
     protected Map<String, String> known;
-    protected Set<String>         unknown;
+    protected Set<Long>           knownHashes;
+    protected Set<Long>           unknown;
     protected Set<WADFile>        wads;
     protected Set<String>         dirList;
-    
+
     public HashGuesser(HashFile hashFile, Collection<String> hashes)
     {
         this.hashFile = hashFile;
         this.hashes = new HashSet<>(hashes);
-        
-        this.known = this.hashFile.load(true);
-        this.unknown = new HashSet<>(hashes);
-        this.unknown.removeAll(this.known.keySet());
+
+        this.known = new ConcurrentHashMap<>();
+        this.knownHashes = ConcurrentHashMap.newKeySet();
+        this.hashFile.load(true).forEach((k, v) -> {
+            Long parsed = parseHash(k);
+            if (parsed != null && v != null)
+            {
+                this.known.put(k, v);
+                this.knownHashes.add(parsed);
+            }
+        });
+
+        this.unknown = ConcurrentHashMap.newKeySet();
+        for (String hash : hashes)
+        {
+            Long parsed = parseHash(hash);
+            if (parsed != null && !this.knownHashes.contains(parsed))
+            {
+                this.unknown.add(parsed);
+            }
+        }
+    }
+
+    private static Long parseHash(String hex)
+    {
+        try
+        {
+            return Long.parseUnsignedLong(hex.trim(), 16);
+        } catch (NumberFormatException e)
+        {
+            return null;
+        }
     }
     
     public HashGuesser fromWads(Set<WADFile> wads)
@@ -117,39 +154,62 @@ public abstract class HashGuesser
     
     public void saveToBackup()
     {
+        // sorting and writing the full hash list is slow, so skip it when nothing changed
+        if (!this.dirty)
+        {
+            System.out.println("No new hashes, skipping save");
+            return;
+        }
+
         System.out.println("Saving current hashes as JSON");
+        this.dirty = false;
         this.hashFile.saveToBackupAsJson(this.known);
     }
     
-    public void addKnown(String hash, String printPath, String savePath)
+    public void addKnown(long hash, String printPath, String savePath)
     {
-        System.out.format(hashFile.printFormat, hash, printPath);
-        this.known.put(hash, savePath);
+        String hex = HashHandler.toHex(hash, hexLength());
+        System.out.format(hashFile.printFormat, hex, printPath);
+        this.known.put(hex, savePath);
+        this.knownHashes.add(hash);
         this.unknown.remove(hash);
         this.foundNew = true;
-        
-        if (this.unknown.isEmpty())
-        {
-            System.out.println("No more unknown hashes!");
-            System.exit(0);
-        }
+        this.dirty = true;
     }
-    
-    public abstract String generateHash(String val);
-    
-    boolean hasPrinted = false;
-    
+
+    /**
+     * Hashes an already lowercased value
+     */
+    public abstract long hashOf(String lowerCased);
+
+    /**
+     * Amount of hex digits used for hashes in the hash file
+     */
+    protected abstract int hexLength();
+
+    public String generateHash(String val)
+    {
+        return HashHandler.toHex(hashOf(val), hexLength());
+    }
+
+    volatile boolean hasPrinted = false;
+
     /**
      * returns false if there are no more hashes
      */
     public boolean check(String path)
     {
+        if (this.unknown.isEmpty())
+        {
+            return noMoreHashes();
+        }
+
         String lowerCased = path.toLowerCase();
         if (lowerCased.isBlank())
         {
             return true;
         }
-        
+
         if (lowerCased.endsWith(".lua"))
         {
             String test = lowerCased.substring(0, lowerCased.lastIndexOf(".lua"));
@@ -157,32 +217,73 @@ public abstract class HashGuesser
             check(test + ".luabin64");
             check(test + ".preload");
         }
-        
-        String startPart = path.substring(0, path.lastIndexOf('/') + 1);
-        String lastPart  = path.substring(path.lastIndexOf('/') + 1);
-        if (!lastPart.startsWith("2x") && !lastPart.startsWith("4x"))
+
+        // scaled variants only exist for images
+        if (lowerCased.endsWith(".png") || lowerCased.endsWith(".jpg"))
         {
-            check(startPart + "2x_" + lastPart);
-            check(startPart + "4x_" + lastPart);
+            String startPart = path.substring(0, path.lastIndexOf('/') + 1);
+            String lastPart  = path.substring(path.lastIndexOf('/') + 1);
+            if (!lastPart.startsWith("2x") && !lastPart.startsWith("4x"))
+            {
+                check(startPart + "2x_" + lastPart);
+                check(startPart + "4x_" + lastPart);
+            }
         }
-        
-        String hash = generateHash(lowerCased);
-        if (this.unknown.contains(hash))
+
+        return checkHash(hashOf(lowerCased), path, lowerCased);
+    }
+
+    /**
+     * Checks a "hash path" line (as found in the CDTB hash lists) without rehashing the path
+     */
+    public boolean checkPrehashed(String line)
+    {
+        int split = line.indexOf(' ');
+        if (split <= 0)
         {
-            this.addKnown(hash, path, lowerCased);
             return true;
         }
-        
+
+        String path = line.substring(split + 1);
+        try
+        {
+            long hash = Long.parseUnsignedLong(line, 0, split, 16);
+            return checkHash(hash, path, path.toLowerCase());
+        } catch (NumberFormatException e)
+        {
+            return check(path);
+        }
+    }
+
+    /**
+     * returns false if there are no more hashes
+     */
+    protected boolean checkHash(long hash, String printPath, String savePath)
+    {
+        if (this.unknown.contains(hash))
+        {
+            this.addKnown(hash, printPath, savePath);
+            return true;
+        }
+
         if (this.unknown.isEmpty())
         {
-            if (!hasPrinted)
-            {
-                System.out.println("No more unknown hashes!");
-                hasPrinted = false;
-            }
-            return false;
+            return noMoreHashes();
         }
         return true;
+    }
+
+    /**
+     * Prints the "done" message once; always returns false so callers can stop
+     */
+    protected boolean noMoreHashes()
+    {
+        if (!hasPrinted)
+        {
+            hasPrinted = true;
+            System.out.println("No more unknown hashes!");
+        }
+        return false;
     }
     
     public void check(String... paths)
@@ -256,60 +357,83 @@ public abstract class HashGuesser
     
     public void substituteBasenames()
     {
-        Set<String> dirs  = directoryList(true);
-        Set<String> names = new HashSet<>();
+        // only combine names and directories that share the first two path segments (plugin / top level folder),
+        // the full cross product of every name with every directory is too large to finish
+        Map<String, Set<String>> dirsByRoot  = new HashMap<>();
+        Map<String, Set<String>> namesByRoot = new HashMap<>();
+        for (String dir : directoryList(true))
+        {
+            dirsByRoot.computeIfAbsent(pathRoot(dir), k -> new HashSet<>()).add(dir);
+        }
         for (String p : this.known.values())
         {
-            names.add(UtilHandler.getFilename(p));
+            namesByRoot.computeIfAbsent(pathRoot(p), k -> new HashSet<>()).add(UtilHandler.getFilename(p));
         }
         
-        System.out.format("substitute basenamses: %s basenames, %s directories%n", names.size(), dirs.size());
-        
-        for (String name : names)
+        long total = 0;
+        for (Map.Entry<String, Set<String>> e : namesByRoot.entrySet())
         {
-            for (String dir : dirs)
+            total += (long) e.getValue().size() * dirsByRoot.getOrDefault(e.getKey(), Set.of()).size();
+        }
+        System.out.format("substitute basenames: %s roots, %s combinations%n", namesByRoot.size(), total);
+        
+        for (Map.Entry<String, Set<String>> e : namesByRoot.entrySet())
+        {
+            Set<String> dirs = dirsByRoot.getOrDefault(e.getKey(), Set.of());
+            for (String name : e.getValue())
             {
-                check(dir + "/" + name);
+                for (String dir : dirs)
+                {
+                    check(dir + "/" + name);
+                }
             }
         }
     }
     
+    /**
+     * The path up to (not including) the second '/', or the whole path if it has fewer
+     */
+    private static String pathRoot(String path)
+    {
+        int first = path.indexOf('/');
+        if (first < 0)
+        {
+            return path;
+        }
+        
+        int second = path.indexOf('/', first + 1);
+        return second < 0 ? path : path.substring(0, second);
+    }
+    
+    /**
+     * The text before and after the part of a path that gets substituted
+     */
+    private record Slot(String pre, String post) {}
+    
     public void substituteBasenameWords(Set<String> paths, Set<String> words, int amount)
     {
-        String formatPartPart = "{sep}%%s".repeat(amount - 1);
-        String formatPart     = "%s%%s" + formatPartPart + "%s";
-        
-        Pattern     reExtract   = Pattern.compile("([^/_.-]+)(?=((?:[-_][^/_.-]+){" + (amount - 1) + "})[^/]*\\.[^/]+$)");
-        Set<String> tempFormats = new HashSet<>();
+        Pattern   reExtract = Pattern.compile("([^/_.-]+)(?=((?:[-_][^/_.-]+){" + (amount - 1) + "})[^/]*\\.[^/]+$)");
+        Set<Slot> slots     = new HashSet<>();
         for (String path : paths)
         {
             reExtract.matcher(path).results().forEach(m -> {
-                String match     = m.group(1) + m.group(2);
-                String pre       = path.substring(0, m.start());
-                String post      = path.substring(m.start() + match.length());
-                String formatted = String.format(formatPart, pre, post);
-                tempFormats.add(formatted);
+                String match = m.group(1) + m.group(2);
+                slots.add(new Slot(path.substring(0, m.start()), path.substring(m.start() + match.length())));
             });
         }
         
-        Set<String> formats = new HashSet<>();
+        System.out.format("substitute basenames words: %s formats, %s words%n", slots.size() * 2, words.size());
+        
+        // lazy view, the product is never materialized
+        Set<List<String>> product = Sets.cartesianProduct(Collections.nCopies(amount, words));
         for (String sep : Arrays.asList("-", "_"))
         {
-            for (String fmt : tempFormats)
+            for (Slot slot : slots)
             {
-                formats.add(fmt.replace("{sep}", sep));
-            }
-        }
-        
-        System.out.format("substitute basenames words: %s formats, %s words%n", formats.size(), words.size());
-        Set<String> product = UtilHandler.product(words, amount);
-        for (String fmt : formats)
-        {
-            for (String p : product)
-            {
-                String[] parts   = fmt.split("%s");
-                String   toCheck = parts[0] + p + parts[1];
-                check(toCheck);
+                for (List<String> p : product)
+                {
+                    check(slot.pre() + String.join(sep, p) + slot.post());
+                }
             }
         }
     }
@@ -317,7 +441,7 @@ public abstract class HashGuesser
     public void addBasenameWord(Set<String> paths, Set<String> words)
     {
         Pattern     reExtract  = Pattern.compile("([^/_.-]+)(?=[^/]*\\.[^/]+$)");
-        Set<String> formats    = new HashSet<>();
+        Set<Slot>   slots      = new HashSet<>();
         Set<String> knownPaths = new HashSet<>(Arrays.asList("assets/characters/", "vo/", "sfx/", "skins_skin"));
         for (String path : paths)
         {
@@ -326,27 +450,21 @@ public abstract class HashGuesser
                 reExtract.matcher(path).results().forEach(m -> {
                     for (String sep : Arrays.asList("-", "_", "."))
                     {
-                        String pre     = path.substring(0, m.start());
-                        String preEnd  = path.substring(m.start());
-                        String post    = path.substring(0, m.end());
-                        String postEnd = path.substring(m.end());
-                        
-                        formats.add(pre + sep + "%s" + preEnd);
-                        formats.add(post + sep + "%s" + postEnd);
+                        // word before the match, and word after the match
+                        slots.add(new Slot(path.substring(0, m.start()), sep + path.substring(m.start())));
+                        slots.add(new Slot(path.substring(0, m.end()) + sep, path.substring(m.end())));
                     }
                 });
             }
         }
         
-        System.out.format("add basename word: %s formats, %s words%n", formats.size(), words.size());
-    
-        for (String fmt : formats)
+        System.out.format("add basename word: %s formats, %s words%n", slots.size(), words.size());
+        
+        for (Slot slot : slots)
         {
             for (String w : words)
             {
-                String[] parts   = fmt.split("%s");
-                String   toCheck = parts[0] + w + parts[1];
-                check(toCheck);
+                check(slot.pre() + w + slot.post());
             }
         }
     }
@@ -354,102 +472,244 @@ public abstract class HashGuesser
     
     public void doubleSubstitution(Set<String> paths, Set<String> words)
     {
-        Pattern     reExtract = Pattern.compile("([^/_.-]+)(?=[^/]*\\.[^/]+$)");
-        Set<String> formats   = new HashSet<>();
+        Pattern   reExtract = Pattern.compile("([^/_.-]+)(?=[^/]*\\.[^/]+$)");
+        Set<Slot> slots     = new HashSet<>();
         for (String path : paths)
         {
-            reExtract.matcher(path).results().forEach(m -> {
-                for (String sep : Arrays.asList("-", "_"))
-                {
-                    String start = path.substring(0, m.start());
-                    String end   = path.substring(m.end());
-                    
-                    formats.add(start + "%s" + sep + "%s" + end);
-                }
-            });
+            reExtract.matcher(path).results().forEach(m -> slots.add(new Slot(path.substring(0, m.start()), path.substring(m.end()))));
         }
         
-        Set<String> product = UtilHandler.product(words, 2);
-        System.out.format("double substitution: %s formats, %s words%n", formats.size(), words.size());
-        for (String fmt : formats)
+        System.out.format("double substitution: %s formats, %s words%n", slots.size() * 2, words.size());
+        for (String sep : Arrays.asList("-", "_"))
         {
-            for (String p : product)
+            for (Slot slot : slots)
             {
-                String[] parts   = fmt.split("%s");
-                String   toCheck = parts[0] + p + parts[1];
-                check(toCheck);
+                for (String first : words)
+                {
+                    String pre = slot.pre() + first + sep;
+                    for (String second : words)
+                    {
+                        check(pre + second + slot.post());
+                    }
+                }
             }
         }
     }
     
     public void substituteNumbers(Set<String> paths, int max, Optional<Integer> numbers)
     {
-        int     digits;
-        String  fmtTemp   = null;
-        Pattern reExtract = null;
+        Pattern reExtract = numbers.isEmpty()
+                            ? Pattern.compile("([0-9]+)(?=[^/]*\\.[^/]+$)")
+                            : Pattern.compile("([0-9]{" + numbers.get() + "})(?=[^/]*\\.[^/]+$)");
         
-        if (numbers.isPresent() && numbers.get() == null)
+        Set<Slot> slots = new HashSet<>();
+        for (String path : paths)
         {
-            numbers = Optional.of(String.valueOf(max).length());
+            reExtract.matcher(path).results().forEach(m -> slots.add(new Slot(path.substring(0, m.start()), path.substring(m.end()))));
         }
         
-        if (numbers.isEmpty())
+        // format the numbers once instead of once per path
+        String       fmt    = numbers.isEmpty() ? "%d" : "%0" + numbers.get() + "d";
+        List<String> values = IntStream.rangeClosed(0, max).mapToObj(n -> String.format(fmt, n)).toList();
+        
+        System.out.format("substitute numbers: %s formats, nmax = %s%n", slots.size(), max);
+        for (Slot slot : slots)
         {
-            fmtTemp = "%d";
-            reExtract = Pattern.compile("([0-9]+)(?=[^/]*\\.[^/]+$)");
-        } else
-        {
-            fmtTemp = "%0" + numbers.get() + "d";
-            reExtract = Pattern.compile("([0-9]{" + numbers.get() + "})( ? =[^/]*\\.[^/]+$)");
+            for (String n : values)
+            {
+                check(slot.pre() + n + slot.post());
+            }
         }
-        
-        
-        Set<String> formats = new HashSet<>();
-        for (
-                String path : paths)
-        
-        {
-            String finalFmt = fmtTemp;
-            reExtract.matcher(path).results().forEach(m -> {
-                String start = path.substring(0, m.start());
-                String end   = path.substring(m.end());
-                formats.add(start + finalFmt + end);
-            });
-        }
-        
-        
-        System.out.format("substitute numbers: %s formats, nmax = %s%n", formats.size(), max);
-        for (String fmt : formats)
-        {
-            IntStream.rangeClosed(0, max).forEach(n -> check(String.format(fmt, n)));
-        }
-        
     }
     
+    /**
+     * Tries every known extension on every known path (directory and name kept, extension swapped).
+     * Only sensible for the smaller hash lists (LCU), for game paths use the sibling extension guesser.
+     */
     public void substituteExtensions()
     {
-        Set<String> prefixes   = new HashSet<>();
+        Set<String> stems      = new HashSet<>();
         Set<String> extensions = new HashSet<>();
-        
+
         for (String path : this.known.values())
         {
-            String filename = UtilHandler.getFilename(path);
-            String ext      = UtilHandler.getEnding(filename);
-            String prefix   = filename.substring(0, filename.lastIndexOf('.'));
-            
-            prefixes.add(prefix);
-            extensions.add(ext);
+            int slash = path.lastIndexOf('/');
+            int dot   = path.lastIndexOf('.');
+            if (dot <= slash)
+            {
+                continue;
+            }
+
+            stems.add(path.substring(0, dot + 1).toLowerCase(Locale.ENGLISH));
+            extensions.add(path.substring(dot + 1).toLowerCase(Locale.ENGLISH));
         }
-        
-        System.out.format("substitute extensions: %s prefixes, %s extensions%n", prefixes.size(), extensions.size());
-        
-        Set<String> paths = new HashSet<>();
-        for (List<String> strings : Sets.cartesianProduct(prefixes, extensions))
+
+        System.out.format("substitute extensions: %s paths, %s extensions%n", stems.size(), extensions.size());
+
+        stems.parallelStream().forEach(stem -> {
+            for (String ext : extensions)
+            {
+                check(stem + ext);
+            }
+        });
+    }
+
+    /**
+     * The locales this guesser substitutes
+     */
+    public Set<String> getLanguages()
+    {
+        return Collections.unmodifiableSet(LANGUAGES);
+    }
+
+    /**
+     * Builds templates from the known paths by cutting out every occurrence of a matched value
+     * (all occurrences of the same value are replaced together, so {@code vo/en_us/x_en_us.bnk} keeps both in sync),
+     * then fills each template with every replacement.
+     * Templates are deduplicated, so paths that only differ by the substituted value are only tried once.
+     *
+     * @param name         printed in the progress message
+     * @param paths        the paths to build templates from
+     * @param pattern      finds the values to substitute, group 1 is the value that is replaced
+     * @param accept       filters the matched values, eg. to only accept real locales
+     * @param replacements the values put into the templates
+     */
+    protected void substituteTemplates(String name, Collection<String> paths, Pattern pattern, Predicate<String> accept, Collection<String> replacements)
+    {
+        Set<List<String>> templates = buildTemplates(paths, pattern, accept);
+
+        System.out.format("%s: %s templates (from %s paths), %s replacements%n", name, templates.size(), paths.size(), replacements.size());
+
+        templates.parallelStream().forEach(parts -> {
+            StringBuilder sb = new StringBuilder();
+            for (String value : replacements)
+            {
+                sb.setLength(0);
+                sb.append(parts.get(0));
+                for (int i = 1; i < parts.size(); i++)
+                {
+                    sb.append(value).append(parts.get(i));
+                }
+                check(sb.toString());
+            }
+        });
+    }
+
+    /**
+     * Splits each path around the occurrences of the matched values, see {@link #substituteTemplates}
+     */
+    static Set<List<String>> buildTemplates(Collection<String> paths, Pattern pattern, Predicate<String> accept)
+    {
+        Set<List<String>> templates = ConcurrentHashMap.newKeySet();
+        paths.parallelStream().forEach(raw -> {
+            String  path   = raw.toLowerCase(Locale.ENGLISH);
+            Matcher m      = pattern.matcher(path);
+            Set<String> values = new HashSet<>();
+            while (m.find())
+            {
+                if (accept.test(m.group(1)))
+                {
+                    values.add(m.group(1));
+                }
+            }
+
+            for (String value : values)
+            {
+                // split on exact occurrences found by the pattern, not on any substring equal to the value
+                List<String> parts = new ArrayList<>();
+                int          last  = 0;
+                m.reset();
+                while (m.find())
+                {
+                    if (m.group(1).equals(value))
+                    {
+                        parts.add(path.substring(last, m.start(1)));
+                        last = m.end(1);
+                    }
+                }
+                parts.add(path.substring(last));
+                templates.add(List.copyOf(parts));
+            }
+        });
+        return templates;
+    }
+
+    /**
+     * The maintained hash lists from CommunityDragon
+     */
+    public static final String CDRAGON_HASH_URL = "https://raw.communitydragon.org/data/hashes/lol/";
+    /**
+     * Mirror of the same lists on GitHub, large lists are split into name.0, name.1, ...
+     */
+    public static final String GITHUB_HASH_URL  = "https://raw.githubusercontent.com/CommunityDragon/Data/master/hashes/lol/";
+
+    /**
+     * Streams a CommunityDragon hash list (eg. "hashes.game.txt") line by line into the consumer.
+     * Uses raw.communitydragon.org, falling back to the GitHub mirror (and its split parts) if that fails.
+     *
+     * @return false if the list could not be loaded from anywhere
+     */
+    public static boolean readCDragonHashList(String name, Consumer<String> consumer)
+    {
+        if (readWebLines(CDRAGON_HASH_URL + name, consumer))
         {
-            paths.add(String.join("", strings));
+            return true;
         }
-        
-        check(paths.toArray(new String[0]));
+
+        System.out.println("Unable to load " + name + " from raw.communitydragon.org, trying GitHub");
+        if (readWebLines(GITHUB_HASH_URL + name, consumer))
+        {
+            return true;
+        }
+
+        boolean any = false;
+        for (int part = 0; readWebLines(GITHUB_HASH_URL + name + "." + part, consumer); part++)
+        {
+            any = true;
+        }
+
+        if (!any)
+        {
+            System.out.println("Unable to load hash list " + name);
+        }
+        return any;
+    }
+
+    /**
+     * Streams the lines of a text url without holding the whole file in memory (hashes.game.txt is >200MB)
+     *
+     * @return false if the url did not answer with 200
+     */
+    public static boolean readWebLines(String url, Consumer<String> consumer)
+    {
+        try
+        {
+            HttpURLConnection con = (HttpURLConnection) URI.create(url).toURL().openConnection();
+            con.setConnectTimeout(30_000);
+            con.setReadTimeout(120_000);
+            if (con.getResponseCode() != 200)
+            {
+                con.disconnect();
+                return false;
+            }
+
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)))
+            {
+                String line;
+                while ((line = in.readLine()) != null)
+                {
+                    if (!line.isEmpty())
+                    {
+                        consumer.accept(line);
+                    }
+                }
+            }
+            return true;
+        } catch (IOException | IllegalArgumentException e)
+        {
+            System.err.println("Unable to read " + url + ": " + e.getMessage());
+            return false;
+        }
     }
     
     public Set<Triplet<String, String, String>> getFilesAsText(WADFile wad)
@@ -539,195 +799,53 @@ public abstract class HashGuesser
             return true;
         }
         
-        String hash = generateHash(lowerCased);
-        if (this.unknown.contains(hash))
-        {
-            return true;
-        }
-        
-        return this.known.containsKey(hash);
+        long hash = hashOf(lowerCased);
+        return this.unknown.contains(hash) || this.knownHashes.contains(hash);
     }
     
     public void guessByExistingWords(Set<String> prefixes)
     {
-        Set<String> separators = Set.of("", "_", ".", "/", "-");
-        Set<String> endings    = new HashSet<>();
-        Set<String> words      = this.generateWordListFromKnownHashes();
+        guessByExistingWords(prefixes, 3);
+    }
+    
+    /**
+     * Tries prefix + word (+ separator + word)* + ending, with up to maxWords words
+     */
+    public void guessByExistingWords(Set<String> prefixes, int maxWords)
+    {
+        Set<String> endings = new HashSet<>();
+        Set<String> words   = this.generateWordListFromKnownHashes();
         this.known.values().forEach(v -> endings.add(v.substring(v.lastIndexOf('.'))));
         
-        System.out.println("Guessing by existing words");
+        System.out.format("Guessing by existing words: %s prefixes, %s words, %s endings, up to %s words%n", prefixes.size(), words.size(), endings.size(), maxWords);
         
-        for (String plugin : prefixes)
+        for (String prefix : prefixes)
         {
-            for (String word : words)
+            guessByExistingWords(prefix, words, endings, maxWords);
+        }
+    }
+    
+    private void guessByExistingWords(String current, Set<String> words, Set<String> endings, int wordsLeft)
+    {
+        for (String word : words)
+        {
+            String path = current + word;
+            for (String ending : endings)
             {
-                for (String ending : endings)
-                {
-                    this.check(plugin + word + ending);
-                }
-                
-                if (word.isEmpty())
-                {
-                    continue;
-                }
-                
-                for (String separator : separators)
-                {
-                    String path1 = word + separator;
-                    
-                    for (String word2 : words)
-                    {
-                        for (String ending : endings)
-                        {
-                            this.check(plugin + path1 + word2 + ending);
-                        }
-                        
-                        if (word2.isEmpty())
-                        {
-                            continue;
-                        }
-                        
-                        for (String separator2 : separators)
-                        {
-                            String path2 = word2 + separator2;
-                            
-                            for (String word3 : words)
-                            {
-                                for (String ending : endings)
-                                {
-                                    this.check(plugin + path1 + path2 + word3 + ending);
-                                }
-                                
-                                if (word3.isEmpty())
-                                {
-                                    continue;
-                                }
-                                
-                                for (String separator3 : separators)
-                                {
-                                    String path3 = word3 + separator3;
-                                    
-                                    for (String word4 : words)
-                                    {
-                                        for (String ending : endings)
-                                        {
-                                            this.check(plugin + path1 + word2 + path3 + word4 + ending);
-                                        }
-                                        
-                                        if (word4.isEmpty())
-                                        {
-                                            continue;
-                                        }
-                                        
-                                        for (String separator4 : separators)
-                                        {
-                                            String path4 = word4 + separator4;
-                                            
-                                            for (String word5 : words)
-                                            {
-                                                for (String ending : endings)
-                                                {
-                                                    this.check(plugin + path1 + word2 + path3 + path4 + word5 + ending);
-                                                }
-                                                
-                                                if (word5.isEmpty())
-                                                {
-                                                    continue;
-                                                }
-                                                
-                                                for (String separator5 : separators)
-                                                {
-                                                    String path5 = word5 + separator5;
-                                                    
-                                                    for (String word6 : words)
-                                                    {
-                                                        for (String ending : endings)
-                                                        {
-                                                            this.check(plugin + path1 + word2 + path3 + path4 + path5 + word6 + ending);
-                                                        }
-                                                        
-                                                        if (word6.isEmpty())
-                                                        {
-                                                            continue;
-                                                        }
-                                                        
-                                                        for (String separator6 : separators)
-                                                        {
-                                                            String path6 = word6 + separator6;
-                                                            
-                                                            for (String word7 : words)
-                                                            {
-                                                                for (String ending : endings)
-                                                                {
-                                                                    this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + word7 + ending);
-                                                                }
-                                                                
-                                                                if (word7.isEmpty())
-                                                                {
-                                                                    continue;
-                                                                }
-                                                                
-                                                                for (String separator7 : separators)
-                                                                {
-                                                                    String path7 = word7 + separator7;
-                                                                    
-                                                                    for (String word8 : words)
-                                                                    {
-                                                                        for (String ending : endings)
-                                                                        {
-                                                                            this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + path7 + word8 + ending);
-                                                                        }
-                                                                        
-                                                                        if (word8.isEmpty())
-                                                                        {
-                                                                            continue;
-                                                                        }
-                                                                        
-                                                                        for (String separator8 : separators)
-                                                                        {
-                                                                            String path8 = word8 + separator8;
-                                                                            
-                                                                            for (String word9 : words)
-                                                                            {
-                                                                                for (String ending : endings)
-                                                                                {
-                                                                                    this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + path7 + path8 + word9 + ending);
-                                                                                }
-                                                                                
-                                                                                if (word9.isEmpty())
-                                                                                {
-                                                                                    continue;
-                                                                                }
-                                                                                
-                                                                                for (String separator9 : separators)
-                                                                                {
-                                                                                    String path9 = word9 + separator9;
-                                                                                    
-                                                                                    for (String word10 : words)
-                                                                                    {
-                                                                                        for (String ending : endings)
-                                                                                        {
-                                                                                            this.check(plugin + path1 + word2 + path3 + path4 + path5 + path6 + path7 + path8 + path9 + word10 + ending);
-                                                                                        }
-                                                                                    }
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                this.check(path + ending);
+            }
+            
+            if (wordsLeft <= 1 || word.isEmpty())
+            {
+                continue;
+            }
+            
+            for (String separator : WORD_SEPARATORS)
+            {
+                guessByExistingWords(path + separator, words, endings, wordsLeft - 1);
             }
         }
     }
+    
+    private static final Set<String> WORD_SEPARATORS = Set.of("", "_", ".", "/", "-");
 }

@@ -1,27 +1,23 @@
 package no.stelar7.cdragon.types.bnk.data;
 
-public class BNKDATAWEMFile
+public final class BNKDATAWEMFile
 {
-    private int    fileId;
-    private byte[] data;
+    private final int    fileId;
+    private final byte[] data;
+    
+    public BNKDATAWEMFile(int fileId, byte[] data)
+    {
+        this.fileId = fileId;
+        this.data = data;
+    }
     
     public int getFileId()
     {
         return fileId;
     }
     
-    public void setFileId(int fileId)
-    {
-        this.fileId = fileId;
-    }
-    
     public byte[] getData()
     {
         return data;
-    }
-    
-    public void setData(byte[] data)
-    {
-        this.data = data;
     }
 }

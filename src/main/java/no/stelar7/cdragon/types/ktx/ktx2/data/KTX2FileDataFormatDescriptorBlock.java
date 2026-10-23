@@ -5,8 +5,8 @@ import java.util.*;
 public class KTX2FileDataFormatDescriptorBlock
 {
     
-    private short                                        vendorId;
-    private short                                        descriptorType;
+    private int                                          vendorId;
+    private int                                          descriptorType;
     private short                                        versionNumber;
     private short                                        descriptorBlockSize;
     private byte                                         colorModel;
@@ -25,24 +25,24 @@ public class KTX2FileDataFormatDescriptorBlock
     private byte                                          bytesPlane5;
     private byte                                          bytesPlane6;
     private byte                                          bytesPlane7;
-    private List<KTX2FileDataFormatDescriptorBlockSample> samples;
+    private List<KTX2FileDataFormatDescriptorBlockSample> samples = new ArrayList<>();
     
-    public short getVendorId()
+    public int getVendorId()
     {
         return vendorId;
     }
     
-    public void setVendorId(short vendorId)
+    public void setVendorId(int vendorId)
     {
         this.vendorId = vendorId;
     }
     
-    public short getDescriptorType()
+    public int getDescriptorType()
     {
         return descriptorType;
     }
     
-    public void setDescriptorType(short descriptorType)
+    public void setDescriptorType(int descriptorType)
     {
         this.descriptorType = descriptorType;
     }

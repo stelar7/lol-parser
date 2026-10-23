@@ -1,21 +1,25 @@
 package no.stelar7.cdragon.types.packagemanifest.data;
 
-public class PackagemanifestLine
+public final class PackagemanifestLine
 {
-    private String filePath;
-    private String containedInFile;
-    private int    containedOffset;
-    private int    fileSize;
-    private int    unknown;
+    private final String filePath;
+    private final String containedInFile;
+    private final int    containedOffset;
+    private final int    fileSize;
+    private final int    unknown;
+    
+    public PackagemanifestLine(String filePath, String containedInFile, int containedOffset, int fileSize, int unknown)
+    {
+        this.filePath = filePath;
+        this.containedInFile = containedInFile;
+        this.containedOffset = containedOffset;
+        this.fileSize = fileSize;
+        this.unknown = unknown;
+    }
     
     public String getFilePath()
     {
         return filePath;
-    }
-    
-    public void setFilePath(String filePath)
-    {
-        this.filePath = filePath;
     }
     
     public String getContainedInFile()
@@ -23,19 +27,9 @@ public class PackagemanifestLine
         return containedInFile;
     }
     
-    public void setContainedInFile(String containedInFile)
-    {
-        this.containedInFile = containedInFile;
-    }
-    
     public int getContainedOffset()
     {
         return containedOffset;
-    }
-    
-    public void setContainedOffset(int containedOffset)
-    {
-        this.containedOffset = containedOffset;
     }
     
     public int getFileSize()
@@ -43,19 +37,9 @@ public class PackagemanifestLine
         return fileSize;
     }
     
-    public void setFileSize(int fileSize)
-    {
-        this.fileSize = fileSize;
-    }
-    
     public int getUnknown()
     {
         return unknown;
-    }
-    
-    public void setUnknown(int unknown)
-    {
-        this.unknown = unknown;
     }
     
     @Override

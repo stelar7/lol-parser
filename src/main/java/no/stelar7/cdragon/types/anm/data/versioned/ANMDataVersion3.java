@@ -4,23 +4,27 @@ import no.stelar7.cdragon.types.anm.data.ANMBone;
 
 import java.util.*;
 
-public class ANMDataVersion3
+public final class ANMDataVersion3
 {
-    private int designerId;
-    private int boneCount;
-    private int frameCount;
-    private int fps;
+    private final int designerId;
+    private final int boneCount;
+    private final int frameCount;
+    private final int fps;
     
-    private List<ANMBone> bones = new ArrayList<>();
+    private final List<ANMBone> bones;
+    
+    public ANMDataVersion3(int designerId, int boneCount, int frameCount, int fps, List<ANMBone> bones)
+    {
+        this.designerId = designerId;
+        this.boneCount = boneCount;
+        this.frameCount = frameCount;
+        this.fps = fps;
+        this.bones = bones;
+    }
     
     public int getDesignerId()
     {
         return designerId;
-    }
-    
-    public void setDesignerId(int designerId)
-    {
-        this.designerId = designerId;
     }
     
     public int getBoneCount()
@@ -28,19 +32,9 @@ public class ANMDataVersion3
         return boneCount;
     }
     
-    public void setBoneCount(int boneCount)
-    {
-        this.boneCount = boneCount;
-    }
-    
     public int getFrameCount()
     {
         return frameCount;
-    }
-    
-    public void setFrameCount(int frameCount)
-    {
-        this.frameCount = frameCount;
     }
     
     public int getFps()
@@ -48,18 +42,8 @@ public class ANMDataVersion3
         return fps;
     }
     
-    public void setFps(int fps)
-    {
-        this.fps = fps;
-    }
-    
     public List<ANMBone> getBones()
     {
         return bones;
-    }
-    
-    public void setBones(List<ANMBone> bones)
-    {
-        this.bones = bones;
     }
 }

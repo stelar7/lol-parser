@@ -1,22 +1,26 @@
 package no.stelar7.cdragon.types.releasemanifest.data;
 
-public class ReleasemanifestHeader
+public final class ReleasemanifestHeader
 {
-    private String magic;
-    private int    type;
-    private int    entries;
-    private int    version;
-    private int    directoriesCount;
+    private final String magic;
+    private final int    type;
+    private final int    entries;
+    private final int    version;
+    private final int    directoriesCount;
     
+    public ReleasemanifestHeader(String magic, int type, int entries, int version)
+    {
+        this.magic = magic;
+        this.type = type;
+        this.entries = entries;
+        this.version = version;
+        // never read from the file
+        this.directoriesCount = 0;
+    }
     
     public String getMagic()
     {
         return magic;
-    }
-    
-    public void setMagic(String magic)
-    {
-        this.magic = magic;
     }
     
     public int getType()
@@ -24,19 +28,9 @@ public class ReleasemanifestHeader
         return type;
     }
     
-    public void setType(int type)
-    {
-        this.type = type;
-    }
-    
     public int getEntries()
     {
         return entries;
-    }
-    
-    public void setEntries(int entries)
-    {
-        this.entries = entries;
     }
     
     public int getVersion()
@@ -44,18 +38,8 @@ public class ReleasemanifestHeader
         return version;
     }
     
-    public void setVersion(int version)
-    {
-        this.version = version;
-    }
-    
     public int getDirectoriesCount()
     {
         return directoriesCount;
-    }
-    
-    public void setDirectoriesCount(int directoriesCount)
-    {
-        this.directoriesCount = directoriesCount;
     }
 }

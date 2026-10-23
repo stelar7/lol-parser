@@ -45,7 +45,6 @@ public final class UtilHandler
     private static Gson        gson;
     private static JsonParser  parser;
     private static Preferences preferences;
-    private static JSPrettier  jsPretty;
     
     public static Path CDRAGON_FOLDER = new File("C:\\cdragon").toPath();
     
@@ -497,24 +496,6 @@ public final class UtilHandler
         }
         
         return name;
-    }
-    
-    public static String beautifyJS(String input)
-    {
-        try
-        {
-            if (jsPretty == null)
-            {
-                jsPretty = new JSPrettier();
-            }
-            
-            //return jsPretty.beautify(input);
-            return input;
-        } catch (Exception e)
-        {
-            e.printStackTrace();
-            return input;
-        }
     }
     
     public static Predicate<Path> filetypePredicate(String type)

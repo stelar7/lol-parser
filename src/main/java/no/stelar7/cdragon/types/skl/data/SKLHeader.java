@@ -1,27 +1,23 @@
 package no.stelar7.cdragon.types.skl.data;
 
-public class SKLHeader
+public final class SKLHeader
 {
-    private String magic;
-    private int    version;
+    private final String magic;
+    private final int    version;
+    
+    public SKLHeader(String magic, int version)
+    {
+        this.magic = magic;
+        this.version = version;
+    }
     
     public String getMagic()
     {
         return magic;
     }
     
-    public void setMagic(String magic)
-    {
-        this.magic = magic;
-    }
-    
     public int getVersion()
     {
         return version;
-    }
-    
-    public void setVersion(int version)
-    {
-        this.version = version;
     }
 }

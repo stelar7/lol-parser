@@ -43,9 +43,12 @@ public enum BBQRuntimePlatform
         this.flag = flag;
     }
     
+    /**
+     * Returns null for platforms that are not in this list (newer Unity versions keep adding them)
+     */
     public static BBQRuntimePlatform from(int flag)
     {
-        return Arrays.stream(values()).filter(v -> v.flag == flag).findFirst().get();
+        return Arrays.stream(values()).filter(v -> v.flag == flag).findFirst().orElse(null);
     }
     
 }

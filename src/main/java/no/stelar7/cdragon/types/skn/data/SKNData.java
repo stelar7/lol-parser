@@ -2,24 +2,30 @@ package no.stelar7.cdragon.types.skn.data;
 
 import no.stelar7.cdragon.util.types.math.*;
 
-public class SKNData
+public final class SKNData
 {
-    private Vector3f position;
-    private Vector4b boneIndecies;
-    private Vector4f weight;
-    private Vector3f normals;
-    private Vector2f uv;
-    private Vector4f tangent;
-    private Vector4b color;
+    private final Vector3f position;
+    private final Vector4b boneIndecies;
+    private final Vector4f weight;
+    private final Vector3f normals;
+    private final Vector2f uv;
+    private final Vector4f tangent;
+    private final Vector4b color;
+    
+    public SKNData(Vector3f position, Vector4b boneIndecies, Vector4f weight, Vector3f normals, Vector2f uv, Vector4f tangent, Vector4b color)
+    {
+        this.position = position;
+        this.boneIndecies = boneIndecies;
+        this.weight = weight;
+        this.normals = normals;
+        this.uv = uv;
+        this.tangent = tangent;
+        this.color = color;
+    }
     
     public Vector3f getPosition()
     {
         return position;
-    }
-    
-    public void setTangent(Vector4f tangent)
-    {
-        this.tangent = tangent;
     }
     
     public Vector4b getColor()
@@ -27,19 +33,9 @@ public class SKNData
         return color;
     }
     
-    public void setColor(Vector4b color)
-    {
-        this.color = color;
-    }
-    
     public Vector4f getTangent()
     {
         return tangent;
-    }
-    
-    public void setPosition(Vector3f position)
-    {
-        this.position = position;
     }
     
     public Vector4b getBoneIndecies()
@@ -47,19 +43,9 @@ public class SKNData
         return boneIndecies;
     }
     
-    public void setBoneIndecies(Vector4b boneIndecies)
-    {
-        this.boneIndecies = boneIndecies;
-    }
-    
     public Vector4f getWeight()
     {
         return weight;
-    }
-    
-    public void setWeight(Vector4f weight)
-    {
-        this.weight = weight;
     }
     
     public Vector3f getNormals()
@@ -67,18 +53,8 @@ public class SKNData
         return normals;
     }
     
-    public void setNormals(Vector3f normals)
-    {
-        this.normals = normals;
-    }
-    
     public Vector2f getUv()
     {
         return uv;
-    }
-    
-    public void setUv(Vector2f uv)
-    {
-        this.uv = uv;
     }
 }

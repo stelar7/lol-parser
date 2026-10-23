@@ -2,15 +2,16 @@ package no.stelar7.cdragon.types.filemanifest;
 
 import java.util.*;
 
-public class ManifestContentFileV2
+public final class ManifestContentFileV2
 {
-    private final Map<String, List<String>> content = new HashMap<>();
+    private final Map<String, List<String>> content;
     
-    public void addItem(String header, String item)
+    /**
+     * @param content the items grouped by their header (an unmodifiable view of the map is kept, so it should not be modified afterwards)
+     */
+    public ManifestContentFileV2(Map<String, List<String>> content)
     {
-        List<String> data = content.getOrDefault(header, new ArrayList<>());
-        data.add(item);
-        content.put(header, data);
+        this.content = Collections.unmodifiableMap(content);
     }
     
     public int size()

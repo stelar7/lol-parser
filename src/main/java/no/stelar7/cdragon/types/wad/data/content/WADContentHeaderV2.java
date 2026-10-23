@@ -1,53 +1,45 @@
 package no.stelar7.cdragon.types.wad.data.content;
 
-public class WADContentHeaderV2 extends WADContentHeaderV1
+import no.stelar7.cdragon.types.wad.data.WADCompressionType;
+
+/**
+ * A WAD 2.x / 3.x table of contents entry. Immutable.
+ */
+public final class WADContentHeaderV2 extends WADContentHeaderV1
 {
-    private boolean duplicate;
-    private int   subChunkOffset;
-    private long    sha256;
-    
-    public WADContentHeaderV2(WADContentHeaderV1 header)
+    private final boolean duplicate;
+    private final int     subChunkOffset;
+    private final long    sha256;
+
+    public WADContentHeaderV2(String pathHash, long offset, long compressedFileSize, long fileSize, WADCompressionType compressionType, int subChunkCount, boolean duplicate, int subChunkOffset, long sha256)
     {
-        this.pathHash = header.pathHash;
-        this.offset = header.offset;
-        this.compressedFileSize = header.compressedFileSize;
-        this.fileSize = header.fileSize;
-        this.compressionType = header.compressionType;
-        this.subChunkCount = header.subChunkCount;
+        super(pathHash, offset, compressedFileSize, fileSize, compressionType, subChunkCount);
+        this.duplicate = duplicate;
+        this.subChunkOffset = subChunkOffset;
+        this.sha256 = sha256;
     }
-    
-    
+
+    /**
+     * Always false for 3.4, which reuses the byte for the subchunk index
+     */
     public boolean isDuplicate()
     {
         return duplicate;
     }
-    
-    public void setDuplicate(boolean duplicate)
-    {
-        this.duplicate = duplicate;
-    }
-    
-    
+
+    /**
+     * The 64-bit entry checksum (named sha256 for compatibility)
+     */
     public long getSha256()
     {
         return sha256;
     }
-    
-    public void setSha256(long sha256)
-    {
-        this.sha256 = sha256;
-    }
-    
+
     public int getSubChunkOffset()
     {
         return subChunkOffset;
     }
-    
-    public void setSubChunkOffset(int subChunkOffset)
-    {
-        this.subChunkOffset = subChunkOffset;
-    }
-    
+
     @Override
     public String toString()
     {

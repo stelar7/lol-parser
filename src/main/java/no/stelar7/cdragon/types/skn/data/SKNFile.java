@@ -6,39 +6,57 @@ import no.stelar7.cdragon.util.types.math.*;
 import java.text.*;
 import java.util.*;
 
-public class SKNFile
+public final class SKNFile
 {
-    private int   magic;
-    private short major;
-    private short minor;
-    private int   objectCount;
-    private int   indexCount;
-    private int   vertexCount;
-    private int   materialCount;
-    private int   vertexSize;
+    private final int   magic;
+    private final short major;
+    private final short minor;
+    private final int   objectCount;
+    private final int   indexCount;
+    private final int   vertexCount;
+    private final int   materialCount;
+    private final int   vertexSize;
     
-    private int    unknown;
-    private byte[] unknown2;
+    private final int    unknown;
+    private final byte[] unknown2;
     
-    private int vertexType;
+    private final int vertexType;
     
-    private Vector3f boundingBoxMin;
-    private Vector3f boundingBoxMax;
-    private Vector3f boundingSphereLocation;
-    private float    boundingSphereRadius;
+    private final Vector3f boundingBoxMin;
+    private final Vector3f boundingBoxMax;
+    private final Vector3f boundingSphereLocation;
+    private final float    boundingSphereRadius;
     
-    private List<Short>       indecies  = new ArrayList<>();
-    private List<SKNData>     vertices  = new ArrayList<>();
-    private List<SKNMaterial> materials = new ArrayList<>();
+    private final int[]             indecies;
+    private final List<SKNData>     vertices;
+    private final List<SKNMaterial> materials;
+    
+    public SKNFile(int magic, short major, short minor, int objectCount, int indexCount, int vertexCount, int vertexSize, int unknown, int vertexType, Vector3f boundingBoxMin, Vector3f boundingBoxMax, Vector3f boundingSphereLocation, float boundingSphereRadius, int[] indecies, List<SKNData> vertices, List<SKNMaterial> materials)
+    {
+        this.magic = magic;
+        this.major = major;
+        this.minor = minor;
+        this.objectCount = objectCount;
+        this.indexCount = indexCount;
+        this.vertexCount = vertexCount;
+        // never read from the file
+        this.materialCount = 0;
+        this.vertexSize = vertexSize;
+        this.unknown = unknown;
+        this.unknown2 = null;
+        this.vertexType = vertexType;
+        this.boundingBoxMin = boundingBoxMin;
+        this.boundingBoxMax = boundingBoxMax;
+        this.boundingSphereLocation = boundingSphereLocation;
+        this.boundingSphereRadius = boundingSphereRadius;
+        this.indecies = indecies;
+        this.vertices = vertices;
+        this.materials = materials;
+    }
     
     public int getVertexSize()
     {
         return vertexSize;
-    }
-    
-    public void setVertexSize(int vertexSize)
-    {
-        this.vertexSize = vertexSize;
     }
     
     public int getMagic()
@@ -46,19 +64,9 @@ public class SKNFile
         return magic;
     }
     
-    public void setMagic(int magic)
-    {
-        this.magic = magic;
-    }
-    
     public short getMajor()
     {
         return major;
-    }
-    
-    public void setMajor(short major)
-    {
-        this.major = major;
     }
     
     public short getMinor()
@@ -66,19 +74,9 @@ public class SKNFile
         return minor;
     }
     
-    public void setMinor(short minor)
-    {
-        this.minor = minor;
-    }
-    
     public int getObjectCount()
     {
         return objectCount;
-    }
-    
-    public void setObjectCount(int objectCount)
-    {
-        this.objectCount = objectCount;
     }
     
     public int getIndexCount()
@@ -86,19 +84,9 @@ public class SKNFile
         return indexCount;
     }
     
-    public void setIndexCount(int indexCount)
-    {
-        this.indexCount = indexCount;
-    }
-    
     public int getVertexCount()
     {
         return vertexCount;
-    }
-    
-    public void setVertexCount(int vertexCount)
-    {
-        this.vertexCount = vertexCount;
     }
     
     public int getMaterialCount()
@@ -106,19 +94,9 @@ public class SKNFile
         return materialCount;
     }
     
-    public void setMaterialCount(int materialCount)
-    {
-        this.materialCount = materialCount;
-    }
-    
     public int getUnknown()
     {
         return unknown;
-    }
-    
-    public void setUnknown(int unknown)
-    {
-        this.unknown = unknown;
     }
     
     public byte[] getUnknown2()
@@ -126,19 +104,9 @@ public class SKNFile
         return unknown2;
     }
     
-    public void setUnknown2(byte[] unknown2)
-    {
-        this.unknown2 = unknown2;
-    }
-    
     public Vector3f getBoundingBoxMin()
     {
         return boundingBoxMin;
-    }
-    
-    public void setBoundingBoxMin(Vector3f boundingBoxMin)
-    {
-        this.boundingBoxMin = boundingBoxMin;
     }
     
     public Vector3f getBoundingBoxMax()
@@ -146,19 +114,9 @@ public class SKNFile
         return boundingBoxMax;
     }
     
-    public void setBoundingBoxMax(Vector3f boundingBoxMax)
-    {
-        this.boundingBoxMax = boundingBoxMax;
-    }
-    
     public Vector3f getBoundingSphereLocation()
     {
         return boundingSphereLocation;
-    }
-    
-    public void setBoundingSphereLocation(Vector3f boundingSphereLocation)
-    {
-        this.boundingSphereLocation = boundingSphereLocation;
     }
     
     public float getBoundingSphereRadius()
@@ -166,29 +124,14 @@ public class SKNFile
         return boundingSphereRadius;
     }
     
-    public void setBoundingSphereRadius(float boundingSphereRadius)
-    {
-        this.boundingSphereRadius = boundingSphereRadius;
-    }
-    
     public int getVertexType()
     {
         return vertexType;
     }
     
-    public void setVertexType(int vertexType)
-    {
-        this.vertexType = vertexType;
-    }
-    
-    public List<Short> getIndecies()
+    public int[] getIndecies()
     {
         return indecies;
-    }
-    
-    public void setIndecies(List<Short> indecies)
-    {
-        this.indecies = indecies;
     }
     
     public List<SKNData> getVertices()
@@ -206,11 +149,6 @@ public class SKNFile
         return pos;
     }
     
-    public void setVertices(List<SKNData> vertices)
-    {
-        this.vertices = vertices;
-    }
-    
     public List<SKNMaterial> getMaterials()
     {
         return materials;
@@ -223,12 +161,7 @@ public class SKNFile
             return submesh.getVertices();
         }
         
-        return new ArrayList<>(vertices.subList(submesh.getStartVertex(), submesh.getNumVertex()));
-    }
-    
-    public void setMaterials(List<SKNMaterial> materials)
-    {
-        this.materials = materials;
+        return new ArrayList<>(vertices.subList(submesh.getStartVertex(), submesh.getStartVertex() + submesh.getNumVertex()));
     }
     
     public String toOBJ(SKNMaterial submesh)
@@ -244,18 +177,17 @@ public class SKNFile
             sb.append(String.format("v %s %s %s%n", df.format(pos.x), df.format(pos.y), df.format(pos.z)));
         }
         
-        for (SKNData vertex : vertices)
+        for (SKNData vertex : submesh.getVertices())
         {
             Vector2f pos = vertex.getUv();
             sb.append(String.format("vt %s %s%n", df.format(pos.x), df.format(pos.y)));
         }
         
-        for (SKNData vertex : vertices)
+        for (SKNData vertex : submesh.getVertices())
         {
             Vector3f pos = vertex.getNormals();
             sb.append(String.format("vn %s %s %s%n", df.format(pos.x), df.format(pos.y), df.format(pos.z)));
         }
-        
         
         for (int i = 0; i < indeciesList.size(); i += 3)
         {

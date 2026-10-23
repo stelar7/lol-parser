@@ -1,9 +1,8 @@
 package no.stelar7.cdragon.types.bin.data;
 
-import java.util.stream.Stream;
-
 public enum BINValueType
 {
+    // type 0 is NONE/EMPTY. CDTB reads it as 3 u16 (6 bytes), so it is kept as a "V3_SHORT"
     V3_SHORT(0),
     BOOLEAN(1),
     SIGNED_BYTE(2),
@@ -32,28 +31,60 @@ public enum BINValueType
     PAIR(25),
     BOOLEAN_FLAGS(26),
     ;
-    
+
     public int value;
-    
-    private static final int COMPLEX_FLAG = 128;
-    
-    
-    public static BINValueType valueOf(byte value)
+
+    private static final int            COMPLEX_FLAG = 0x80;
+    private static final BINValueType[] BY_VALUE;
+
+    static
     {
-        int   firstComplexType = CONTAINER.value;
-        int   check            = Byte.toUnsignedInt(value);
-        int[] use              = {check};
-        if ((check & COMPLEX_FLAG) == COMPLEX_FLAG)
+        BINValueType[] types = values();
+        BY_VALUE = new BINValueType[types.length];
+        for (BINValueType type : types)
         {
-            use[0] -= COMPLEX_FLAG;
-            use[0] += firstComplexType;
+            BY_VALUE[type.value] = type;
         }
-        
-        return Stream.of(values()).filter(t -> t.value == use[0]).findAny().orElseThrow(() -> new RuntimeException("Unknown Type: " + value));
     }
-    
+
     BINValueType(int value)
     {
         this.value = value;
+    }
+
+    /**
+     * Returns the type for the raw type byte in a bin file, or null if it is not a known type
+     */
+    public static BINValueType fromRaw(byte value)
+    {
+        int check = Byte.toUnsignedInt(value);
+        if ((check & COMPLEX_FLAG) == COMPLEX_FLAG)
+        {
+            check = check - COMPLEX_FLAG + CONTAINER.value;
+        }
+
+        return (check >= 0 && check < BY_VALUE.length) ? BY_VALUE[check] : null;
+    }
+
+    public static BINValueType valueOf(byte value)
+    {
+        BINValueType type = fromRaw(value);
+        if (type == null)
+        {
+            throw new IllegalArgumentException("Unknown Type: " + Byte.toUnsignedInt(value));
+        }
+        return type;
+    }
+
+    /**
+     * The byte used for this type in a bin file (complex types have the 0x80 flag set)
+     */
+    public byte toRaw()
+    {
+        if (value >= CONTAINER.value)
+        {
+            return (byte) (COMPLEX_FLAG + value - CONTAINER.value);
+        }
+        return (byte) value;
     }
 }
