@@ -11,8 +11,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- compile the tests, but don't run them as part of the build (they download and extract game data) -->
-        <skipTests>true</skipTests>
         <lwjgl.version>3.4.3</lwjgl.version>
     </properties>
 
@@ -64,7 +62,6 @@
             <groupId>com.github.luben</groupId>
             <artifactId>zstd-jni</artifactId>
             <version>1.5.7-24</version>
-            <classifier>win_amd64</classifier>
         </dependency>
 
         <!-- used to create powersets -->
@@ -172,11 +169,6 @@
 
     <repositories>
         <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-
-        <repository>
             <id>maven.nikr.net</id>
             <name>maven.nikr.net</name>
             <url>https://maven.nikr.net/</url>
@@ -186,6 +178,23 @@
 
 
     <profiles>
+        <!-- mvn test -Pdata also runs the tests that need downloaded game data (in the cdragon folder) or network access -->
+        <profile>
+            <id>data</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <includes combine.self="override">
+                                <include>**/*.java</include>
+                            </includes>
+                            <systemPropertyVariables combine.self="override"/>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
         <profile>
             <id>lwjgl-natives-linux</id>
             <activation>
@@ -230,18 +239,6 @@
                 <configuration>
                     <source>22</source>
                     <target>22</target>
-                    <compilerArgs>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED</arg>
-                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -272,6 +269,18 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.6.0</version>
+                <configuration>
+                    <!-- by default only run the self-contained tests, the rest need game data (see the data profile) -->
+                    <includes>
+                        <include>offline/*Test.java</include>
+                        <include>types/viewer/*.java</include>
+                        <include>types/filetypes/TestTextureDecoders.java</include>
+                        <include>no/stelar7/cdragon/**/*Test.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <cdragon.hashes.offline>true</cdragon.hashes.offline>
+                    </systemPropertyVariables>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>

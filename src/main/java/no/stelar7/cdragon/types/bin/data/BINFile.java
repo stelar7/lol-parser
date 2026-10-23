@@ -5,7 +5,7 @@ import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.math.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
@@ -100,7 +100,7 @@ public class BINFile
             Files.write(output, toBytes());
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -460,7 +460,7 @@ public class BINFile
                     obj.add("value", toJsonValue(entry.getType(), entry.getValue()));
                 } else
                 {
-                    obj.add("value", UtilHandler.getGson().toJsonTree(entry.getValue()));
+                    obj.add("value", JsonHandler.getGson().toJsonTree(entry.getValue()));
                 }
                 patchJson.add(obj);
             }
@@ -468,7 +468,7 @@ public class BINFile
             root.add("linkedBinFiles", links);
             root.add("patches", patchJson);
 
-            json = UtilHandler.getGson().toJson(root);
+            json = JsonHandler.getGson().toJson(root);
         }
 
         return json;
@@ -606,7 +606,7 @@ public class BINFile
                 return new JsonPrimitive(output + testHash);
             }
             default:
-                return UtilHandler.getGson().toJsonTree(data);
+                return JsonHandler.getGson().toJsonTree(data);
         }
     }
 

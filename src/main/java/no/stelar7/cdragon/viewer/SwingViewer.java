@@ -127,8 +127,7 @@ public class SwingViewer
                 int option = saveDialog.showSaveDialog(null);
                 if (option == JFileChooser.APPROVE_OPTION)
                 {
-                    String filePath  = saveDialog.getSelectedFile().toString();
-                    Path   parent    = Paths.get(filePath.substring(0, filePath.lastIndexOf("\\")));
+                    Path   parent    = saveDialog.getSelectedFile().toPath().getParent();
                     File[] fileSaves = saveDialog.getSelectedFiles();
                     for (File file : fileSaves)
                     {
@@ -326,7 +325,7 @@ public class SwingViewer
                 {
                     ByteArray bContent = data.getContent();
                     String    datum    = new BINParser().parse(bContent).toJson();
-                    byte[]    datb     = FileTypeHandler.makePrettyJson(datum.getBytes(StandardCharsets.UTF_8));
+                    byte[]    datb     = JsonHandler.makePrettyJson(datum.getBytes(StandardCharsets.UTF_8));
                     JTextArea label    = new JTextArea(new String(datb, StandardCharsets.UTF_8));
                     label.setEditable(false);
                     contentPane.setViewportView(label);

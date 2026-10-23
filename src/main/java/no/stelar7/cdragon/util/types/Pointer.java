@@ -3,7 +3,7 @@ package no.stelar7.cdragon.util.types;
 import com.sun.jna.Native;
 import com.sun.jna.platform.win32.Kernel32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.ByteHandler;
 
 import java.nio.*;
 
@@ -94,7 +94,7 @@ public class Pointer
             return loc.readString(size);
         }
         
-        byte[] content = UtilHandler.bytebufferToArray(buffer);
+        byte[] content = ByteHandler.bytebufferToArray(buffer);
         return new String(content, 0, size);
     }
     
@@ -105,7 +105,7 @@ public class Pointer
     
     public byte[] readArray(int bytes)
     {
-        return UtilHandler.bytebufferToArray(readBytes(bytes));
+        return ByteHandler.bytebufferToArray(readBytes(bytes));
     }
     
     public ByteBuffer readBytes(int byteCount)
@@ -155,7 +155,7 @@ public class Pointer
             return loc.readString(size);
         }
         
-        byte[] content = UtilHandler.bytebufferToArray(buffer);
+        byte[] content = ByteHandler.bytebufferToArray(buffer);
         return new String(content, 0, size);
     }
     
@@ -166,7 +166,7 @@ public class Pointer
     
     public byte[] readArray(long offset, int bytes)
     {
-        return UtilHandler.bytebufferToArray(readBytes(offset, bytes));
+        return ByteHandler.bytebufferToArray(readBytes(offset, bytes));
     }
     
     public ByteBuffer readBytes(long offset, int byteCount)

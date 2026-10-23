@@ -2,6 +2,7 @@ package no.stelar7.cdragon.types.rman.data;
 
 import com.github.luben.zstd.Zstd;
 import com.google.gson.*;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.util.handlers.*;
 
 import java.io.*;
@@ -83,10 +84,8 @@ public final class RMANFile
     
     public Set<RMANFileBodyBundle> getBundlesForFile(RMANFileBodyFile file)
     {
-        return file.getChunkIds()
-                   .stream()
-                   .map(getChunkMap()::get).toList()
-                   .stream()
+        return Arrays.stream(file.getChunkIdArray())
+                   .mapToObj(getChunkMap()::get)
                    .map(RMANFileBodyBundleChunkInfo::getBundleId)
                    .map(getBundleMap()::get)
                    .collect(Collectors.toSet());
@@ -137,7 +136,6 @@ public final class RMANFile
     
     public void extractFile(RMANFileBodyFile file, Path bundleFolder, Path outputFolder)
     {
-        System.out.println("Loading bundles needed for " + file.getName());
         Path outputName = outputFolder.resolve(file.getFullFilepath(this));
 
         // bundles are opened once each, and only the needed chunks are read from them
@@ -152,9 +150,10 @@ public final class RMANFile
 
         try (OutputStream fos = new BufferedOutputStream(Files.newOutputStream(outputName)))
         {
-            for (Long chunkId : file.getChunkIds())
+            for (int i = 0; i < file.getChunkCount(); i++)
             {
-                RMANFileBodyBundleChunkInfo chunk = getChunkMap().get(chunkId);
+                long                        chunkId = file.getChunkId(i);
+                RMANFileBodyBundleChunkInfo chunk   = getChunkMap().get(chunkId);
                 if (chunk == null)
                 {
                     throw new IllegalStateException("Chunk " + HashHandler.toHex(chunkId, 16) + " of " + file.getName() + " is not in any bundle");
@@ -201,8 +200,8 @@ public final class RMANFile
     
     public void downloadBundles(Collection<RMANFileBodyBundle> bundles, Path bundleFolder)
     {
-        AtomicInteger count = new AtomicInteger();
-        System.out.println("Downloading bundles");
+        AtomicInteger downloaded = new AtomicInteger();
+        ProgressBar   progress   = new ProgressBar("Downloading bundles", bundles.size());
         
         bundles.parallelStream().forEach(bundle -> {
             
@@ -210,28 +209,18 @@ public final class RMANFile
             Path   bundlePath = bundleFolder.resolve(bundleId + ".bundle");
             long   bundleSize = bundle.getChunks().stream().mapToLong(RMANFileBodyBundleChunk::getCompressedSize).sum();
             
-            int     current               = count.incrementAndGet();
-            boolean shouldPrintBundleInfo = current % 100 == 0 || current == bundles.size();
-            
-            
-            if (!WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
+            if (WebHandler.shouldDownloadBundle(bundleId, bundlePath, bundleSize))
             {
-                if (shouldPrintBundleInfo)
-                {
-                    System.out.println("Skipping bundle: " + bundleId + " (" + current + "/" + bundles.size() + ")");
-                }
-                
-                return;
+                bundlePath.toFile().delete();
+                WebHandler.downloadBundle(bundleId, bundlePath);
+                downloaded.incrementAndGet();
             }
             
-            if (shouldPrintBundleInfo)
-            {
-                System.out.println("Downloading bundle: " + bundleId + " (" + current + "/" + bundles.size() + ")");
-            }
-            
-            bundlePath.toFile().delete();
-            WebHandler.downloadBundle(bundleId, bundlePath);
+            progress.step();
         });
+        
+        progress.finish();
+        System.out.println("Downloaded " + downloaded.get() + " bundles, " + (bundles.size() - downloaded.get()) + " were already up to date");
     }
     
     
@@ -284,7 +273,7 @@ public final class RMANFile
         for (RMANFileBodyFile oldFile : oldM.getBody().getFiles())
         {
             RMANFileBodyFile newFile = newFiles.get(oldFile.getName().toLowerCase(Locale.ROOT));
-            if (newFile != null && oldFile.getChunkIds().equals(newFile.getChunkIds()))
+            if (newFile != null && oldFile.hasSameChunks(newFile))
             {
                 ignored.add(oldFile);
             }
@@ -301,7 +290,7 @@ public final class RMANFile
         for (RMANFileBodyFile oldFile : oldM.getBody().getFiles())
         {
             RMANFileBodyFile newFile = newFiles.get(oldFile.getName().toLowerCase(Locale.ROOT));
-            if (newFile == null || !oldFile.getChunkIds().equals(newFile.getChunkIds()))
+            if (newFile == null || !oldFile.hasSameChunks(newFile))
             {
                 ignored.add(oldFile);
             }

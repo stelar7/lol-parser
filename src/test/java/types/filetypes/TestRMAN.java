@@ -2,6 +2,7 @@ package types.filetypes;
 
 import no.stelar7.cdragon.types.rman.RMANParser;
 import no.stelar7.cdragon.types.rman.data.*;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.types.Pair;
 import org.junit.jupiter.api.Test;
@@ -59,23 +60,28 @@ public class TestRMAN
             // use one thread per core, and leave one free for the OS
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             
+            long        totalSize = files.stream().flatMap(m -> m.getBody().getFiles().stream()).mapToLong(RMANFileBodyFile::getFileSize).sum();
+            ProgressBar progress  = new ProgressBar("Extracting manifest files", totalSize, true);
+
             Set<Pair<Long, Function<Void, Void>>> extracts = new HashSet<>();
             files.forEach(manifest -> manifest.getBody()
                                               .getFiles()
                                               .forEach(f -> {
                                                   extracts.add(new Pair<>(f.getFileSize(), (v) -> {
                                                       manifest.extractFile(f, bundleFolder, fileFolder);
+                                                      progress.step(f.getFileSize());
                                                       return null;
                                                   }));
                                               }));
-            
+
             // extract content based on filesize (largest first)
             extracts.stream()
                     .sorted(Comparator.comparing(Pair::getA, Comparator.reverseOrder()))
                     .forEach(e -> service.submit(() -> e.getB().apply(null)));
-            
+
             service.shutdown();
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+            progress.finish();
         } else
         {
             System.out.println("This version is already merged, skipping merging step");

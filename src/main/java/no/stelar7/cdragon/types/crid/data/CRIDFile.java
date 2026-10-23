@@ -171,9 +171,15 @@ public class CRIDFile
         try
         {
             Files.createDirectories(extractPath);
+            Path root = extractPath.toAbsolutePath().normalize();
             for (Pair<String, byte[]> pair : getStreamData())
             {
-                Files.write(extractPath.resolve(pair.getA()), pair.getB());
+                Path target = root.resolve(pair.getA()).normalize();
+                if (!target.getParent().equals(root))
+                {
+                    throw new IllegalArgumentException("Stream name \"" + pair.getA() + "\" points outside " + root);
+                }
+                Files.write(target, pair.getB());
             }
 
             String baseName = getStreamData().stream()

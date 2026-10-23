@@ -11,6 +11,7 @@ import no.stelar7.cdragon.types.skn.data.SKNFile;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class TestWAD
 {
@@ -68,7 +69,7 @@ public class TestWAD
         
         downloadPBEAssets("");
         String       jsn  = String.join("\n", WebHandler.readWeb("http://ddragon.leagueoflegends.com/cdn/languages.json"));
-        List<String> data = UtilHandler.getGson().fromJson(jsn, new TypeToken<List<String>>() {}.getType());
+        List<String> data = JsonHandler.getGson().fromJson(jsn, new TypeToken<List<String>>() {}.getType());
         data.forEach(k -> {
             try
             {
@@ -316,15 +317,16 @@ public class TestWAD
         
         final ManifestContentParser dp = new ManifestContentParser();
         
-        Files.walk(extractPath)
-             .parallel()
-             .filter(a -> a.getFileName().toString().endsWith(".manifestv1"))
+        List<Path>  v1         = findFiles(extractPath, ".manifestv1");
+        ProgressBar progressV1 = new ProgressBar("Transforming manifestv1 files", v1.size());
+        v1.parallelStream()
              .forEach(file -> {
+                 progressV1.step();
                  try
                  {
                      Path               output  = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Collection<String> content = dp.parseV1(file).getItems();
-                     Files.writeString(output, UtilHandler.getGson().toJson(content));
+                     Files.writeString(output, JsonHandler.getGson().toJson(content));
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
@@ -333,15 +335,16 @@ public class TestWAD
                  }
              });
         
-        Files.walk(extractPath)
-             .parallel()
-             .filter(a -> a.getFileName().toString().endsWith(".manifestv2"))
+        List<Path>  v2         = findFiles(extractPath, ".manifestv2");
+        ProgressBar progressV2 = new ProgressBar("Transforming manifestv2 files", v2.size());
+        v2.parallelStream()
              .forEach(file -> {
+                 progressV2.step();
                  try
                  {
                      Path                      output  = file.resolveSibling(UtilHandler.pathToFilename(file) + ".json");
                      Map<String, List<String>> content = dp.parseV2(file).getItems();
-                     Files.writeString(output, UtilHandler.getGson().toJson(content));
+                     Files.writeString(output, JsonHandler.getGson().toJson(content));
                      //file.toFile().deleteOnExit();
                  } catch (IOException e)
                  {
@@ -411,10 +414,11 @@ public class TestWAD
     {
         System.out.println("Transforming bin files to json");
         
-        final BINParser bp = binHashCollector;
-        Files.walk(extractPath)
-             .filter(a -> a.getFileName().toString().endsWith(".bin"))
-             .forEach(file -> {
+        final BINParser   bp       = binHashCollector;
+        final List<Path>  bins     = findFiles(extractPath, ".bin");
+        final ProgressBar progress = new ProgressBar("Transforming bin files", bins.size());
+        bins.forEach(file -> {
+                 progress.step();
                  try
                  {
                      BINFile parsed = bp.tryParse(file);
@@ -464,7 +468,8 @@ public class TestWAD
             ExecutorService                       service  = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
             Set<Pair<Long, Function<Void, Void>>> extracts = new TreeSet<>(Comparator.comparingLong((ToLongFunction<Pair<Long, Function<Void, Void>>>) Pair::getA).reversed());
             
-            WADParser parser = new WADParser();
+            WADParser   parser   = new WADParser();
+            ProgressBar progress = new ProgressBar("Extracting WADs", sizeOfWads(from), true);
             Files.walk(from)
                  .filter(f -> !Files.isDirectory(f))
                  // .filter(f -> f.toString().contains("rcp-be-lol-game-data"))
@@ -482,6 +487,7 @@ public class TestWAD
                                  System.out.println("Extracting from " + filename);
                                  WADFile parsed = parser.parseReadOnly(file);
                                  parsed.extractFiles(to, parent);
+                                 progress.step(size);
                                  return null;
                              };
                              
@@ -494,6 +500,7 @@ public class TestWAD
                                  System.out.println("Extracting from " + filename);
                                  WADFile parsed = parser.parseCompressed(file);
                                  parsed.extractFiles(to, parent);
+                                 progress.step(size);
                                  return null;
                              };
                              
@@ -506,6 +513,7 @@ public class TestWAD
                                  System.out.println("Extracting from " + filename);
                                  WADFile parsed = parser.parseReadOnly(file);
                                  parsed.extractFiles(to.resolveSibling("mobile"), parent);
+                                 progress.step(size);
                                  return null;
                              };
                              
@@ -522,7 +530,8 @@ public class TestWAD
             extracts.forEach(e -> service.submit(() -> e.getB().apply(null)));
             service.shutdown();
             service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            
+            progress.finish();
+
         } catch (IOException | InterruptedException e)
         {
             e.printStackTrace();
@@ -578,19 +587,25 @@ public class TestWAD
     {
         System.out.println("Generating unknown files list");
         
-        WADParser parser     = new WADParser();
-        Path      outputPath = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
+        WADParser   parser     = new WADParser();
+        Path        outputPath = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
+        ProgressBar progress   = new ProgressBar("Scanning WADs for unknown files", countWads(from));
         outputPath.toFile().delete();
         Files.walkFileTree(from, new SimpleFileVisitor<>()
         {
             final List<String> ends = Arrays.asList(".wad", ".wad.client");
             final List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
-            
+
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
                 try
                 {
+                    if (isWad(file))
+                    {
+                        progress.step();
+                    }
+
                     if (Files.size(file) > Integer.MAX_VALUE)
                     {
                         System.out.println("Skipping " + file + " since its too large to parse");
@@ -624,7 +639,9 @@ public class TestWAD
                 return FileVisitResult.CONTINUE;
             }
         });
-        
+        progress.finish();
+
+        System.out.println("Sorting unknown files list");
         Path         output  = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
         List<String> content = new ArrayList<>();
         Files.readAllLines(output).stream()
@@ -641,5 +658,38 @@ public class TestWAD
                           .thenComparing((String a) -> a.substring(0, 16).toLowerCase())
                     );
         Files.write(outputPath, content, StandardCharsets.UTF_8);
+    }
+
+    private static boolean isWad(Path file)
+    {
+        String name = file.getFileName().toString();
+        return name.endsWith(".wad") || name.endsWith(".wad.client") || name.endsWith(".wad.compressed") || name.endsWith(".wad.client.compressed");
+    }
+
+    private static long countWads(Path from) throws IOException
+    {
+        try (Stream<Path> files = Files.walk(from))
+        {
+            return files.filter(Files::isRegularFile).filter(TestWAD::isWad).count();
+        }
+    }
+
+    private static long sizeOfWads(Path from) throws IOException
+    {
+        try (Stream<Path> files = Files.walk(from))
+        {
+            return files.filter(Files::isRegularFile)
+                        .filter(f -> isWad(f) || f.getFileName().toString().endsWith(".wad.mobile"))
+                        .mapToLong(f -> f.toFile().length())
+                        .sum();
+        }
+    }
+
+    private static List<Path> findFiles(Path from, String extension) throws IOException
+    {
+        try (Stream<Path> files = Files.walk(from))
+        {
+            return files.filter(a -> a.getFileName().toString().endsWith(extension)).collect(Collectors.toList());
+        }
     }
 }

@@ -5,7 +5,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 import org.apache.commons.compress.archivers.tar.*;
 import org.apache.commons.compress.utils.IOUtils;
@@ -191,7 +191,7 @@ public class TestExtractImages
     private void img_copyFilesToFolders()
     {
         Path                inputFile = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("filenames.json");
-        Map<String, String> files     = UtilHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
+        Map<String, String> files     = JsonHandler.getGson().fromJson(UtilHandler.readAsString(inputFile), new TypeToken<Map<String, String>>() {}.getType());
         Path                baseTo    = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("pretty");
         
         try
@@ -249,7 +249,7 @@ public class TestExtractImages
         }
         
         Path                possibleTech = UtilHandler.CDRAGON_FOLDER.resolve("images_out").resolve("rcp-fe-lol-loot\\unknown\\4c0ce4a49dbc214c.json");
-        Map<String, String> data         = UtilHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
+        Map<String, String> data         = JsonHandler.getGson().fromJson(UtilHandler.readAsString(possibleTech), new TypeToken<Map<String, String>>() {}.getType());
         return img_transmute(data.keySet());
     }
     

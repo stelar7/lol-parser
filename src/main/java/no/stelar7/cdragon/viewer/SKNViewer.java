@@ -53,9 +53,9 @@ public class SKNViewer extends Renderer
         {
             Files.deleteIfExists(UtilHandler.CDRAGON_FOLDER.resolve("gl.log"));
             
-            Path characterBase = assetRoot.resolve("data\\characters");
+            Path characterBase = assetRoot.resolve("data").resolve("characters");
             List<Path> skins = Files.walk(characterBase, FileVisitOption.FOLLOW_LINKS)
-                                    .filter(f -> f.toString().contains("\\skins\\"))
+                                    .filter(f -> f.getParent().getFileName().toString().equals("skins"))
                                     .filter(f -> f.toString().endsWith(".bin"))
                                     .collect(Collectors.toList());
             skins.stream().limit(5).map(p -> SkinData.createFromBin(assetRoot, p)).filter(Objects::nonNull).forEach(skinList::add);

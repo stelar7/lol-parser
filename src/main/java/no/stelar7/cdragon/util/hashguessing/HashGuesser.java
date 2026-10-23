@@ -1,14 +1,13 @@
 package no.stelar7.cdragon.util.hashguessing;
 
 import com.google.common.collect.Sets;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.types.wad.data.WADFile;
 import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.*;
 
 import java.io.*;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,9 +17,9 @@ import java.util.stream.*;
 
 public abstract class HashGuesser
 {
-    public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("lcu.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\lcu.json"));
-    public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("game.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\wad\\game.json"));
-    public static HashFile hashFileBIN  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("bin.json"), Paths.get("C:\\Dropbox\\Private\\workspace\\cdragon\\src\\main\\resources\\hashes\\bin\\binhash.json"));
+    public static HashFile hashFileLCU  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("lcu.json"), HashHandler.WAD_HASH_STORE.resolve("lcu.json"));
+    public static HashFile hashFileGAME = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("game.json"), HashHandler.WAD_HASH_STORE.resolve("game.json"));
+    public static HashFile hashFileBIN  = new HashFile(UtilHandler.CDRAGON_FOLDER.resolve("bin.json"), HashHandler.BIN_HASH_STORE);
     
     
     protected Set<String> REGIONS = new HashSet<>(Arrays.asList("global", "br", "cn", "eun", "eune", "euw", "garena2", "garena3", "id", "jp", "kr", "la", "la1", "la2",
@@ -101,34 +100,6 @@ public abstract class HashGuesser
         return this;
     }
     
-    public static Set<String> unknownFromExportWAD(Path unknownFile)
-    {
-        try
-        {
-            return Files.readAllLines(unknownFile).stream().map(a -> a.substring(0, 16)).collect(Collectors.toSet());
-            
-        } catch (IOException e)
-        {
-            System.err.println(e.getMessage());
-            System.out.println("Unable to load unknown hash file");
-        }
-        
-        return Collections.emptySet();
-    }
-    
-    public static Set<String> unknownFromExportBIN(Path unknownFile)
-    {
-        try
-        {
-            return new HashSet<>(Files.readAllLines(unknownFile));
-        } catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        
-        return Collections.emptySet();
-    }
-    
     public boolean didFindNewHash()
     {
         return foundNew;
@@ -204,7 +175,7 @@ public abstract class HashGuesser
             return noMoreHashes();
         }
 
-        String lowerCased = path.toLowerCase();
+        String lowerCased = path.toLowerCase(Locale.ROOT);
         if (lowerCased.isBlank())
         {
             return true;
@@ -248,7 +219,7 @@ public abstract class HashGuesser
         try
         {
             long hash = Long.parseUnsignedLong(line, 0, split, 16);
-            return checkHash(hash, path, path.toLowerCase());
+            return checkHash(hash, path, path.toLowerCase(Locale.ROOT));
         } catch (NumberFormatException e)
         {
             return check(path);
@@ -376,7 +347,8 @@ public abstract class HashGuesser
             total += (long) e.getValue().size() * dirsByRoot.getOrDefault(e.getKey(), Set.of()).size();
         }
         System.out.format("substitute basenames: %s roots, %s combinations%n", namesByRoot.size(), total);
-        
+
+        ProgressBar progress = new ProgressBar("Substitute basenames", total);
         for (Map.Entry<String, Set<String>> e : namesByRoot.entrySet())
         {
             Set<String> dirs = dirsByRoot.getOrDefault(e.getKey(), Set.of());
@@ -386,8 +358,10 @@ public abstract class HashGuesser
                 {
                     check(dir + "/" + name);
                 }
+                progress.step(dirs.size());
             }
         }
+        progress.finish();
     }
     
     /**
@@ -425,7 +399,8 @@ public abstract class HashGuesser
         System.out.format("substitute basenames words: %s formats, %s words%n", slots.size() * 2, words.size());
         
         // lazy view, the product is never materialized
-        Set<List<String>> product = Sets.cartesianProduct(Collections.nCopies(amount, words));
+        Set<List<String>> product  = Sets.cartesianProduct(Collections.nCopies(amount, words));
+        ProgressBar       progress = new ProgressBar("Substitute basename words", slots.size() * 2L);
         for (String sep : Arrays.asList("-", "_"))
         {
             for (Slot slot : slots)
@@ -434,8 +409,10 @@ public abstract class HashGuesser
                 {
                     check(slot.pre() + String.join(sep, p) + slot.post());
                 }
+                progress.step();
             }
         }
+        progress.finish();
     }
     
     public void addBasenameWord(Set<String> paths, Set<String> words)
@@ -459,14 +436,17 @@ public abstract class HashGuesser
         }
         
         System.out.format("add basename word: %s formats, %s words%n", slots.size(), words.size());
-        
+
+        ProgressBar progress = new ProgressBar("Add basename word", slots.size());
         for (Slot slot : slots)
         {
             for (String w : words)
             {
                 check(slot.pre() + w + slot.post());
             }
+            progress.step();
         }
+        progress.finish();
     }
     
     
@@ -480,6 +460,7 @@ public abstract class HashGuesser
         }
         
         System.out.format("double substitution: %s formats, %s words%n", slots.size() * 2, words.size());
+        ProgressBar progress = new ProgressBar("Double substitution", slots.size() * 2L);
         for (String sep : Arrays.asList("-", "_"))
         {
             for (Slot slot : slots)
@@ -492,8 +473,10 @@ public abstract class HashGuesser
                         check(pre + second + slot.post());
                     }
                 }
+                progress.step();
             }
         }
+        progress.finish();
     }
     
     public void substituteNumbers(Set<String> paths, int max, Optional<Integer> numbers)
@@ -513,13 +496,16 @@ public abstract class HashGuesser
         List<String> values = IntStream.rangeClosed(0, max).mapToObj(n -> String.format(fmt, n)).toList();
         
         System.out.format("substitute numbers: %s formats, nmax = %s%n", slots.size(), max);
+        ProgressBar progress = new ProgressBar("Substitute numbers", slots.size());
         for (Slot slot : slots)
         {
             for (String n : values)
             {
                 check(slot.pre() + n + slot.post());
             }
+            progress.step();
         }
+        progress.finish();
     }
     
     /**
@@ -546,12 +532,15 @@ public abstract class HashGuesser
 
         System.out.format("substitute extensions: %s paths, %s extensions%n", stems.size(), extensions.size());
 
+        ProgressBar progress = new ProgressBar("Substitute extensions", stems.size());
         stems.parallelStream().forEach(stem -> {
             for (String ext : extensions)
             {
                 check(stem + ext);
             }
+            progress.step();
         });
+        progress.finish();
     }
 
     /**
@@ -580,6 +569,7 @@ public abstract class HashGuesser
 
         System.out.format("%s: %s templates (from %s paths), %s replacements%n", name, templates.size(), paths.size(), replacements.size());
 
+        ProgressBar progress = new ProgressBar(name, templates.size());
         templates.parallelStream().forEach(parts -> {
             StringBuilder sb = new StringBuilder();
             for (String value : replacements)
@@ -592,7 +582,9 @@ public abstract class HashGuesser
                 }
                 check(sb.toString());
             }
+            progress.step();
         });
+        progress.finish();
     }
 
     /**
@@ -634,110 +626,6 @@ public abstract class HashGuesser
         return templates;
     }
 
-    /**
-     * The maintained hash lists from CommunityDragon
-     */
-    public static final String CDRAGON_HASH_URL = "https://raw.communitydragon.org/data/hashes/lol/";
-    /**
-     * Mirror of the same lists on GitHub, large lists are split into name.0, name.1, ...
-     */
-    public static final String GITHUB_HASH_URL  = "https://raw.githubusercontent.com/CommunityDragon/Data/master/hashes/lol/";
-
-    /**
-     * Streams a CommunityDragon hash list (eg. "hashes.game.txt") line by line into the consumer.
-     * Uses raw.communitydragon.org, falling back to the GitHub mirror (and its split parts) if that fails.
-     *
-     * @return false if the list could not be loaded from anywhere
-     */
-    public static boolean readCDragonHashList(String name, Consumer<String> consumer)
-    {
-        if (readWebLines(CDRAGON_HASH_URL + name, consumer))
-        {
-            return true;
-        }
-
-        System.out.println("Unable to load " + name + " from raw.communitydragon.org, trying GitHub");
-        if (readWebLines(GITHUB_HASH_URL + name, consumer))
-        {
-            return true;
-        }
-
-        boolean any = false;
-        for (int part = 0; readWebLines(GITHUB_HASH_URL + name + "." + part, consumer); part++)
-        {
-            any = true;
-        }
-
-        if (!any)
-        {
-            System.out.println("Unable to load hash list " + name);
-        }
-        return any;
-    }
-
-    /**
-     * Streams the lines of a text url without holding the whole file in memory (hashes.game.txt is >200MB)
-     *
-     * @return false if the url did not answer with 200
-     */
-    public static boolean readWebLines(String url, Consumer<String> consumer)
-    {
-        try
-        {
-            HttpURLConnection con = (HttpURLConnection) URI.create(url).toURL().openConnection();
-            con.setConnectTimeout(30_000);
-            con.setReadTimeout(120_000);
-            if (con.getResponseCode() != 200)
-            {
-                con.disconnect();
-                return false;
-            }
-
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8)))
-            {
-                String line;
-                while ((line = in.readLine()) != null)
-                {
-                    if (!line.isEmpty())
-                    {
-                        consumer.accept(line);
-                    }
-                }
-            }
-            return true;
-        } catch (IOException | IllegalArgumentException e)
-        {
-            System.err.println("Unable to read " + url + ": " + e.getMessage());
-            return false;
-        }
-    }
-    
-    public Set<Triplet<String, String, String>> getFilesAsText(WADFile wad)
-    {
-        Set<Triplet<String, String, String>> data = new HashSet<>();
-        
-        Set<String> exts = new HashSet<>(Arrays.asList("png", "jpg", "ttf", "webm", "ogg", "dds", "tga"));
-        for (WADContentHeaderV1 header : wad.getContentHeaders())
-        {
-            String unhashed = HashHandler.getWadHash(header.getPathHash());
-            if (!unhashed.equals(header.getPathHash()))
-            {
-                String ext = UtilHandler.getEnding(unhashed);
-                if (exts.contains(ext))
-                {
-                    continue;
-                }
-            }
-            
-            String ext     = UtilHandler.getEnding(unhashed);
-            String content = new String(wad.readContentFromHeaderData(header));
-            data.add(new Triplet<>(unhashed, ext, content));
-        }
-        
-        return data;
-    }
-    
-    
     public Set<String> buildWordlist(Set<String> paths)
     {
         Set<String> words   = new HashSet<>();
@@ -793,7 +681,7 @@ public abstract class HashGuesser
      */
     public boolean checkKnown(String test)
     {
-        String lowerCased = test.toLowerCase();
+        String lowerCased = test.toLowerCase(Locale.ROOT);
         if (lowerCased.isBlank())
         {
             return true;
@@ -819,13 +707,16 @@ public abstract class HashGuesser
         
         System.out.format("Guessing by existing words: %s prefixes, %s words, %s endings, up to %s words%n", prefixes.size(), words.size(), endings.size(), maxWords);
         
+        // progress is counted per first word, the deeper levels finish in between
+        ProgressBar progress = new ProgressBar("Guessing by existing words", (long) prefixes.size() * words.size());
         for (String prefix : prefixes)
         {
-            guessByExistingWords(prefix, words, endings, maxWords);
+            guessByExistingWords(prefix, words, endings, maxWords, progress);
         }
+        progress.finish();
     }
-    
-    private void guessByExistingWords(String current, Set<String> words, Set<String> endings, int wordsLeft)
+
+    private void guessByExistingWords(String current, Set<String> words, Set<String> endings, int wordsLeft, ProgressBar progress)
     {
         for (String word : words)
         {
@@ -834,15 +725,18 @@ public abstract class HashGuesser
             {
                 this.check(path + ending);
             }
-            
-            if (wordsLeft <= 1 || word.isEmpty())
+
+            if (wordsLeft > 1 && !word.isEmpty())
             {
-                continue;
+                for (String separator : WORD_SEPARATORS)
+                {
+                    guessByExistingWords(path + separator, words, endings, wordsLeft - 1, null);
+                }
             }
-            
-            for (String separator : WORD_SEPARATORS)
+
+            if (progress != null)
             {
-                guessByExistingWords(path + separator, words, endings, wordsLeft - 1);
+                progress.step();
             }
         }
     }

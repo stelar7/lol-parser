@@ -162,7 +162,7 @@ public class TestTFTData
             exportImages(inputFolder, outputFolder, outputSetMap, itemData);
         }
         
-        String template = UtilHandler.getGson().toJson(outputObject);
+        String template = JsonHandler.getGson().toJson(outputObject);
         
         Files.createDirectories(outputFolder.resolve("TFT"));
         Files.writeString(outputFolder.resolve("TFT").resolve("template_TFT.json"),
@@ -179,7 +179,7 @@ public class TestTFTData
                               TranslationConfig vals = descs.get(lang);
                               System.out.println("Generating files for " + lang);
                               
-                              Map<String, Object> output = UtilHandler.getGson().fromJson(template, Map.class);
+                              Map<String, Object> output = JsonHandler.getGson().fromJson(template, Map.class);
                               ((Map<String, Map<String, Object>>) output.get("sets")).forEach((k, v) -> {
                                   ((List<Map<String, Object>>) v.get("traits")).forEach(e -> {
                                       e.put("name", vals.get((String) e.get("name")));
@@ -206,7 +206,7 @@ public class TestTFTData
                                   v.put("desc", vals.get((String) v.get("desc")));
                               });
                               
-                              String alteredData = UtilHandler.getGson().toJson(output);
+                              String alteredData = JsonHandler.getGson().toJson(output);
                               Files.writeString(outputFolder.resolve("TFT").resolve(lang + "_TFT.json"),
                                                 alteredData,
                                                 StandardOpenOption.CREATE,

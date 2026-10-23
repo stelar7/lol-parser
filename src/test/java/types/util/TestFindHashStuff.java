@@ -60,7 +60,7 @@ public class TestFindHashStuff
         
         HashHandler.bruteForceHash(HashHandler::computeXXHash64AsLong,
                                    List.of(62979898981692412L),
-                                   Arrays.asList(Stream.concat(Arrays.stream(UtilHandler.CHARS), Arrays.stream(new String[]{"_"})).toArray(String[]::new)),
+                                   Arrays.asList(Stream.concat(Arrays.stream(WordHandler.CHARS), Arrays.stream(new String[]{"_"})).toArray(String[]::new)),
                                    "assets/esports/sponsoredbanners/secret/srx_banner_flags_",
                                    ".dds",
                                    "bruteforced.txt",

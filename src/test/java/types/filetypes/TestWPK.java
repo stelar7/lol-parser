@@ -5,7 +5,7 @@ import no.stelar7.cdragon.types.ogg.data.OGGStream;
 import no.stelar7.cdragon.types.wem.data.WEMFile;
 import no.stelar7.cdragon.types.wpk.WPKParser;
 import no.stelar7.cdragon.types.wpk.data.WPKFile;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -65,6 +65,6 @@ public class TestWPK
                 return FileVisitResult.CONTINUE;
             }
         });
-        Files.write(from.resolveSibling("wemfilenames"), UtilHandler.getGson().toJson(names).getBytes(StandardCharsets.UTF_8));
+        Files.write(from.resolveSibling("wemfilenames"), JsonHandler.getGson().toJson(names).getBytes(StandardCharsets.UTF_8));
     }
 }

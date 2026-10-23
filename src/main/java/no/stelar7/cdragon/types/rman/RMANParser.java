@@ -21,51 +21,83 @@ public class RMANParser implements Parseable<RMANFile>
         GAME, LCU
     }
     
+    private static Path manifestFolder()
+    {
+        return UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests");
+    }
+
+    /**
+     * Downloads the game or lcu manifest listed in a patcher json (pbe-pbe-win.json) into folder/game or folder/lcu, and parses it
+     */
+    private static RMANFile downloadManifest(JsonObject patcherJson, String version, RMANFileType type, Path folder)
+    {
+        String urlKey = type == RMANFileType.GAME ? "game_patch_url" : "client_patch_url";
+        String subdir = type == RMANFileType.GAME ? "game" : "lcu";
+
+        System.out.println("Downloading " + subdir + " manifest");
+        Path manifest = folder.resolve(subdir).resolve(version + ".rman");
+        WebHandler.downloadFile(manifest, patcherJson.get(urlKey).getAsString());
+
+        System.out.println("Parsing...");
+        return new RMANParser().parse(manifest);
+    }
+
+    /**
+     * Downloads the current PBE patcher json, and saves it as {version}.json in the manifest folder (unless it is already there)
+     */
+    private static JsonObject downloadPatcherJson() throws IOException
+    {
+        Path downloadPath = manifestFolder().resolve(UUID.randomUUID().toString());
+        Files.createDirectories(downloadPath.getParent());
+
+        System.out.println("Downloading patcher manifest");
+        //String patcherUrl = "https://ks-foundation.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+        //String patcherUrl = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[artifact_type_id]=lol-game-client&q[platform]=windows&q[published]=true";
+        String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
+        //String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/macpbe-pbe-mac.json";
+        WebHandler.downloadFile(downloadPath, patcherUrl);
+
+        String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
+        JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
+        int        version       = obj.get("version").getAsInt();
+        System.out.println("Found patch version " + version);
+
+        Path realPath = downloadPath.resolveSibling(version + ".json");
+        if (Files.exists(realPath))
+        {
+            System.out.println("Manifest already saved!");
+            Files.deleteIfExists(downloadPath);
+        } else
+        {
+            System.out.println("Saving file");
+            Files.move(downloadPath, realPath);
+        }
+
+        obj.addProperty("localsavepath", realPath.toString());
+        return obj;
+    }
+
     public static RMANFile loadFromCache(int version, RMANFileType type)
     {
         try
         {
-            Path downloadPath = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
-            Path realPath     = downloadPath.resolveSibling(version + ".json");
+            Path realPath = manifestFolder().resolve(version + ".json");
             if (!Files.exists(realPath))
             {
                 System.out.println("Manifest not in cache!!");
                 return null;
             }
-            
+
             String     patchManifest = String.join("\n", Files.readAllLines(realPath));
             JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
-            
-            Path usedManfest = null;
-            switch (type)
-            {
-                case GAME ->
-                {
-                    System.out.println("Downloading game manifest");
-                    String url = obj.get("game_patch_url").getAsString();
-                    usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
-                    WebHandler.downloadFile(usedManfest, url);
-                }
-                case LCU ->
-                {
-                    System.out.println("Downloading lcu manifest");
-                    String url = obj.get("client_patch_url").getAsString();
-                    usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
-                    WebHandler.downloadFile(usedManfest, url);
-                    
-                }
-            }
-            
-            System.out.println("Parsing...");
-            return new RMANParser().parse(usedManfest);
-            
+            return downloadManifest(obj, String.valueOf(version), type, manifestFolder());
         } catch (IOException e)
         {
             e.printStackTrace();
             return null;
         }
     }
-    
+
     public static Long getSieveVersion()
     {
         Pair<String, String> urls = getPBEManifestFromSieve();
@@ -83,13 +115,13 @@ public class RMANParser implements Parseable<RMANFile>
         String url     = gameData.getB();
         
         System.out.println("Downloading manifest " + version);
-        Path usedManfest = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests").resolve("sieve\\" + version + "-game.rman");
+        Path usedManfest = manifestFolder().resolve("sieve").resolve(version + "-game.rman");
         System.out.println(usedManfest);
         WebHandler.downloadFile(usedManfest, url);
         files.add(parser.parse(usedManfest));
         
         url = clientData;
-        usedManfest = UtilHandler.CDRAGON_FOLDER.resolve("cdragon").resolve("patcher").resolve("manifests").resolve("sieve\\" + version + "-client.rman");
+        usedManfest = manifestFolder().resolve("sieve").resolve(version + "-client.rman");
         System.out.println(usedManfest);
         WebHandler.downloadFile(usedManfest, url);
         files.add(parser.parse(usedManfest));
@@ -162,71 +194,21 @@ public class RMANParser implements Parseable<RMANFile>
     {
         try
         {
-            Path downloadPath = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
-            Files.createDirectories(downloadPath.getParent());
-            
-            System.out.println("Downloading patcher manifest");
-            //String patcherUrl = "https://ks-foundation.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-            //String patcherUrl = "https://sieve.services.riotcdn.net/api/v1/products/lol/version-sets/PBE1?q[artifact_type_id]=lol-game-client&q[platform]=windows&q[published]=true";
-            String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-            //String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/macpbe-pbe-mac.json";
-            WebHandler.downloadFile(downloadPath, patcherUrl);
-            
-            String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
-            JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
-            int        version       = obj.get("version").getAsInt();
-            System.out.println("Found patch version " + version);
-            
-            Path realPath = downloadPath.resolveSibling(version + ".json");
-            if (Files.exists(realPath))
-            {
-                System.out.println("Manifest already saved!");
-                Files.deleteIfExists(downloadPath);
-            } else
-            {
-                System.out.println("Saving file");
-                Files.move(downloadPath, realPath);
-            }
-            
-            obj.addProperty("localsavepath", realPath.toString());
-            return obj;
+            return downloadPatcherJson();
         } catch (IOException e)
         {
             e.printStackTrace();
         }
-        
+
         return null;
     }
-    
+
     public static RMANFile loadFromPBE(JsonObject obj, RMANFileType type)
     {
-        Path   downloadPath = Paths.get(obj.get("localsavepath").getAsString());
-        String version      = obj.get("version").getAsString();
-        
-        Path usedManfest = null;
-        switch (type)
-        {
-            case GAME ->
-            {
-                System.out.println("Downloading game manifest");
-                String url = obj.get("game_patch_url").getAsString();
-                usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
-                WebHandler.downloadFile(usedManfest, url);
-            }
-            case LCU ->
-            {
-                System.out.println("Downloading lcu manifest");
-                String url = obj.get("client_patch_url").getAsString();
-                usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
-                WebHandler.downloadFile(usedManfest, url);
-                
-            }
-        }
-        
-        System.out.println("Parsing...");
-        return new RMANParser().parse(usedManfest);
+        Path downloadPath = Paths.get(obj.get("localsavepath").getAsString());
+        return downloadManifest(obj, obj.get("version").getAsString(), type, downloadPath.getParent());
     }
-    
+
     /**
      * the files list on this object only contains the files that have changed between this and last patch
      */
@@ -234,49 +216,10 @@ public class RMANParser implements Parseable<RMANFile>
     {
         try
         {
-            Path downloadPath = UtilHandler.CDRAGON_FOLDER.resolve("cdragon\\patcher\\manifests").resolve(UUID.randomUUID().toString());
-            
-            System.out.println("Downloading patcher manifest");
-            String patcherUrl = "https://lol.dyn.riotcdn.net/channels/public/pbe-pbe-win.json";
-            WebHandler.downloadFile(downloadPath, patcherUrl);
-            
-            String     patchManifest = String.join("\n", Files.readAllLines(downloadPath));
-            JsonObject obj           = JsonParser.parseString(patchManifest).getAsJsonObject();
-            int        version       = obj.get("version").getAsInt();
-            System.out.println("Found patch version " + version);
-            
-            Path realPath = downloadPath.resolveSibling(version + ".json");
-            if (Files.exists(realPath))
-            {
-                System.out.println("Manifest already saved!");
-                Files.deleteIfExists(downloadPath);
-            } else
-            {
-                System.out.println("Saving file");
-                Files.move(downloadPath, realPath);
-            }
-            
-            Path usedManfest = null;
-            switch (type)
-            {
-                case GAME ->
-                {
-                    System.out.println("Downloading game manifest");
-                    String url = obj.get("game_patch_url").getAsString();
-                    usedManfest = downloadPath.resolveSibling("game\\" + version + ".rman");
-                    WebHandler.downloadFile(usedManfest, url);
-                }
-                case LCU ->
-                {
-                    System.out.println("Downloading lcu manifest");
-                    String url = obj.get("client_patch_url").getAsString();
-                    usedManfest = downloadPath.resolveSibling("lcu\\" + version + ".rman");
-                    WebHandler.downloadFile(usedManfest, url);
-                }
-            }
-            
-            System.out.println("Parsing...");
-            RMANFile newFile = new RMANParser().parse(usedManfest);
+            JsonObject obj     = downloadPatcherJson();
+            int        version = obj.get("version").getAsInt();
+
+            RMANFile newFile = downloadManifest(obj, String.valueOf(version), type, manifestFolder());
             RMANFile oldFile = RMANParser.loadFromCache(version - 1, type);
             if (oldFile != null)
             {
@@ -286,16 +229,16 @@ public class RMANParser implements Parseable<RMANFile>
                 newFile.getBody().getFiles().removeIf(nfif -> !changedIds.contains(nfif.getFileId()));
                 System.out.println();
             }
-            
+
             return newFile;
-            
+
         } catch (IOException e)
         {
             e.printStackTrace();
             return null;
         }
     }
-    
+
     public static RMANFile getFromURL(String url)
     {
         ByteArrayOutputStream stream = WebHandler.downloadFileToMemory(url);
@@ -319,13 +262,13 @@ public class RMANParser implements Parseable<RMANFile>
         }
 
         raf.seek(bodyOffset);
-        byte[] compressedBody = raf.readBytes(bodyLength);
+        byte[] compressedBody = raf.readBytesExact(bodyLength);
 
         // the signature follows the body
         byte[] signature = null;
         if (header.getSignatureType() != 0)
         {
-            signature = raf.readBytes(256);
+            signature = raf.readBytesExact(256);
         }
 
         RMANFile file = new RMANFile(header, parseCompressedBody(header, compressedBody), compressedBody, signature);
@@ -400,7 +343,7 @@ public class RMANParser implements Parseable<RMANFile>
         long       fileSize      = table.u64(RMANVTable.FILE_SIZE, 0);
         String     name          = table.string(RMANVTable.FILE_NAME, "");
         long       languageFlags = table.u64(RMANVTable.FILE_LANGUAGES, 0);
-        List<Long> chunkIds      = table.u64Vector(RMANVTable.FILE_CHUNKS);
+        long[]     chunkIds      = table.u64Vector(RMANVTable.FILE_CHUNKS);
         String     symlink       = table.string(RMANVTable.FILE_SYMLINK, "");
         int        permissions   = table.u8(RMANVTable.FILE_PERMISSIONS, 0);
 

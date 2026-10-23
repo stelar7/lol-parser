@@ -3,6 +3,8 @@ package no.stelar7.cdragon.util.hashguessing;
 import com.google.gson.JsonElement;
 import no.stelar7.cdragon.types.wad.WADParser;
 import no.stelar7.cdragon.types.wad.data.WADFile;
+import no.stelar7.cdragon.types.wad.data.content.WADContentHeaderV1;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.Triplet;
 
@@ -41,6 +43,32 @@ public class LCUHashGuesser extends HashGuesser
         return 16;
     }
     
+    private static Set<Triplet<String, String, String>> getFilesAsText(WADFile wad)
+    {
+        Set<Triplet<String, String, String>> data = new HashSet<>();
+        
+        Set<String> exts = new HashSet<>(Arrays.asList("png", "jpg", "ttf", "webm", "ogg", "dds", "tga"));
+        for (WADContentHeaderV1 header : wad.getContentHeaders())
+        {
+            String unhashed = HashHandler.getWadHash(header.getPathHash());
+            if (!unhashed.equals(header.getPathHash()))
+            {
+                String ext = UtilHandler.getEnding(unhashed);
+                if (exts.contains(ext))
+                {
+                    continue;
+                }
+            }
+            
+            String ext     = UtilHandler.getEnding(unhashed);
+            String content = new String(wad.readContentFromHeaderData(header));
+            data.add(new Triplet<>(unhashed, ext, content));
+        }
+        
+        return data;
+    }
+    
+    
     public Set<String> buildWordlist()
     {
         Pattern     reFilterPath = Pattern.compile("^plugins/rcp-be-lol-game-data/global/default/data/characters/|/[0-9a-f]{32}\\.");
@@ -70,7 +98,7 @@ public class LCUHashGuesser extends HashGuesser
     {
         Set<String> languages = new HashSet<>(this.LANGUAGES);
         languages.add("default");
-        Set<String> regionLang = UtilHandler.product("/", this.REGIONS, languages);
+        Set<String> regionLang = WordHandler.product("/", this.REGIONS, languages);
 
         // paths are plugins/<plugin>/<region>/<lang>/<rest>, most of them only differ by region/lang,
         // so collapse them to unique (prefix, rest) pairs before substituting
@@ -87,12 +115,15 @@ public class LCUHashGuesser extends HashGuesser
 
         System.out.format("Substitute region, and language: %s region/languages, %s templates (from %s hashes)%n", regionLang.size(), templates.size(), this.known.size());
 
+        ProgressBar progress = new ProgressBar("Substitute region, and language", templates.size());
         templates.parallelStream().forEach(t -> {
             for (String rl : regionLang)
             {
                 check(t.get(0) + rl + "/" + t.get(1));
             }
+            progress.step();
         });
+        progress.finish();
     }
 
     public void substitutePlugins()
@@ -108,6 +139,7 @@ public class LCUHashGuesser extends HashGuesser
 
         System.out.format("Substitute plugins: %s plugins, %s hashes%n", plugins.size(), pluginPaths.size());
 
+        ProgressBar progress = new ProgressBar("Substitute plugins", plugins.size());
         for (String p : plugins)
         {
             for (String value : pluginPaths)
@@ -115,10 +147,12 @@ public class LCUHashGuesser extends HashGuesser
                 String prefix  = value.substring(0, ordinalIndexOf(value, "/", 1) + 1);
                 String suffix  = value.substring(ordinalIndexOf(value, "/", 2) + 1);
                 String toCheck = prefix + p + "/" + suffix;
-                
+
                 check(toCheck);
             }
+            progress.step();
         }
+        progress.finish();
     }
     
     public void substituteBasenameWords(String plugin, String ext, Set<String> words, int amount)
@@ -199,7 +233,7 @@ public class LCUHashGuesser extends HashGuesser
             
             if (ext.equalsIgnoreCase("json"))
             {
-                jsonData = UtilHandler.getJsonParser().parse(content);
+                jsonData = JsonHandler.getJsonParser().parse(content);
             }
             
             if (jsonData != null)
@@ -332,9 +366,12 @@ public class LCUHashGuesser extends HashGuesser
     public void guessFromGameHashes()
     {
         // game textures are served by the client with the same path, converted to png/jpg
-        String base = "plugins/rcp-be-lol-game-data/global/default";
-        for (String path : HashGuesser.hashFileGAME.load(true).values())
+        String             base      = "plugins/rcp-be-lol-game-data/global/default";
+        Collection<String> gamePaths = HashGuesser.hashFileGAME.load(true).values();
+        ProgressBar        progress  = new ProgressBar("Guessing from game hashes", gamePaths.size());
+        for (String path : gamePaths)
         {
+            progress.step();
             String ext = UtilHandler.getEnding(path);
 
             if (ext.equals("dds") || ext.equals("tex"))
@@ -347,6 +384,7 @@ public class LCUHashGuesser extends HashGuesser
                 check(base + "/" + path);
             }
         }
+        progress.finish();
     }
     
     public void guessPatterns()
@@ -440,11 +478,13 @@ public class LCUHashGuesser extends HashGuesser
         
         // need a better regex for this :thinking:
         Pattern p = Pattern.compile("/(rcp-(?:fe|be)-.{1,40}\\.(?:css|js))\"");
-        
+
+        ProgressBar progress = new ProgressBar("Searching web files for assets", readMe.size());
         readMe.stream()
               .parallel()
               .map(UtilHandler::readAsString)
               .forEach(e -> {
+                  progress.step();
                   Matcher m = p.matcher(e);
                   while (m.find())
                   {
@@ -470,7 +510,7 @@ public class LCUHashGuesser extends HashGuesser
                               end++;
                           }
                     
-                          String toCheck = e.substring(start, end).toLowerCase();
+                          String toCheck = e.substring(start, end).toLowerCase(Locale.ROOT);
                           if (toCheck.contains("/"))
                           {
                               String prefix = "plugins/";
@@ -488,6 +528,7 @@ public class LCUHashGuesser extends HashGuesser
                       }
                   }
               });
+        progress.finish();
     }
     
     private final Predicate<String> isLCUHash = s -> s.startsWith("plugins/");
@@ -495,7 +536,7 @@ public class LCUHashGuesser extends HashGuesser
     public void pullCDTB()
     {
         System.out.println("Feching hashlists from CommunityDragon");
-        readCDragonHashList("hashes.lcu.txt", line -> {
+        HashLists.readCDragonHashList("hashes.lcu.txt", line -> {
             if (isLCUHash.test(line.substring(line.indexOf(' ') + 1)))
             {
                 checkPrehashed(line);
@@ -526,7 +567,8 @@ public class LCUHashGuesser extends HashGuesser
         }
 
         System.out.format("Grepping %s LCU wads%n", wadFiles.size());
-        WADParser parser = new WADParser();
+        WADParser   parser   = new WADParser();
+        ProgressBar progress = new ProgressBar("Grepping LCU wads", wadFiles.size());
         for (Path wadFile : wadFiles)
         {
             try
@@ -540,7 +582,9 @@ public class LCUHashGuesser extends HashGuesser
             {
                 System.err.println("Unable to grep " + wadFile + ": " + e.getMessage());
             }
+            progress.step();
         }
+        progress.finish();
     }
     
     public void guessSanitizerHashes()

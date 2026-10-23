@@ -138,6 +138,10 @@ public class BBQBlockStore
         if (data == null)
         {
             BBQBlockInfo info = blockList.get(index);
+            if (compressedStarts[index] + Integer.toUnsignedLong(info.getCompressedSize()) > raf.size())
+            {
+                throw new ParseException("Bundle block " + index + " is truncated", compressedStarts[index]);
+            }
             raf.seek(compressedStarts[index]);
             byte[] compressed = raf.readBytes(Integer.toUnsignedLong(info.getCompressedSize()));
             if (compressed.length != info.getCompressedSize())

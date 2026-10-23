@@ -2,6 +2,8 @@ package no.stelar7.cdragon.util.hashguessing;
 
 import com.google.gson.*;
 import no.stelar7.cdragon.types.bin.BINParser;
+import no.stelar7.cdragon.types.bin.data.BINFile;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.types.filemanifest.*;
 import no.stelar7.cdragon.util.handlers.*;
 
@@ -77,7 +79,9 @@ public class GameHashGuesser extends HashGuesser
         List<String> paths = new ArrayList<>(this.known.values());
         System.out.format("Substitute sibling extensions: %s paths%n", paths.size());
 
+        ProgressBar progress = new ProgressBar("Substitute sibling extensions", paths.size());
         paths.parallelStream().forEach(raw -> {
+            progress.step();
             String path = raw.toLowerCase(Locale.ENGLISH);
             for (Map.Entry<String, List<String>> e : SIBLING_ENDINGS.entrySet())
             {
@@ -91,6 +95,7 @@ public class GameHashGuesser extends HashGuesser
                 }
             }
         });
+        progress.finish();
     }
 
     // content hashed names, shaders (guessShaderFiles covers them) and skin paths (substituteSkinNumbers covers them)
@@ -119,9 +124,24 @@ public class GameHashGuesser extends HashGuesser
         System.out.println("Guessing bin files by linked file names");
         try
         {
-            System.out.println("Parsing bin files...");
-            BINParser parser = new BINParser();
-            Files.walk(pbe).parallel().filter(UtilHandler.IS_BIN_PREDICATE).map(p -> BINHashGuesser.parseOrSkip(parser, p)).filter(Objects::nonNull).flatMap(b -> b.getLinkedFiles().stream()).forEach(this::check);
+            BINParser  parser = new BINParser();
+            List<Path> bins;
+            try (Stream<Path> files = Files.walk(pbe))
+            {
+                bins = files.filter(UtilHandler.IS_BIN_PREDICATE).toList();
+            }
+
+            ProgressBar progress = new ProgressBar("Parsing bin files for linked files", bins.size());
+            bins.parallelStream()
+                .map(p -> {
+                    BINFile parsed = BINHashGuesser.parseOrSkip(parser, p);
+                    progress.step();
+                    return parsed;
+                })
+                .filter(Objects::nonNull)
+                .flatMap(b -> b.getLinkedFiles().stream())
+                .forEach(this::check);
+            progress.finish();
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -136,11 +156,13 @@ public class GameHashGuesser extends HashGuesser
         // use one thread per core, and leave one free for the OS
         ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() - 1);
         
-        List<Path> files = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
-        Pattern    p     = Pattern.compile("(/.*?/).*?\\..*\"");
-        
+        List<Path>  files    = UtilHandler.getFilesMatchingPredicate(pbe, UtilHandler.IS_JSON_PREDICATE);
+        Pattern     p        = Pattern.compile("(/.*?/).*?\\..*\"");
+        ProgressBar progress = new ProgressBar("Searching json files for assets", files.size());
+
         // read inside the task so file contents are not all held in memory while queued
         files.forEach(file -> service.execute(() -> {
+                 progress.step();
                  String  e = UtilHandler.readAsString(file);
                  Matcher m = p.matcher(e);
                  while (m.find())
@@ -167,7 +189,7 @@ public class GameHashGuesser extends HashGuesser
                              end++;
                          }
                          
-                         String toCheck = e.substring(start, end).toLowerCase();
+                         String toCheck = e.substring(start, end).toLowerCase(Locale.ROOT);
                          this.check(toCheck);
                      }
                  }
@@ -175,6 +197,7 @@ public class GameHashGuesser extends HashGuesser
         
         service.shutdown();
         service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        progress.finish();
     }
     
     private final Predicate<String> isGameHash = s -> !s.startsWith("plugins/");
@@ -183,7 +206,7 @@ public class GameHashGuesser extends HashGuesser
     {
         System.out.println("Feching hashlists from CommunityDragon");
         // streamed, the file is >200MB
-        readCDragonHashList("hashes.game.txt", line -> {
+        HashLists.readCDragonHashList("hashes.game.txt", line -> {
             if (isGameHash.test(line.substring(line.indexOf(' ') + 1)))
             {
                 checkPrehashed(line);
@@ -218,14 +241,21 @@ public class GameHashGuesser extends HashGuesser
             Optional<Path> manifest = Files.find(dataPath, 100, (path, attr) -> path.toString().contains("shaderdefines.json")).findFirst();
             if (manifest.isPresent())
             {
-                JsonObject shaders  = UtilHandler.getJsonParser().parse(Files.readString(manifest.get())).getAsJsonObject().getAsJsonObject("shaders");
+                JsonObject shaders  = JsonHandler.getJsonParser().parse(Files.readString(manifest.get())).getAsJsonObject().getAsJsonObject("shaders");
                 JsonArray  sections = shaders.getAsJsonArray("sections");
-                
+
+                long fileCount = 0;
+                for (JsonElement sectionEle : sections)
+                {
+                    fileCount += ((JsonObject) sectionEle).getAsJsonArray("files").size();
+                }
+
+                ProgressBar progress = new ProgressBar("Guessing shaders from shaderdefines", fileCount);
                 for (JsonElement sectionEle : sections)
                 {
                     JsonObject section = (JsonObject) sectionEle;
                     JsonArray  files   = section.getAsJsonArray("files");
-                    
+
                     for (JsonElement fileEle : files)
                     {
                         for (String suffix : suffixes)
@@ -236,8 +266,10 @@ public class GameHashGuesser extends HashGuesser
                                 check(toCheck);
                             }
                         }
+                        progress.step();
                     }
                 }
+                progress.finish();
             }
             
             Function<JsonElement, String>      getFirstChildKey     = obj -> obj.getAsJsonObject().keySet().toArray(String[]::new)[0];
@@ -252,15 +284,17 @@ public class GameHashGuesser extends HashGuesser
             
             Stream.of(".ps_2_0.dx9_", ".vs_2_0.dx9_", ".ps_2_0.dx11_", ".vs_2_0.dx11_", ".ps_2_0.glsl_", ".vs_2_0.glsl_", ".ps_2_0.metal_", ".vs_2_0.metal_").forEach(s -> IntStream.rangeClosed(0, 100_000).filter(i -> i % 100 == 0).forEach(i -> suffixes.add(s + i)));
             
-            Path shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("pbe\\data\\shaders\\shaders.json");
+            Path shaderJson = UtilHandler.CDRAGON_FOLDER.resolve("pbe").resolve("data").resolve("shaders").resolve("shaders.json");
             if (!Files.exists(shaderJson))
             {
                 return;
             }
             
-            JsonArray shaderObj = JsonParser.parseString(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
+            JsonArray   shaderObj = JsonParser.parseString(Files.readString(shaderJson)).getAsJsonObject().getAsJsonArray("CustomShaderDef");
+            ProgressBar progress  = new ProgressBar("Guessing shaders from shaders.json", shaderObj.size());
             for (JsonElement elem : shaderObj)
             {
+                progress.step();
                 JsonObject obj     = (JsonObject) elem;
                 JsonObject realObj = getFirstChildObject.apply(obj);
                 String     name    = realObj.get("objectPath").getAsString();
@@ -273,9 +307,10 @@ public class GameHashGuesser extends HashGuesser
                         check(toCheck);
                     }
                 }
-                
+
             }
-            
+            progress.finish();
+
         } catch (IOException e)
         {
             e.printStackTrace();

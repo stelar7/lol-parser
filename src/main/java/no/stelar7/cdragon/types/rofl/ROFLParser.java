@@ -4,7 +4,7 @@ import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.interfaces.Parseable;
 import no.stelar7.cdragon.types.rofl.data.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.JsonHandler;
 import no.stelar7.cdragon.util.readers.*;
 
 import java.lang.reflect.Type;
@@ -311,27 +311,28 @@ public class ROFLParser implements Parseable<ROFLFile>
         }
 
         ROFLMetadata metadata = new ROFLMetadata();
+        String       rawStats;
         try
         {
             metadata.setGameLength(getLong(object, "gameLength"));
             metadata.setGameVersion(object.has("gameVersion") && !object.get("gameVersion").isJsonNull() ? object.get("gameVersion").getAsString() : null);
             metadata.setLastGameChunkId((int) getLong(object, "lastGameChunkId"));
             metadata.setLastKeyframeId((int) getLong(object, "lastKeyFrameId"));
+            rawStats = object.has("statsJson") && !object.get("statsJson").isJsonNull() ? object.get("statsJson").getAsString() : null;
         } catch (RuntimeException e)
         {
             throw new ParseException("Invalid ROFL metadata field: " + e.getMessage(), offset, e);
         }
 
-        if (object.has("statsJson") && !object.get("statsJson").isJsonNull())
+        if (rawStats != null)
         {
-            String rawStats = object.get("statsJson").getAsString();
             metadata.setRawStatsJson(rawStats);
 
             try
             {
                 JsonElement             stats     = JsonParser.parseString(rawStats);
                 Type                    statsType = new TypeToken<List<ROFLMetadataStats>>() {}.getType();
-                List<ROFLMetadataStats> statList  = UtilHandler.getGson().fromJson(stats, statsType);
+                List<ROFLMetadataStats> statList  = JsonHandler.getGson().fromJson(stats, statsType);
                 metadata.setStatsJson(statList);
             } catch (RuntimeException e)
             {

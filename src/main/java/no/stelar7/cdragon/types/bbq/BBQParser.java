@@ -64,13 +64,32 @@ public class BBQParser implements Parseable<BBQFile>
         raf.setEndian(ByteOrder.BIG_ENDIAN);
         raf.seek(0);
 
-        BBQFile        file   = new BBQFile();
-        BBQHeader      header = parseHeader(raf);
-        List<BBQAsset> assets = usesFSLayout(header) ? parseEntryList(raf, header) : parseWebRaw(raf, header);
+        try
+        {
+            BBQFile        file   = new BBQFile();
+            BBQHeader      header = parseHeader(raf);
+            List<BBQAsset> assets = usesFSLayout(header) ? parseEntryList(raf, header) : parseWebRaw(raf, header);
 
-        file.setHeader(header);
-        file.setEntries(assets);
-        return file;
+            file.setHeader(header);
+            file.setEntries(assets);
+            return file;
+        } catch (IndexOutOfBoundsException e)
+        {
+            throw new ParseException("Unexpected end of bundle data", raf.pos(), e);
+        }
+    }
+
+    /**
+     * Reads an entry count and checks that that many entries (of at least minEntrySize bytes) fit in the rest of the data
+     */
+    private static int readCount(RandomAccessReader raf, int minEntrySize)
+    {
+        int count = raf.readInt();
+        if (count < 0 || (long) count * minEntrySize > raf.remaining())
+        {
+            throw new ParseException("Invalid entry count " + count + " (" + raf.remaining() + " bytes left)", raf.pos() - 4);
+        }
+        return count;
     }
 
     private static void align16(RandomAccessReader raf)
@@ -108,7 +127,7 @@ public class BBQParser implements Parseable<BBQFile>
         RandomAccessReader metaReader = new RandomAccessReader(data, ByteOrder.BIG_ENDIAN);
         byte[]             guid       = metaReader.readBytes(16);
 
-        int                blocks    = metaReader.readInt();
+        int                blocks    = readCount(metaReader, header.getFormatVersion() >= 9 ? 18 : 10);
         List<BBQBlockInfo> blockList = new ArrayList<>(blocks);
         for (int i = 0; i < blocks; i++)
         {
@@ -123,7 +142,7 @@ public class BBQParser implements Parseable<BBQFile>
             blockList.add(block);
         }
 
-        int                  nodeCount = metaReader.readInt();
+        int                  nodeCount = readCount(metaReader, 8 + 8 + 4 + 1);
         List<BBQBundleEntry> nodes     = new ArrayList<>(nodeCount);
         for (int i = 0; i < nodeCount; i++)
         {
@@ -254,8 +273,8 @@ public class BBQParser implements Parseable<BBQFile>
         header.setCompressionMode(header.isWEB() ? BBQCompressionType.LZMA : BBQCompressionType.NONE);
 
         RandomAccessReader   reader    = new RandomAccessReader(data, ByteOrder.BIG_ENDIAN);
-        int                  nodeCount = reader.readInt();
-        List<BBQBundleEntry> nodes     = new ArrayList<>(Math.max(0, nodeCount));
+        int                  nodeCount = readCount(reader, 1 + 4 + 4);
+        List<BBQBundleEntry> nodes     = new ArrayList<>(nodeCount);
         for (int i = 0; i < nodeCount; i++)
         {
             BBQBundleEntry entry = new BBQBundleEntry();

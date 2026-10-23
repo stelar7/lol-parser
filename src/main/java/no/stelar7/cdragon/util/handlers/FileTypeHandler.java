@@ -1,6 +1,5 @@
 package no.stelar7.cdragon.util.handlers;
 
-import com.google.gson.*;
 import no.stelar7.cdragon.types.atlas.AtlasParser;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.filemanifest.ManifestContentParser;
@@ -34,14 +33,15 @@ public final class FileTypeHandler
             return "empty";
         }
         
-        if (FileTypeHandler.isProbableBOM(magic))
+        int bomLength = TextTypeHandler.getBOMLength(magic);
+        if (bomLength > 0)
         {
-            return findFileType(magic.copyOfRange(3));
+            return findFileType(magic.copyOfRange(bomLength));
         }
         
         if (!(magic.getDataRaw().length > 3))
         {
-            if (isProbableJSON(magic))
+            if (TextTypeHandler.isProbableJSON(magic))
             {
                 return "json";
             }
@@ -54,17 +54,17 @@ public final class FileTypeHandler
             return "sfd";
         }
         
-        if (FileTypeHandler.isProbableJavascript(magic))
+        if (TextTypeHandler.isProbableJavascript(magic))
         {
             return "js";
         }
         
-        if (FileTypeHandler.isProbableHTML(magic))
+        if (TextTypeHandler.isProbableHTML(magic))
         {
             return "html";
         }
         
-        if (FileTypeHandler.isProbableCSS(magic))
+        if (TextTypeHandler.isProbableCSS(magic))
         {
             return "css";
         }
@@ -140,8 +140,7 @@ public final class FileTypeHandler
         
         if (FileTypeHandler.isProbableRST(magic))
         {
-            // files are saved as txt, but should be rst?
-            return "txt|rst";
+            return "rst";
         }
         
         if (FileTypeHandler.isProbableMTLB(magic))
@@ -186,7 +185,7 @@ public final class FileTypeHandler
             return "troybin";
         }
         
-        if (FileTypeHandler.isProbableJSON(magic))
+        if (TextTypeHandler.isProbableJSON(magic))
         {
             return "json";
         }
@@ -230,7 +229,7 @@ public final class FileTypeHandler
             return "tex";
         }
         
-        if (FileTypeHandler.isProbableTXT(magic))
+        if (TextTypeHandler.isProbableTXT(magic))
         {
             return "txt";
         }
@@ -300,35 +299,9 @@ public final class FileTypeHandler
         return magic.startsWith(new ByteArray(new byte[]{(byte) 0x54, (byte) 0x45, (byte) 0x58, (byte) 0x00}));
     }
     
-    public static byte[] makePrettyJson(byte[] jsonString)
-    {
-        StringBuilder sb = new StringBuilder(new String(jsonString, StandardCharsets.UTF_8));
-        String        dataString;
-        
-        String rev = sb.reverse().toString().replaceAll("\n", "");
-        if (rev.charAt(1) == ',')
-        {
-            dataString = new StringBuilder(rev).replace(1, 2, "").reverse().toString();
-        } else
-        {
-            sb.reverse();
-            dataString = sb.toString();
-        }
-        
-        try
-        {
-            JsonElement obj    = JsonParser.parseString(dataString);
-            String      pretty = UtilHandler.getGson().toJson(obj);
-            return pretty.getBytes(StandardCharsets.UTF_8);
-        } catch (JsonSyntaxException e)
-        {
-            return jsonString;
-        }
-    }
-    
     private static Map<ByteArray, String> magicNumbers = new HashMap<>();
     
-    public static Map<ByteArray, String> getMagicNumbers()
+    public static synchronized Map<ByteArray, String> getMagicNumbers()
     {
         if (magicNumbers.isEmpty())
         {
@@ -425,15 +398,6 @@ public final class FileTypeHandler
         return isSame(data[0], (byte) 0x28) && isSame(data[1], (byte) 0xB5) && isSame(data[2], (byte) 0x2F) && isSame(data[3], (byte) 0xFD);
     }
     
-    public static boolean isProbableBOM(ByteArray wrapper)
-    {
-        byte[]  data       = wrapper.getDataRaw();
-        boolean isUTF8BOM  = isSame(data[0], (byte) 0xEF) && isSame(data[1], (byte) 0xBB) && isSame(data[2], (byte) 0xBF);
-        boolean isUTF16BOM = isSame(data[0], (byte) 0xFE) && isSame(data[1], (byte) 0xFF);
-        boolean isUTF32BOM = isSame(data[0], (byte) 0x00) && isSame(data[1], (byte) 0x00) && isSame(data[2], (byte) 0xFE) && isSame(data[3], (byte) 0xFF);
-        
-        return isUTF8BOM || isUTF16BOM || isUTF32BOM;
-    }
     //</editor-fold>
     
     
@@ -484,172 +448,6 @@ public final class FileTypeHandler
                 magic.indexMatch(3, (byte) 0x00));
     }
     
-    public static boolean isProbableJSON(ByteArray wrapper)
-    {
-        boolean startsWithJson                    = (wrapper.indexMatch(0, (byte) 0x7B) || wrapper.indexMatch(0, (byte) 0x5B));
-        boolean endsWithJson                      = (wrapper.indexMatch(wrapper.size() - 1, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 1, (byte) 0x5D));
-        boolean endsWithJsonMinusLinefeed         = (wrapper.indexMatch(wrapper.size() - 2, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 2, (byte) 0x5D));
-        boolean endsWithJsonMinusLinefeedAndBreak = (wrapper.indexMatch(wrapper.size() - 3, (byte) 0x7D) || wrapper.indexMatch(wrapper.size() - 3, (byte) 0x5D));
-        
-        return startsWithJson && (endsWithJson || endsWithJsonMinusLinefeed || endsWithJsonMinusLinefeedAndBreak);
-    }
-    
-    public static boolean isProbableCSS(ByteArray wrapper)
-    {
-        byte[]  data  = wrapper.getDataRaw();
-        boolean isCSS = isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x62) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6F);
-        
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x70) && isSame(data[2], (byte) 0x6C) && isSame(data[3], (byte) 0x6E);
-        isCSS |= isSame(data[0], (byte) 0x62) && isSame(data[1], (byte) 0x6F) && isSame(data[2], (byte) 0x64) && isSame(data[3], (byte) 0x79);
-        isCSS |= isSame(data[0], (byte) 0x2F) && isSame(data[1], (byte) 0x2A) && isSame(data[2], (byte) 0x40) && isSame(data[3], (byte) 0x69);
-        isCSS |= isSame(data[0], (byte) 0x73) && isSame(data[1], (byte) 0x70) && isSame(data[2], (byte) 0x61) && isSame(data[3], (byte) 0x6E);
-        isCSS |= isSame(data[0], (byte) 0x40) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x6D) && isSame(data[3], (byte) 0x70);
-        isCSS |= isSame(data[0], (byte) 0x2F) && isSame(data[1], (byte) 0x2A) && isSame(data[2], (byte) 0x20) && isSame(data[3], (byte) 0x53);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x68) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6E);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x6C) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x79);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x63) && isSame(data[2], (byte) 0x68) && isSame(data[3], (byte) 0x65);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x70);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x75) && isSame(data[2], (byte) 0x70) && isSame(data[3], (byte) 0x64);
-        isCSS |= isSame(data[0], (byte) 0x40) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6E);
-        isCSS |= isSame(data[0], (byte) 0x0A) && isSame(data[1], (byte) 0x3A) && isSame(data[2], (byte) 0x72) && isSame(data[3], (byte) 0x6F);
-        isCSS |= isSame(data[0], (byte) 0x3A) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6F);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x6C) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6C);
-        isCSS |= isSame(data[0], (byte) 0x64) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x76) && isSame(data[3], (byte) 0x5B);
-        isCSS |= isSame(data[0], (byte) 0x2E) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x70);
-        isCSS |= isSame(data[0], (byte) 0x20) && isSame(data[1], (byte) 0x2E) && isSame(data[2], (byte) 0x70) && isSame(data[3], (byte) 0x6C);
-        
-        return isCSS;
-    }
-    
-    public static boolean isProbableJavascript(ByteArray wrapper)
-    {
-        byte[]  data = wrapper.getDataRaw();
-        boolean isJS = isSame(data[0], (byte) 0x21) && isSame(data[1], (byte) 0x66) && isSame(data[2], (byte) 0x75) && isSame(data[3], (byte) 0x6E);
-        
-        isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x65) && isSame(data[2], (byte) 0x62) && isSame(data[3], (byte) 0x70);
-        isJS |= isSame(data[0], (byte) 0x76) && isSame(data[1], (byte) 0x61) && isSame(data[2], (byte) 0x72) && isSame(data[3], (byte) 0x20);
-        isJS |= isSame(data[0], (byte) 0x77) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x6E) && isSame(data[3], (byte) 0x64);
-        isJS |= isSame(data[0], (byte) 0x22) && isSame(data[1], (byte) 0x75) && isSame(data[2], (byte) 0x73) && isSame(data[3], (byte) 0x65);
-        isJS |= isSame(data[0], (byte) 0x50) && isSame(data[1], (byte) 0x72) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x4C);
-        isJS |= isSame(data[0], (byte) 0x5F) && isSame(data[1], (byte) 0x4E) && isSame(data[2], (byte) 0x41) && isSame(data[3], (byte) 0x4D);
-        
-        return isJS;
-    }
-    
-    public static boolean isProbableHTML(ByteArray wrapper)
-    {
-        byte[]  data   = wrapper.getDataRaw();
-        boolean isHTML = isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x63) && isSame(data[3], (byte) 0x72);
-        
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x21) && isSame(data[2], (byte) 0x64) && isSame(data[3], (byte) 0x6F);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x6C) && isSame(data[2], (byte) 0x69) && isSame(data[3], (byte) 0x6E);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x3F) && isSame(data[2], (byte) 0x78) && isSame(data[3], (byte) 0x6D);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x74) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x6D);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x6C) && isSame(data[2], (byte) 0x6F) && isSame(data[3], (byte) 0x6C);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x76) && isSame(data[3], (byte) 0x67);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x21) && isSame(data[2], (byte) 0x2D) && isSame(data[3], (byte) 0x2D);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x64) && isSame(data[2], (byte) 0x69) && isSame(data[3], (byte) 0x76);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x69) && isSame(data[2], (byte) 0x6D) && isSame(data[3], (byte) 0x67);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x68) && isSame(data[2], (byte) 0x74) && isSame(data[3], (byte) 0x6D);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x73) && isSame(data[2], (byte) 0x74) && isSame(data[3], (byte) 0x79);
-        isHTML |= isSame(data[0], (byte) 0x7B) && isSame(data[1], (byte) 0x7B) && isSame(data[2], (byte) 0x23) && isSame(data[3], (byte) 0x75);
-        isHTML |= isSame(data[0], (byte) 0x3C) && isSame(data[1], (byte) 0x68) && isSame(data[2], (byte) 0x65) && isSame(data[3], (byte) 0x61);
-        
-        return isHTML;
-    }
-    
-    private static final List<ByteArray> possibleTextTargets = loadTextTargets();
-    
-    public static boolean isProbableTXT(ByteArray wrapper)
-    {
-        byte[]    data        = wrapper.getDataRaw();
-        ByteArray checkTarget = new ByteArray(Arrays.copyOf(data, 3));
-        boolean   isTXT       = new String(data, StandardCharsets.UTF_8).isEmpty();
-        
-        return isTXT || possibleTextTargets.contains(checkTarget);
-    }
-    
-    private static List<ByteArray> loadTextTargets()
-    {
-        List<ByteArray> list = new ArrayList<>();
-        
-        byte[] magicText3Wide = {
-                (byte) 0x63, (byte) 0x60, (byte) 0x63, (byte) 0x21, (byte) 0x30, (byte) 0x31,
-                (byte) 0x61, (byte) 0x73, (byte) 0x73, (byte) 0x68, (byte) 0x70, (byte) 0x0d,
-                (byte) 0x32, (byte) 0x67, (byte) 0x69, (byte) 0x70, (byte) 0x6f, (byte) 0x0f,
-                (byte) 0x62, (byte) 0x65, (byte) 0x6e, (byte) 0x70, (byte) 0x6f, (byte) 0x73,
-                (byte) 0x63, (byte) 0x61, (byte) 0x63, (byte) 0x62, (byte) 0x6c, (byte) 0x6f,
-                (byte) 0x34, (byte) 0x6d, (byte) 0x6f, (byte) 0x63, (byte) 0x75, (byte) 0x6d,
-                (byte) 0x70, (byte) 0x6f, (byte) 0x6e, (byte) 0x72, (byte) 0x6f, (byte) 0x61,
-                (byte) 0xea, (byte) 0xb0, (byte) 0x80, (byte) 0x6a, (byte) 0x61, (byte) 0x0d,
-                (byte) 0x6c, (byte) 0x80, (byte) 0x3c, (byte) 0x61, (byte) 0x6c, (byte) 0x6c,
-                (byte) 0x67, (byte) 0x61, (byte) 0x72, (byte) 0x72, (byte) 0x69, (byte) 0x6f,
-                (byte) 0x62, (byte) 0x69, (byte) 0x6d, (byte) 0x72, (byte) 0x65, (byte) 0x67,
-                (byte) 0x21, (byte) 0x69, (byte) 0x0d, (byte) 0x21, (byte) 0x20, (byte) 0x22,
-                (byte) 0x61, (byte) 0x6d, (byte) 0x0d, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-                (byte) 0xc3, (byte) 0x80, (byte) 0xc3, (byte) 0x61, (byte) 0x6d, (byte) 0x0d,
-                (byte) 0x62, (byte) 0x61, (byte) 0x6e, (byte) 0x61, (byte) 0x73, (byte) 0x61,
-                (byte) 0x63, (byte) 0x6f, (byte) 0x77, (byte) 0x63, (byte) 0x64, (byte) 0x63,
-                (byte) 0x61, (byte) 0x72, (byte) 0x73, (byte) 0x62, (byte) 0x6f, (byte) 0x62,
-                (byte) 0x70, (byte) 0x65, (byte) 0x64, (byte) 0x63, (byte) 0x38, (byte) 0x0d,
-                (byte) 0x6d, (byte) 0x61, (byte) 0x64, (byte) 0x6b, (byte) 0x75, (byte) 0x6e,
-                (byte) 0x73, (byte) 0x6c, (byte) 0x75, (byte) 0x36, (byte) 0x39, (byte) 0x0d,
-                (byte) 0x62, (byte) 0x64, (byte) 0x6d, (byte) 0x70, (byte) 0x69, (byte) 0x73,
-                (byte) 0x36, (byte) 0x39, (byte) 0x0d, (byte) 0x61, (byte) 0x63, (byte) 0x63,
-                (byte) 0x62, (byte) 0x61, (byte) 0x6b, (byte) 0xc4, (byte) 0x8d, (byte) 0x75,
-                (byte) 0x21, (byte) 0x20, (byte) 0x27, (byte) 0x30, (byte) 0x31, (byte) 0x32,
-                (byte) 0x61, (byte) 0x64, (byte) 0x6d, (byte) 0x37, (byte) 0x33, (byte) 0x37,
-                (byte) 0x21, (byte) 0x22, (byte) 0x23, (byte) 0x2d, (byte) 0xe8, (byte) 0x83,
-                (byte) 0x62, (byte) 0x6f, (byte) 0x6d, (byte) 0x63, (byte) 0x75, (byte) 0x0d,
-                (byte) 0x62, (byte) 0x75, (byte) 0x67, (byte) 0x62, (byte) 0x79, (byte) 0x6d,
-                (byte) 0x30, (byte) 0x6f, (byte) 0x0d, (byte) 0x30, (byte) 0x6f, (byte) 0x0d,
-                (byte) 0x72, (byte) 0x65, (byte) 0x63, (byte) 0x6c, (byte) 0x6f, (byte) 0x6f,
-                (byte) 0x54, (byte) 0x45, (byte) 0x52, (byte) 0x45, (byte) 0x4e, (byte) 0x44,
-                (byte) 0x45, (byte) 0x6e, (byte) 0x64, (byte) 0x45, (byte) 0x6c, (byte) 0x20,
-                (byte) 0x54, (byte) 0x45, (byte) 0x52, (byte) 0xd0, (byte) 0xa3, (byte) 0xd0,
-                (byte) 0xd0, (byte) 0x9b, (byte) 0xd0, (byte) 0xec, (byte) 0x8b, (byte) 0x9c,
-                (byte) 0x43, (byte) 0x6f, (byte) 0x6e, (byte) 0x09, (byte) 0x0d, (byte) 0x0a,
-                (byte) 0x4c, (byte) 0x45, (byte) 0x41, (byte) 0xe3, (byte) 0x82, (byte) 0xa2,
-                (byte) 0x6c, (byte) 0x65, (byte) 0x73, (byte) 0x37, (byte) 0x31, (byte) 0x37,
-                (byte) 0x61, (byte) 0x34, (byte) 0x75, (byte) 0x40, (byte) 0x21, (byte) 0x40,
-                (byte) 0xd1, (byte) 0x85, (byte) 0xd1, (byte) 0xe3, (byte) 0x84, (byte) 0x85,
-                (byte) 0x31, (byte) 0x6d, (byte) 0x65, (byte) 0x20, (byte) 0x21, (byte) 0x23,
-                (byte) 0x28, (byte) 0x29, (byte) 0x2a, (byte) 0x73, (byte) 0x69, (byte) 0x6b,
-                (byte) 0xe6, (byte) 0x8b, (byte) 0xa6, (byte) 0x70, (byte) 0x65, (byte) 0x72,
-                (byte) 0xe3, (byte) 0x83, (byte) 0xaa, (byte) 0x74, (byte) 0x75, (byte) 0x72,
-                (byte) 0x44, (byte) 0x41, (byte) 0x54, (byte) 0xe2, (byte) 0x94, (byte) 0x80,
-                (byte) 0x61, (byte) 0x61, (byte) 0x74, (byte) 0xeb, (byte) 0xa6, (byte) 0xac,
-                (byte) 0x66, (byte) 0x6c, (byte) 0x6f, (byte) 0x23, (byte) 0x69, (byte) 0x6e,
-                (byte) 0x2f, (byte) 0x2f, (byte) 0x20, (byte) 0x23, (byte) 0x23, (byte) 0x23,
-                (byte) 0x44, (byte) 0x72, (byte) 0x69, (byte) 0x53, (byte) 0x52, (byte) 0x55,
-                (byte) 0x41, (byte) 0x49, (byte) 0x50, (byte) 0x0d, (byte) 0x0a, (byte) 0x5b,
-                (byte) 0x2f, (byte) 0x2f, (byte) 0x41, (byte) 0x65, (byte) 0x6e, (byte) 0x76,
-                (byte) 0x2f, (byte) 0x2f, (byte) 0x2f, (byte) 0x63, (byte) 0x6f, (byte) 0x6c,
-                (byte) 0x3b, (byte) 0x3b, (byte) 0x3b, (byte) 0x54, (byte) 0x75, (byte) 0x72,
-                (byte) 0x54, (byte) 0x54, (byte) 0x5f, (byte) 0x63, (byte) 0x68, (byte) 0x61,
-                (byte) 0x4c, (byte) 0x65, (byte) 0x76, (byte) 0x6f, (byte) 0x72, (byte) 0x64,
-                (byte) 0x63, (byte) 0x70, (byte) 0x5f, (byte) 0x2e, (byte) 0x6c, (byte) 0x6f,
-                (byte) 0x61, (byte) 0x6e, (byte) 0x61, (byte) 0x61, (byte) 0x66, (byte) 0x75,
-                (byte) 0x65, (byte) 0x6c, (byte) 0x69, (byte) 0x61, (byte) 0x62, (byte) 0x6f,
-                (byte) 0x3f, (byte) 0x61, (byte) 0x72, (byte) 0x61, (byte) 0x62, (byte) 0x73,
-                (byte) 0x61, (byte) 0x62, (byte) 0x61, (byte) 0x61, (byte) 0x62, (byte) 0x62,
-                (byte) 0x61, (byte) 0x6c, (byte) 0x6a, (byte) 0x0d, (byte) 0x0a, (byte) 0x0d,
-                (byte) 0x73, (byte) 0x72, (byte) 0x75, (byte) 0xe8, (byte) 0x94, (byte) 0xa1,
-                (byte) 0x67, (byte) 0x61, (byte) 0x73, (byte) 0x65, (byte) 0x73, (byte) 0x74,
-                (byte) 0x74, (byte) 0x72, (byte) 0x20, (byte) 0x40, (byte) 0x73, (byte) 0x65,
-                (byte) 0x54, (byte) 0x68, (byte) 0x69,
-                };
-        
-        
-        for (int i = 0; i < magicText3Wide.length; i += 3)
-        {
-            byte[] temp = Arrays.copyOfRange(magicText3Wide, i, i + 3);
-            list.add(new ByteArray(temp));
-        }
-        
-        return list;
-    }
-    
     public static boolean isProbable3DModelStuff(ByteArray wrapper)
     {
         return wrapper.indexMatch(2, (byte) 0x00) && wrapper.indexMatch(3, (byte) 0x00);
@@ -662,7 +460,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableSKL(ByteArray wrapper)
     {
-        boolean isSKL = wrapper.equals(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
+        boolean isSKL = wrapper.startsWith(new ByteArray("r3d2sklt".getBytes(StandardCharsets.UTF_8)));
         if (!isSKL)
         {
             // edge case where the filetype is determined by the first bytes being equal to the filesize
@@ -679,8 +477,8 @@ public final class FileTypeHandler
     
     public static boolean isProbableANM(ByteArray wrapper)
     {
-        boolean isEqual = wrapper.equals(new ByteArray("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
-        isEqual |= wrapper.equals(new ByteArray("r3d2canm".getBytes(StandardCharsets.UTF_8)));
+        boolean isEqual = wrapper.startsWith(new ByteArray("r3d2anmd".getBytes(StandardCharsets.UTF_8)));
+        isEqual |= wrapper.startsWith(new ByteArray("r3d2canm".getBytes(StandardCharsets.UTF_8)));
         return isEqual;
     }
     
@@ -691,7 +489,7 @@ public final class FileTypeHandler
     
     public static boolean isProbableBNK(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("BKHD".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.startsWith(new ByteArray("BKHD".getBytes(StandardCharsets.UTF_8)));
     }
     
     public static boolean isProbableSCO(ByteArray wrapper)
@@ -701,17 +499,17 @@ public final class FileTypeHandler
     
     public static boolean isProbablePRELOAD(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("PreLoad".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.startsWith(new ByteArray("PreLoad".getBytes(StandardCharsets.UTF_8)));
     }
     
     private static boolean isProbableWPK(ByteArray wrapper)
     {
-        return wrapper.equals(new ByteArray("r3d2".getBytes(StandardCharsets.UTF_8)));
+        return wrapper.startsWith(new ByteArray("r3d2".getBytes(StandardCharsets.UTF_8)));
     }
     
     private static boolean isProbableSofdec(ByteArray magic)
     {
-        return magic.equals(new ByteArray("CRID".getBytes(StandardCharsets.UTF_8)));
+        return magic.startsWith(new ByteArray("CRID".getBytes(StandardCharsets.UTF_8)));
     }
     
     

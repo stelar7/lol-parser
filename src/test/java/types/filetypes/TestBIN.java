@@ -89,9 +89,9 @@ public class TestBIN
         BINFile data2 = parser.parse(file2);
         BINFile data3 = parser.parse(file3);
         
-        JsonElement ani = UtilHandler.getJsonParser().parse(data.toJson()).getAsJsonObject().get("CharacterRecord");
-        JsonElement ash = UtilHandler.getJsonParser().parse(data2.toJson()).getAsJsonObject().get("CharacterRecord");
-        JsonElement aat = UtilHandler.getJsonParser().parse(data3.toJson()).getAsJsonObject().get("CharacterRecord");
+        JsonElement ani = JsonHandler.getJsonParser().parse(data.toJson()).getAsJsonObject().get("CharacterRecord");
+        JsonElement ash = JsonHandler.getJsonParser().parse(data2.toJson()).getAsJsonObject().get("CharacterRecord");
+        JsonElement aat = JsonHandler.getJsonParser().parse(data3.toJson()).getAsJsonObject().get("CharacterRecord");
         
         System.out.println();
         System.out.println(ani);
@@ -347,7 +347,7 @@ public class TestBIN
         String text = UtilHandler.readAsString(UtilHandler.CDRAGON_FOLDER.resolve("words_fixed.log"));
         Type   type = new TypeToken<LinkedHashMap<String, String>>() {}.getType();
         
-        Map<String, String>          hashes = UtilHandler.getGson().fromJson(text, type);
+        Map<String, String>          hashes = JsonHandler.getGson().fromJson(text, type);
         Queue<Entry<String, String>> toRead = new ArrayDeque<>(hashes.entrySet());
         
         BufferedWriter bw = new BufferedWriter(new FileWriter(UtilHandler.CDRAGON_FOLDER.resolve("output.log").toFile(), true));
@@ -364,7 +364,7 @@ public class TestBIN
             String k = value.getKey();
             String v = value.getValue();
             
-            List<List<String>> result = UtilHandler.searchDictionary(k);
+            List<List<String>> result = WordHandler.searchDictionary(k);
             if (!result.isEmpty())
             {
                 bw.write(String.format("%s: %s: %s%n", v, k, result));
@@ -396,7 +396,7 @@ public class TestBIN
                     }
                     
                     byte[] json = parsed.toJson().getBytes(StandardCharsets.UTF_8);
-                    byte[] data = FileTypeHandler.makePrettyJson(json);
+                    byte[] data = JsonHandler.makePrettyJson(json);
                     
                     Files.write(file.resolveSibling(UtilHandler.pathToFilename(file) + ".json"), data);
                     
@@ -418,7 +418,7 @@ public class TestBIN
             @Override
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
             {
-                JsonObject elem = UtilHandler.getJsonParser().parse(UtilHandler.readAsString(file)).getAsJsonObject();
+                JsonObject elem = JsonHandler.getJsonParser().parse(UtilHandler.readAsString(file)).getAsJsonObject();
                 
                 if (!elem.has("CharacterRecord"))
                 {
@@ -463,7 +463,7 @@ public class TestBIN
             }
         });
         
-        System.out.println(UtilHandler.getGson().toJson(typeMap));
+        System.out.println(JsonHandler.getGson().toJson(typeMap));
     }
     
     @Test

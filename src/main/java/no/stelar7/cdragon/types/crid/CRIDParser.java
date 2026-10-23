@@ -62,6 +62,17 @@ public class CRIDParser implements Parseable<CRIDFile>
         raf.setEndian(ByteOrder.BIG_ENDIAN);
         raf.seek(0);
 
+        try
+        {
+            return parseFile(raf);
+        } catch (IndexOutOfBoundsException e)
+        {
+            throw new ParseException("Unexpected end of USM data", raf.pos(), e);
+        }
+    }
+
+    private CRIDFile parseFile(RandomAccessReader raf)
+    {
         CRIDFile file = new CRIDFile();
         file.setHeader(parseHeader(raf));
 
@@ -550,7 +561,7 @@ public class CRIDParser implements Parseable<CRIDFile>
                                           .findFirst()
                                           .orElseGet(() -> streamData.stream().filter(a -> type.equals(a.getStreamType())).findFirst().orElse(null));
 
-        String base = (stream != null && stream.getFilename() != null) ? stream.getFilename() : "stream";
+        String base = safeBaseName(stream != null ? stream.getFilename() : null);
         String name = base + type;
         if (key.channel() != 0)
         {
@@ -558,6 +569,26 @@ public class CRIDParser implements Parseable<CRIDFile>
         }
 
         return name + "." + (audio ? AUDIO_EXT : VIDEO_EXT);
+    }
+
+    /**
+     * The "filename" column is often the encoder's source path (e.g. "D:\movies\intro.avi"); keep only its last part,
+     * without characters Windows does not allow, so the stream is always written inside the extraction folder
+     */
+    static String safeBaseName(String filename)
+    {
+        if (filename == null)
+        {
+            return "stream";
+        }
+
+        String name = filename.substring(Math.max(filename.lastIndexOf('/'), filename.lastIndexOf('\\')) + 1);
+        name = name.replaceAll("[\\x00-\\x1F<>:\"|?*]", "_").strip();
+        if (name.isEmpty() || name.chars().allMatch(c -> c == '.'))
+        {
+            return "stream";
+        }
+        return name;
     }
 
     private static String detectAudioExtension(byte[] data)

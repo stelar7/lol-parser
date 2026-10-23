@@ -19,8 +19,8 @@ public class MemoryHandler
 {
     public static void readProcessMemory(String handleName)
     {
-        byte[] dataPattern = UtilHandler.byteArrayFromString("0x8B0x3D0x000x000x000x000x8B0x350x000x000x000x000x3B0xF70x0F0x840x000x000x000x000x660x66");
-        byte[] mask        = UtilHandler.byteArrayFromSetBits(0b1100001100001111000011);
+        byte[] dataPattern = ByteHandler.byteArrayFromString("0x8B0x3D0x000x000x000x000x8B0x350x000x000x000x000x3B0xF70x0F0x840x000x000x000x000x660x66");
+        byte[] mask        = ByteHandler.byteArrayFromSetBits(0b1100001100001111000011);
         
         
         int     processId         = findProcessID(handleName);
@@ -140,7 +140,7 @@ public class MemoryHandler
             readAddress.move(pageSize);
         }
         
-        byte[] data = UtilHandler.bytebufferToArray(ret);
+        byte[] data = ByteHandler.bytebufferToArray(ret);
         return indexOf(data, dataPattern, mask);
     }
     

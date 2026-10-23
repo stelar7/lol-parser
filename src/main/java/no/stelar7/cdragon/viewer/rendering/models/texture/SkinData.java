@@ -90,7 +90,7 @@ public class SkinData
     
     public static SkinData createFromBin(Path assetRoot, Path p)
     {
-        if (!p.toString().matches(".*skins\\\\skin\\d+\\.bin"))
+        if (!p.toString().matches(".*skins[\\\\/]skin\\d+\\.bin"))
         {
             return null;
         }
@@ -207,7 +207,7 @@ public class SkinData
         if (hashPath.toString().length() > 255)
         {
             String hashMe = hashPath.toString().substring(assetRoot.toString().length() + 1).replace("\\", "/");
-            String hash   = HashHandler.computeXXHash64(hashMe.toLowerCase());
+            String hash   = HashHandler.computeXXHash64(hashMe.toLowerCase(Locale.ROOT));
             hashPath = hashPath.resolveSibling("too_long_filename_" + hash + ".bin");
         }
         return hashPath;

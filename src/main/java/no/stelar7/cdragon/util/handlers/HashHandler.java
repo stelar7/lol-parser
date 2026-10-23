@@ -21,9 +21,14 @@ public class HashHandler
     
     private static final XXHashFactory xxHashFactory = XXHashFactory.fastestInstance();
     
-    public static final Path WAD_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\wad");
-    public static final Path BIN_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\bin\\binhash.json");
-    public static final Path INI_HASH_STORE = Paths.get("src\\main\\resources\\hashes\\inibin\\inihash.json");
+    public static final Path WAD_HASH_STORE = Paths.get("src", "main", "resources", "hashes", "wad");
+    public static final Path BIN_HASH_STORE = Paths.get("src", "main", "resources", "hashes", "bin", "binhash.json");
+    public static final Path INI_HASH_STORE = Paths.get("src", "main", "resources", "hashes", "inibin", "inihash.json");
+
+    /**
+     * When the system property cdragon.hashes.offline is true, the hash tables start out empty instead of being read from disk or GitHub (used by the tests)
+     */
+    private static final boolean OFFLINE = Boolean.getBoolean("cdragon.hashes.offline");
     
     private static Map<String, String> binHashNames;
     private static Map<Long, String>   iniHashNames;
@@ -277,7 +282,7 @@ public class HashHandler
     
     public static void bruteForceHash(Function<String, Long> hashFunc, List<Long> hashes)
     {
-        bruteForceHash(hashFunc, hashes, Arrays.asList(UtilHandler.ALL), "", "", "bruteforced.txt", true);
+        bruteForceHash(hashFunc, hashes, Arrays.asList(WordHandler.ALL), "", "", "bruteforced.txt", true);
     }
     
     public static long computeCCITT32(byte[] buffer, int size)
@@ -432,10 +437,16 @@ public class HashHandler
     }
     
     
-    public static Map<String, String> getBinHashes()
+    public static synchronized Map<String, String> getBinHashes()
     {
         if (binHashNames != null)
         {
+            return binHashNames;
+        }
+
+        if (OFFLINE)
+        {
+            binHashNames = new HashMap<>();
             return binHashNames;
         }
         
@@ -444,15 +455,17 @@ public class HashHandler
             InputStream is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/bin");
             Scanner     s         = new Scanner(is).useDelimiter("\\A");
             String[]    fileArray = s.next().split("\n");
+            binHashNames = new HashMap<>();
             for (String file : fileArray)
             {
                 System.out.println("Reading: " + file);
                 String sb = UtilHandler.readInternalAsString("hashes/bin/" + file);
-                binHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
-                if (binHashNames == null)
+                Map<String, String> fileHashes = JsonHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+                if (fileHashes == null)
                 {
                     throw new IOException("Failed to load hashes");
                 }
+                binHashNames.putAll(fileHashes);
             }
             
         } catch (Exception e)
@@ -464,7 +477,7 @@ public class HashHandler
             String hashBINURL = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/bin/binhash.json";
             String hashesBIN  = String.join("", WebHandler.readWeb(hashBINURL));
             
-            binHashNames = UtilHandler.getGson().fromJson(hashesBIN, new TypeToken<Map<String, String>>() {}.getType());
+            binHashNames = JsonHandler.getGson().fromJson(hashesBIN, new TypeToken<Map<String, String>>() {}.getType());
             if (binHashNames == null)
             {
                 binHashNames = new HashMap<>();
@@ -475,18 +488,24 @@ public class HashHandler
         return getBinHashes();
     }
     
-    public static Map<Long, String> getIniHashes()
+    public static synchronized Map<Long, String> getIniHashes()
     {
         if (iniHashNames != null)
         {
+            return iniHashNames;
+        }
+
+        if (OFFLINE)
+        {
+            iniHashNames = new HashMap<>();
             return iniHashNames;
         }
         
         try
         {
             String sb = Files.readString(INI_HASH_STORE);
-            iniHashNames = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
-            System.out.println("Loaded known bin hashes");
+            iniHashNames = JsonHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
+            System.out.println("Loaded known ini hashes");
         } catch (IOException e)
         {
             iniHashNames = new HashMap<>();
@@ -496,7 +515,7 @@ public class HashHandler
         return getIniHashes();
     }
     
-    private static final Map<String, String> reverseCache = new HashMap<>();
+    private static final Map<String, String> reverseCache = new java.util.concurrent.ConcurrentHashMap<>();
     
     public static String getBinKeyForHash(String hash)
     {
@@ -521,8 +540,13 @@ public class HashHandler
         return getWADHashes().getOrDefault(hash, hash);
     }
     
-    public static Map<String, String> getWADHashes()
+    public static synchronized Map<String, String> getWADHashes()
     {
+        if (wadHashNames == null && OFFLINE)
+        {
+            wadHashNames = new HashMap<>();
+        }
+
         if (wadHashNames == null)
         {
             System.out.println("Reading hash files!");
@@ -538,7 +562,7 @@ public class HashHandler
                     System.out.println("Reading: " + file);
                     String              plugin = file.substring(0, file.lastIndexOf('.'));
                     String              sb     = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
-                    Map<String, String> val    = UtilHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
+                    Map<String, String> val    = JsonHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
                     if (val == null)
                     {
                         val = new HashMap<>();
@@ -556,14 +580,14 @@ public class HashHandler
                 String hashesGame = String.join("", WebHandler.readWeb(hashGameURL));
                 String hashesLCU  = String.join("", WebHandler.readWeb(hashLCUURL));
                 
-                Map<String, String> val = UtilHandler.getGson().fromJson(hashesGame, new TypeToken<Map<String, String>>() {}.getType());
+                Map<String, String> val = JsonHandler.getGson().fromJson(hashesGame, new TypeToken<Map<String, String>>() {}.getType());
                 if (val == null)
                 {
                     val = new HashMap<>();
                 }
                 wadHashNames.putAll(val);
                 
-                val = UtilHandler.getGson().fromJson(hashesLCU, new TypeToken<Map<String, String>>() {}.getType());
+                val = JsonHandler.getGson().fromJson(hashesLCU, new TypeToken<Map<String, String>>() {}.getType());
                 if (val == null)
                 {
                     val = new HashMap<>();
@@ -575,7 +599,7 @@ public class HashHandler
         return wadHashNames;
     }
     
-    public static void reloadWadHashes()
+    public static synchronized void reloadWadHashes()
     {
         wadHashNames = null;
         getWADHashes();

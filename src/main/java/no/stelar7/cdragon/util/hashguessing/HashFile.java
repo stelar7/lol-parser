@@ -2,7 +2,7 @@ package no.stelar7.cdragon.util.hashguessing;
 
 import com.google.gson.reflect.TypeToken;
 import no.stelar7.cdragon.util.NaturalOrderComparator;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.JsonHandler;
 import no.stelar7.cdragon.util.writers.JsonWriterWrapper;
 
 import java.io.*;
@@ -37,13 +37,13 @@ public class HashFile
             {
                 if (!Files.exists(file))
                 {
-                    hashes = UtilHandler.getGson().fromJson(Files.readString(this.backup), new TypeToken<Map<String, String>>() {}.getType());
+                    hashes = JsonHandler.getGson().fromJson(Files.readString(this.backup), new TypeToken<Map<String, String>>() {}.getType());
                 } else
                 {
-                    hashes = UtilHandler.getGson().fromJson(Files.readString(this.file), new TypeToken<Map<String, String>>() {}.getType());
+                    hashes = JsonHandler.getGson().fromJson(Files.readString(this.file), new TypeToken<Map<String, String>>() {}.getType());
                     if (hashes == null && Files.exists(backup))
                     {
-                        hashes = UtilHandler.getGson().fromJson(Files.readString(this.backup), new TypeToken<Map<String, String>>() {}.getType());
+                        hashes = JsonHandler.getGson().fromJson(Files.readString(this.backup), new TypeToken<Map<String, String>>() {}.getType());
                     }
                 }
                 
@@ -54,7 +54,7 @@ public class HashFile
             }
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
         
         return hashes;
@@ -67,15 +67,16 @@ public class HashFile
             List<Entry<String, String>> entries = new ArrayList<>(known.entrySet());
             entries.sort((a, b) -> a.getValue().compareToIgnoreCase(b.getValue()));
             
-            Files.write(this.file, "{\n".getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+            StringBuilder sb = new StringBuilder("{\n");
             for (Entry<String, String> e : entries)
             {
-                Files.write(this.file, String.format(this.writeFormat, e.getKey(), e.getValue()).getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                sb.append(String.format(this.writeFormat, e.getKey(), e.getValue()));
             }
-            Files.write(this.file, "}".getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+            sb.append("}");
+            Files.writeString(this.file, sb);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -99,7 +100,7 @@ public class HashFile
             Files.write(outputFile, jw.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -123,7 +124,7 @@ public class HashFile
             Files.write(this.backup, jw.toString().getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
 }

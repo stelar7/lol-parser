@@ -1,5 +1,6 @@
 package no.stelar7.cdragon.types.rman.data;
 
+import com.google.common.primitives.Longs;
 import no.stelar7.cdragon.util.readers.*;
 
 import java.util.*;
@@ -143,12 +144,12 @@ public class RMANVTable
             return raf.readString(raf.readU32());
         }
 
-        public List<Long> u64Vector(int field)
+        public long[] u64Vector(int field)
         {
             long pos = offset(field);
             if (pos < 0)
             {
-                return new ArrayList<>();
+                return new long[0];
             }
             raf.seek(pos);
             long count = raf.readU32();
@@ -156,7 +157,7 @@ public class RMANVTable
             {
                 throw new ParseException("Vector of " + count + " u64 is larger than the data", pos);
             }
-            return raf.readLongs((int) count);
+            return raf.readLongArray((int) count);
         }
     }
 
@@ -186,7 +187,7 @@ public class RMANVTable
                 case "u4" -> data.put(key, table.u32(index, 0));
                 case "8" -> data.put(key, table.u64(index, 0));
                 case "offset4" -> data.put(key, (int) table.offset(index));
-                case "list8" -> data.put(key, table.u64Vector(index));
+                case "list8" -> data.put(key, Longs.asList(table.u64Vector(index)));
                 case "string" -> data.put(key, table.string(index, ""));
                 default -> throw new IllegalArgumentException("Unhandled read size: " + key + ": " + entry.getValue());
             }

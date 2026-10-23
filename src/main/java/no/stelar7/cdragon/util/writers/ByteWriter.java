@@ -37,7 +37,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeByte(value);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -48,7 +48,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeInt(i);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -59,7 +59,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeShort(i);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -70,7 +70,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeFloat(i);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -81,7 +81,7 @@ public class ByteWriter implements AutoCloseable
             stream.write(s.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -94,15 +94,16 @@ public class ByteWriter implements AutoCloseable
             stream.write(c.getRed());
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
     
     public void writeStringWithLength(String s)
     {
-        writeShort((short) s.length());
-        writeString(s);
+        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
+        writeShort((short) bytes.length);
+        writeByteArray(bytes);
     }
     
     public void writeBoolean(boolean value)
@@ -112,7 +113,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeBoolean(value);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -123,7 +124,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeLong(value);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -135,7 +136,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeFloat(value.y);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -148,7 +149,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeFloat(value.z);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -162,7 +163,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeFloat(value.w);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -191,7 +192,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeFloat(value.m33());
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -199,13 +200,13 @@ public class ByteWriter implements AutoCloseable
     {
         try
         {
-            stream.writeShort(value.getX());
-            stream.writeShort(value.getY());
-            stream.writeShort(value.getZ());
-            stream.writeShort(value.getW());
+            stream.writeByte(value.getX());
+            stream.writeByte(value.getY());
+            stream.writeByte(value.getZ());
+            stream.writeByte(value.getW());
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -218,7 +219,7 @@ public class ByteWriter implements AutoCloseable
             stream.writeShort(value.getZ());
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -238,7 +239,7 @@ public class ByteWriter implements AutoCloseable
             raf.seek(pos);
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -247,9 +248,9 @@ public class ByteWriter implements AutoCloseable
         try
         {
             stream.write(data);
-        } catch (Exception e)
+        } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -258,9 +259,9 @@ public class ByteWriter implements AutoCloseable
         try
         {
             stream.write(data, offset, length);
-        } catch (Exception e)
+        } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -269,9 +270,9 @@ public class ByteWriter implements AutoCloseable
         try
         {
             stream.write(data, 0, length);
-        } catch (Exception e)
+        } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -298,7 +299,7 @@ public class ByteWriter implements AutoCloseable
             
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
     
@@ -307,10 +308,10 @@ public class ByteWriter implements AutoCloseable
         try
         {
             Files.createDirectories(output.getParent());
-            Files.write(output, toByteArray(), StandardOpenOption.CREATE);
+            Files.write(output, toByteArray());
         } catch (IOException e)
         {
-            e.printStackTrace();
+            throw new UncheckedIOException(e);
         }
     }
 }

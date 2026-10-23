@@ -34,12 +34,6 @@ public class BINParser implements Parseable<BINFile>
     private final boolean                  wideHashFields;
     private final Map<String, Set<String>> hashes = new ConcurrentHashMap<>();
 
-    static
-    {
-        // Preload bin hashes
-        HashHandler.getBinHashes();
-    }
-
     public BINParser()
     {
         this(false);

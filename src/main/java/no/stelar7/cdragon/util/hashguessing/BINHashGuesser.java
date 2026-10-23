@@ -3,15 +3,16 @@ package no.stelar7.cdragon.util.hashguessing;
 import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.bin.data.*;
 import no.stelar7.cdragon.types.rst.*;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.Vector2;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.regex.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class BINHashGuesser extends HashGuesser
 {
@@ -30,18 +31,27 @@ public class BINHashGuesser extends HashGuesser
         {
             try
             {
-                System.out.println("Parsing bin files...");
-                BINParser parser = new BINParser();
-                files = Files.walk(dataPath)
-                             .parallel()
-                             .filter(UtilHandler.IS_BIN_PREDICATE)
-                             .map(p -> parseOrSkip(parser, p))
-                             .filter(Objects::nonNull)
-                             .collect(Collectors.toList());
+                BINParser  parser = new BINParser();
+                List<Path> bins;
+                try (Stream<Path> paths = Files.walk(dataPath))
+                {
+                    bins = paths.filter(UtilHandler.IS_BIN_PREDICATE).toList();
+                }
 
-            } catch (Exception e)
+                ProgressBar progress = new ProgressBar("Parsing bin files", bins.size());
+                files = bins.parallelStream()
+                            .map(p -> {
+                                BINFile parsed = parseOrSkip(parser, p);
+                                progress.step();
+                                return parsed;
+                            })
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
+                progress.finish();
+
+            } catch (IOException e)
             {
-                e.printStackTrace();
+                throw new UncheckedIOException(e);
             }
         }
 
@@ -184,7 +194,7 @@ public class BINHashGuesser extends HashGuesser
                 int lastStart = 0;
                 for (int i = 0; i <= m.groupCount(); i++)
                 {
-                    String data = m.group(1).toLowerCase();
+                    String data = m.group(1).toLowerCase(Locale.ROOT);
                     check(data);
                 }
             }
@@ -201,11 +211,18 @@ public class BINHashGuesser extends HashGuesser
         Map<String, Map<String, String>> descs = new HashMap<>();
         try
         {
-            Files.walk(dataPath.resolve("data\\menu"))
-                 .parallel()
-                 .filter(p -> p.getFileName().toString().contains("fontconfig"))
-                 .filter(UtilHandler.filetypePredicate(".txt"))
+            List<Path> fontFiles;
+            try (Stream<Path> paths = Files.walk(dataPath.resolve("data").resolve("menu")))
+            {
+                fontFiles = paths.filter(p -> p.getFileName().toString().contains("fontconfig"))
+                                 .filter(UtilHandler.filetypePredicate(".txt"))
+                                 .toList();
+            }
+
+            ProgressBar progress = new ProgressBar("Guessing from fontconfig files", fontFiles.size());
+            fontFiles.parallelStream()
                  .forEach(p -> {
+                     progress.step();
                      try
                      {
                          ByteArray ba = new ByteArray(Files.readAllBytes(p));
@@ -241,6 +258,7 @@ public class BINHashGuesser extends HashGuesser
                          e.printStackTrace();
                      }
                  });
+            progress.finish();
         } catch (IOException e)
         {
             e.printStackTrace();
@@ -276,7 +294,7 @@ public class BINHashGuesser extends HashGuesser
 
         for (String file : files)
         {
-            readCDragonHashList(file, this::checkPrehashed);
+            HashLists.readCDragonHashList(file, this::checkPrehashed);
         }
     }
 
@@ -299,7 +317,7 @@ public class BINHashGuesser extends HashGuesser
     @Override
     public boolean check(String path)
     {
-        String lowerCased = path.toLowerCase();
+        String lowerCased = path.toLowerCase(Locale.ROOT);
         if (lowerCased.isBlank())
         {
             return true;
@@ -338,7 +356,7 @@ public class BINHashGuesser extends HashGuesser
         
         try
         {
-            Path chars = dataPath.resolve("data\\characters");
+            Path chars = dataPath.resolve("data").resolve("characters");
             Files.walk(chars, 1).filter(Files::isDirectory).forEach(f -> check("characters/" + f.getFileName().toString()));
         } catch (IOException e)
         {

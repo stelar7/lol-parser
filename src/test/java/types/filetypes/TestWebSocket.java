@@ -1,7 +1,7 @@
 package types.filetypes;
 
 import com.google.gson.*;
-import no.stelar7.cdragon.util.handlers.UtilHandler;
+import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.LCUSocketReader;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ public class TestWebSocket
         JsonArray events = JsonParser.parseString(data).getAsJsonObject().get("events").getAsJsonArray();
         
         Thread th = new Thread(() -> {
-            LCUSocketReader reader = new LCUSocketReader(UtilHandler.getLCUConnectionData());
+            LCUSocketReader reader = new LCUSocketReader(LCUHandler.getLCUConnectionData());
             reader.connect();
             for (JsonElement event : events)
             {

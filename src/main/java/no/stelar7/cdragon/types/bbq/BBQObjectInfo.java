@@ -4,6 +4,7 @@ import no.stelar7.cdragon.util.handlers.UtilHandler;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.Pair;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiFunction;
 
@@ -141,8 +142,18 @@ public class BBQObjectInfo
      */
     public byte[] readBytes()
     {
+        if (this.size < 0)
+        {
+            throw new ParseException("Object " + this.pathId + " has a negative size " + this.size, this.dataOffset);
+        }
+
         this.asset.buf.seek(this.asset.bufferOffset + this.dataOffset);
-        return this.asset.buf.readBytes(this.size);
+        byte[] data = this.asset.buf.readBytes(this.size);
+        if (data.length != this.size)
+        {
+            throw new ParseException("Object " + this.pathId + " (offset " + this.dataOffset + ", size " + this.size + ") ends outside the file", this.dataOffset);
+        }
+        return data;
     }
 
     public Object read()
@@ -153,10 +164,41 @@ public class BBQObjectInfo
             throw new ParseException("No type tree for class " + this.classId + " (bundle has no type tree, and the class is not in the bundled defaults); use readBytes() instead", -1);
         }
 
-        return readValue(tree, new RandomAccessReader(readBytes(), this.asset.endian));
+        RandomAccessReader buf = new RandomAccessReader(readBytes(), this.asset.endian);
+        try
+        {
+            return readValue(tree, buf);
+        } catch (IndexOutOfBoundsException e)
+        {
+            throw new ParseException("Object " + this.pathId + " does not match its type tree " + tree.type, buf.pos(), e);
+        }
     }
-    
-    protected Object readValue(BBQTypeTree type, BinaryReader buf)
+
+    /**
+     * Throws if a node has fewer children than the reader needs (a malformed type tree)
+     */
+    private static void requireChildren(BBQTypeTree type, int count, long pos)
+    {
+        if (type.children.size() < count)
+        {
+            throw new ParseException(type.type + " " + type.name + " has " + type.children.size() + " children, expected " + count, pos);
+        }
+    }
+
+    /**
+     * Reads a length or element count, and throws if it is negative or more than the bytes left could hold
+     */
+    private static int readCount(RandomAccessReader buf, String what)
+    {
+        int count = buf.readInt();
+        if (count < 0 || count > buf.remaining())
+        {
+            throw new ParseException("Invalid " + what + " " + count + " (" + buf.remaining() + " bytes left)", buf.pos() - 4);
+        }
+        return count;
+    }
+
+    protected Object readValue(BBQTypeTree type, RandomAccessReader buf)
     {
         boolean     shouldAlign  = false;
         int         expectedSize = type.size;
@@ -209,12 +251,13 @@ public class BBQObjectInfo
                 result = buf.readDouble();
                 break;
             case "string":
+                requireChildren(type, 1, pos);
                 int stringSize = type.size;
                 if (stringSize == -1)
                 {
-                    stringSize = buf.readInt();
+                    stringSize = readCount(buf, "string length");
                 }
-                result = buf.readString(stringSize);
+                result = new String(buf.readBytesExact(stringSize), StandardCharsets.UTF_8);
                 shouldAlign = type.children.get(0).shouldAlign();
                 break;
             default:
@@ -228,12 +271,13 @@ public class BBQObjectInfo
                     result = new BBQObjectPointer(type, this.asset, buf);
                 } else if (firstChild != null && firstChild.isArray)
                 {
+                    requireChildren(firstChild, 2, pos);
                     shouldAlign = firstChild.shouldAlign();
-                    int         size      = buf.readInt();
                     BBQTypeTree arrayType = firstChild.children.get(1);
+                    int         size      = readCount(buf, "array size");
                     if (arrayType.type.equals("char") || arrayType.type.equals("UInt8"))
                     {
-                        result = buf.readBytes(size);
+                        result = buf.readBytesExact(size);
                     } else
                     {
                         result = new ArrayList<>();
@@ -254,7 +298,7 @@ public class BBQObjectInfo
                     result = new Pair<>(first, second);
                 } else if (t.startsWith("ExposedReference"))
                 {
-                    BiFunction<BBQTypeTree, BinaryReader, Object> readValueExposed = (internalType, internalBuf) -> {
+                    BiFunction<BBQTypeTree, RandomAccessReader, Object> readValueExposed = (internalType, internalBuf) -> {
                         if (internalType.name.equals("exposedName"))
                         {
                             internalBuf.readInt();

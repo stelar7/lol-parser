@@ -66,7 +66,7 @@ public class WADParser implements Parseable<WADFile>
             UtilHandler.getPreferences().putInt(cacheKey, use);
         }
         
-        return handleAll(pluginName, String.format(url + "%s", "%s", type), UtilHandler.getIPFromLong(use), path);
+        return handleAll(pluginName, String.format(url + "%s", "%s", type), ByteHandler.getIPFromLong(use), path);
     }
     
     private WADFile parseHiddenVersion(String pluginName, Path path, boolean pbe, String version, boolean assetDefault, int count)
@@ -311,8 +311,8 @@ public class WADParser implements Parseable<WADFile>
                 {
                     throw new ParseException("Invalid WAD signature length: " + ecdsaLength, raf);
                 }
-                byte[] ecdsa               = raf.readBytes(ecdsaLength);
-                byte[] ecdsaPadding        = raf.readBytes(83 - ecdsaLength);
+                byte[] ecdsa               = raf.readBytesExact(ecdsaLength);
+                byte[] ecdsaPadding        = raf.readBytesExact(83 - ecdsaLength);
                 long   fileChecksum        = raf.readLong();
                 int    entryHeaderOffset   = raf.readU16();
                 int    entryHeaderCellSize = raf.readU16();
@@ -326,7 +326,7 @@ public class WADParser implements Parseable<WADFile>
                     throw new ParseException("Unsupported WAD version " + major + "." + minor, 2);
                 }
 
-                byte[] ecdsa     = raf.readBytes(256);
+                byte[] ecdsa     = raf.readBytesExact(256);
                 long   checksum  = raf.readLong();
                 long   fileCount = raf.readU32();
                 return new WADHeaderV3(magic, major, minor, ecdsa, checksum, fileCount);

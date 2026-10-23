@@ -1,5 +1,7 @@
 package no.stelar7.cdragon.types.rman.data;
 
+import com.google.common.primitives.Longs;
+
 import java.util.*;
 
 public final class RMANFileBodyFile
@@ -16,9 +18,9 @@ public final class RMANFileBodyFile
     private final int        unknown2;
     private final int        unknown3;
     private final long       languageFlags;
-    private final List<Long> chunkIds;
+    private final long[]     chunkIds;
     
-    public RMANFileBodyFile(String name, String symlink, long fileId, long directoryId, long fileSize, int permissions, long languageFlags, List<Long> chunkIds)
+    public RMANFileBodyFile(String name, String symlink, long fileId, long directoryId, long fileSize, int permissions, long languageFlags, long[] chunkIds)
     {
         // never read from the file
         this.filetypeFlag = 0;
@@ -125,9 +127,35 @@ public final class RMANFileBodyFile
         return languageFlags;
     }
     
+    /**
+     * Read-only view of the chunk ids, boxes each id on access; use getChunkIdArray() in loops over large manifests
+     */
     public List<Long> getChunkIds()
     {
-        return chunkIds;
+        return Collections.unmodifiableList(Longs.asList(chunkIds));
+    }
+
+    public long[] getChunkIdArray()
+    {
+        return chunkIds.clone();
+    }
+
+    public int getChunkCount()
+    {
+        return chunkIds.length;
+    }
+
+    public long getChunkId(int index)
+    {
+        return chunkIds[index];
+    }
+
+    /**
+     * True if both files are made of the same chunks, in the same order
+     */
+    public boolean hasSameChunks(RMANFileBodyFile other)
+    {
+        return Arrays.equals(chunkIds, other.chunkIds);
     }
     
     @Override
@@ -154,7 +182,7 @@ public final class RMANFileBodyFile
                unknown3 == that.unknown3 &&
                Objects.equals(name, that.name) &&
                Objects.equals(symlink, that.symlink) &&
-               Objects.equals(chunkIds, that.chunkIds);
+               Arrays.equals(chunkIds, that.chunkIds);
     }
     
     @Override

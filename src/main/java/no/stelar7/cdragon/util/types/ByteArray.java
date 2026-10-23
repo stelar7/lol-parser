@@ -78,7 +78,7 @@ public final class ByteArray
     public boolean indexMatch(int index, byte b)
     {
         compact();
-        return (data.length > index) && data[index] == b;
+        return index >= 0 && index < data.length && data[index] == b;
     }
     
     public ByteArray removeLastByte(int i)
@@ -123,11 +123,7 @@ public final class ByteArray
         compact();
         otherObj.compact();
         
-        int    len       = Math.min(otherObj.data.length, data.length);
-        byte[] otherData = Arrays.copyOfRange(otherObj.data, 0, len);
-        byte[] selfData  = Arrays.copyOfRange(data, 0, len);
-        
-        return Arrays.equals(otherData, selfData);
+        return Arrays.equals(data, otherObj.data);
     }
     
     public byte[] getDataCopy()
@@ -189,7 +185,9 @@ public final class ByteArray
     
     public boolean startsWith(ByteArray bytes)
     {
-        return this.equals(bytes);
+        compact();
+        bytes.compact();
+        return this.data.length >= bytes.data.length && Arrays.equals(this.data, 0, bytes.data.length, bytes.data, 0, bytes.data.length);
     }
     
     public int indexOf(int value, int offset)

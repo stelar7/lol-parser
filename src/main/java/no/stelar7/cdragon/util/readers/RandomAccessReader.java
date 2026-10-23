@@ -5,11 +5,14 @@ import no.stelar7.cdragon.util.types.ByteArray;
 import no.stelar7.cdragon.util.types.math.*;
 import org.joml.Quaternionf;
 
+import java.io.EOFException;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
@@ -36,15 +39,20 @@ public class RandomAccessReader implements BinaryReader
     private ValueLayout.OfFloat  floatLayout;
     private ValueLayout.OfDouble doubleLayout;
 
+    /**
+     * A new reader over the same data, starting at position 0. The data is shared, not read again.
+     */
     public static RandomAccessReader create(RandomAccessReader raf)
     {
-        if (raf.getPath() != null)
-        {
-            return new RandomAccessReader(raf.getPath(), raf.byteOrder);
-        } else
-        {
-            return new RandomAccessReader(raf.rawBytes, raf.byteOrder);
-        }
+        return new RandomAccessReader(raf.segment, raf.rawBytes, raf.path, raf.byteOrder);
+    }
+
+    private RandomAccessReader(MemorySegment segment, byte[] rawBytes, Path path, ByteOrder order)
+    {
+        this.segment = segment;
+        this.rawBytes = rawBytes;
+        this.path = path;
+        setEndian(order);
     }
 
     public RandomAccessReader(File path, ByteOrder order)
@@ -52,22 +60,47 @@ public class RandomAccessReader implements BinaryReader
         this(path.toPath(), order);
     }
 
+    /**
+     * Files that fit in a byte[] are read into the heap once, so the file is not left locked (on Windows) while the reader is alive.
+     * Larger files are memory mapped instead of copied; the mapping is released when the reader is garbage collected.
+     */
     public RandomAccessReader(Path path, ByteOrder order)
     {
-        // copy the file into GC-managed memory and unmap it right away,
-        // so the file is not left locked (on Windows) while the reader is alive
-        try (Arena mapArena = Arena.ofConfined(); FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
         {
-            MemorySegment mapped = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), mapArena);
-            this.segment = Arena.ofAuto().allocate(mapped.byteSize());
-            this.segment.copyFrom(mapped);
+            long size = channel.size();
+            if (size <= MAX_ARRAY_SIZE)
+            {
+                this.rawBytes = readFully(channel, (int) size);
+                this.segment = MemorySegment.ofArray(this.rawBytes);
+            } else
+            {
+                this.segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, size, Arena.ofAuto());
+            }
         } catch (IOException e)
         {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
 
         this.path = path;
         setEndian(order);
+    }
+
+    // the largest array size every JVM accepts
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
+    private static byte[] readFully(FileChannel channel, int size) throws IOException
+    {
+        byte[]     data   = new byte[size];
+        ByteBuffer buffer = ByteBuffer.wrap(data);
+        while (buffer.hasRemaining())
+        {
+            if (channel.read(buffer) < 0)
+            {
+                throw new EOFException("File shrank while it was being read");
+            }
+        }
+        return data;
     }
 
     public RandomAccessReader(Path path)
@@ -311,10 +344,8 @@ public class RandomAccessReader implements BinaryReader
     public long[] readLongArray(int count)
     {
         long[] values = new long[count];
-        for (int j = 0; j < count; j++)
-        {
-            values[j] = readLong();
-        }
+        MemorySegment.copy(this.segment, longLayout, pos(), values, 0, count);
+        pos += (long) count * Long.BYTES;
         return values;
     }
 
@@ -338,10 +369,8 @@ public class RandomAccessReader implements BinaryReader
     public int[] readIntArray(int count)
     {
         int[] values = new int[count];
-        for (int j = 0; j < count; j++)
-        {
-            values[j] = readInt();
-        }
+        MemorySegment.copy(this.segment, intLayout, pos(), values, 0, count);
+        pos += (long) count * Integer.BYTES;
         return values;
     }
 
@@ -365,10 +394,8 @@ public class RandomAccessReader implements BinaryReader
     public short[] readShortArray(int count)
     {
         short[] values = new short[count];
-        for (int j = 0; j < count; j++)
-        {
-            values[j] = readShort();
-        }
+        MemorySegment.copy(this.segment, shortLayout, pos(), values, 0, count);
+        pos += (long) count * Short.BYTES;
         return values;
     }
 
@@ -436,9 +463,28 @@ public class RandomAccessReader implements BinaryReader
             length = remaining();
         }
 
-        byte[] data = slice(pos(), Math.max(length, 0));
+        if (length <= 0)
+        {
+            // also when the position is past the end
+            return new byte[0];
+        }
+
+        byte[] data = slice(pos(), length);
         pos += data.length;
         return data;
+    }
+
+    /**
+     * Reads exactly length bytes, throws a ParseException if the data ends first
+     */
+    public byte[] readBytesExact(long length)
+    {
+        if (length < 0 || length > remaining())
+        {
+            throw new ParseException("Expected " + length + " bytes, but only " + Math.max(remaining(), 0) + " are left", this);
+        }
+
+        return readBytes(length);
     }
 
     /**
@@ -502,10 +548,8 @@ public class RandomAccessReader implements BinaryReader
     public float[] readFloatArray(int count)
     {
         float[] values = new float[count];
-        for (int j = 0; j < count; j++)
-        {
-            values[j] = readFloat();
-        }
+        MemorySegment.copy(this.segment, floatLayout, pos(), values, 0, count);
+        pos += (long) count * Float.BYTES;
         return values;
     }
 

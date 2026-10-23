@@ -144,7 +144,7 @@ public class WebHandler
         System.out.println("Finding current version for: " + url.substring(url.lastIndexOf("/")) + file);
         while (failCount < 5)
         {
-            String versionAsIP = UtilHandler.getIPFromLong(++i);
+            String versionAsIP = ByteHandler.getIPFromLong(++i);
             String finalUrl    = String.format(url, versionAsIP) + file;
             if (!canConnect(finalUrl))
             {
@@ -158,7 +158,7 @@ public class WebHandler
             }
         }
         
-        System.out.println("Returning version: " + lastGood + " (" + UtilHandler.getIPFromLong(lastGood) + ")");
+        System.out.println("Returning version: " + lastGood + " (" + ByteHandler.getIPFromLong(lastGood) + ")");
         return lastGood;
     }
     
@@ -169,7 +169,7 @@ public class WebHandler
         {
             for (String endPart : urlEnds)
             {
-                String versionAsIP = UtilHandler.getIPFromLong(i);
+                String versionAsIP = ByteHandler.getIPFromLong(i);
                 String finalUrl    = String.format(url, versionAsIP) + endPart;
                 System.out.println("Looking for " + finalUrl);
                 

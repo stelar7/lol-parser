@@ -5,6 +5,7 @@ import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.tex.TEXParser;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
+import no.stelar7.cdragon.util.ProgressBar;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
@@ -256,20 +257,21 @@ public class WADFile
     
     public void extractFiles(Path path, String wadName)
     {
-        final int interval = (int) Math.floor(getContentHeaders().size() / 10f);
-        for (int index = 0; index < getContentHeaders().size(); index++)
+        // small wads finish quickly, a bar for each of them would only be noise
+        ProgressBar progress = getContentHeaders().size() > 1500 ? new ProgressBar("Extracting " + wadName, getContentHeaders().size()) : null;
+        for (WADContentHeaderV1 fileHeader : getContentHeaders())
         {
-            WADContentHeaderV1 fileHeader = getContentHeaders().get(index);
-            
-            if (contentHeaders.size() > 1500)
-            {
-                if (index % interval == 0)
-                {
-                    System.out.println(index + "/" + getContentHeaders().size());
-                }
-            }
-            
             saveFile(fileHeader, path, wadName);
+
+            if (progress != null)
+            {
+                progress.step();
+            }
+        }
+
+        if (progress != null)
+        {
+            progress.finish();
         }
     }
     
@@ -290,7 +292,7 @@ public class WADFile
         
         if (filename.endsWith("json"))
         {
-            data = FileTypeHandler.makePrettyJson(data);
+            data = JsonHandler.makePrettyJson(data);
         }
         
         try
@@ -349,13 +351,13 @@ public class WADFile
         switch (header.getCompressionType())
         {
             case NONE:
-                return fileReader.readBytes(header.getFileSize());
+                return fileReader.readBytesExact(header.getFileSize());
             case GZIP:
-                return checkDecompressed(header, CompressionHandler.uncompressGZIP(fileReader.readBytes(header.getCompressedFileSize())));
+                return checkDecompressed(header, CompressionHandler.uncompressGZIP(fileReader.readBytesExact(header.getCompressedFileSize())));
             case REFERENCE:
                 return fileReader.readFixedString(fileReader.readU32()).getBytes(StandardCharsets.UTF_8);
             case ZSTD:
-                return checkDecompressed(header, CompressionHandler.uncompressZSTD(fileReader.readBytes(header.getCompressedFileSize()), toArraySize(header.getFileSize(), header)));
+                return checkDecompressed(header, CompressionHandler.uncompressZSTD(fileReader.readBytesExact(header.getCompressedFileSize()), toArraySize(header.getFileSize(), header)));
             case ZSTD_MULTI:
                 return readSubChunked(header);
             default:
@@ -374,7 +376,7 @@ public class WADFile
         if (chunks == null)
         {
             // No subchunk TOC; if every chunk is zstd compressed, the entry is just a series of zstd frames
-            byte[] data = CompressionHandler.uncompressZSTD(fileReader.readBytes(header.getCompressedFileSize()), toArraySize(header.getFileSize(), header));
+            byte[] data = CompressionHandler.uncompressZSTD(fileReader.readBytesExact(header.getCompressedFileSize()), toArraySize(header.getFileSize(), header));
             if (data == null || data.length != header.getFileSize())
             {
                 throw new ParseException("Unable to determine subchunk file, and " + header.getPathHash() + " is not plain zstd", offset);
@@ -400,11 +402,7 @@ public class WADFile
                 throw new ParseException("Subchunks of " + header.getPathHash() + " are bigger than the file size", fileReader);
             }
 
-            byte[] data = fileReader.readBytes(chunk.compressed);
-            if (data.length != chunk.compressed)
-            {
-                throw new ParseException("Unexpected end of file in subchunk " + i + " of " + header.getPathHash(), fileReader);
-            }
+            byte[] data = fileReader.readBytesExact(chunk.compressed);
 
             if (chunk.compressed == chunk.uncompressed)
             {
@@ -464,7 +462,7 @@ public class WADFile
         
         if ("json".equals(fileType))
         {
-            data = FileTypeHandler.makePrettyJson(data);
+            data = JsonHandler.makePrettyJson(data);
         }
         
         Files.createDirectories(other.getParent());
