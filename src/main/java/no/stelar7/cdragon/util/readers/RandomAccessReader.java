@@ -86,6 +86,23 @@ public class RandomAccessReader implements BinaryReader
         setEndian(order);
     }
 
+    /**
+     * Memory maps the file regardless of its size, so only the parts that are actually read are loaded from disk.
+     * Useful when only a small part of a large file is needed (eg. the entry table of a wad).
+     * The file stays locked (on Windows) until the reader is garbage collected.
+     */
+    public static RandomAccessReader mapped(Path path, ByteOrder order)
+    {
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.READ))
+        {
+            MemorySegment segment = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size(), Arena.ofAuto());
+            return new RandomAccessReader(segment, null, path, order);
+        } catch (IOException e)
+        {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     // the largest array size every JVM accepts
     private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
 

@@ -254,49 +254,55 @@ public final class RMANFile
     }
     
     /**
-     * Files of this manifest by lowercase name (the first one, if several share a name)
+     * Files of this manifest by their lowercase full path.
+     * (names alone are not unique, eg. every LCU plugin has its own assets.wad and index.html)
      */
-    private Map<String, RMANFileBodyFile> getFilesByLowercaseName()
+    private Map<String, RMANFileBodyFile> getFilesByLowercasePath()
     {
-        Map<String, RMANFileBodyFile> byName = new HashMap<>();
+        Map<String, RMANFileBodyFile> byPath = new HashMap<>();
         for (RMANFileBodyFile file : getBody().getFiles())
         {
-            byName.putIfAbsent(file.getName().toLowerCase(Locale.ROOT), file);
+            byPath.putIfAbsent(file.getFullFilepath(this).toLowerCase(Locale.ROOT), file);
         }
-        return byName;
+        return byPath;
     }
 
+    /**
+     * The files of this manifest that have the same path and content in the old manifest
+     */
     public List<RMANFileBodyFile> getUnchangedFiles(RMANFile oldM)
     {
-        Map<String, RMANFileBodyFile> newFiles = getFilesByLowercaseName();
-        List<RMANFileBodyFile>        ignored  = new ArrayList<>();
-        for (RMANFileBodyFile oldFile : oldM.getBody().getFiles())
+        Map<String, RMANFileBodyFile> oldFiles  = oldM.getFilesByLowercasePath();
+        List<RMANFileBodyFile>        unchanged = new ArrayList<>();
+        for (RMANFileBodyFile newFile : getBody().getFiles())
         {
-            RMANFileBodyFile newFile = newFiles.get(oldFile.getName().toLowerCase(Locale.ROOT));
-            if (newFile != null && oldFile.hasSameChunks(newFile))
+            RMANFileBodyFile oldFile = oldFiles.get(newFile.getFullFilepath(this).toLowerCase(Locale.ROOT));
+            if (oldFile != null && oldFile.hasSameChunks(newFile))
             {
-                ignored.add(oldFile);
+                unchanged.add(newFile);
             }
         }
 
-        return ignored;
+        return unchanged;
     }
 
-
+    /**
+     * The files of this manifest that were added, or whose content changed, since the old manifest
+     */
     public List<RMANFileBodyFile> getChangedFiles(RMANFile oldM)
     {
-        Map<String, RMANFileBodyFile> newFiles = getFilesByLowercaseName();
-        List<RMANFileBodyFile>        ignored  = new ArrayList<>();
-        for (RMANFileBodyFile oldFile : oldM.getBody().getFiles())
+        Map<String, RMANFileBodyFile> oldFiles = oldM.getFilesByLowercasePath();
+        List<RMANFileBodyFile>        changed  = new ArrayList<>();
+        for (RMANFileBodyFile newFile : getBody().getFiles())
         {
-            RMANFileBodyFile newFile = newFiles.get(oldFile.getName().toLowerCase(Locale.ROOT));
-            if (newFile == null || !oldFile.hasSameChunks(newFile))
+            RMANFileBodyFile oldFile = oldFiles.get(newFile.getFullFilepath(this).toLowerCase(Locale.ROOT));
+            if (oldFile == null || !oldFile.hasSameChunks(newFile))
             {
-                ignored.add(oldFile);
+                changed.add(newFile);
             }
         }
 
-        return ignored;
+        return changed;
     }
     
     

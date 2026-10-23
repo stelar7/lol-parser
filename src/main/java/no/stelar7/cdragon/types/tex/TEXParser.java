@@ -32,6 +32,11 @@ public class TEXParser implements Parseable<BufferedImage>
     public static final int FORMAT_BC5    = 0x0E;
     public static final int FORMAT_BGRA8  = 0x14;
     public static final int FORMAT_RGBA16 = 0x15;
+    /**
+     * One byte per pixel, decoded as grey (written to DDS as R8_UNORM).
+     * Every file seen so far (patch 16.22, 64x64 without mipmaps) is all zeros, so whether it is red, alpha or luminance is unknown.
+     */
+    public static final int FORMAT_R8     = 0x17;
 
     private static final int HEADER_SIZE = 12;
 
@@ -62,6 +67,7 @@ public class TEXParser implements Parseable<BufferedImage>
             case FORMAT_BC5 -> TextureDecoder.Format.BC5;
             case FORMAT_BGRA8 -> TextureDecoder.Format.BGRA8;
             case FORMAT_RGBA16 -> RGBA16_FORMAT;
+            case FORMAT_R8 -> TextureDecoder.Format.R8;
             default -> throw new ParseException("TEX format 0x" + Integer.toHexString(header.format()) + " can not be decoded to an image, use toDDS instead", 9);
         };
 
@@ -94,13 +100,14 @@ public class TEXParser implements Parseable<BufferedImage>
         {
             case FORMAT_DXT1 -> pixelFormat.putInt(0x4).put("DXT1".getBytes(StandardCharsets.US_ASCII));
             case FORMAT_DXT5 -> pixelFormat.putInt(0x4).put("DXT5".getBytes(StandardCharsets.US_ASCII));
-            case FORMAT_BC7, FORMAT_BC5, FORMAT_RGBA16 ->
+            case FORMAT_BC7, FORMAT_BC5, FORMAT_RGBA16, FORMAT_R8 ->
             {
                 pixelFormat.putInt(0x4).put("DX10".getBytes(StandardCharsets.US_ASCII));
                 int dxgiFormat = switch (header.format())
                 {
                     case FORMAT_BC7 -> 99;
                     case FORMAT_BC5 -> 83; // BC5_UNORM
+                    case FORMAT_R8 -> 61; // R8_UNORM
                     default -> rgba16DxgiFormat();
                 };
                 // dxgiFormat, dimension (2D), miscFlag, arraySize, miscFlags2
@@ -166,13 +173,14 @@ public class TEXParser implements Parseable<BufferedImage>
         }
 
         // uncompressed formats are stored per pixel, the rest in 4x4 blocks
-        int blockSize = (header.format() == FORMAT_BGRA8 || header.format() == FORMAT_RGBA16) ? 1 : 4;
+        int blockSize = (header.format() == FORMAT_BGRA8 || header.format() == FORMAT_RGBA16 || header.format() == FORMAT_R8) ? 1 : 4;
         int blockBytes = switch (header.format())
         {
             case FORMAT_DXT1 -> 8;
             case FORMAT_DXT5, FORMAT_BC7, FORMAT_BC5 -> 16;
             case FORMAT_BGRA8 -> 4;
             case FORMAT_RGBA16 -> 8;
+            case FORMAT_R8 -> 1;
             default -> throw new ParseException("Unsupported TEX format 0x" + Integer.toHexString(header.format()), 9);
         };
 

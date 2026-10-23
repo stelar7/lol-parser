@@ -478,13 +478,11 @@ public class TestWAD
                      {
                          String parent   = file.getParent().getFileName().toString();
                          String child    = file.getFileName().toString();
-                         String filename = parent + "/" + child;
                          long   size     = Files.size(file);
                          
                          if (ends.stream().anyMatch(child::endsWith))
                          {
                              Function<Void, Void> export = a -> {
-                                 System.out.println("Extracting from " + filename);
                                  WADFile parsed = parser.parseReadOnly(file);
                                  parsed.extractFiles(to, parent);
                                  progress.step(size);
@@ -497,7 +495,6 @@ public class TestWAD
                          if (endsc.stream().anyMatch(child::endsWith))
                          {
                              Function<Void, Void> export = a -> {
-                                 System.out.println("Extracting from " + filename);
                                  WADFile parsed = parser.parseCompressed(file);
                                  parsed.extractFiles(to, parent);
                                  progress.step(size);
@@ -510,7 +507,6 @@ public class TestWAD
                          if (endsm.stream().anyMatch(child::endsWith))
                          {
                              Function<Void, Void> export = a -> {
-                                 System.out.println("Extracting from " + filename);
                                  WADFile parsed = parser.parseReadOnly(file);
                                  parsed.extractFiles(to.resolveSibling("mobile"), parent);
                                  progress.step(size);
@@ -587,64 +583,59 @@ public class TestWAD
     {
         System.out.println("Generating unknown files list");
         
-        WADParser   parser     = new WADParser();
-        Path        outputPath = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
-        ProgressBar progress   = new ProgressBar("Scanning WADs for unknown files", countWads(from));
+        WADParser parser     = new WADParser();
+        Path      outputPath = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
         outputPath.toFile().delete();
-        Files.walkFileTree(from, new SimpleFileVisitor<>()
-        {
-            final List<String> ends = Arrays.asList(".wad", ".wad.client");
-            final List<String> endsc = Arrays.asList(".wad.compressed", ".wad.client.compressed");
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
-            {
+        // largest first, so a big wad does not end up running alone at the end
+        List<Path> wads;
+        try (Stream<Path> files = Files.walk(from))
+        {
+            wads = files.filter(Files::isRegularFile)
+                        .filter(TestWAD::isWad)
+                        .sorted(Comparator.comparingLong((Path p) -> p.toFile().length()).reversed())
+                        .toList();
+        }
+
+        // the wads are memory mapped, so only the entry table and the unknown entries are read from disk;
+        // reading is mostly waiting on the disk, so use more threads than cores to keep it busy
+        ProgressBar     progress = new ProgressBar("Scanning WADs for unknown files", wads.size());
+        Queue<String>   lines    = new ConcurrentLinkedQueue<>();
+        ExecutorService service  = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+        for (Path file : wads)
+        {
+            service.execute(() -> {
                 try
                 {
-                    if (isWad(file))
-                    {
-                        progress.step();
-                    }
+                    String  name   = file.getFileName().toString();
+                    WADFile parsed = name.endsWith(".compressed") ? parser.parseCompressed(file) : parser.parseMapped(file);
 
-                    if (Files.size(file) > Integer.MAX_VALUE)
-                    {
-                        System.out.println("Skipping " + file + " since its too large to parse");
-                        return FileVisitResult.CONTINUE;
-                    }
-                } catch (IOException e)
+                    String filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + name);
+                    lines.addAll(parsed.getUnknownFiles(filename));
+                } catch (RuntimeException e)
                 {
-                    throw new RuntimeException(e);
-                }
-                
-                WADFile parsed = null;
-                
-                long endsCount  = ends.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
-                long endscCount = endsc.stream().filter(a -> file.getFileName().toString().endsWith(a)).count();
-                if (endsCount != 0)
+                    System.out.println("Unable to scan " + file + ": " + e.getMessage());
+                } finally
                 {
-                    parsed = parser.parseReadOnly(file);
+                    progress.step();
                 }
-                
-                if (endscCount != 0)
-                {
-                    parsed = parser.parseCompressed(file);
-                }
-                
-                if (parsed != null)
-                {
-                    String filename = String.format("%-60s", file.getParent().getFileName().toString() + "/" + file.getFileName().toString());
-                    parsed.printUnknownFiles(filename, outputPath);
-                }
-                
-                return FileVisitResult.CONTINUE;
-            }
-        });
+            });
+        }
+
+        service.shutdown();
+        try
+        {
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+        } catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while scanning wads", e);
+        }
         progress.finish();
 
         System.out.println("Sorting unknown files list");
-        Path         output  = UtilHandler.CDRAGON_FOLDER.resolve("unknownsSorted.txt");
         List<String> content = new ArrayList<>();
-        Files.readAllLines(output).stream()
+        lines.stream()
              .map(s -> new Triplet<>(s.substring(0, s.indexOf(":")).trim(), s.substring(s.indexOf(":") + 1, s.lastIndexOf(":")).trim(), s.substring(s.lastIndexOf(":") + 1).trim()))
              .collect(Collectors.groupingBy(Triplet::getA, Collectors.mapping(t -> new Pair<>(t.getC(), t.getB()), Collectors.toList())))
              .forEach((k, v) -> {
@@ -664,14 +655,6 @@ public class TestWAD
     {
         String name = file.getFileName().toString();
         return name.endsWith(".wad") || name.endsWith(".wad.client") || name.endsWith(".wad.compressed") || name.endsWith(".wad.client.compressed");
-    }
-
-    private static long countWads(Path from) throws IOException
-    {
-        try (Stream<Path> files = Files.walk(from))
-        {
-            return files.filter(Files::isRegularFile).filter(TestWAD::isWad).count();
-        }
     }
 
     private static long sizeOfWads(Path from) throws IOException

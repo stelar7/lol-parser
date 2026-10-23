@@ -1,6 +1,8 @@
 package no.stelar7.cdragon.util.handlers;
 
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 import net.jpountz.xxhash.*;
 import net.openhft.hashing.LongHashFunction;
 
@@ -30,9 +32,16 @@ public class HashHandler
      */
     private static final boolean OFFLINE = Boolean.getBoolean("cdragon.hashes.offline");
     
-    private static Map<String, String> binHashNames;
-    private static Map<Long, String>   iniHashNames;
-    private static Map<String, String> wadHashNames;
+    // the hash tables are only assigned once fully loaded, and are volatile so lookups can read them without taking the lock
+    private static volatile Map<String, String> binHashNames;
+    private static volatile Map<Long, String>   iniHashNames;
+    private static volatile Map<String, String> wadHashNames;
+
+    // the hash tables shipped in the resources (and on GitHub, used if they are missing from the classpath)
+    private static final String[] WAD_HASH_RESOURCES = {"hashes/wad/game.json", "hashes/wad/lcu.json"};
+    private static final String   BIN_HASH_RESOURCE  = "hashes/bin/binhash.json";
+    private static final String   INI_HASH_RESOURCE  = "hashes/inibin/inihash.json";
+    private static final String   HASH_GITHUB_URL    = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/";
     
     /*
     public static String toFormattedHex(byte[] bytes)
@@ -415,14 +424,23 @@ public class HashHandler
     {
         long   val = Integer.toUnsignedLong(hash);
         String hex = toHex(val, 8);
-        return getBinHashes().getOrDefault(hex, hex);
+        return loadedBinHashes().getOrDefault(hex, hex);
     }
     
     public static String getBINHash(String hash)
     {
         long   hashed = computeFNV1A(hash);
         String hex    = toHex(hashed, 8);
-        return getBinHashes().getOrDefault(hex, hex);
+        return loadedBinHashes().getOrDefault(hex, hex);
+    }
+
+    /**
+     * Called for every hash in every bin file, often from many threads, so the synchronized getter is skipped once loaded
+     */
+    private static Map<String, String> loadedBinHashes()
+    {
+        Map<String, String> names = binHashNames;
+        return names != null ? names : getBinHashes();
     }
     
     public static boolean hasBINHash(String hash)
@@ -439,80 +457,63 @@ public class HashHandler
     
     public static synchronized Map<String, String> getBinHashes()
     {
-        if (binHashNames != null)
+        if (binHashNames == null)
         {
-            return binHashNames;
+            Map<String, String> names = OFFLINE ? new HashMap<>() : loadHashResource(BIN_HASH_RESOURCE, new TypeToken<Map<String, String>>() {}.getType());
+            System.out.println("Loaded " + names.size() + " known bin hashes");
+            binHashNames = names;
         }
-
-        if (OFFLINE)
-        {
-            binHashNames = new HashMap<>();
-            return binHashNames;
-        }
-        
-        try
-        {
-            InputStream is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/bin");
-            Scanner     s         = new Scanner(is).useDelimiter("\\A");
-            String[]    fileArray = s.next().split("\n");
-            binHashNames = new HashMap<>();
-            for (String file : fileArray)
-            {
-                System.out.println("Reading: " + file);
-                String sb = UtilHandler.readInternalAsString("hashes/bin/" + file);
-                Map<String, String> fileHashes = JsonHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
-                if (fileHashes == null)
-                {
-                    throw new IOException("Failed to load hashes");
-                }
-                binHashNames.putAll(fileHashes);
-            }
-            
-        } catch (Exception e)
-        {
-            binHashNames = new HashMap<>();
-            System.err.println("BIN Hash file not found: " + e.getMessage());
-            System.err.println("Loading from GH...");
-            
-            String hashBINURL = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/bin/binhash.json";
-            String hashesBIN  = String.join("", WebHandler.readWeb(hashBINURL));
-            
-            binHashNames = JsonHandler.getGson().fromJson(hashesBIN, new TypeToken<Map<String, String>>() {}.getType());
-            if (binHashNames == null)
-            {
-                binHashNames = new HashMap<>();
-            }
-        }
-        
-        System.out.println("Loaded known bin hashes");
-        return getBinHashes();
+        return binHashNames;
     }
     
     public static synchronized Map<Long, String> getIniHashes()
     {
-        if (iniHashNames != null)
+        if (iniHashNames == null)
         {
-            return iniHashNames;
+            Map<Long, String> names = OFFLINE ? new HashMap<>() : loadHashResource(INI_HASH_RESOURCE, new TypeToken<Map<Long, String>>() {}.getType());
+            System.out.println("Loaded " + names.size() + " known ini hashes");
+            iniHashNames = names;
+        }
+        return iniHashNames;
+    }
+
+    /**
+     * Reads a json hash table from the classpath (streamed, the wad tables are close to 100MB), falling back to the copy on GitHub.
+     * Returns an empty map if neither can be read.
+     */
+    private static <K> Map<K, String> loadHashResource(String resource, java.lang.reflect.Type type)
+    {
+        System.out.println("Reading: " + resource);
+        try (InputStream is = HashHandler.class.getClassLoader().getResourceAsStream(resource))
+        {
+            if (is != null)
+            {
+                Map<K, String> names = JsonHandler.getGson().fromJson(new JsonReader(new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))), type);
+                if (names != null)
+                {
+                    return names;
+                }
+            }
+            System.err.println("Hash file " + resource + " not found, loading it from GitHub");
+        } catch (IOException | JsonParseException e)
+        {
+            System.err.println("Unable to read the hash file " + resource + " (" + e.getMessage() + "), loading it from GitHub");
         }
 
-        if (OFFLINE)
-        {
-            iniHashNames = new HashMap<>();
-            return iniHashNames;
-        }
-        
         try
         {
-            String sb = Files.readString(INI_HASH_STORE);
-            iniHashNames = JsonHandler.getGson().fromJson(sb, new TypeToken<Map<Long, String>>() {}.getType());
-            System.out.println("Loaded known ini hashes");
-        } catch (IOException e)
+            Map<K, String> names = JsonHandler.getGson().fromJson(String.join("", WebHandler.readWeb(HASH_GITHUB_URL + resource)), type);
+            if (names != null)
+            {
+                return names;
+            }
+        } catch (JsonParseException e)
         {
-            iniHashNames = new HashMap<>();
-            System.err.println("INI Hash file not found: " + e.getMessage());
+            // handled below
         }
-        
-        return getIniHashes();
+
+        System.err.println("Unable to load the hash file " + resource + ", hashes will not be resolved to names");
+        return new HashMap<>();
     }
     
     private static final Map<String, String> reverseCache = new java.util.concurrent.ConcurrentHashMap<>();
@@ -537,65 +538,32 @@ public class HashHandler
     
     public static String getWadHash(String hash)
     {
-        return getWADHashes().getOrDefault(hash, hash);
+        // called once per wad entry, often from many threads, so skip the synchronized getter once loaded
+        Map<String, String> names = wadHashNames;
+        if (names == null)
+        {
+            names = getWADHashes();
+        }
+        return names.getOrDefault(hash, hash);
     }
-    
+
     public static synchronized Map<String, String> getWADHashes()
     {
-        if (wadHashNames == null && OFFLINE)
-        {
-            wadHashNames = new HashMap<>();
-        }
-
         if (wadHashNames == null)
         {
-            System.out.println("Reading hash files!");
-            wadHashNames = new HashMap<>();
-            try
+            // filled before it is published, so lock-free readers never see a partially loaded map
+            Map<String, String> names = new HashMap<>();
+            if (!OFFLINE)
             {
-                InputStream  is        = HashHandler.class.getClassLoader().getResourceAsStream("hashes/wad");
-                Scanner      s         = new Scanner(is).useDelimiter("\\A");
-                List<String> files     = new ArrayList<>();
-                String[]     fileArray = s.next().split("\n");
-                for (String file : fileArray)
+                for (String resource : WAD_HASH_RESOURCES)
                 {
-                    System.out.println("Reading: " + file);
-                    String              plugin = file.substring(0, file.lastIndexOf('.'));
-                    String              sb     = UtilHandler.readInternalAsString("hashes/wad/" + plugin + ".json");
-                    Map<String, String> val    = JsonHandler.getGson().fromJson(sb, new TypeToken<Map<String, String>>() {}.getType());
-                    if (val == null)
-                    {
-                        val = new HashMap<>();
-                    }
-                    
-                    wadHashNames.putAll(val);
+                    names.putAll(loadHashResource(resource, new TypeToken<Map<String, String>>() {}.getType()));
                 }
-            } catch (NoSuchElementException e)
-            {
-                System.err.println("WAD Hash file not found: " + e.getMessage());
-                System.err.println("Loading from GH...");
-                String hashGameURL = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/wad/game.json";
-                String hashLCUURL  = "https://github.com/stelar7/lol-parser/raw/master/src/main/resources/hashes/wad/lcu.json";
-                
-                String hashesGame = String.join("", WebHandler.readWeb(hashGameURL));
-                String hashesLCU  = String.join("", WebHandler.readWeb(hashLCUURL));
-                
-                Map<String, String> val = JsonHandler.getGson().fromJson(hashesGame, new TypeToken<Map<String, String>>() {}.getType());
-                if (val == null)
-                {
-                    val = new HashMap<>();
-                }
-                wadHashNames.putAll(val);
-                
-                val = JsonHandler.getGson().fromJson(hashesLCU, new TypeToken<Map<String, String>>() {}.getType());
-                if (val == null)
-                {
-                    val = new HashMap<>();
-                }
-                wadHashNames.putAll(val);
+                System.out.println("Loaded " + names.size() + " known wad hashes");
             }
+            wadHashNames = names;
         }
-        
+
         return wadHashNames;
     }
     

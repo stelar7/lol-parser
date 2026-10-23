@@ -279,6 +279,7 @@
                     </includes>
                     <systemPropertyVariables>
                         <cdragon.hashes.offline>true</cdragon.hashes.offline>
+                        <cdragon.errorlog>${project.build.directory}/test-errors.log</cdragon.errorlog>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>

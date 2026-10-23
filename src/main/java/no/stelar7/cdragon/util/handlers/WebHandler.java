@@ -1,62 +1,34 @@
 package no.stelar7.cdragon.util.handlers;
 
 import no.stelar7.cdragon.types.rbun.RBUNParser;
+import no.stelar7.cdragon.util.ErrorLog;
 import no.stelar7.cdragon.util.types.*;
 
-import javax.net.ssl.*;
+import javax.net.ssl.SSLException;
 import java.io.*;
 import java.net.*;
 import java.net.http.*;
 import java.net.http.HttpClient.Version;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.nio.channels.*;
 import java.nio.file.*;
-import java.security.*;
-import java.security.cert.X509Certificate;
+import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class WebHandler
 {
     
-    static
-    {
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager()
-        {
-            public java.security.cert.X509Certificate[] getAcceptedIssuers()
-            {
-                return null;
-            }
-            
-            public void checkClientTrusted(X509Certificate[] certs, String authType)
-            {
-            }
-            
-            public void checkServerTrusted(X509Certificate[] certs, String authType)
-            {
-            }
-        }
-        };
-        
-        try
-        {
-            // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-            
-            // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = (hostname, session) -> true;
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (NoSuchAlgorithmException | KeyManagementException e)
-        {
-            e.printStackTrace();
-        }
-        
-    }
+    // retries for failed downloads (connection errors and 5xx/429 responses), waiting a bit longer before each one
+    private static final int MAX_ATTEMPTS = 5;
+
+    // shared, as every HttpClient has its own selector thread and connection pool
+    private static final HttpClient CLIENT = HttpClient.newBuilder()
+                                                       .version(Version.HTTP_2)
+                                                       .followRedirects(HttpClient.Redirect.NORMAL)
+                                                       .connectTimeout(Duration.ofSeconds(30))
+                                                       .build();
     
-    
-    public static boolean checkIfURLExists(String finalUrl)
+        public static boolean checkIfURLExists(String finalUrl)
     {
         try
         {
@@ -105,33 +77,91 @@ public class WebHandler
         downloadFile(output, "https://lol.dyn.riotcdn.net/channels/public/bundles/" + bundleId + ".bundle");
     }
     
-    public static void downloadFile(Path output, String url)
+    /**
+     * Downloads the url to the file. The data is written to a .part file first, and only moved into place when the download succeeded,
+     * so a failed download never leaves a truncated file (or an error page) behind.
+     *
+     * @return false if the download failed, the reason is written to the {@link ErrorLog}
+     */
+    public static boolean downloadFile(Path output, String url)
     {
+        HttpRequest request;
         try
         {
             Files.createDirectories(output.getParent());
-            HttpRequest request = HttpRequest.newBuilder()
-                                             .uri(new URI(url))
-                                             .version(Version.HTTP_2)
-                                             .GET()
-                                             .build();
-            
-            HttpResponse<InputStream> response = HttpClient.newHttpClient().send(request, BodyHandlers.ofInputStream());
-            
-            try (InputStream is = response.body();
-                 ReadableByteChannel rbc = Channels.newChannel(is);
-                 FileOutputStream fos = new FileOutputStream(output.toFile()))
+            request = HttpRequest.newBuilder().uri(new URI(url)).GET().build();
+        } catch (IOException | URISyntaxException e)
+        {
+            ErrorLog.log("download failed", url, e);
+            return false;
+        }
+
+        Path   temp      = output.resolveSibling(output.getFileName() + ".part");
+        String lastError = null;
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++)
+        {
+            try
             {
-                fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+                HttpResponse<Path> response = CLIENT.send(request, BodyHandlers.ofFile(temp));
+                int                status   = response.statusCode();
+                if (status >= 200 && status < 300)
+                {
+                    Files.move(temp, output, StandardCopyOption.REPLACE_EXISTING);
+                    return true;
+                }
+
+                Files.deleteIfExists(temp);
+                lastError = "HTTP " + status;
+                if (status < 500 && status != 429)
+                {
+                    // eg. 404, retrying will not help
+                    break;
+                }
+            } catch (IOException e)
+            {
+                lastError = e.toString();
+                deleteQuietly(temp);
+            } catch (InterruptedException e)
+            {
+                deleteQuietly(temp);
+                Thread.currentThread().interrupt();
+                return false;
             }
-            
+
+            if (attempt < MAX_ATTEMPTS && !sleep(attempt * 1000L))
+            {
+                return false;
+            }
+        }
+
+        ErrorLog.log("download failed", url + " -> " + output + ": " + lastError);
+        return false;
+    }
+
+    private static void deleteQuietly(Path path)
+    {
+        try
+        {
+            Files.deleteIfExists(path);
         } catch (IOException e)
         {
-            // try again
-            downloadFile(output, url);
-        } catch ( URISyntaxException | InterruptedException e)
+            // it is overwritten by the next attempt anyway
+        }
+    }
+
+    /**
+     * @return false if the thread was interrupted
+     */
+    private static boolean sleep(long millis)
+    {
+        try
         {
-            e.printStackTrace();
+            Thread.sleep(millis);
+            return true;
+        } catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            return false;
         }
     }
     
@@ -223,10 +253,11 @@ public class WebHandler
         try
         {
             HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
-            if (con.getResponseCode() == 503)
+            for (int attempt = 1; con.getResponseCode() == 503 && attempt < MAX_ATTEMPTS; attempt++)
             {
-                Thread.sleep(500);
-                return readWeb(url);
+                con.disconnect();
+                Thread.sleep(500L * attempt);
+                con = (HttpURLConnection) new URL(url).openConnection();
             }
             
             try (InputStreamReader isr = new InputStreamReader(con.getInputStream());
@@ -279,25 +310,31 @@ public class WebHandler
     
     public static ByteArrayOutputStream downloadFileToMemory(String url)
     {
-        try
+        for (int attempt = 1; ; attempt++)
         {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            URL                   u   = new URL(url);
-            try (InputStream is = u.openStream())
+            try
             {
-                is.transferTo(bos);
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                URL                   u   = new URL(url);
+                try (InputStream is = u.openStream())
+                {
+                    is.transferTo(bos);
+                }
+                
+                return bos;
+            } catch (SSLException e)
+            {
+                // the connection was dropped during the handshake, try again
+                if (attempt >= MAX_ATTEMPTS || !sleep(attempt * 1000L))
+                {
+                    ErrorLog.log("download failed", url, e);
+                    return null;
+                }
+            } catch (IOException e)
+            {
+                ErrorLog.log("download failed", url, e);
+                return null;
             }
-            
-            return bos;
-        } catch (SSLException e)
-        {
-            // try again
-            return downloadFileToMemory(url);
-        } catch (IOException e)
-        {
-            e.printStackTrace();
         }
-        
-        return null;
     }
 }

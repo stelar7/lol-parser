@@ -1,6 +1,6 @@
 package no.stelar7.cdragon.util.handlers;
 
-import com.github.luben.zstd.Zstd;
+import com.github.luben.zstd.*;
 import net.jpountz.lz4.*;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 
@@ -139,6 +139,22 @@ public final class CompressionHandler
         }
     }
     
+    /**
+     * Decompresses zstd data when the uncompressed size is not known.
+     * Streams the data, so it also works for several concatenated frames and frames that do not store their size.
+     */
+    public static byte[] uncompressZSTD(byte[] fileBytes)
+    {
+        try (ZstdInputStream input = new ZstdInputStream(new ByteArrayInputStream(fileBytes)))
+        {
+            return input.readAllBytes();
+        } catch (IOException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
     public static byte[] uncompress(byte[] bytes)
     {
         if (FileTypeHandler.isProbableGZIP(bytes))
@@ -148,7 +164,7 @@ public final class CompressionHandler
         
         if (FileTypeHandler.isProbableZSTD(bytes))
         {
-            return uncompressZSTD(bytes, bytes.length * 6);
+            return uncompressZSTD(bytes);
         }
         
         if (FileTypeHandler.isProbableDEFLATE(bytes))

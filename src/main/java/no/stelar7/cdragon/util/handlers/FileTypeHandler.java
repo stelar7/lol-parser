@@ -105,8 +105,23 @@ public final class FileTypeHandler
         
         if (FileTypeHandler.isProbableKTX(magic))
         {
-            // OpenGL ES shaders
             return "ktx";
+        }
+        
+        if (FileTypeHandler.isProbableKTX2(magic))
+        {
+            return "ktx2";
+        }
+        
+        if (FileTypeHandler.isProbableJPG(magic))
+        {
+            // every jpg starts with a start of image marker (FF D8) followed by another marker (FF xx)
+            return "jpg";
+        }
+        
+        if (FileTypeHandler.isProbableEncryptedTEX(magic))
+        {
+            return "encrypted.tex";
         }
         
         if (FileTypeHandler.isProbableGLSLF(magic))
@@ -190,6 +205,22 @@ public final class FileTypeHandler
             return "json";
         }
         
+        if (FileTypeHandler.isProbableSpineSkeleton(magic))
+        {
+            // binary spine animation, always next to a (text) spine .atlas
+            return "skel";
+        }
+        
+        if (TextTypeHandler.isProbableSpineAtlas(magic))
+        {
+            return "atlas";
+        }
+        
+        if (TextTypeHandler.isProbableINI(magic))
+        {
+            return "ini";
+        }
+        
         if (FileTypeHandler.isProbableHLS(magic))
         {
             return "hls";
@@ -232,6 +263,13 @@ public final class FileTypeHandler
         if (TextTypeHandler.isProbableTXT(magic))
         {
             return "txt";
+        }
+        
+        // anything else that decodes as text (eg. minified js and css from the client)
+        String textType = TextTypeHandler.findTextType(magic);
+        if (textType != null)
+        {
+            return textType;
         }
         
         // some files start with whitespace, so substring it and try again
@@ -284,6 +322,56 @@ public final class FileTypeHandler
         return magic.startsWith(new ByteArray(new byte[]{(byte) 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x31, 0x31, (byte) 0xBB, 0x0D, 0x0A, 0x1A, 0x0A}));
     }
     
+    private static boolean isProbableKTX2(ByteArray magic)
+    {
+        return magic.startsWith(new ByteArray(new byte[]{(byte) 0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, (byte) 0xBB, 0x0D, 0x0A, 0x1A, 0x0A}));
+    }
+    
+    private static boolean isProbableJPG(ByteArray magic)
+    {
+        return magic.indexMatch(0, (byte) 0xFF) && magic.indexMatch(1, (byte) 0xD8) && magic.indexMatch(2, (byte) 0xFF);
+    }
+    
+    /**
+     * Encrypted textures (eg. assets/esports/sponsoredbanners/secret/*.tex), they all start with the same bytes
+     */
+    private static boolean isProbableEncryptedTEX(ByteArray magic)
+    {
+        return magic.startsWith(new ByteArray(new byte[]{(byte) 0xC9, (byte) 0xE3, (byte) 0x44, (byte) 0x26, (byte) 0x64, (byte) 0xBB, (byte) 0x01, (byte) 0x61}));
+    }
+    
+    /**
+     * Binary spine skeletons: a 64 bit hash followed by the spine version (eg. "4.2.38") as a varint length prefixed string
+     */
+    private static boolean isProbableSpineSkeleton(ByteArray magic)
+    {
+        byte[] data = magic.getDataRaw();
+        if (data.length < 16)
+        {
+            return false;
+        }
+        
+        // the length is the string length + 1
+        int length = (data[8] & 0xFF) - 1;
+        if (length < 3 || length > 15 || 9 + length > data.length || !Character.isDigit(data[9]))
+        {
+            return false;
+        }
+        
+        boolean hasDot = false;
+        for (int i = 9; i < 9 + length; i++)
+        {
+            if (data[i] == '.')
+            {
+                hasDot = true;
+            } else if (!Character.isDigit(data[i]))
+            {
+                return false;
+            }
+        }
+        return hasDot;
+    }
+    
     private static boolean isProbableCSO(ByteArray magic)
     {
         return new String(magic.getDataRaw()).contains("Microsoft (R) HLSL Shader Compiler");
@@ -299,11 +387,19 @@ public final class FileTypeHandler
         return magic.startsWith(new ByteArray(new byte[]{(byte) 0x54, (byte) 0x45, (byte) 0x58, (byte) 0x00}));
     }
     
-    private static Map<ByteArray, String> magicNumbers = new HashMap<>();
+    // volatile so it can be read without the lock, it is only assigned once fully built
+    private static volatile Map<ByteArray, String> magicNumbers;
     
-    public static synchronized Map<ByteArray, String> getMagicNumbers()
+    public static Map<ByteArray, String> getMagicNumbers()
     {
-        if (magicNumbers.isEmpty())
+        // called for every file whose type is detected, often from many threads
+        Map<ByteArray, String> loaded = magicNumbers;
+        return loaded != null ? loaded : loadMagicNumbers();
+    }
+    
+    private static synchronized Map<ByteArray, String> loadMagicNumbers()
+    {
+        if (magicNumbers == null)
         {
             System.out.println("Loading magic numbers");
             
@@ -312,10 +408,6 @@ public final class FileTypeHandler
             ByteArray ddsMagic          = new ByteArray(new byte[]{(byte) 0x44, (byte) 0x44, (byte) 0x53, (byte) 0x20});
             ByteArray encryptedDdsMagic = new ByteArray(new byte[]{(byte) 0x2A, (byte) 0x6C, (byte) 0x04, (byte) 0x50});
             ByteArray pngMagic          = new ByteArray(new byte[]{(byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47});
-            ByteArray jpgMagic          = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0});
-            ByteArray jpg2Magic         = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1});
-            ByteArray jpg3Magic         = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xEC});
-            ByteArray jpg4Magic         = new ByteArray(new byte[]{(byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xDB});
             ByteArray bnkMagic          = new ByteArray(new byte[]{(byte) 0x42, (byte) 0x4B, (byte) 0x48, (byte) 0x44});
             ByteArray binMagic          = new ByteArray(new byte[]{(byte) 0x50, (byte) 0x52, (byte) 0x4F, (byte) 0x50});
             ByteArray lcovMagic         = new ByteArray(new byte[]{(byte) 0x54, (byte) 0x4E, (byte) 0x3A, (byte) 0x0A});
@@ -330,9 +422,13 @@ public final class FileTypeHandler
             ByteArray hlslMagic         = new ByteArray(new byte[]{(byte) 0x23, (byte) 0x70, (byte) 0x72, (byte) 0x61});
             ByteArray oegmMagic         = new ByteArray(new byte[]{(byte) 0x4F, (byte) 0x45, (byte) 0x47, (byte) 0x4D});
             ByteArray fcnfMagic         = new ByteArray(new byte[]{(byte) 0x5B, (byte) 0x46, (byte) 0x6F, (byte) 0x6E});
+            ByteArray gmshMagic         = new ByteArray("GMSH".getBytes(StandardCharsets.US_ASCII));
+            ByteArray imaaMagic         = new ByteArray("IMAA".getBytes(StandardCharsets.US_ASCII));
+            ByteArray nvrgMagic         = new ByteArray("NVRG".getBytes(StandardCharsets.US_ASCII));
+            ByteArray nsdiMagic         = new ByteArray("NSDI".getBytes(StandardCharsets.US_ASCII));
             
             
-            magicNumbers = new HashMap<>();
+            Map<ByteArray, String> magicNumbers = new HashMap<>();
             // Sound
             magicNumbers.put(oggMagic, "ogg");
             
@@ -341,16 +437,14 @@ public final class FileTypeHandler
             
             // Image
             magicNumbers.put(pngMagic, "png");
-            magicNumbers.put(jpgMagic, "jpg");
-            magicNumbers.put(jpg2Magic, "jpg");
-            magicNumbers.put(jpg3Magic, "jpg");
-            magicNumbers.put(jpg4Magic, "jpg");
             magicNumbers.put(gifMagic, "gif");
             
             // Fonts
             magicNumbers.put(ttfMagic, "ttf");
             magicNumbers.put(otfMagic, "otf");
-            
+            magicNumbers.put(new ByteArray("wOFF".getBytes(StandardCharsets.US_ASCII)), "woff");
+            magicNumbers.put(new ByteArray("wOF2".getBytes(StandardCharsets.US_ASCII)), "woff2");
+
             // Div
             magicNumbers.put(zipMagic, "zip");
             magicNumbers.put(luaMagic, "luaobj");
@@ -364,11 +458,19 @@ public final class FileTypeHandler
             magicNumbers.put(lcovMagic, "info");
             magicNumbers.put(sknMagic, "skn");
             magicNumbers.put(objMagic, "obj");
-            
-            // i dont know...?
+            magicNumbers.put(gmshMagic, "gmesh");
+
+            // i dont know...? (named after their magic)
             magicNumbers.put(unkMagic, "unk");
+            // eg. assets/items/icons2d/autoatlas/largeicons/atlas_info.bin
+            magicNumbers.put(imaaMagic, "imaa");
+            // 12 byte files (magic, version 1, 4 zero bytes) in the map wads
+            magicNumbers.put(nvrgMagic, "nvrg");
+            magicNumbers.put(nsdiMagic, "nsdi");
             magicNumbers.put(oegmMagic, "oegm");
             magicNumbers.put(fcnfMagic, "fcnf");
+            
+            FileTypeHandler.magicNumbers = magicNumbers;
         }
         
         return magicNumbers;
@@ -382,6 +484,11 @@ public final class FileTypeHandler
     //<editor-fold desc="Decent-ish byte comparisons">
     public static boolean isProbableDEFLATE(byte[] data)
     {
+        if (data.length < 2)
+        {
+            return false;
+        }
+        
         boolean isNoCompress      = isSame(data[0], (byte) 0x78) && isSame(data[1], (byte) 0x01);
         boolean isBestCompress    = isSame(data[0], (byte) 0x78) && isSame(data[1], (byte) 0xDA);
         boolean isDefaultCompress = isSame(data[0], (byte) 0x78) && isSame(data[1], (byte) 0x9C);
@@ -390,12 +497,12 @@ public final class FileTypeHandler
     
     public static boolean isProbableGZIP(byte[] data)
     {
-        return isSame(data[0], (byte) 0x1f) && isSame(data[1], (byte) 0x8b);
+        return data.length >= 2 && isSame(data[0], (byte) 0x1f) && isSame(data[1], (byte) 0x8b);
     }
     
     public static boolean isProbableZSTD(byte[] data)
     {
-        return isSame(data[0], (byte) 0x28) && isSame(data[1], (byte) 0xB5) && isSame(data[2], (byte) 0x2F) && isSame(data[3], (byte) 0xFD);
+        return data.length >= 4 && isSame(data[0], (byte) 0x28) && isSame(data[1], (byte) 0xB5) && isSame(data[2], (byte) 0x2F) && isSame(data[3], (byte) 0xFD);
     }
     
     //</editor-fold>

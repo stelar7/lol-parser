@@ -155,6 +155,18 @@ public class WADParser implements Parseable<WADFile>
     }
     
     /**
+     * Parses the specified WAD without reading the whole file into memory; entries are read from disk when they are accessed.
+     * Much faster when only some entries are needed, but the file stays locked (on Windows) until the WADFile is garbage collected.
+     *
+     * @param path path to the file
+     * @return WADFile
+     */
+    public WADFile parseMapped(Path path)
+    {
+        return parse(RandomAccessReader.mapped(path, ByteOrder.LITTLE_ENDIAN));
+    }
+
+    /**
      * Parses a compressed (eg. .wad.compressed) WAD
      *
      * @throws ParseException       if the file can not be decompressed, or is not a valid WAD

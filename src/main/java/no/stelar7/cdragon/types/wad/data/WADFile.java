@@ -5,7 +5,7 @@ import no.stelar7.cdragon.types.bin.BINParser;
 import no.stelar7.cdragon.types.tex.TEXParser;
 import no.stelar7.cdragon.types.wad.data.content.*;
 import no.stelar7.cdragon.types.wad.data.header.WADHeaderBase;
-import no.stelar7.cdragon.util.ProgressBar;
+import no.stelar7.cdragon.util.*;
 import no.stelar7.cdragon.util.handlers.*;
 import no.stelar7.cdragon.util.readers.*;
 import no.stelar7.cdragon.util.types.ByteArray;
@@ -23,6 +23,7 @@ public class WADFile
     private       WADHeaderBase      header;
     
     private List<SubChunkInfo> subChunkContent;
+    private WADContentHeaderV1 subChunkTocHeader;
     private boolean            subChunkSearched   = false;
     private int                totalSubChunkCount = -1;
 
@@ -57,6 +58,7 @@ public class WADFile
     {
         this.contentHeaders = contentHeaders;
         this.subChunkContent = null;
+        this.subChunkTocHeader = null;
         this.subChunkSearched = false;
         this.totalSubChunkCount = -1;
     }
@@ -120,6 +122,7 @@ public class WADFile
                 {
                     throw new ParseException("Subchunk TOC " + byName.getPathHash() + " is corrupt", -1);
                 }
+                subChunkTocHeader = byName;
                 return subChunkContent;
             }
 
@@ -132,18 +135,21 @@ public class WADFile
                                                                           .toList();
 
             List<List<SubChunkInfo>> chunkLists = new ArrayList<>();
+            List<WADContentHeaderV1> tocHeaders = new ArrayList<>();
             for (WADContentHeaderV1 possibleChoice : possibleChoices)
             {
                 List<SubChunkInfo> chunks = parseSubChunkToc(possibleChoice);
                 if (chunks != null)
                 {
                     chunkLists.add(chunks);
+                    tocHeaders.add(possibleChoice);
                 }
             }
 
             if (chunkLists.size() == 1)
             {
                 subChunkContent = chunkLists.get(0);
+                subChunkTocHeader = tocHeaders.get(0);
             }
 
             return subChunkContent;
@@ -152,6 +158,22 @@ public class WADFile
             subChunkSearched = true;
             fileReader.seek(startPos);
         }
+    }
+
+    /**
+     * The entry holding the .subchunktoc of this WAD, or null if it has none (or it can not be found)
+     */
+    public synchronized WADContentHeaderV1 getSubChunkTocHeader()
+    {
+        // (the total is cached, hasSubChunks is not)
+        int chunkCount = getTotalSubChunkCount();
+        if (chunkCount == 0)
+        {
+            return null;
+        }
+
+        findSubChunkMap(chunkCount);
+        return subChunkTocHeader;
     }
 
     /**
@@ -299,7 +321,7 @@ public class WADFile
         {
             if (header.getPathHash().equals(filename))
             {
-                findFileTypeAndRename(data, filename, savePath, wadName);
+                findFileTypeAndRename(header, data, filename, savePath, wadName);
             } else
             {
                 Files.createDirectories(self.getParent());
@@ -314,8 +336,7 @@ public class WADFile
             
         } catch (IOException e)
         {
-            System.out.println("Failed to write " + self);
-            e.printStackTrace();
+            ErrorLog.log("write failed", self.toString(), e);
         }
     }
     
@@ -333,8 +354,9 @@ public class WADFile
             return;
         }
         
-        Files.write(savePath.resolve(filename + ".unknown"), data);
-        System.out.println("Unable to determine the type of file " + savePath + "/" + filename);
+        Path output = savePath.resolve(filename + ".unknown");
+        Files.write(output, data);
+        ErrorLog.log("unknown filetype", output + ": " + describeMagic(data));
     }
     
     
@@ -447,18 +469,15 @@ public class WADFile
     }
     
     
-    private String findFileTypeAndRename(byte[] data, String filename, Path parent, String wadName) throws IOException
+    private String findFileTypeAndRename(WADContentHeaderV1 header, byte[] data, String filename, Path parent, String wadName) throws IOException
     {
-        ByteArray magic    = new ByteArray(Arrays.copyOf(data, data.length));
-        String    fileType = FileTypeHandler.findFileType(magic);
-        
+        String fileType = header == getSubChunkTocHeader() ? "subchunktoc" : FileTypeHandler.findFileType(new ByteArray(data));
+        Path   other    = parent.resolve("unknown").resolve(wadName).resolve(filename + "." + fileType);
+
         if ("unknown".equals(fileType))
         {
-            System.err.format("Unknown filetype: %s\\%s %s%n", parent, filename, magic.copyOfRange(0, 4));
+            ErrorLog.log("unknown filetype", other + ": " + describeMagic(data));
         }
-        
-        StringBuilder sb    = new StringBuilder(filename).append(".").append(fileType);
-        Path          other = parent.resolve("unknown").resolve(wadName).resolve(sb.toString());
         
         if ("json".equals(fileType))
         {
@@ -506,34 +525,58 @@ public class WADFile
             Files.write(output.resolveSibling(base + ".dds"), TEXParser.toDDS(data));
         } catch (ParseException unsupported)
         {
-            System.out.println("Unable to convert " + output + " (png: " + pngError + ", dds: " + unsupported.getMessage() + "), writing the original tex");
+            ErrorLog.log("tex conversion failed", output + " (png: " + pngError + ", dds: " + unsupported.getMessage() + "), wrote the original tex");
             Files.write(output, data);
         }
     }
     
+    /**
+     * The first bytes of the data as hex and text, eg. {@code 4E 56 52 47 01 00 00 00 "NVRG...." (12 bytes)}
+     */
+    private static String describeMagic(byte[] data)
+    {
+        int           length = Math.min(8, data.length);
+        StringBuilder hex    = new StringBuilder();
+        StringBuilder text   = new StringBuilder();
+        for (int i = 0; i < length; i++)
+        {
+            int value = data[i] & 0xFF;
+            hex.append(String.format("%02X ", value));
+            text.append(value >= 0x20 && value < 0x7F ? (char) value : '.');
+        }
+        return hex + "\"" + text + "\" (" + data.length + " bytes)";
+    }
+
     public void printUnknownFiles(String wadfilename, Path outputFile)
     {
         try
         {
-            StandardOpenOption[] flags   = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
-            List<String>         outputs = new ArrayList<>();
-            this.getContentHeaders().forEach(header -> {
-                String filename = HashHandler.getWadHash(header.getPathHash());
-                if (!filename.equals(header.getPathHash()))
-                {
-                    return;
-                }
-                
-                byte[] data     = readContentFromHeaderData(header);
-                String filetype = FileTypeHandler.findFileType(new ByteArray(data));
-                String output   = String.format("%s : %-15s : %s", filename, filetype, wadfilename);
-                outputs.add(output);
-            });
-            
-            Files.write(outputFile, outputs, StandardCharsets.UTF_8, flags);
+            StandardOpenOption[] flags = {StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND};
+            Files.write(outputFile, getUnknownFiles(wadfilename), StandardCharsets.UTF_8, flags);
         } catch (IOException e)
         {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * One "hash : filetype : wadfilename" line for every entry without a known name
+     */
+    public List<String> getUnknownFiles(String wadfilename)
+    {
+        List<String> outputs = new ArrayList<>();
+        for (WADContentHeaderV1 header : this.getContentHeaders())
+        {
+            String filename = HashHandler.getWadHash(header.getPathHash());
+            if (!filename.equals(header.getPathHash()))
+            {
+                continue;
+            }
+
+            byte[] data     = readContentFromHeaderData(header);
+            String filetype = FileTypeHandler.findFileType(new ByteArray(data));
+            outputs.add(String.format("%s : %-15s : %s", filename, filetype, wadfilename));
+        }
+        return outputs;
     }
 }

@@ -2,7 +2,8 @@ package no.stelar7.cdragon.util.handlers;
 
 import no.stelar7.cdragon.util.types.ByteArray;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.*;
+import java.nio.charset.*;
 import java.util.*;
 
 /**
@@ -22,7 +23,7 @@ public final class TextTypeHandler
     };
     
     private static final String[] JS_STARTS = {
-            "!fun", "webp", "var ", "wind", "\"use", "PreL", "_NAM",
+            "!fun", "webp", "var ", "wind", "\"use", "PreL", "_NAM", "(()=",
     };
     
     private static final String[] HTML_STARTS = {
@@ -92,6 +93,112 @@ public final class TextTypeHandler
             }
         }
         return false;
+    }
+    
+    // how much of a file is looked at to decide if it is text
+    private static final int TEXT_SAMPLE_SIZE = 64 * 1024;
+    
+    /**
+     * The start of the file as text, or null if it is not valid UTF-8 or contains control characters other than whitespace
+     */
+    private static String readTextSample(ByteArray wrapper)
+    {
+        byte[] data   = wrapper.getDataRaw();
+        int    length = Math.min(data.length, TEXT_SAMPLE_SIZE);
+        for (int i = 0; i < length; i++)
+        {
+            int value = data[i] & 0xFF;
+            if (value < 0x20 && value != '\t' && value != '\n' && value != '\r' && value != '\f')
+            {
+                return null;
+            }
+        }
+        
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder()
+                                                       .onMalformedInput(CodingErrorAction.REPORT)
+                                                       .onUnmappableCharacter(CodingErrorAction.REPORT);
+        CharBuffer out = CharBuffer.allocate(length);
+        // when the sample ends inside a multibyte character, the decoder stops there instead of failing (endOfInput is only true for the whole file)
+        CoderResult result = decoder.decode(ByteBuffer.wrap(data, 0, length), out, length == data.length);
+        if (result.isError())
+        {
+            return null;
+        }
+        return out.flip().toString();
+    }
+    
+    /**
+     * Spine texture atlases (text): a page name like "x.tex" or "x.png", followed by "size:", "format:" or "filter:" lines
+     */
+    public static boolean isProbableSpineAtlas(ByteArray wrapper)
+    {
+        String text = readTextSample(wrapper);
+        if (text == null)
+        {
+            return false;
+        }
+        
+        String[] lines = text.strip().split("\\r?\\n", 3);
+        if (lines.length < 2 || !lines[0].contains("."))
+        {
+            return false;
+        }
+        
+        String second = lines[1].strip();
+        return second.startsWith("size:") || second.startsWith("format:") || second.startsWith("filter:") || second.startsWith("pma:");
+    }
+    
+    /**
+     * Text starting with a [section] or a ; comment
+     */
+    public static boolean isProbableINI(ByteArray wrapper)
+    {
+        byte[] data = wrapper.getDataRaw();
+        if (data.length == 0 || (data[0] != '[' && data[0] != ';'))
+        {
+            return false;
+        }
+        
+        String text = readTextSample(wrapper);
+        if (text == null)
+        {
+            return false;
+        }
+        
+        String firstLine = text.lines().findFirst().orElse("").strip();
+        return firstLine.startsWith(";") || (firstLine.endsWith("]") && firstLine.length() > 2);
+    }
+    
+    /**
+     * Guesses the type of a text file that did not match anything more specific: "js", "css" or "txt", or null if it is not text
+     */
+    public static String findTextType(ByteArray wrapper)
+    {
+        String text = readTextSample(wrapper);
+        if (text == null || text.isBlank())
+        {
+            return null;
+        }
+        
+        String start = text.stripLeading();
+        if (start.startsWith("(()=>") || start.startsWith("(function") || start.startsWith("!function") || start.startsWith("\"use strict\"") ||
+            start.startsWith("'use strict'") || start.startsWith("export ") || start.startsWith("import ") || start.startsWith("const ") || start.startsWith("let "))
+        {
+            return "js";
+        }
+        
+        // css starts with a selector (or an @rule) followed by a { ... } block
+        int brace = start.indexOf('{');
+        if (brace > 0 && (start.charAt(0) == '.' || start.charAt(0) == '#' || start.charAt(0) == '@' || start.charAt(0) == ':' || start.charAt(0) == '*' || Character.isLetter(start.charAt(0))))
+        {
+            String selector = start.substring(0, brace);
+            if (!selector.contains(";") && !selector.contains("(") && !selector.contains("=") && start.indexOf('}', brace) > 0)
+            {
+                return "css";
+            }
+        }
+        
+        return "txt";
     }
     
     private static final List<ByteArray> possibleTextTargets = loadTextTargets();

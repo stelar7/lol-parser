@@ -224,10 +224,9 @@ public class RMANParser implements Parseable<RMANFile>
             if (oldFile != null)
             {
                 System.out.println("Found version " + (version - 1) + " in cache");
-                Set<Long> changedIds = new HashSet<>();
-                newFile.getChangedFiles(oldFile).forEach(f -> changedIds.add(f.getFileId()));
-                newFile.getBody().getFiles().removeIf(nfif -> !changedIds.contains(nfif.getFileId()));
-                System.out.println();
+                Set<RMANFileBodyFile> changed = Collections.newSetFromMap(new IdentityHashMap<>());
+                changed.addAll(newFile.getChangedFiles(oldFile));
+                newFile.getBody().getFiles().removeIf(file -> !changed.contains(file));
             }
 
             return newFile;

@@ -266,4 +266,30 @@ public class RmanTest
 
         assertThrows(ParseException.class, () -> p.parse(new ByteArray(new byte[10])), "too small");
     }
+
+    private static RMANFile manifestWithFiles(List<RMANFileBodyFile> files)
+    {
+        List<RMANFileBodyDirectory> directories = List.of(new RMANFileBodyDirectory("pluginA", 1, 0), new RMANFileBodyDirectory("pluginB", 2, 0), new RMANFileBodyDirectory("pluginC", 3, 0));
+        return new RMANFile(null, new RMANFileBody(0, null, List.of(), List.of(), new ArrayList<>(files), directories), null, null);
+    }
+
+    private static RMANFileBodyFile file(String name, long directoryId, long chunkId)
+    {
+        return new RMANFileBodyFile(name, "", directoryId * 100 + chunkId, directoryId, 1, 0, 0, new long[]{chunkId});
+    }
+
+    @Test
+    public void testChangedFilesAreMatchedByPath()
+    {
+        // every LCU plugin has its own index.html, so the name alone does not say which file to compare with
+        RMANFile oldManifest = manifestWithFiles(List.of(file("index.html", 1, 1), file("index.html", 2, 2)));
+
+        RMANFileBodyFile unchanged = file("index.html", 1, 1);
+        RMANFileBodyFile changed   = file("index.html", 2, 3);
+        RMANFileBodyFile added     = file("new.json", 3, 4);
+        RMANFile         manifest  = manifestWithFiles(List.of(unchanged, changed, added));
+
+        assertEquals(List.of(changed, added), manifest.getChangedFiles(oldManifest));
+        assertEquals(List.of(unchanged), manifest.getUnchangedFiles(oldManifest));
+    }
 }
